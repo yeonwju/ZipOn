@@ -1,0 +1,21 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/zipon}
+    username: ${DB_USER:a303}
+    password: ${DB_PASS:a303pw}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.hibernate.SQL: info
