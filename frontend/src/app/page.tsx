@@ -6,6 +6,10 @@ export default function Home() {
       <Link href="/test" className={'bg-blue-400 text-2xl'}>
         UI 확인하러 가기
       </Link>
+      <br />
+      <Link href="/home" className={'bg-blue-400 text-2xl'}>
+        홈으로
+      </Link>
     </div>
   )
 }
