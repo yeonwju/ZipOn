@@ -1,4 +1,5 @@
 import BottomNavigation from '@/components/layout/BottomNavigation'
+import React from 'react'
 
 export default function TabsBottomLayout({ children }: { children: React.ReactNode }) {
   return (
