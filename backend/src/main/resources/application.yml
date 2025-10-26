@@ -18,6 +18,19 @@ spring:
     init:
       mode: never
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope: openid,profile,email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+
 server:
   port: 8080
 
@@ -26,15 +39,3 @@ jwt:
   access-token-minutes: 60
   refresh-token-days: 14
 
-#security:
-#  oauth2:
-#    client:
-#      registration:
-#        google:
-#          client-id: ${GOOGLE_CLIENT_ID}
-#          client-secret: ${GOOGLE_CLIENT_SECRET}
-#          redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-#          scope: openid,profile,email
-#      provider:
-#        google:
-#          issuer-uri: https://accounts.google.com
