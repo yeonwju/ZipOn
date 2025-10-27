@@ -1,4 +1,4 @@
-package ssafy.a303.backend.dto;
+package ssafy.a303.backend.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
