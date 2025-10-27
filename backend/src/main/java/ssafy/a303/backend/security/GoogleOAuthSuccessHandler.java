@@ -59,10 +59,15 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+        System.out.println("------------------------------------------");
+        System.out.println("------------------------------------------");
+        System.out.println("---------------- login success -----------");
+        System.out.println("------------------------------------------");
+        System.out.println("------------------------------------------");
 
         var result = ResponseDTO.ok(loginResDTO, "로그인 성공");
 
-        // ✅ JSON 응답
+        // JSON 응답
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpStatus.OK.value());
         response.getWriter().write(objectMapper.writeValueAsString(result));
