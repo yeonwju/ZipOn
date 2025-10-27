@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "target": "ES2017",
     "lib": [

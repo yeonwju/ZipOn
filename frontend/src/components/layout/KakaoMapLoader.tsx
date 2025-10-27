@@ -17,57 +17,71 @@ interface KakaoMapProps {
   level?: number
 }
 
-export default function KakaoMapLoader({ lat = 37.5665, lng = 126.978, level = 3 }: KakaoMapProps) {
+export default function KakaoMapLoader({ lat = 37.56, lng = 126.978, level = 3 }: KakaoMapProps) {
   const mapRef = useRef<kakao.maps.Map | null>(null)
-  const markersRef = useRef<kakao.maps.Marker[]>([])
+  const [scriptLoaded, setScriptLoaded] = useState(false)
   const [isReady, setIsReady] = useState(false)
 
-  /** 지도 초기화 */
+  /**  지도 초기화 */
   const initMap = () => {
-    if (!window.kakao?.maps) return
+    if (typeof window === 'undefined' || !window.kakao?.maps || mapRef.current) return
+
     const container = document.getElementById('map')
     if (!container) return
 
     const center = new window.kakao.maps.LatLng(lat, lng)
-    const map = new window.kakao.maps.Map(container, { center, level })
-    mapRef.current = map
-
-    const marker = new window.kakao.maps.Marker({ map, position: center })
-    markersRef.current = [marker]
-
-    window.kakao.maps.event.addListener(map, 'click', e => {
-      const latlng = e.latLng
-      const marker = new window.kakao.maps.Marker({ map, position: latlng })
-      markersRef.current.push(marker)
-      console.log('📍 클릭 위치:', latlng.getLat(), latlng.getLng())
+    mapRef.current = new window.kakao.maps.Map(container, {
+      center,
+      level,
+      draggable: true,
+      scrollwheel: true,
     })
+    setIsReady(true)
   }
 
-  /** 지도 로드 트리거 */
+  /** Kakao SDK 감지 및 로드 */
   useEffect(() => {
-    if (isReady) {
-      window.kakao.maps.load(initMap)
-      return
+    if (typeof window !== 'undefined' && window.kakao?.maps) {
+      queueMicrotask(() => setScriptLoaded(true))
     }
+  }, [])
 
-    if (window.kakao?.maps) {
-      window.kakao.maps.load(initMap)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsReady(true)
+  /**  SDK 로드 후 지도 초기화 */
+  useEffect(() => {
+    if (!scriptLoaded) return
+    if (typeof window === 'undefined' || !window.kakao?.maps) return
+
+    window.kakao.maps.load(initMap)
+
+    return () => {
+      // cleanup: 메모리 누수 방지
+      mapRef.current = null
     }
-  }, [isReady, lat, lng, level])
+  }, [scriptLoaded, lat, lng, level, initMap])
 
   return (
     <>
-      <Script
-        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false`}
-        strategy="afterInteractive"
-        onLoad={() => {
-          setIsReady(true)
-        }}
-        onError={e => console.error('❌ 카카오 맵 로드 실패:', e)}
-      />
-      <div id="map" className="h-screen w-full" />
+      {/*  SDK가 없을 때만 Script 로드 */}
+      {!window.kakao?.maps && (
+        <Script
+          src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false`}
+          strategy="afterInteractive"
+          onLoad={() => setScriptLoaded(true)}
+          onError={e => console.error(' 카카오 맵 SDK 로드 실패:', e)}
+        />
+      )}
+
+      {/*  지도 container */}
+      <div
+        id="map"
+        className="h-[calc(100vh-60px)] w-full rounded-lg border border-gray-200 shadow-sm"
+      >
+        {!isReady && (
+          <div className="flex h-full w-full items-center justify-center text-gray-500">
+            지도 불러오는 중...
+          </div>
+        )}
+      </div>
     </>
   )
 }
