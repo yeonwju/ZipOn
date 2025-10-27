@@ -1,4 +1,4 @@
-package ssafy.a303.backend.config;
+package ssafy.a303.backend.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,8 +10,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import ssafy.a303.backend.security.GoogleOAuthSuccessHandler;
-import ssafy.a303.backend.security.JWTFilter;
+import ssafy.a303.backend.security.filter.GoogleOAuthSuccessHandler;
+import ssafy.a303.backend.security.filter.JWTFilter;
 
 import java.util.List;
 

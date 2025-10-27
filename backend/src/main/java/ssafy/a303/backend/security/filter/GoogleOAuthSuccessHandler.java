@@ -1,4 +1,4 @@
-package ssafy.a303.backend.security;
+package ssafy.a303.backend.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -10,11 +10,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import ssafy.a303.backend.dto.ResponseDTO;
-import ssafy.a303.backend.dto.user.LoginResDTO;
-import ssafy.a303.backend.entity.user.Role;
-import ssafy.a303.backend.entity.user.User;
-import ssafy.a303.backend.repository.user.UserRepository;
+import ssafy.a303.backend.common.dto.ResponseDTO;
+import ssafy.a303.backend.security.dto.LoginResDTO;
+import ssafy.a303.backend.security.dto.TokenData;
+import ssafy.a303.backend.user.entity.Role;
+import ssafy.a303.backend.user.entity.User;
+import ssafy.a303.backend.user.repository.UserRepository;
+import ssafy.a303.backend.security.service.JWTProvider;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -61,7 +63,7 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
                 .build();
         System.out.println("------------------------------------------");
         System.out.println("------------------------------------------");
-        System.out.println("---------------- login success -----------");
+        System.out.println("-------------- login success -------------");
         System.out.println("------------------------------------------");
         System.out.println("------------------------------------------");
 

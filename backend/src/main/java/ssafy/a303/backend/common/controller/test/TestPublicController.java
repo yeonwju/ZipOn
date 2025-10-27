@@ -1,11 +1,11 @@
-package ssafy.a303.backend.controller.test;
+package ssafy.a303.backend.common.controller.test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ssafy.a303.backend.dto.ResponseDTO;
+import ssafy.a303.backend.common.dto.ResponseDTO;
 
 import java.util.HashMap;
 import java.util.Map;

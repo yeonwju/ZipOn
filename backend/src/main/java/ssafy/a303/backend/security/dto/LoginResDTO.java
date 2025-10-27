@@ -1,4 +1,4 @@
-package ssafy.a303.backend.dto.user;
+package ssafy.a303.backend.security.dto;
 
 import lombok.*;
 

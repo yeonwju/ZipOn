@@ -1,4 +1,4 @@
-package ssafy.a303.backend.entity.user;
+package ssafy.a303.backend.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

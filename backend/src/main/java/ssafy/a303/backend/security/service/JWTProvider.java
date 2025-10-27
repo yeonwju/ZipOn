@@ -1,4 +1,4 @@
-package ssafy.a303.backend.security;
+package ssafy.a303.backend.security.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -7,6 +7,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ssafy.a303.backend.security.dto.TokenData;
+import ssafy.a303.backend.security.dto.TokenType;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -36,13 +38,13 @@ public class JWTProvider {
         Duration life = Duration.ofMinutes(accessMinutes);
         Date expiry = Date.from(now.plus(life));
         return Jwts.builder()
-                .setSubject(String.valueOf(tokenData.getUserSeq()))          // 사용자 PK
-                .setIssuedAt(Date.from(now))                                 // 발급 시각
-                .setExpiration(expiry)                                       // 만료 시각
-                .claim("role", tokenData.getRole())                          // 권한
-                .claim("tokenType", TokenType.ACCESS.name())                // 액세스/리프레시 구분
-                .claim("ver", tokenData.getVer())                            // 버전
-                .signWith(key, SignatureAlgorithm.HS256)                     // 서명
+                .setSubject(String.valueOf(tokenData.getUserSeq()))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(expiry)
+                .claim("role", tokenData.getRole())
+                .claim("tokenType", TokenType.ACCESS.name())
+                .claim("ver", tokenData.getVer())
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
     public String generateRefreshToken(TokenData tokenData){
