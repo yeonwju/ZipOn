@@ -1,6 +1,7 @@
-import Image from 'next/image'
-import { Badge } from '@/components/ui/badge'
 import { Eye } from 'lucide-react'
+import Image from 'next/image'
+
+import { Badge } from '@/components/ui/badge'
 
 export default function MainRecommendLiveCard() {
   return (

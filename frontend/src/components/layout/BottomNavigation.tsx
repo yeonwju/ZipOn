@@ -1,8 +1,8 @@
 'use client'
 
+import { Gavel, Heart, Home, TvMinimalPlay, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Gavel, Heart, Home, TvMinimalPlay, User } from 'lucide-react'
 
 const navItems = [
   { href: '/live', label: '라이브', icon: TvMinimalPlay },

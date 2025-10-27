@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
 import { usePathname } from 'next/navigation'
+import React from 'react'
+
 import SubHeader from '@/components/layout/SubHeader'
 
 export default function SubHeaderLayout({ children }: { children: React.ReactNode }) {
@@ -10,7 +11,7 @@ export default function SubHeaderLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen">
       <SubHeader pathname={pathname} />
-      <main className="pb-16">{children}</main>
+      <main className="pt-13 pb-16">{children}</main>
     </div>
   )
 }

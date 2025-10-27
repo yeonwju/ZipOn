@@ -3,7 +3,6 @@ import next from "eslint-config-next"
 import tseslint from "typescript-eslint"
 import prettier from "eslint-config-prettier"
 import reactHooks from "eslint-plugin-react-hooks"
-import jsxA11y from "eslint-plugin-jsx-a11y"
 import importPlugin from "eslint-plugin-import"
 import simpleImportSort from "eslint-plugin-simple-import-sort"
 
@@ -14,7 +13,6 @@ export default defineConfig([
   {
     plugins: {
       "react-hooks": reactHooks,
-      "jsx-a11y": jsxA11y,
       import: importPlugin,
       "simple-import-sort": simpleImportSort,
     },
