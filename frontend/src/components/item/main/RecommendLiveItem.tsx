@@ -1,9 +1,9 @@
-import { Eye } from 'lucide-react'
+import { Eye, Timer } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
 
-export default function MainRecommendLiveCard() {
+export default function RecommendLiveItem() {
   return (
     <div className="w-[200px] flex-shrink-0 rounded-2xl bg-white p-3 shadow-sm transition-all duration-200 hover:shadow-md sm:w-[220px] sm:p-4 md:w-[250px] lg:w-[280px]">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
@@ -42,10 +42,14 @@ export default function MainRecommendLiveCard() {
           </div>
 
           {/* 시간 + 시청자수 */}
-          <div className="flex items-center gap-3">
-            <span>2m ago</span>
+          <div className="flex flex-col items-start gap-1">
+            <span className={'flex flex-row items-center gap-1'}>
+              <Timer size={15} />
+              <div>13m ago</div>
+            </span>
             <span className="flex items-center gap-1">
-              <Eye size={15} /> 130명 시청중
+              <Eye size={15} />
+              <div>130명 시청중</div>
             </span>
           </div>
         </div>

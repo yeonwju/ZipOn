@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
-import SubHeader from '@/components/layout/SubHeader'
+import SubHeader from '@/components/layout/header/SubHeader'
 
 export default function SubHeaderLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -11,7 +11,7 @@ export default function SubHeaderLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen">
       <SubHeader pathname={pathname} />
-      <main className="pt-13 pb-16">{children}</main>
+      <main className="pt-14 pb-16">{children}</main>
     </div>
   )
 }

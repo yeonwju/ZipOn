@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
 
-export default function MainListingCard() {
+export default function ListingItem() {
   return (
     <div className="w-[140px] flex-shrink-0 rounded-2xl bg-white p-3 shadow-sm transition-all duration-200 hover:shadow-md sm:w-[160px] md:w-[200px]">
       <div className="relative aspect-square w-full overflow-hidden rounded-xl">

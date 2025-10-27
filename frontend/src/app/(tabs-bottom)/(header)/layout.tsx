@@ -1,6 +1,6 @@
 import React from 'react'
 
-import MainHeader from '@/components/layout/MainHeader'
+import MainHeader from '@/components/layout/header/MainHeader'
 
 export default function HeaderLayout({ children }: { children: React.ReactNode }) {
   return (

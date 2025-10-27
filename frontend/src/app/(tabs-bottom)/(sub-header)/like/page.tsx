@@ -1,7 +1,18 @@
+import ListingItem from '@/components/item/ListingItem'
+
 export default function LikePage() {
   return (
-    <section className="p-4">
-      <h1 className="text-lg font-bold">찜 화면</h1>
+    <section>
+      <div className={'flex flex-col gap-4'}>
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+      </div>
     </section>
   )
 }

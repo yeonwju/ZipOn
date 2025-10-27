@@ -1,12 +1,12 @@
 'use client'
 
-import { Gavel, Heart, Home, TvMinimalPlay, User } from 'lucide-react'
+import { Heart, Home, MapPin, TvMinimalPlay, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
   { href: '/live', label: '라이브', icon: TvMinimalPlay },
-  { href: '/auction', label: '경매', icon: Gavel },
+  { href: '/map', label: '지도', icon: MapPin },
   { href: '/home', label: '홈', icon: Home },
   { href: '/like', label: '찜', icon: Heart },
   { href: '/mypage', label: '마이페이지', icon: User },

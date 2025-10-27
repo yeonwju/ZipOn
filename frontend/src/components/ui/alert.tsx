@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -8,9 +8,9 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-card test-card-foreground',
+        default: 'bg-item test-item-foreground',
         destructive:
-          'test-destructive bg-card [&>svg]:test-current *:data-[slot=alert-description]:test-destructive/90',
+          'test-destructive bg-item [&>svg]:test-current *:data-[slot=alert-description]:test-destructive/90',
       },
     },
     defaultVariants: {
@@ -57,4 +57,4 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
   )
 }
 
-export { Alert, AlertTitle, AlertDescription }
+export { Alert, AlertDescription, AlertTitle }
