@@ -11,9 +11,7 @@ interface KakaoMapsStatic {
   LatLng: new (lat: number, lng: number) => kakao.maps.LatLng
   CustomOverlay: new (options: kakao.maps.CustomOverlayOptions) => kakao.maps.CustomOverlay
   Marker: new (options: kakao.maps.MarkerOptions) => kakao.maps.Marker
-  MarkerClusterer: new (
-    options: kakao.maps.MarkerClustererOptions
-  ) => kakao.maps.MarkerClusterer
+  MarkerClusterer: new (options: kakao.maps.MarkerClustererOptions) => kakao.maps.MarkerClusterer
   event: {
     addListener: (
       target: kakao.maps.Map | kakao.maps.Marker | unknown,

@@ -1,7 +1,20 @@
+import type { Metadata } from 'next'
+
 import ListingItem from '@/components/item/main/ListingItem'
 import RecommendLiveItem from '@/components/item/main/RecommendLiveItem'
 import SideScrollCardSection from '@/components/layout/SideScrollCardSection'
 
+export const metadata: Metadata = {
+  title: 'HomeOn - 홈',
+  description: '실시간 인기 방송과 추천 매물을 확인하세요',
+}
+
+/**
+ * 홈 페이지 (Server Component)
+ * 
+ * 실시간 인기 방송, 추천 매물, 경매 임박 매물을 표시합니다.
+ * 향후 API 연결 시 서버에서 데이터를 페칭하여 표시합니다.
+ */
 export default function HomePage() {
   return (
     <section className="flex flex-col gap-10 p-2">

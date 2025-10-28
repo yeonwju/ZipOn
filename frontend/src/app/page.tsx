@@ -1,15 +1,10 @@
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-  return (
-    <div className="bg-background-2 min-h-screen font-sans">
-      <Link href="/test" className={'bg-blue-400 text-2xl'}>
-        UI 확인하러 가기
-      </Link>
-      <br />
-      <Link href="/home" className={'bg-blue-400 text-2xl'}>
-        홈으로
-      </Link>
-    </div>
-  )
+/**
+ * 루트 페이지 (Server Component)
+ * 
+ * 루트 경로(/)로 접근 시 홈 페이지(/home)로 리다이렉트합니다.
+ */
+export default function RootPage() {
+  redirect('/home')
 }
