@@ -30,7 +30,7 @@ export default function SearchBar() {
         }
         value={searchValue}
         onChange={e => setSearchValue(e.target.value)}
-        placeholder="검색어를 입력하세요"
+        placeholder="지역, 지하철, 대학, 단지"
       />
     </div>
   )
