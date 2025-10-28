@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name="property")
@@ -32,10 +31,10 @@ public class Property {
     private Integer brkSeq;
 
     @Column(name = "lessor_nm", length = 50)
-    private String lessorName; //매물 주인 이름
+    private String lessorNm; //매물 주인 이름
 
     @Column(name = "property_nm", length = 100)
-    private String propertyName;
+    private String propertyNm;
 
     @Column(name = "address", nullable = false, length = 150)
     private String address;
@@ -59,7 +58,7 @@ public class Property {
     private Long deposit;
 
     @Column(name = "mn_rent")
-    private Integer monthlyRent;
+    private Integer mnRent;
 
     @Column(name = "fee")
     private Integer fee; // 관리비
@@ -77,16 +76,16 @@ public class Property {
     private Facing facing; // 방향
 
     @Column(name = "room_cnt")
-    private Byte roomCount;
+    private Byte roomCnt;
 
     @Column(name = "bathroom_cnt")
-    private Byte bathroomCount;
+    private Byte bathroomCnt;
 
     @Column(name = "construction_date", length = 10)
     private String constructionDate;
 
     @Column(name = "parking_cnt")
-    private Byte parkingCount;
+    private Byte parkingCnt;
 
     @Column(name = "has_elevator")
     private Boolean hasElevator;
@@ -95,7 +94,7 @@ public class Property {
     private Boolean petAvailable;
 
     @Column(name = "min_auc")
-    private Integer minAuction;
+    private Integer minAuc;
 
     @Column(name = "deleted_at", length = 10)
     private String deletedAt;
