@@ -25,8 +25,8 @@ export type ListingData = {
  * 지도에 매물 마커를 표시하는 통합 훅
  *
  * 줌 레벨에 따라 클러스터/개별 마커를 자동 전환합니다.
- * - 레벨 7+: 원형 클러스터 마커 (useClusteredMarkers)
- * - 레벨 6 이하: 말풍선 개별 마커 (useDetailedMarkers)
+ * - 레벨 4+: 원형 클러스터 마커 (useClusteredMarkers)
+ * - 레벨 3 이하: 말풍선 개별 마커 (useDetailedMarkers, 호버 시 강조 효과)
  *
  * @param map - 카카오 지도 인스턴스
  * @param listings - 매물 데이터 배열
@@ -45,9 +45,9 @@ export default function useListingMarkers(
   // 현재 줌 레벨 추적
   const zoomLevel = useMapZoomLevel(map)
 
-  // 레벨 7+ 클러스터 마커
-  useClusteredMarkers(map, listings, onMarkerClick, zoomLevel >= 7)
+  // 레벨 4+ 클러스터 마커
+  useClusteredMarkers(map, listings, onMarkerClick, zoomLevel >= 4)
 
-  // 레벨 6 이하 상세 마커
-  useDetailedMarkers(map, listings, onMarkerClick, zoomLevel < 7)
+  // 레벨 3 이하 상세 마커
+  useDetailedMarkers(map, listings, onMarkerClick, zoomLevel < 4)
 }

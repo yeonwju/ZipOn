@@ -19,7 +19,7 @@ import type { kakao } from '@/types/kakao.maps'
  * 기능:
  * - GPS 기반 현재 위치 추적 및 파란색 마커 표시
  * - 매물 위치에 말풍선 마커 표시 (클러스터링 지원)
- * - 레벨 7+: 클러스터 모드, 레벨 6 이하: 상세 마커 모드
+ * - 레벨 4+: 클러스터 모드, 레벨 3 이하: 상세 마커 모드 (호버 시 강조 효과)
  */
 export default function BasicMap() {
   useKakaoLoader()

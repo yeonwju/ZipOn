@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, BellRing, Heart, Search, Settings } from 'lucide-react'
+import { ArrowLeft, BellRing, Search, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'

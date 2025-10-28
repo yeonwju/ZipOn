@@ -59,6 +59,7 @@ export default function useUserMarker(
       xAnchor: 0.5,
       yAnchor: 0.5,
       clickable: true,
+      zIndex: 1000,
     })
 
     overlay.setMap(map)

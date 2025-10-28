@@ -1,10 +1,10 @@
 import { defineConfig } from "eslint/config"
 import next from "eslint-config-next"
-import tseslint from "typescript-eslint"
 import prettier from "eslint-config-prettier"
-import reactHooks from "eslint-plugin-react-hooks"
 import importPlugin from "eslint-plugin-import"
+import reactHooks from "eslint-plugin-react-hooks"
 import simpleImportSort from "eslint-plugin-simple-import-sort"
+import tseslint from "typescript-eslint"
 
 export default defineConfig([
   ...next,

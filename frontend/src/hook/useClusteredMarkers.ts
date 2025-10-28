@@ -7,7 +7,7 @@ import type { kakao } from '@/types/kakao.maps'
  * 매물을 클러스터 마커로 표시하는 훅
  *
  * 여러 매물을 그룹화하여 원형 클러스터로 표시합니다.
- * 주로 줌 레벨이 높을 때(7+) 사용됩니다.
+ * 주로 줌 레벨이 높을 때(4+) 사용됩니다.
  *
  * @param map - 카카오 지도 인스턴스
  * @param listings - 매물 데이터 배열
@@ -15,7 +15,7 @@ import type { kakao } from '@/types/kakao.maps'
  * @param enabled - 클러스터 마커 활성화 여부 (기본: true)
  *
  * @example
- * useClusteredMarkers(map, buildingData, onMarkerClick, zoomLevel >= 7)
+ * useClusteredMarkers(map, buildingData, onMarkerClick, zoomLevel >= 4)
  */
 export default function useClusteredMarkers(
   map: kakao.maps.Map | null,
@@ -101,18 +101,16 @@ export default function useClusteredMarkers(
       },
     ]
 
-    const clusterer = new window.kakao.maps.MarkerClusterer({
+    clustererRef.current = new window.kakao.maps.MarkerClusterer({
       map: map,
       markers: markers,
       gridSize: 60,
       averageCenter: true,
-      minLevel: 7,
+      minLevel: 4,
       minClusterSize: 1,
       disableClickZoom: false,
       styles: clusterStyles,
     })
-
-    clustererRef.current = clusterer
     markersRef.current = markers
 
     // cleanup
