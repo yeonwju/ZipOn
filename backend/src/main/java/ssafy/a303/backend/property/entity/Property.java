@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @Entity
 @Table(name="property")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,6 +27,9 @@ public class Property {
 
     @Column(name = "brk_seq")
     private Integer brkSeq;
+
+    @Column(name = "content")
+    private String content;
 
     @Column(name = "lessor_nm", length = 50)
     private String lessorNm; //매물 주인 이름

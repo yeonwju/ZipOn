@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
+import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
 import ssafy.a303.backend.property.entity.Property;
+import ssafy.a303.backend.property.entity.PropertyAucInfo;
+import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 
 @Service
@@ -15,6 +18,7 @@ import ssafy.a303.backend.property.repository.PropertyRepository;
 public class PropertyService {
 
     private final PropertyRepository propertyRepository;
+    private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final StorageService storageService;
 
     /**
@@ -38,14 +42,14 @@ public class PropertyService {
         // 임대인 id, 이름, 매물 주소, 위도, 경도 db에 저장
         Property entity = Property.builder()
                 .lessorSeq(lessorSeqFromAuth)
-                .lessorNm(lessorNameFromAuth)
+                .lessorNm(req.lessorNm())
+                .propertyNm(req.propertyNm())
                 .address(req.address())
                 .latitude(req.latitude())
                 .longitude(req.longitude())
                 .build();
 
         Property saved = propertyRepository.save(entity);
-
 
         return new PropertyAddressResponseDto(
                 saved.getPropertySeq(),
@@ -63,6 +67,7 @@ public class PropertyService {
      * @param file
      * @return
      */
+    @Transactional
     public String uploadCertificatePdf(Integer propertySeq, Integer lessorSeq, MultipartFile file) {
         // 해당 매물이 유효한지 검증
         Property property = propertyRepository.findByPropertySeqAndLessorSeq(propertySeq, lessorSeq)
@@ -86,12 +91,58 @@ public class PropertyService {
         return url;
     }
 
-    public void VerifyCertificate(Integer propertySeq, Integer lessorSeq, boolean verified) {
+    /**
+     * 등기부등본 검증 여부를 fast api에서 받아서 등록.
+     * @param propertySeq
+     * @param lessorSeq
+     * @param verified
+     */
+    @Transactional
+    public void verifyCertificate(Integer propertySeq, Integer lessorSeq, boolean verified) {
         //매물이 유효한지 검증
         Property property = propertyRepository.findByPropertySeqAndLessorSeq(propertySeq, lessorSeq)
                 .orElseThrow(() -> new IllegalArgumentException("매물을 찾을 수 없습니다."));
         //매물의 검증 여부 업데이트
         property.updateIsCertificated(verified);
     }
+
+    @Transactional
+    public void submitPropertyDetail(Integer propertySeq, Integer lessorSeq, PropertyDetailRequestDto req) {
+        // 매물 소유권 확인
+        Property p = propertyRepository.findByPropertySeqAndLessorSeq(propertySeq, lessorSeq)
+                .orElseThrow(()->new IllegalArgumentException("매물을 찾을 수 없거나 권한이 없습니다."));
+
+        // 상세 정보 등록
+        if (req.content() != null) p.setContent(req.content());
+        if (req.area() != null) p.setArea(req.area());
+        if (req.areaP() != null) p.setAreaP(req.areaP());
+        if (req.deposit() != null) p.setDeposit(req.deposit());
+        if (req.mnRent() != null) p.setMnRent(req.mnRent());
+        if (req.fee() != null) p.setFee(req.fee());
+        if (req.thumbnail() != null) p.setThumbnail(req.thumbnail());
+        if (req.period() != null) p.setPeriod(req.period());
+        if (req.floor() != null) p.setFloor(req.floor());
+        if (req.facing() != null) p.setFacing(req.facing());
+        if (req.roomCnt() != null) p.setRoomCnt(req.roomCnt());
+        if (req.bathroomCnt() != null) p.setBathroomCnt(req.bathroomCnt());
+        if (req.constructionDate() != null) p.setConstructionDate(req.constructionDate());
+        if (req.parkingCnt() != null) p.setParkingCnt(req.parkingCnt());
+        if (req.hasElevator() != null) p.setHasElevator(req.hasElevator());
+        if (req.petAvailable() != null) p.setPetAvailable(req.petAvailable());
+
+        // 경매, 중개인 희망 등록
+        PropertyAucInfo info = propertyAucInfoRepository.findByPropertySeq(propertySeq)
+                .orElseGet(()->PropertyAucInfo.builder()
+                        .propertySeq(propertySeq)
+                        .build());
+
+        if (req.isAucPref() != null) info.setIsAucPref(req.isAucPref());
+        if (req.isBrkPref() != null) info.setIsBrkPref(req.isBrkPref());
+        if (req.aucAt() != null) info.setAucAt(req.aucAt());
+        if (req.aucAvailable() != null) info.setAucAvailable(req.aucAvailable());
+
+        propertyAucInfoRepository.save(info);
+    }
+
 
 }

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, Integer> {
+    // 소유권 확인
     boolean existsByAddressAndLessorSeq(String address, Integer lessorSeq);
 
     Optional<Property> findByPropertySeqAndLessorSeq(Integer propertySeq, Integer lessorSeq);
