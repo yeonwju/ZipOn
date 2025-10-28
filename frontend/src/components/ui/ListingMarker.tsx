@@ -43,11 +43,11 @@ export function createListingMarkerElement(
   //  월세 박스 (말풍선 하단, 있는 경우에만)
   const rentBox = document.createElement('div')
   rentBox.className = `bg-white text-blue-500 border border-blue-500 px-3 py-1 rounded-b-md`
-  rentBox.textContent = listing.rent > 0 ? `${listing.rent}만` : ''
+  rentBox.textContent = listing.rent > 0 ? `${listing.rent}만` : '매매'
 
   // ️ DOM 구조 조립
   priceLabel.appendChild(depositBox)
-  if (listing.rent > 0) priceLabel.appendChild(rentBox)
+  priceLabel.appendChild(rentBox)
   container.appendChild(priceLabel)
 
   //  클릭 이벤트 등록
