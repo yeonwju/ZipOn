@@ -1,4 +1,18 @@
 // src/types/kakao.maps.d.ts
+
+declare global {
+  interface Window {
+    kakao: {
+      maps: {
+        Map: typeof Map
+        LatLng: typeof LatLng
+        CustomOverlay: typeof CustomOverlay
+        [key: string]: any
+      }
+    }
+  }
+}
+
 export declare namespace kakao {
   namespace maps {
     /** 좌표 객체 */
@@ -77,6 +91,30 @@ export declare namespace kakao {
       constructor(width: number, height: number)
     }
 
+    /** 커스텀 오버레이 */
+    class CustomOverlay {
+      constructor(options: CustomOverlayOptions)
+      setMap(map: Map | null): void
+      setPosition(position: LatLng): void
+      getMap(): Map | null
+      getPosition(): LatLng
+      setContent(content: HTMLElement | string): void
+      setVisible(visible: boolean): void
+      getVisible(): boolean
+      setZIndex(zIndex: number): void
+      getZIndex(): number
+    }
+
+    interface CustomOverlayOptions {
+      map?: Map
+      position: LatLng
+      content: HTMLElement | string
+      xAnchor?: number
+      yAnchor?: number
+      clickable?: boolean
+      zIndex?: number
+    }
+
     /** 이벤트 리스너 */
     namespace event {
       interface MouseEvent {
@@ -94,8 +132,8 @@ export declare namespace kakao {
       }
     }
 
-    export function load(arg0: () => void) {
-      throw new Error('Function not implemented.')
-    }
+    export function load(arg0: () => void): void
   }
 }
+
+export {}
