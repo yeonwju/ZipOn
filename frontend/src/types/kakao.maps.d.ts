@@ -1,15 +1,30 @@
-// src/types/kakao.maps.d.ts
-
 declare global {
   interface Window {
     kakao: {
-      maps: {
-        Map: typeof Map
-        LatLng: typeof LatLng
-        CustomOverlay: typeof CustomOverlay
-        [key: string]: any
-      }
+      maps: KakaoMapsStatic
     }
+  }
+}
+
+interface KakaoMapsStatic {
+  Map: new (container: HTMLElement, options: kakao.maps.MapOptions) => kakao.maps.Map
+  LatLng: new (lat: number, lng: number) => kakao.maps.LatLng
+  CustomOverlay: new (options: kakao.maps.CustomOverlayOptions) => kakao.maps.CustomOverlay
+  Marker: new (options: kakao.maps.MarkerOptions) => kakao.maps.Marker
+  MarkerClusterer: new (
+    options: kakao.maps.MarkerClustererOptions
+  ) => kakao.maps.MarkerClusterer
+  event: {
+    addListener: (
+      target: kakao.maps.Map | kakao.maps.Marker | unknown,
+      type: string,
+      callback: (event?: kakao.maps.event.MouseEvent) => void
+    ) => void
+    removeListener: (
+      target: kakao.maps.Map | kakao.maps.Marker | unknown,
+      type: string,
+      callback: (event?: kakao.maps.event.MouseEvent) => void
+    ) => void
   }
 }
 
@@ -28,6 +43,7 @@ export declare namespace kakao {
       setCenter(latlng: LatLng): void
       getCenter(): LatLng
       setLevel(level: number): void
+      getLevel(): number
       addOverlayMapTypeId(typeId: MapTypeId): void
       removeOverlayMapTypeId(typeId: MapTypeId): void
     }
@@ -115,6 +131,54 @@ export declare namespace kakao {
       zIndex?: number
     }
 
+    /** 마커 클러스터러 */
+    class MarkerClusterer {
+      constructor(options: MarkerClustererOptions)
+      addMarker(marker: Marker, nodraw?: boolean): void
+      addMarkers(markers: Marker[], nodraw?: boolean): void
+      removeMarker(marker: Marker, nodraw?: boolean): void
+      removeMarkers(markers: Marker[], nodraw?: boolean): void
+      clear(): void
+      redraw(): void
+      setMinClusterSize(size: number): void
+      getMinClusterSize(): number
+      setAverageCenter(bool: boolean): void
+      getAverageCenter(): boolean
+      setMinLevel(level: number): void
+      getMinLevel(): number
+      setTexts(texts: string[] | ((size: number) => string)): void
+      setCalculator(calculator: (sizes: number[]) => number[]): void
+      setStyles(styles: ClusterStyle[]): void
+      getStyles(): ClusterStyle[]
+    }
+
+    interface MarkerClustererOptions {
+      map: Map
+      markers?: Marker[]
+      gridSize?: number
+      averageCenter?: boolean
+      minLevel?: number
+      minClusterSize?: number
+      styles?: ClusterStyle[]
+      texts?: string[] | ((size: number) => string)
+      calculator?: (sizes: number[]) => number[]
+      disableClickZoom?: boolean
+      clickable?: boolean
+      hoverable?: boolean
+    }
+
+    interface ClusterStyle {
+      width: string
+      height: string
+      background: string
+      borderRadius?: string
+      color: string
+      textAlign?: string
+      lineHeight?: string
+      fontWeight?: string
+      fontSize?: string
+    }
+
     /** 이벤트 리스너 */
     namespace event {
       interface MouseEvent {
@@ -127,7 +191,7 @@ export declare namespace kakao {
         callback: (event: MouseEvent) => void
       ): void
 
-      export function removeListener(current: any) {
+      export function removeListener(current: string) {
         throw new Error('Function not implemented.')
       }
     }

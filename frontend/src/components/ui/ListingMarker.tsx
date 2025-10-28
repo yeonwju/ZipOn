@@ -1,20 +1,13 @@
 import type { ListingData } from '@/hook/useListingMarkers'
 
 /**
- * 매물 마커의 UI 요소를 생성하는 함수
- *
- * **말풍선 구조:**
- * ```
- * container
- * └─ priceLabel (말풍선 본체)
- *     ├─ depositBox (상단: 파란색 배경, 흰색 글씨)
- *     └─ rentBox (하단: 흰색 배경, 파란색 글씨, 파란색 테두리)
- *     └─ after (중앙 하단 꼬리 - 이 끝이 정확한 좌표를 가리킴)
- * ```
- *
- * **좌표 정렬:**
- * - 말풍선 꼬리 끝이 정확히 지도 좌표를 가리킴
- * - CustomOverlay의 yAnchor와 함께 작동하여 정확한 위치 표시
+ * 매물 마커 UI를 생성하는 함수
+ * 
+ * 말풍선 형태의 마커로 보증금/월세 정보를 표시합니다.
+ * 중앙 하단의 삼각형 꼬리가 정확한 좌표를 가리킵니다.
+ * 
+ * @param listing - 매물 데이터
+ * @param onClick - 클릭 콜백
  */
 export function createListingMarkerElement(
   listing: ListingData,
