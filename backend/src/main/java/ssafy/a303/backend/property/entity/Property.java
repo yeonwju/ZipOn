@@ -1,10 +1,7 @@
 package ssafy.a303.backend.property.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import ssafy.a303.backend.property.enums.Facing;
@@ -47,6 +44,9 @@ public class Property {
 
     @Column(name = "is_certificated")
     private Boolean isCertificated; // 등기부등본 확인 여부
+
+    @Column(name = "certificate_url")
+    private String certificateUrl;
 
     @Column(name = "area")
     private Double area;
@@ -110,4 +110,11 @@ public class Property {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+    public void saveCertificateUrl(String url){
+        this.certificateUrl = url;
+    }
+
+    public void updateIsCertificated(Boolean isCertificated){
+        this.isCertificated = isCertificated;
+    }
 }
