@@ -36,9 +36,9 @@ export function createListingMarkerElement(
   //  보증금 박스 (말풍선 상단)
   const depositBox = document.createElement('div')
   depositBox.className = `bg-blue-500 text-white px-3 py-1 rounded-t-md`
-  const depositValue =
+
+  depositBox.textContent =
     listing.deposit >= 10000 ? `${listing.deposit / 10000}억` : `${listing.deposit}만`
-  depositBox.textContent = depositValue
 
   //  월세 박스 (말풍선 하단, 있는 경우에만)
   const rentBox = document.createElement('div')
