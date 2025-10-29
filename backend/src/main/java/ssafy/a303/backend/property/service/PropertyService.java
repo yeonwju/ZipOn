@@ -2,15 +2,20 @@ package ssafy.a303.backend.property.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
+import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
+import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +24,8 @@ public class PropertyService {
 
     private final PropertyRepository propertyRepository;
     private final PropertyAucInfoRepository propertyAucInfoRepository;
+    private final PropertyImageRepository propertyImageRepository;
+
     private final StorageService storageService;
 
     /**
@@ -106,6 +113,12 @@ public class PropertyService {
         property.updateIsCertificated(verified);
     }
 
+    /**
+     * 매물 상세 정보 등록
+     * @param propertySeq
+     * @param lessorSeq
+     * @param req
+     */
     @Transactional
     public void submitPropertyDetail(Integer propertySeq, Integer lessorSeq, PropertyDetailRequestDto req) {
         // 매물 소유권 확인
@@ -144,5 +157,54 @@ public class PropertyService {
         propertyAucInfoRepository.save(info);
     }
 
+    /**
+     * 매물 상세 정보 조회
+     * @param propertySeq
+     * @return
+     */
+    @Transactional
+    public DetailResponseDto getPropertyDetail(Integer propertySeq) {
+        Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
+                .orElseThrow(() -> new IllegalArgumentException("해당 매물을 조회할 수 없습니다."));
+
+        PropertyAucInfo aucInfo = propertyAucInfoRepository.findByPropertySeq(propertySeq)
+                .orElseThrow(() -> new IllegalArgumentException("해당 매물 경매 정보가 없습니다."));
+
+
+        // 이미지 리스트
+        List<String> images = propertyImageRepository.findByPropertySeqOrderBySortOrderAsc(propertySeq)
+                .stream()
+                .map(img -> img.getS3Key())
+                .toList();
+
+        DetailResponseDto detail = new DetailResponseDto(
+                p.getLessorNm(),
+                p.getPropertyNm(),
+                p.getContent(),
+                p.getAddress(),
+                p.getLatitude(),
+                p.getLongitude(),
+                p.getArea(),
+                p.getAreaP(),
+                p.getDeposit(),
+                p.getMnRent(),
+                p.getFee(),
+                images,
+                p.getPeriod(),
+                p.getFloor(),
+                p.getFacing(),
+                p.getRoomCnt(),
+                p.getBathroomCnt(),
+                p.getConstructionDate(),
+                p.getParkingCnt(),
+                p.getHasElevator(),
+                p.getPetAvailable(),
+                aucInfo.getIsAucPref(),
+                aucInfo.getIsBrkPref(),
+                aucInfo.getAucAt(),
+                aucInfo.getAucAvailable()
+        );
+        return detail;
+    }
 
 }

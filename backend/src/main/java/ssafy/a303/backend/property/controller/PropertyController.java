@@ -10,6 +10,7 @@ import ssafy.a303.backend.common.dto.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
+import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
 import ssafy.a303.backend.property.service.PropertyService;
 
@@ -40,43 +41,48 @@ public class PropertyController {
         return ResponseDTO.created(response, "매물이 성공적으로 등록되었습니다.");
     }
 
+//    /**
+//     * 등기부등본 등록 API
+//     * @param propertySeq
+//     * @param file
+//     * @param userSeq
+//     * @return
+//     */
+//    @PostMapping("/certificates")
+//    public ResponseEntity<Map<String, Object>> uploadCertificate(
+//            @PathVariable Integer propertySeq,
+//            @RequestPart("file")MultipartFile file,
+//            @AuthenticationPrincipal Integer userSeq
+//
+//    ) {
+//        String url = propertyService.uploadCertificatePdf(propertySeq, userSeq, file);
+//
+//        //-------------나머지
+//    }
+//
+//    /**
+//     * 등기부등본 검증 여부 확인
+//     * @param propertySeq
+//     * @param req
+//     * @param userSeq
+//     * @return
+//     */
+//    @PostMapping("/{propertySeq}/verify")
+//    public ResponseEntity<Map<String, Object>> verifyCertificate(
+//            @PathVariable Integer propertySeq,
+//            @RequestBody VerifyRequestDto req,
+//            @AuthenticationPrincipal Integer userSeq
+//    ) {
+//        propertyService.verifyCertificate(propertySeq, userSeq, req.isCertificated());
+//    }
+
     /**
-     * 등기부등본 등록 API
-     * @param propertySeq
-     * @param file
-     * @param userSeq
-     * @return
-     */
-    @PostMapping("/certificates")
-    public ResponseEntity<Map<String, Object>> uploadCertificate(
-            @PathVariable Integer propertySeq,
-            @RequestPart("file")MultipartFile file,
-            @AuthenticationPrincipal Integer userSeq
-
-    ) {
-        String url = propertyService.uploadCertificatePdf(propertySeq, userSeq, file);
-
-        //-------------나머지
-    }
-
-    /**
-     * 등기부등본 검증 여부 확인
+     * 매물 상세 정보 등록
      * @param propertySeq
      * @param req
      * @param userSeq
      * @return
      */
-    @PostMapping("/{propertySeq}/verify")
-    public ResponseEntity<Map<String, Object>> verifyCertificate(
-            @PathVariable Integer propertySeq,
-            @RequestBody VerifyRequestDto req,
-            @AuthenticationPrincipal Integer userSeq
-    ) {
-        propertyService.verifyCertificate(propertySeq, userSeq, req.isCertificated());
-
-
-    }
-
     @PatchMapping("/{propertySeq}/details")
     public ResponseEntity<ResponseDTO<Void>> submitDetail(@PathVariable Integer propertySeq,
                                                             @RequestBody PropertyDetailRequestDto req,
@@ -86,5 +92,17 @@ public class PropertyController {
         return ResponseDTO.ok(null, "매물 상세 정보가 등록되었습니다.");
     }
 
+    /**
+     * 매물 상세 정보 조회
+     * @param propertySeq
+     * @param userSeq
+     * @return
+     */
+    @GetMapping("/{propertySeq}")
+    public ResponseEntity<ResponseDTO<DetailResponseDto>> getDetail(@PathVariable Integer propertySeq,
+                                                       @AuthenticationPrincipal Integer userSeq) {
+        DetailResponseDto response = propertyService.getPropertyDetail(propertySeq);
+        return ResponseDTO.ok(response, "해당 매물의 상세 정보를 조회합니다.");
+    }
 
 }
