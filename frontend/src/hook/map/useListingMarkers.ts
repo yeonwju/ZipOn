@@ -13,12 +13,14 @@ import type { kakao } from '@/types/kakao.maps'
  * @property rent - 월세 (단위: 만원)
  */
 export type ListingData = {
+  id: number
   name: string
   address: string
   lat: number
   lng: number
   deposit: number
   rent: number
+  isAuction: boolean
 }
 
 /**
