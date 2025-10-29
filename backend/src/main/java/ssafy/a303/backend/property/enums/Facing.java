@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public enum Facing {
-    EAST, WEST, SOUTH, NORTH, NORTHEAST, SOUTHEAST, NORTHWEST, SOUTHWEST;
+    N, S, W, E, NW, NE, SW, SE;
 }

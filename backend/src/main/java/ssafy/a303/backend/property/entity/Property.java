@@ -100,10 +100,10 @@ public class Property {
     @Column(name = "min_auc")
     private Integer minAuc;
 
-    @Column(name = "deleted_at", length = 10)
+    @Column(name = "deleted_at", length = 50)
     private String deletedAt;
 
-    @Column(name = "traded_at", length = 10)
+    @Column(name = "traded_at", length = 50)
     private String tradedAt;
 
     @CreationTimestamp

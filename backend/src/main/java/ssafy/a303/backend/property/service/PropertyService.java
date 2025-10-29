@@ -1,9 +1,7 @@
 package ssafy.a303.backend.property.service;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
@@ -19,9 +17,6 @@ import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -36,7 +31,7 @@ public class PropertyService {
     private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final PropertyImageRepository propertyImageRepository;
 
-    private final StorageService storageService;
+//    private final StorageServiceImpl storageService;
 
     /**
      * 매물 등록 단계 중 첫단계,
@@ -49,8 +44,7 @@ public class PropertyService {
      */
     @Transactional
     public PropertyAddressResponseDto submitAddress(PropertyAddressRequestDto req,
-                                                    Integer lessorSeqFromAuth,
-                                                    String lessorNameFromAuth) {
+                                                    Integer lessorSeqFromAuth) {
         // 이미 등록된 매물인지 검증
         if(propertyRepository.existsByAddressAndLessorSeq(req.address(), lessorSeqFromAuth)){
             throw new IllegalArgumentException("이미 동일 주소의 매물이 등록되어 있습니다.");
@@ -84,29 +78,29 @@ public class PropertyService {
      * @param file
      * @return
      */
-    @Transactional
-    public String uploadCertificatePdf(Integer propertySeq, Integer lessorSeq, MultipartFile file) {
-        // 해당 매물이 유효한지 검증
-        Property property = propertyRepository.findByPropertySeqAndLessorSeq(propertySeq, lessorSeq)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 등록한 매물을 찾을 수 없습니다."));
-
-        // 파일이 유효한지 검증
-        if(file == null || file.isEmpty()) throw new IllegalArgumentException("빈 파일 입니다.");
-
-        // 파일 타입이 pdf인지 검증
-        String contentType = file.getContentType();
-        if(contentType == null || !contentType.equalsIgnoreCase("application/pdf")) {
-            throw new IllegalArgumentException("PDF 파일만 업로드할 수 있습니다.");
-        }
-
-        // S3에 pdf 파일 업로드
-        String url = storageService.uploadPdf(file, "certificates/%d/".formatted(propertySeq));
-
-        // db에 pdf 파일 url 업로드 및 검증 상태 등록
-        property.saveCertificateUrl(url);
-        property.updateIsCertificated(false); //업로드 시점엔 미검증 상태
-        return url;
-    }
+//    @Transactional
+//    public String uploadCertificatePdf(Integer propertySeq, Integer lessorSeq, MultipartFile file) {
+//        // 해당 매물이 유효한지 검증
+//        Property property = propertyRepository.findByPropertySeqAndLessorSeq(propertySeq, lessorSeq)
+//                .orElseThrow(() -> new IllegalArgumentException("사용자가 등록한 매물을 찾을 수 없습니다."));
+//
+//        // 파일이 유효한지 검증
+//        if(file == null || file.isEmpty()) throw new IllegalArgumentException("빈 파일 입니다.");
+//
+//        // 파일 타입이 pdf인지 검증
+//        String contentType = file.getContentType();
+//        if(contentType == null || !contentType.equalsIgnoreCase("application/pdf")) {
+//            throw new IllegalArgumentException("PDF 파일만 업로드할 수 있습니다.");
+//        }
+//
+//        // S3에 pdf 파일 업로드
+//        String url = storageService.uploadPdf(file, "certificates/%d/".formatted(propertySeq));
+//
+//        // db에 pdf 파일 url 업로드 및 검증 상태 등록
+//        property.saveCertificateUrl(url);
+//        property.updateIsCertificated(false); //업로드 시점엔 미검증 상태
+//        return url;
+//    }
 
     /**
      * 등기부등본 검증 여부를 fast api에서 받아서 등록.
@@ -182,7 +176,7 @@ public class PropertyService {
 
 
         // 이미지 리스트
-        List<String> images = propertyImageRepository.findByPropertySeqOrderBySortOrderAsc(propertySeq)
+        List<String> images = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq)
                 .stream()
                 .map(img -> img.getS3Key())
                 .toList();

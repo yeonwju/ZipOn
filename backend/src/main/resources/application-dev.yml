@@ -4,9 +4,9 @@ spring:
       on-profile: dev
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/zipon
-    username: a303
-    password: a303pw
+    url: jdbc:postgresql://localhost:5432/jeepon
+    username: postgres
+    password: ssafy303
 
   jpa:
     hibernate:
@@ -17,3 +17,7 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+#    org.springframework.web: DEBUG
+#    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+#    org.springframework.web.servlet.DispatcherServlet: DEBUG
+#    org.apache.coyote.http11: DEBUG

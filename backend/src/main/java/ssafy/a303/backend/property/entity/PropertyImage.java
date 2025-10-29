@@ -27,8 +27,8 @@ public class PropertyImage {
     @Column(name = "s3_key")
     private String s3Key;
 
-    @Column(name = "order")
-    private Integer order;
+    @Column(name = "img_order")
+    private Integer imgOrder;
 
     @CreationTimestamp
     @Column(name = "created_at")

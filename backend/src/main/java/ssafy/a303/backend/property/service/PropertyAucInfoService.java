@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.property.dto.request.PropertyAucInfoUpdateRequestDto;
+import ssafy.a303.backend.property.dto.response.PropertyAucInfoUpdateResponseDto;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
@@ -23,8 +24,8 @@ public class PropertyAucInfoService {
     }
 
     @Transactional
-    public void updateAucInfo(Integer propertySeq, PropertyAucInfoUpdateRequestDto req,
-                              Integer userSeq) {
+    public PropertyAucInfoUpdateResponseDto updateAucInfo(Integer propertySeq, PropertyAucInfoUpdateRequestDto req,
+                                                          Integer userSeq) {
         // 해당 매물 존재 여부 확인
         Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 매물입니다."));
@@ -44,5 +45,10 @@ public class PropertyAucInfoService {
 
         // 수정 사항 저장.
         aucInfoRepository.save(aucInfo);
+
+        return new PropertyAucInfoUpdateResponseDto(
+                p.getPropertySeq(), aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
+                aucInfo.getAucAt(), aucInfo.getAucAvailable()
+        );
     }
 }

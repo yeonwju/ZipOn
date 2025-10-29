@@ -3,7 +3,7 @@ package ssafy.a303.backend.property.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+//import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.dto.ResponseDTO;
@@ -35,10 +35,10 @@ public class PropertyController {
      */
     @PostMapping("/address")
     public ResponseEntity<ResponseDTO<PropertyAddressResponseDto>> submitAddress(@RequestBody PropertyAddressRequestDto req,
-                                                                                 @AuthenticationPrincipal Integer userSeq)
+                                                                                 //@AuthenticationPrincipal Integer userSeq
+                                                                                @RequestParam Integer userSeq)
     {
-        PropertyAddressResponseDto response =
-                propertyService.submitAddress(req, userSeq, req.lessorNm());
+        PropertyAddressResponseDto response = propertyService.submitAddress(req, userSeq);
 
         return ResponseDTO.created(response, "매물이 성공적으로 등록되었습니다.");
     }
@@ -88,7 +88,8 @@ public class PropertyController {
     @PatchMapping("/{propertySeq}/details")
     public ResponseEntity<ResponseDTO<Void>> submitPropertyDetail(@PathVariable Integer propertySeq,
                                                             @RequestBody PropertyDetailRequestDto req,
-                                                            @AuthenticationPrincipal Integer userSeq)
+//                                                            @AuthenticationPrincipal Integer userSeq
+                                                            @RequestParam Integer userSeq)
     {
         propertyService.submitPropertyDetail(propertySeq, userSeq, req);
         return ResponseDTO.ok(null, "매물 상세 정보가 등록되었습니다.");
@@ -102,7 +103,8 @@ public class PropertyController {
      */
     @GetMapping("/{propertySeq}")
     public ResponseEntity<ResponseDTO<DetailResponseDto>> getPropertyDetail(@PathVariable Integer propertySeq,
-                                                       @AuthenticationPrincipal Integer userSeq)
+//                                                       @AuthenticationPrincipal Integer userSeq,
+                                                                            @RequestParam Integer userSeq)
     {
         DetailResponseDto response = propertyService.getPropertyDetail(propertySeq);
         return ResponseDTO.ok(response, "해당 매물의 상세 정보를 조회합니다.");
@@ -136,7 +138,8 @@ public class PropertyController {
     @PatchMapping("/{propertySeq}")
     public ResponseEntity<ResponseDTO<PropertyUpdateResponseDto>> updateProperty(@PathVariable Integer propertySeq,
                                                                                  @RequestBody PropertyUpdateRequestDto req,
-                                                                                 @AuthenticationPrincipal Integer userSeq)
+//                                                                                 @AuthenticationPrincipal Integer userSeq,
+                                                                                 @RequestParam Integer userSeq)
     {
         PropertyUpdateResponseDto response = propertyService.updateProperty(propertySeq, req, userSeq);
         return ResponseDTO.ok(response,"매물 정보가 수정되었습니다.");
@@ -148,12 +151,13 @@ public class PropertyController {
      * @param userSeq
      * @return
      */
-    @PatchMapping("/{propertySeq}")
+    @DeleteMapping("/{propertySeq}")
     public ResponseEntity<ResponseDTO<Void>> deleteProperty(@PathVariable Integer propertySeq,
-                                                            @AuthenticationPrincipal Integer userSeq)
+//                                                            @AuthenticationPrincipal Integer userSeq,
+                                                            @RequestParam Integer userSeq)
     {
         propertyService.deleteProperty(propertySeq, userSeq);
-        return ResponseDTO.notFound("매물이 삭제되었습니다.");
+        return ResponseDTO.ok(null, "매물이 삭제되었습니다.");
     }
 
 }

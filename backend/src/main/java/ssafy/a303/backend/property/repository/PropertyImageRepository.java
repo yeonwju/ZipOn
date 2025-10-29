@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PropertyImageRepository extends JpaRepository<PropertyImage, Integer> {
-    List<PropertyImage> findByPropertySeqOrderBySortOrderAsc(Integer propertySeq);
+    List<PropertyImage> findByPropertySeqOrderByImgOrderAsc(Integer propertySeq);
 }
