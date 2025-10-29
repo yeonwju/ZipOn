@@ -36,7 +36,7 @@ server:
 
 jwt:
   secret: ${JWT_SECRET:dev-secret-key-dev-secret-key-dev-secret-key}
-  access-token-minutes: 60
+  access-token-hours: 24
   refresh-token-days: 14
 
 frontUrl: ${FRONT_URL:http://localhost:3000}

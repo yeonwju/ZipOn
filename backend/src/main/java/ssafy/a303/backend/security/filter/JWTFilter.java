@@ -2,6 +2,7 @@ package ssafy.a303.backend.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ssafy.a303.backend.security.jwt.service.JWTProvider;
+import ssafy.a303.backend.security.jwt.token.TokenData;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -31,25 +33,25 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        // token 읽기
-        String token = null;
+        // ---- token 읽기 ----
+        String accessToken = null;
         String header = request.getHeader("Authorization");
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
-            token = header.substring(7);
+            accessToken = header.substring(7);
         }
-
-        if (token == null && request.getCookies() != null) {
-            for (var c : request.getCookies()) {
+        if (accessToken == null && request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
                 if ("AT".equals(c.getName())) {
-                    token = c.getValue();
+                    accessToken = c.getValue();
                     break;
                 }
             }
         }
 
-        if (token != null && jwtProvider.isTokenValid(token)) {
-            int userSeq = jwtProvider.getSubject(token);
-            String role = jwtProvider.getRole(token);
+        if (accessToken != null && jwtProvider.isTokenValid(accessToken)) {
+            TokenData tokenData = jwtProvider.parseToken(accessToken);
+            int userSeq = tokenData.getUserSeq();
+            String role = tokenData.getRole();
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(

@@ -39,7 +39,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .email(email)
                     .name(name)
                     .nickname(name)
-                    .role(Role.OAUTH)
+                    .role(Role.USER)
                     .build();
             userRepository.save(user);
         } else {

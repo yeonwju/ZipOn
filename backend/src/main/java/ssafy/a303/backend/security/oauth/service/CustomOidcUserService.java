@@ -38,7 +38,7 @@ public class CustomOidcUserService extends OidcUserService {
                     .email(email)
                     .name(name)
                     .nickname(name)
-                    .role(Role.OAUTH)
+                    .role(Role.USER)
                     .build();
             userRepository.save(user);
         } else {

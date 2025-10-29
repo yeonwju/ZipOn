@@ -30,7 +30,7 @@ public class User {
     private String birth;
     @Column
     private String profileImg;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column
     private Role role;
     @CreationTimestamp

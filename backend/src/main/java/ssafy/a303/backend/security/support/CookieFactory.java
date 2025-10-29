@@ -1,17 +1,18 @@
 package ssafy.a303.backend.security.support;
 
 import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CookieFactory {
 
-    private final int accessMinutes;
+    private final int accessHours;
     private final int refreshDays;
 
-    public CookieFactory(@Value("${jwt.access-token-minutes}") int accessMinutes, @Value("${jwt.refresh-token-days}") int refreshDays){
-        this.accessMinutes = accessMinutes * 60;
+    public CookieFactory(@Value("${jwt.access-token-hours}") int accessHours, @Value("${jwt.refresh-token-days}") int refreshDays){
+        this.accessHours = accessHours * 60 * 60;
         this.refreshDays = refreshDays * 60 * 60 * 24;
     }
 
@@ -25,7 +26,7 @@ public class CookieFactory {
     }
 
     public Cookie accessCookie(String token){
-        return bake("AT", token, accessMinutes);
+        return bake("AT", token, accessHours);
     }
 
     public Cookie refreshCookie(String token){
