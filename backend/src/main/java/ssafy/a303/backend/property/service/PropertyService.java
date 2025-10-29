@@ -1,5 +1,6 @@
 package ssafy.a303.backend.property.service;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -7,16 +8,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
+import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyMapDto;
+import ssafy.a303.backend.property.dto.response.PropertyUpdateResponseDto;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -204,4 +213,68 @@ public class PropertyService {
     public List<PropertyMapDto> getMapPoints(Integer minLat, Integer maxLat, Integer minLng, Integer maxLng) {
         return propertyRepository.findForMap(minLat, maxLat, minLng, maxLng);
     }
+
+    /**
+     * 수정/삭제 가능 여부
+     * 해당 유저가 등록한 매물인지 확인
+     * @param p
+     * @param userSeq
+     */
+    public void assertCanEdit(Property p, Integer userSeq) {
+        if(userSeq == null || !Objects.equals(userSeq, p.getLessorSeq()))
+            throw new IllegalStateException("수정 권한이 없습니다. 작성한 매물만 수정할 수 있습니다.");
+    }
+
+    /**
+     * 매물 수정
+     * @param propertySeq
+     * @param req
+     * @param userSeq
+     * @return
+     */
+    @Transactional
+    public PropertyUpdateResponseDto updateProperty(Integer propertySeq, PropertyUpdateRequestDto req, Integer userSeq){
+        Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 매물입니다."));
+
+        assertCanEdit(p, userSeq);
+
+        if (req.content() != null) p.setContent(req.content());
+        if (req.area() != null) p.setArea(req.area());
+        if (req.areaP() != null) p.setAreaP(req.areaP());
+        if (req.deposit() != null) p.setDeposit(req.deposit());
+        if (req.mnRent() != null) p.setMnRent(req.mnRent());
+        if (req.fee() != null) p.setFee(req.fee());
+        if (req.period() != null) p.setPeriod(req.period());
+        if (req.floor() != null) p.setFloor(req.floor());
+        if (req.facing() != null) p.setFacing(req.facing());
+        if (req.roomCnt() != null) p.setRoomCnt(req.roomCnt());
+        if (req.bathroomCnt() != null) p.setBathroomCnt(req.bathroomCnt());
+        if (req.constructionDate() != null) p.setConstructionDate(req.constructionDate());
+        if (req.parkingCnt() != null) p.setParkingCnt(req.parkingCnt());
+        if (req.hasElevator() != null) p.setHasElevator(req.hasElevator());
+        if (req.petAvailable() != null) p.setPetAvailable(req.petAvailable());
+
+        return new PropertyUpdateResponseDto(
+                p.getPropertySeq(), p.getContent(), p.getArea(), p.getAreaP(),
+                p.getDeposit(), p.getMnRent(), p.getFee(),
+                p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(),
+                p.getConstructionDate(), p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable()
+        );
+    }
+
+    /**
+     * 매물 삭제, 삭제일시 저장.
+     * @param propertySeq
+     * @param userSeq
+     */
+    @Transactional
+    public void deleteProperty(Integer propertySeq, Integer userSeq) {
+        Property p =propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
+                .orElseThrow(() -> new IllegalArgumentException("이미 삭제되엇거나 존재하지 않는 매물입니다."));
+
+        assertCanEdit(p, userSeq);
+        p.delete(OffsetDateTime.now(ZoneId.of("Asia/Seoul")).toString());
+    }
+
 }

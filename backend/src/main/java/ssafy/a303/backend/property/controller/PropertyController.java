@@ -9,10 +9,12 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.dto.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
+import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyMapDto;
+import ssafy.a303.backend.property.dto.response.PropertyUpdateResponseDto;
 import ssafy.a303.backend.property.service.PropertyService;
 
 import java.util.List;
@@ -32,11 +34,9 @@ public class PropertyController {
      * @return
      */
     @PostMapping("/address")
-    public ResponseEntity<ResponseDTO<PropertyAddressResponseDto>> submitAddress(
-            @RequestBody PropertyAddressRequestDto req,
-            @AuthenticationPrincipal Integer userSeq
-            ){
-
+    public ResponseEntity<ResponseDTO<PropertyAddressResponseDto>> submitAddress(@RequestBody PropertyAddressRequestDto req,
+                                                                                 @AuthenticationPrincipal Integer userSeq)
+    {
         PropertyAddressResponseDto response =
                 propertyService.submitAddress(req, userSeq, req.lessorNm());
 
@@ -86,7 +86,7 @@ public class PropertyController {
      * @return
      */
     @PatchMapping("/{propertySeq}/details")
-    public ResponseEntity<ResponseDTO<Void>> submitDetail(@PathVariable Integer propertySeq,
+    public ResponseEntity<ResponseDTO<Void>> submitPropertyDetail(@PathVariable Integer propertySeq,
                                                             @RequestBody PropertyDetailRequestDto req,
                                                             @AuthenticationPrincipal Integer userSeq)
     {
@@ -101,8 +101,9 @@ public class PropertyController {
      * @return
      */
     @GetMapping("/{propertySeq}")
-    public ResponseEntity<ResponseDTO<DetailResponseDto>> getDetail(@PathVariable Integer propertySeq,
-                                                       @AuthenticationPrincipal Integer userSeq) {
+    public ResponseEntity<ResponseDTO<DetailResponseDto>> getPropertyDetail(@PathVariable Integer propertySeq,
+                                                       @AuthenticationPrincipal Integer userSeq)
+    {
         DetailResponseDto response = propertyService.getPropertyDetail(propertySeq);
         return ResponseDTO.ok(response, "해당 매물의 상세 정보를 조회합니다.");
     }
@@ -124,5 +125,23 @@ public class PropertyController {
         List<PropertyMapDto> response = propertyService.getMapPoints(minLat, maxLat, minLng, maxLng);
         return ResponseDTO.ok(response, "매물 요약 정보와 위경도 정보 조회");
     }
+
+    /**
+     * 매물 정보 수정
+     * @param propertySeq
+     * @param req
+     * @param userSeq
+     * @return
+     */
+    @PatchMapping("/{propertySeq}")
+    public ResponseEntity<ResponseDTO<PropertyUpdateResponseDto>> updateProperty(@PathVariable Integer propertySeq,
+                                                                                 @RequestBody PropertyUpdateRequestDto req,
+                                                                                 @AuthenticationPrincipal Integer userSeq)
+    {
+        PropertyUpdateResponseDto response = propertyService.updateProperty(propertySeq, req, userSeq);
+        return ResponseDTO.ok(response,"매물 정보가 수정되었습니다.");
+    }
+
+
 
 }

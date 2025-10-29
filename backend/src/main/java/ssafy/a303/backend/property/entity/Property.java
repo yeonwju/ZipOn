@@ -121,4 +121,8 @@ public class Property {
     public void updateIsCertificated(Boolean isCertificated){
         this.isCertificated = isCertificated;
     }
+
+    public void delete(String deletedAt){
+        this.deletedAt = deletedAt;
+    }
 }

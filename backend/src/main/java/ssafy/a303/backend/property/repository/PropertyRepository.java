@@ -40,4 +40,6 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
                                     @Param("maxLat") Integer maxLat,
                                     @Param("minLng") Integer minLng,
                                     @Param("maxLng") Integer maxLng);
+
+
 }
