@@ -41,7 +41,6 @@ public class SecurityConfig {
     public CorsConfigurationSource ccfs() {
         // ┌─── 설정 ───┐
         List<String> methods = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
-        ;
         List<String> headers = List.of("*");
         // └─── 설정 ───┘
         // 어떤 config인지 설정

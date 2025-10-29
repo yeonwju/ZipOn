@@ -45,7 +45,6 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         OAuth2User p = (OAuth2User) authentication.getPrincipal();
-        Map<String, Object> map = p.getAttributes();
         Integer userSeq = p.getAttribute("userSeq");
         String role     = p.getAttribute("role");
         // ---- 쿠키 발급 ----
