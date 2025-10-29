@@ -31,6 +31,7 @@ interface KakaoMapsStatic {
     options?: kakao.maps.MarkerImageOptions
   ) => kakao.maps.MarkerImage
   CustomOverlay: new (options: kakao.maps.CustomOverlayOptions) => kakao.maps.CustomOverlay
+  InfoWindow: new (options: kakao.maps.InfoWindowOptions) => kakao.maps.InfoWindow
   MarkerClusterer: new (options: kakao.maps.MarkerClustererOptions) => kakao.maps.MarkerClusterer
   event: {
     addListener: (
@@ -365,6 +366,43 @@ export declare namespace kakao {
       xAnchor?: number
       yAnchor?: number
       clickable?: boolean
+      zIndex?: number
+    }
+
+    /**
+     * 인포윈도우 객체
+     *
+     * 마커 위에 정보를 표시하는 말풍선 창입니다.
+     *
+     * @example
+     * ```typescript
+     * const infowindow = new window.kakao.maps.InfoWindow({
+     *   content: '<div style="padding:10px;">서울시청</div>'
+     * })
+     * infowindow.open(map, marker)
+     * ```
+     */
+    class InfoWindow {
+      constructor(options: InfoWindowOptions)
+      open(map: Map, marker: Marker): void
+      close(): void
+      setContent(content: string | HTMLElement): void
+      setPosition(position: LatLng): void
+      setZIndex(zIndex: number): void
+    }
+
+    /**
+     * 인포윈도우 설정 옵션
+     *
+     * @property content - HTML 콘텐츠 (필수)
+     * @property position - 인포윈도우 위치
+     * @property removable - 닫기 버튼 표시 여부
+     * @property zIndex - z-index 값
+     */
+    interface InfoWindowOptions {
+      content: string | HTMLElement
+      position?: LatLng
+      removable?: boolean
       zIndex?: number
     }
 

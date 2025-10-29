@@ -1,11 +1,15 @@
 'use client'
 
-import { ArrowLeft, BellRing, Search, Settings } from 'lucide-react'
+import { ArrowLeft, BellRing, Heart, Search, Settings, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { JSX, useEffect, useState } from 'react'
+import { JSX, ReactNode, useEffect, useState } from 'react'
 
-type IconSet = { href: string; icon: JSX.Element }[]
+type IconAction = {
+  href?: string
+  onClick?: () => void
+  icon: JSX.Element
+}
 
 const pageTitleMap: Record<string, string> = {
   '/auction': '경매',
@@ -14,9 +18,10 @@ const pageTitleMap: Record<string, string> = {
   '/live': '라이브',
   '/home': '홈',
   '/notification': '알림',
+  '/listing': '매물 상세',
 }
 
-const rightIconsMap: Record<string, IconSet> = {
+const rightIconsMap: Record<string, IconAction[]> = {
   default: [
     { href: '/search', icon: <Search size={25} /> },
     { href: '/notification', icon: <BellRing size={25} /> },
@@ -25,9 +30,16 @@ const rightIconsMap: Record<string, IconSet> = {
     { href: '/notification', icon: <BellRing size={25} /> },
     { href: '/mypage/edit', icon: <Settings size={25} /> },
   ],
+  '/listing': [{ href: '/like', icon: <Heart size={25} /> }],
 }
 
-export default function SubHeader({ pathname }: { pathname: string }) {
+interface SubHeaderProps {
+  pathname: string
+  title?: string
+  customRightIcons?: IconAction[]
+}
+
+export default function SubHeader({ pathname, title, customRightIcons }: SubHeaderProps) {
   const router = useRouter()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -57,8 +69,9 @@ export default function SubHeader({ pathname }: { pathname: string }) {
   }, [lastScrollY])
 
   const titleKey = Object.keys(pageTitleMap).find(key => pathname.startsWith(key))
-  const title = titleKey ? pageTitleMap[titleKey] : ''
-  const rightIcons = (titleKey && rightIconsMap[titleKey]) || rightIconsMap.default
+  const displayTitle = title || (titleKey ? pageTitleMap[titleKey] : '')
+  const rightIcons =
+    customRightIcons || (titleKey && rightIconsMap[titleKey]) || rightIconsMap.default
 
   return (
     <nav
@@ -78,15 +91,32 @@ export default function SubHeader({ pathname }: { pathname: string }) {
       </div>
 
       {/* 중앙: 제목 */}
-      <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-medium">{title}</h1>
+      <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-medium">{displayTitle}</h1>
 
       {/* 오른쪽: 페이지별 아이콘 */}
       <div className="flex flex-row gap-4">
-        {rightIcons.map(({ href, icon }) => (
-          <Link key={href} href={href} className="flex items-center transition-colors">
-            {icon}
-          </Link>
-        ))}
+        {rightIcons.map((iconAction, index) => {
+          if (iconAction.onClick) {
+            return (
+              <button
+                key={index}
+                onClick={iconAction.onClick}
+                className="flex items-center transition-colors hover:opacity-70"
+              >
+                {iconAction.icon}
+              </button>
+            )
+          }
+          return (
+            <Link
+              key={iconAction.href || index}
+              href={iconAction.href || '#'}
+              className="flex items-center transition-colors hover:opacity-70"
+            >
+              {iconAction.icon}
+            </Link>
+          )
+        })}
       </div>
     </nav>
   )

@@ -82,8 +82,8 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
 
   // 매물 카드 클릭 핸들러
   const handleListingClick = (listing: ListingData) => {
-    console.log('선택된 매물:', listing)
-    // TODO: 매물 상세 페이지로 이동하거나 상세 모달 열기
+    // 매물 상세 페이지로 이동
+    window.location.href = `/listing/${listing.id}`
   }
 
   // 현재 위치로 이동

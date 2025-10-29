@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 /**
  * 홈 페이지 (Server Component)
- * 
+ *
  * 실시간 인기 방송, 추천 매물, 경매 임박 매물을 표시합니다.
  * 향후 API 연결 시 서버에서 데이터를 페칭하여 표시합니다.
  */
