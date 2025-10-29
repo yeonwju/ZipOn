@@ -179,31 +179,15 @@ public class PropertyService {
                 .toList();
 
         DetailResponseDto detail = new DetailResponseDto(
-                p.getLessorNm(),
-                p.getPropertyNm(),
-                p.getContent(),
-                p.getAddress(),
-                p.getLatitude(),
-                p.getLongitude(),
-                p.getArea(),
-                p.getAreaP(),
-                p.getDeposit(),
-                p.getMnRent(),
-                p.getFee(),
+                p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                p.getAddress(), p.getLatitude(), p.getLongitude(),
+                p.getArea(), p.getAreaP(),
+                p.getDeposit(), p.getMnRent(), p.getFee(),
                 images,
-                p.getPeriod(),
-                p.getFloor(),
-                p.getFacing(),
-                p.getRoomCnt(),
-                p.getBathroomCnt(),
-                p.getConstructionDate(),
-                p.getParkingCnt(),
-                p.getHasElevator(),
-                p.getPetAvailable(),
-                aucInfo.getIsAucPref(),
-                aucInfo.getIsBrkPref(),
-                aucInfo.getAucAt(),
-                aucInfo.getAucAvailable()
+                p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(), p.getConstructionDate(),
+                p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
+                aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
+                aucInfo.getAucAt(), aucInfo.getAucAvailable()
         );
         return detail;
     }
