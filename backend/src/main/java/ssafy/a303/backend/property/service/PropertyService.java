@@ -9,6 +9,7 @@ import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
+import ssafy.a303.backend.property.dto.response.PropertyMapDto;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
@@ -207,4 +208,16 @@ public class PropertyService {
         return detail;
     }
 
+    /**
+     * 지도 좌표 전체/부분 조회
+     * @param minLat
+     * @param maxLat
+     * @param minLng
+     * @param maxLng
+     * @return
+     */
+    @Transactional
+    public List<PropertyMapDto> getMapPoints(Integer minLat, Integer maxLat, Integer minLng, Integer maxLng) {
+        return propertyRepository.findForMap(minLat, maxLat, minLng, maxLng);
+    }
 }

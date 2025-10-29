@@ -12,8 +12,10 @@ import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
+import ssafy.a303.backend.property.dto.response.PropertyMapDto;
 import ssafy.a303.backend.property.service.PropertyService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -103,6 +105,24 @@ public class PropertyController {
                                                        @AuthenticationPrincipal Integer userSeq) {
         DetailResponseDto response = propertyService.getPropertyDetail(propertySeq);
         return ResponseDTO.ok(response, "해당 매물의 상세 정보를 조회합니다.");
+    }
+
+    /**
+     * 지도용 요약 위경도 정보 전체/부분 조회
+     * @param minLat
+     * @param maxLat
+     * @param minLng
+     * @param maxLng
+     * @return
+     */
+    @GetMapping("/map")
+    public ResponseEntity<ResponseDTO<List<PropertyMapDto>>> getMap(@RequestParam(required = false) Integer minLat,
+                                                                    @RequestParam(required = false) Integer maxLat,
+                                                                    @RequestParam(required = false) Integer minLng,
+                                                                    @RequestParam(required = false) Integer maxLng)
+    {
+        List<PropertyMapDto> response = propertyService.getMapPoints(minLat, maxLat, minLng, maxLng);
+        return ResponseDTO.ok(response, "매물 요약 정보와 위경도 정보 조회");
     }
 
 }
