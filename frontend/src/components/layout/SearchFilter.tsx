@@ -45,7 +45,10 @@ export default function SearchFilter() {
       </button>
 
       {/* 지역 필터 (스크롤 테스트용 버튼 많게) */}
-      <div ref={scrollRef} className="scrollbar-hide flex flex-1 flex-row gap-2 overflow-x-auto scroll-smooth bg-white">
+      <div
+        ref={scrollRef}
+        className="scrollbar-hide flex flex-1 flex-row gap-2 overflow-x-auto scroll-smooth bg-white"
+      >
         {[
           '서울',
           '경기',

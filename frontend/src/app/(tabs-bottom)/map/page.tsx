@@ -16,7 +16,6 @@ export const metadata: Metadata = {
  */
 export default function MapPage() {
   // 서버에서 초기 데이터 준비 (나중에 API로 교체)
-  const initialListings = BuildingData
 
-  return <ClientMapView initialListings={initialListings} />
+  return <ClientMapView initialListings={BuildingData} />
 }
