@@ -18,9 +18,10 @@ import type { kakao } from '@/types/kakao.maps'
  * @param onClusterClick - 클러스터 클릭 콜백 (매물 목록 전달)
  * @param enabled - 클러스터 마커 활성화 여부 (기본: true)
  * @param currentZoomLevel - 현재 줌 레벨
+ * @param isAuctionFilter - 경매 필터 여부 (true: 경매만, false: 일반만, undefined: 전체)
  *
  * @example
- * useClusteredMarkers(map, buildingData, onMarkerClick, onClusterClick, zoomLevel >= 4, zoomLevel)
+ * useClusteredMarkers(map, buildingData, onMarkerClick, onClusterClick, zoomLevel >= 4, zoomLevel, true)
  */
 export default function useClusteredMarkers(
   map: kakao.maps.Map | null,
@@ -28,7 +29,8 @@ export default function useClusteredMarkers(
   onMarkerClick?: (listing: ListingData) => void,
   onClusterClick?: (listings: ListingData[]) => void,
   enabled: boolean = true,
-  currentZoomLevel?: number
+  currentZoomLevel?: number,
+  isAuctionFilter?: boolean
 ) {
   const clustererRef = useRef<kakao.maps.MarkerClusterer | null>(null)
   const markersRef = useRef<kakao.maps.Marker[]>([])
@@ -70,10 +72,14 @@ export default function useClusteredMarkers(
         position: new window.kakao.maps.LatLng(listing.lat, listing.lng),
         clickable: true,
         image: markerImage, // 투명 이미지 적용
+        isAuction: listing.isAuction,
       })
 
       // 마커-매물 데이터 매핑
-      markerToListingMap.current.set(marker, listing)
+      markerToListingMap.current.set(
+        marker,
+        listing.isAuction ? listing : { ...listing, isAuction: false }
+      )
 
       // 마커 클릭 이벤트
       if (onMarkerClick) {
@@ -85,12 +91,30 @@ export default function useClusteredMarkers(
       return marker
     })
 
+    // 필터에 따른 클러스터 색상 결정
+    // 경매: 빨간색, 일반: 파란색, 전체: 보라색
+    let baseColors: [string, string, string]
+    if (isAuctionFilter === true) {
+      // 경매만: 빨간색 계열
+      baseColors = ['rgba(239, 68, 68, 0.8)', 'rgba(220, 38, 38, 0.85)', 'rgba(185, 28, 28, 0.9)']
+    } else if (isAuctionFilter === false) {
+      // 일반만: 파란색 계열
+      baseColors = ['rgba(59, 130, 246, 0.8)', 'rgba(37, 99, 235, 0.85)', 'rgba(29, 78, 216, 0.9)']
+    } else {
+      // 전체: 보라색 계열
+      baseColors = [
+        'rgba(139, 92, 246, 0.8)',
+        'rgba(124, 58, 237, 0.85)',
+        'rgba(109, 40, 217, 0.9)',
+      ]
+    }
+
     // 클러스터러 생성
     const clusterStyles: kakao.maps.ClusterStyle[] = [
       {
         width: '50px',
         height: '50px',
-        background: 'rgba(59, 130, 246, 0.8)',
+        background: baseColors[0],
         borderRadius: '25px',
         color: '#fff',
         textAlign: 'center',
@@ -101,7 +125,7 @@ export default function useClusteredMarkers(
       {
         width: '60px',
         height: '60px',
-        background: 'rgba(37, 99, 235, 0.85)',
+        background: baseColors[1],
         borderRadius: '30px',
         color: '#fff',
         textAlign: 'center',
@@ -112,7 +136,7 @@ export default function useClusteredMarkers(
       {
         width: '70px',
         height: '70px',
-        background: 'rgba(29, 78, 216, 0.9)',
+        background: baseColors[2],
         borderRadius: '35px',
         color: '#fff',
         textAlign: 'center',
@@ -166,5 +190,5 @@ export default function useClusteredMarkers(
       markersRef.current = []
       markerToListingMap.current.clear()
     }
-  }, [map, listings, onMarkerClick, onClusterClick, enabled, currentZoomLevel])
+  }, [map, listings, onMarkerClick, onClusterClick, enabled, currentZoomLevel, isAuctionFilter])
 }

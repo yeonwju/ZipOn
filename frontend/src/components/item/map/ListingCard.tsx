@@ -29,8 +29,19 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         alt={'매물 사진'}
         style={{ width: 80, height: 80 }}
       />
-      <div>
-        <h4 className="mb-1 font-semibold text-gray-900">{listing.name}</h4>
+      <div className="flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <h4 className="font-semibold text-gray-900">{listing.name}</h4>
+          {listing.isAuction ? (
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+              경매
+            </span>
+          ) : (
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+              일반
+            </span>
+          )}
+        </div>
         <p className="mb-2 text-sm text-gray-600">{listing.address}</p>
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-blue-600">

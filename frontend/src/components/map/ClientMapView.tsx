@@ -1,10 +1,11 @@
 'use client'
 
 import { LocateFixed, Navigation } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
 import ListingList from '@/components/item/map/ListingList'
+import MapFilter, { type FilterType } from '@/components/layout/MapFilter'
 import BottomSheet from '@/components/layout/modal/BottomSheet'
 import SearchBar from '@/components/layout/SearchBar'
 import useKakaoLoader from '@/hook/map/useKakaoLoader'
@@ -44,6 +45,19 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedListings, setSelectedListings] = useState<ListingData[]>([])
+  const [filter, setFilter] = useState<FilterType>('all')
+
+  // 필터링된 매물 목록
+  const filteredListings = useMemo(() => {
+    if (filter === 'all') {
+      return initialListings
+    }
+    if (filter === 'auction') {
+      return initialListings.filter(listing => listing.isAuction === true)
+    }
+    // filter === 'normal'
+    return initialListings.filter(listing => listing.isAuction === false)
+  }, [initialListings, filter])
 
   const closeModal = () => {
     setIsModalOpen(false)
@@ -65,10 +79,13 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 사용자 현재 위치 마커
   useUserMarker(map, location)
 
-  // 매물 마커 (클러스터링 지원)
+  // 필터 타입에 따른 boolean 값 계산 (클러스터 색상용)
+  const isAuctionFilter = filter === 'auction' ? true : filter === 'normal' ? false : undefined
+
+  // 매물 마커 (클러스터링 지원) - 필터링된 매물 사용
   useListingMarkers(
     map,
-    initialListings,
+    filteredListings,
     listing => {
       console.log('매물 클릭됨:', listing)
       openModal([listing])
@@ -77,7 +94,8 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
       // 클러스터 클릭 시 호출됨 (줌 레벨 4 이상)
       console.log(`🏢 클러스터 클릭 - ${listings.length}개 매물:`, listings)
       openModal(listings)
-    }
+    },
+    isAuctionFilter
   )
 
   // 매물 카드 클릭 핸들러
@@ -112,6 +130,11 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
         {/* 검색바 */}
         <div className="pointer-events-auto absolute top-1 left-1 w-full pr-2">
           <SearchBar />
+        </div>
+
+        {/* 필터 버튼 */}
+        <div className="pointer-events-auto absolute top-16 left-1/2 -translate-x-1/2">
+          <MapFilter selectedFilter={filter} onFilterChange={setFilter} />
         </div>
 
         {/* 현재 위치로 이동 버튼 */}

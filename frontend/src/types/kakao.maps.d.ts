@@ -261,6 +261,7 @@ export declare namespace kakao {
       title?: string
       image?: MarkerImage
       clickable?: boolean
+      isAuction: boolean
     }
 
     /**
