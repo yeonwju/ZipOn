@@ -1,11 +1,11 @@
-import type { ListingData } from '@/hook/useListingMarkers'
+import type { ListingData } from '@/hook/map/useListingMarkers'
 
 /**
  * 매물 마커 UI를 생성하는 함수
- * 
+ *
  * 말풍선 형태의 마커로 보증금/월세 정보를 표시합니다.
  * 중앙 하단의 삼각형 꼬리가 정확한 좌표를 가리킵니다.
- * 
+ *
  * @param listing - 매물 데이터
  * @param onClick - 클릭 콜백
  */

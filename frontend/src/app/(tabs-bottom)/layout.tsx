@@ -10,8 +10,8 @@ import BottomNavigation from '@/components/layout/BottomNavigation'
  */
 export default function TabsBottomLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full min-h-screen">
-      <main>{children}</main>
+    <div className="fixed inset-0 overflow-hidden">
+      <main className="h-full w-full">{children}</main>
       <BottomNavigation />
     </div>
   )

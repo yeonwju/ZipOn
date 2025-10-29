@@ -1,4 +1,4 @@
-import type { ListingData } from '@/hook/useListingMarkers'
+import type { ListingData } from '@/hook/map/useListingMarkers'
 
 /**
  * 건물 매물 샘플 데이터

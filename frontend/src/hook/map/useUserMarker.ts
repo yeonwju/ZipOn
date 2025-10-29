@@ -19,6 +19,9 @@ interface Position {
  * GPS 위치에 파란색 파동 마커를 표시합니다.
  * 위치가 변경되면 마커가 자동으로 이동합니다.
  *
+ * CustomOverlay zIndex: 100 (클러스터 및 다른 마커보다 위에 표시)
+ * 내부 요소 z-index는 UserLocationMarker 컴포넌트 참고
+ *
  * @param map - 카카오 지도 인스턴스
  * @param position - 마커 위치 좌표 (null이면 마커 미표시)
  * @param onClick - 마커 클릭 콜백
@@ -59,7 +62,6 @@ export default function useUserMarker(
       xAnchor: 0.5,
       yAnchor: 0.5,
       clickable: true,
-      zIndex: 1000,
     })
 
     overlay.setMap(map)
