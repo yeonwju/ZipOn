@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +15,7 @@ import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
 import ssafy.a303.backend.security.jwt.token.TokenData;
 import ssafy.a303.backend.security.jwt.token.TokenType;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Duration;
 import java.time.Instant;
@@ -25,12 +28,18 @@ import java.util.UUID;
 public class JWTProvider {
 
     @Value("${jwt.secret}")
+    private String secret;
     private Key key;
     @Value("${jwt.access-token-hours}")
     private long accessHours;
     @Value("${jwt.refresh-token-days}")
     private long refreshDays;
     private final TokenPairRepository tokenPairRepository;
+
+    @PostConstruct
+    void init(){
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateAccessToken(TokenData tokenData) {
         Instant now = tokenData.getIssueTime();
