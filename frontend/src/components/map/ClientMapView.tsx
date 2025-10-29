@@ -1,5 +1,6 @@
 'use client'
 
+import { LocateFixed, Navigation } from 'lucide-react'
 import { useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
@@ -26,9 +27,9 @@ interface ClientMapViewProps {
  * 기능:
  * - GPS 기반 현재 위치 추적 및 파란색 마커 표시
  * - 매물 위치에 말풍선 마커 표시 (클러스터링 지원)
- * - 레벨 5+: 클러스터 클릭 시 줌레벨 4로 이동
- * - 레벨 4: 클러스터 클릭 시 바텀 시트에 매물 목록 표시
+ * - 레벨 4 이상: 클러스터 클릭 시 바텀 시트에 매물 목록 표시
  * - 레벨 3 이하: 상세 마커 모드 (호버 시 강조 효과)
+ * - 현재 위치로 이동 버튼 (우측 하단, 줌 레벨 4로 이동)
  *
  * 바텀 시트 동작:
  * - 매물/클러스터 클릭 시 자동으로 열림
@@ -62,7 +63,7 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   useMapInteraction(map, isModalOpen ? closeModal : undefined)
 
   // 사용자 현재 위치 마커
-  useUserMarker(map, location, () => console.log('내 위치 마커 클릭됨!'))
+  useUserMarker(map, location)
 
   // 매물 마커 (클러스터링 지원)
   useListingMarkers(
@@ -73,8 +74,8 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
       openModal([listing])
     },
     listings => {
-      // 4레벨 클러스터 클릭 시 호출됨
-      console.log(`🏢 4레벨 클러스터 클릭 - ${listings.length}개 매물:`, listings)
+      // 클러스터 클릭 시 호출됨 (줌 레벨 4 이상)
+      console.log(`🏢 클러스터 클릭 - ${listings.length}개 매물:`, listings)
       openModal(listings)
     }
   )
@@ -83,6 +84,14 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   const handleListingClick = (listing: ListingData) => {
     console.log('선택된 매물:', listing)
     // TODO: 매물 상세 페이지로 이동하거나 상세 모달 열기
+  }
+
+  // 현재 위치로 이동
+  const moveToCurrentLocation = () => {
+    if (map && location) {
+      map.setLevel(4) // 줌 레벨 4로 설정
+      map.setCenter(new window.kakao.maps.LatLng(location.lat, location.lng)) // 현재 위치로 이동
+    }
   }
 
   return (
@@ -104,6 +113,16 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
         <div className="pointer-events-auto absolute top-1 left-1 w-full pr-2">
           <SearchBar />
         </div>
+
+        {/* 현재 위치로 이동 버튼 */}
+        <button
+          onClick={moveToCurrentLocation}
+          disabled={!location}
+          className="pointer-events-auto absolute right-4 bottom-20 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg transition-all hover:scale-110 hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100"
+          aria-label="현재 위치로 이동"
+        >
+          <LocateFixed className="h-5 w-5 text-blue-500" />
+        </button>
 
         {/* 바텀 시트 */}
         <BottomSheet

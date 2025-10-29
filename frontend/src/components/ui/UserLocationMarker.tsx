@@ -34,7 +34,7 @@ export function createUserLocationMarkerElement(onClick?: () => void): HTMLDivEl
   // 중앙 원 (실제 위치 지점)
   const centerCircle = document.createElement('div')
   centerCircle.className =
-    'relative w-4 h-4 rounded-full bg-white shadow-lg border-4 border-blue-600 cursor-pointer pointer-events-auto'
+    'relative w-4 h-4 rounded-full bg-white shadow-lg border-4 border-blue-600 cursor-pointer pointer-events-none'
   centerCircle.style.zIndex = '9999'
 
   if (onClick) {
