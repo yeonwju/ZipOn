@@ -142,6 +142,18 @@ public class PropertyController {
         return ResponseDTO.ok(response,"매물 정보가 수정되었습니다.");
     }
 
-
+    /**
+     * 매물 삭제
+     * @param propertySeq
+     * @param userSeq
+     * @return
+     */
+    @PatchMapping("/{propertySeq}")
+    public ResponseEntity<ResponseDTO<Void>> deleteProperty(@PathVariable Integer propertySeq,
+                                                            @AuthenticationPrincipal Integer userSeq)
+    {
+        propertyService.deleteProperty(propertySeq, userSeq);
+        return ResponseDTO.notFound("매물이 삭제되었습니다.");
+    }
 
 }
