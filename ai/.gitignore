@@ -1,0 +1,61 @@
+# ==============================
+# Python / FastAPI Project Ignore
+# ==============================
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.*
+
+# Dependency lock files (optional if managed elsewhere)
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# VSCode / JetBrains IDE configs
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Ignore uploaded or temp data folders (optional)
+uploads/
+temp/
+tmp/
+
+# ==============================
+# uv / project-specific
+# ==============================
+uv.lock
+
+# (Optional) Ignore example configs only if they’re local
+# !.env.example  ← keep the template version
+!.env.example
