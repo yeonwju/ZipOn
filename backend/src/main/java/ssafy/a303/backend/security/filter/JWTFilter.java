@@ -12,7 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ssafy.a303.backend.security.service.JWTProvider;
+import ssafy.a303.backend.security.jwt.service.JWTProvider;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -31,24 +31,35 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
+        // token 읽기
+        String token = null;
         String header = request.getHeader("Authorization");
-        if(StringUtils.hasText(header) && header.startsWith("Bearer ")){
-            String token = header.substring(7);
-            if (jwtProvider.isTokenValid(token)) {
-                int userSeq = jwtProvider.getSubject(token);
-                String role = jwtProvider.getRole(token);
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                userSeq,
-                                null,
-                                Collections.singletonList(authority)
-                        );
+        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+        }
 
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+        if (token == null && request.getCookies() != null) {
+            for (var c : request.getCookies()) {
+                if ("AT".equals(c.getName())) {
+                    token = c.getValue();
+                    break;
+                }
             }
+        }
+
+        if (token != null && jwtProvider.isTokenValid(token)) {
+            int userSeq = jwtProvider.getSubject(token);
+            String role = jwtProvider.getRole(token);
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            userSeq, // principal
+                            null, // credentials
+                            Collections.singletonList(authority)
+                    );
+
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         filterChain.doFilter(request, response);

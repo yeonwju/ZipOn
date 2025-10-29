@@ -1,4 +1,4 @@
-package ssafy.a303.backend.security.service;
+package ssafy.a303.backend.security.jwt.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -7,8 +7,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ssafy.a303.backend.security.dto.TokenData;
-import ssafy.a303.backend.security.dto.TokenType;
+import ssafy.a303.backend.security.jwt.token.TokenData;
+import ssafy.a303.backend.security.jwt.token.TokenType;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

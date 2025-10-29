@@ -1,4 +1,4 @@
-package ssafy.a303.backend.security.dto;
+package ssafy.a303.backend.security.jwt.token;
 
 public enum TokenType {
     ACCESS,

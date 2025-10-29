@@ -1,4 +1,4 @@
-package ssafy.a303.backend.security.dto;
+package ssafy.a303.backend.security.jwt.token;
 
 import lombok.Builder;
 import lombok.Getter;
