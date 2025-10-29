@@ -44,4 +44,19 @@ public class PropertyAucInfo {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+    public void updateIsAucPref(Boolean isAucPref) {
+        this.isAucPref = isAucPref;
+    }
+
+    public void updateIsBrkPref(Boolean isBrkPref) {
+        this.isBrkPref = isBrkPref;
+    }
+
+    public void updateAucAt(String aucAt) {
+        this.aucAt = aucAt;
+    }
+
+    public void updateAucAvailable(String aucAvailable) {
+        this.aucAvailable = aucAvailable;
+    }
 }
