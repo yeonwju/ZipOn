@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 
+import type { kakao } from '@/types/kakao.maps'
 import type { Coordinates } from '@/types/map'
 import { CURRENT_LOCATION_ZOOM_LEVEL } from '@/types/map'
-import type { kakao } from '@/types/kakao.maps'
 
 /**
  * 지도 제어 훅

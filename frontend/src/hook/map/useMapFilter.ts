@@ -24,10 +24,10 @@ export function useMapFilter(listings: ListingData[]) {
       return listings
     }
     if (filter === 'auction') {
-      return listings.filter(listing => listing.isAuction === true)
+      return listings.filter(listing => listing.isAuction)
     }
     // filter === 'normal'
-    return listings.filter(listing => listing.isAuction === false)
+    return listings.filter(listing => !listing.isAuction)
   }, [listings, filter])
 
   // 필터 타입에 따른 boolean 값 (클러스터 색상용)

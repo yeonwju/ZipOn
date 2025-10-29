@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-import type { ListingData } from '@/types/listing'
 import type { kakao } from '@/types/kakao.maps'
+import type { ListingData } from '@/types/listing'
 
 /**
  * 매물을 클러스터 마커로 표시하는 훅
