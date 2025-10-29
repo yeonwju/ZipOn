@@ -1,4 +1,4 @@
-import type { ListingData } from '@/hook/map/useListingMarkers'
+import type { ListingData } from '@/types/listing'
 
 /**
  * 건물 매물 샘플 데이터
@@ -7,7 +7,7 @@ import type { ListingData } from '@/hook/map/useListingMarkers'
  * 실제 프로젝트에서는 이 데이터를 API에서 받아오도록 대체해야 합니다.
  *
  * **데이터 타입:**
- * - ListingData 타입 사용 (@/hook/useListingMarkers에서 정의)
+ * - ListingData 타입 사용 (@/types/listing에서 정의)
  *
  * **데이터 구조:**
  * - name: 건물명

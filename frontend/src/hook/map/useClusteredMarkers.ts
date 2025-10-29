@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import type { ListingData } from '@/hook/map/useListingMarkers'
+import type { ListingData } from '@/types/listing'
 import type { kakao } from '@/types/kakao.maps'
 
 /**

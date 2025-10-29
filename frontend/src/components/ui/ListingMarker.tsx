@@ -1,4 +1,4 @@
-import type { ListingData } from '@/hook/map/useListingMarkers'
+import type { ListingData } from '@/types/listing'
 
 /**
  * 매물 마커 UI를 생성하는 함수

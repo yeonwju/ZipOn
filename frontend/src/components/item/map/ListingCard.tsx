@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import type { ListingData } from '@/hook/map/useListingMarkers'
+import type { ListingData } from '@/types/listing'
 
 interface ListingCardProps {
   listing: ListingData

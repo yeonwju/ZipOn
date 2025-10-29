@@ -2,7 +2,7 @@
 
 import { Building2, Gavel, Home } from 'lucide-react'
 
-export type FilterType = 'all' | 'auction' | 'normal'
+import type { FilterType } from '@/types/listing'
 
 interface MapFilterProps {
   selectedFilter: FilterType
@@ -11,7 +11,7 @@ interface MapFilterProps {
 
 /**
  * 지도 필터 컴포넌트
- * 
+ *
  * 전체, 경매, 일반 매물을 필터링하는 버튼 그룹
  */
 export default function MapFilter({ selectedFilter, onFilterChange }: MapFilterProps) {
@@ -41,4 +41,3 @@ export default function MapFilter({ selectedFilter, onFilterChange }: MapFilterP
     </div>
   )
 }
-

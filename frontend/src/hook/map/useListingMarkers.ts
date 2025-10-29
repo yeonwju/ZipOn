@@ -1,27 +1,8 @@
 import useClusteredMarkers from '@/hook/map/useClusteredMarkers'
 import useDetailedMarkers from '@/hook/map/useDetailedMarkers'
 import useMapZoomLevel from '@/hook/map/useMapZoomLevel'
+import type { ListingData } from '@/types/listing'
 import type { kakao } from '@/types/kakao.maps'
-
-/**
- * 매물 데이터 타입 정의
- * @property name - 건물명
- * @property address - 건물 주소
- * @property lat - 위도 (latitude)
- * @property lng - 경도 (longitude)
- * @property deposit - 보증금 (단위: 만원)
- * @property rent - 월세 (단위: 만원)
- */
-export type ListingData = {
-  id: number
-  name: string
-  address: string
-  lat: number
-  lng: number
-  deposit: number
-  rent: number
-  isAuction: boolean
-}
 
 /**
  * 지도에 매물 마커를 표시하는 통합 훅

@@ -1,4 +1,4 @@
-import type { ListingData } from '@/hook/map/useListingMarkers'
+import type { ListingData } from '@/types/listing'
 
 import ListingCard from './ListingCard'
 
