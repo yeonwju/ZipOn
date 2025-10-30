@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.security.jwt.entity.TokenPair;
 import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
 import ssafy.a303.backend.security.jwt.token.TokenData;
@@ -109,17 +111,17 @@ public class JWTProvider {
         TokenData rTokenData = parseToken(refreshToken);
         // access user != refresh user
         if (aTokenData.getUserSeq() != rTokenData.getUserSeq())
-            return null;
+            throw new CustomException(ErrorCode.ACCESS_REFRESH_MISMATCH);
         // token type 비교
         if (!aTokenData.getTokenType().equals(TokenType.ACCESS.name()) ||
                 !rTokenData.getTokenType().equals(TokenType.REFRESH.name()))
-            return null;
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         // token jti db 찾기
         String accessJti = aTokenData.getJti();
         String refreshJti = rTokenData.getJti();
         Optional<TokenPair> opt = tokenPairRepository.findByAccessJtiAndRefreshJtiAndUsedFalse(accessJti, refreshJti);
         if (opt.isEmpty())
-            return null;
+            throw new CustomException(ErrorCode.TOKEN_TYPE_MISMATCH);
         // 검증 완료
         // 사용 처리
         TokenPair tokenPair = opt.get();

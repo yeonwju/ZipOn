@@ -1,11 +1,10 @@
-package ssafy.a303.backend.common.dto;
+package ssafy.a303.backend.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import ssafy.a303.backend.common.response.ErrorCode;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -28,21 +27,6 @@ public class ResponseDTO <T> {
     }
     public static <T>ResponseEntity<ResponseDTO<T>> created (T data, String message) {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO<>(data, message, HttpStatus.CREATED));
-    }
-    public static <T>ResponseEntity<ResponseDTO<T>> badRequest (String message) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO<>(null, message, HttpStatus.BAD_REQUEST));
-    }
-    public static <T>ResponseEntity<ResponseDTO<T>> unauthorized (String message) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseDTO<>(null, message, HttpStatus.UNAUTHORIZED));
-    }
-    public static <T>ResponseEntity<ResponseDTO<T>> forbidden (String message) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseDTO<>(null, message, HttpStatus.FORBIDDEN));
-    }
-    public static <T>ResponseEntity<ResponseDTO<T>> notFound (String message) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO<>(null, message, HttpStatus.NOT_FOUND));
-    }
-    public static <T>ResponseEntity<ResponseDTO<T>> internalServerError (String message) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseDTO<>(null, message, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     public static ResponseDTO<?> fail(ErrorCode errorCode, String customMessage) {

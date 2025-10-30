@@ -7,6 +7,18 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    // --- 회원가입 외부 API ---
+    EXTERNAL_API_ERROR(502, HttpStatus.BAD_GATEWAY, "외부 API 연동 중 오류가 발생했습니다."),
+
+    // JWT 관련 에러 코드
+    INVALID_TOKEN(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    EXPIRED_TOKEN(401, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    INVALID_CREDENTIALS(401, HttpStatus.UNAUTHORIZED, "잘못된 인증 정보입니다."),
+    TOKEN_TYPE_MISMATCH(401, HttpStatus.UNAUTHORIZED, "토큰 타입이 잘못되었습니다."),
+    ACCESS_REFRESH_MISMATCH(401,HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
+
+
+    // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),
     INVALID_PAGINATION(400, HttpStatus.BAD_REQUEST, "잘못된 페이지네이션 값입니다."),
@@ -15,10 +27,6 @@ public enum ErrorCode {
     // 401 UNAUTHORIZED
     USER_NOT_AUTHENTICATED(401, HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
 
-    // JWT 관련 에러 코드
-    INVALID_TOKEN(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
-    EXPIRED_TOKEN(401, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
-    INVALID_CREDENTIALS(401, HttpStatus.UNAUTHORIZED, "잘못된 인증 정보입니다."),
 
     // 403 FORBIDDEN
     ACCESS_DENIED(403, HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
@@ -45,9 +53,6 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS(409, HttpStatus.CONFLICT, "이미 가입된 사용자입니다."),
     EMAIL_ALREADY_EXISTS(409, HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     INVALID_EMAIL_FORMAT(400, HttpStatus.BAD_REQUEST, "유효하지 않은 이메일 형식입니다."),
-    // --- 회원가입 외부 API ---
-    EXTERNAL_API_ERROR(502, HttpStatus.BAD_GATEWAY, "외부 API 연동 중 오류가 발생했습니다."),
-
 
     // 송금 관련 에러 추가
     ACCOUNT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "계좌를 찾을 수 없습니다."),
@@ -67,7 +72,7 @@ public enum ErrorCode {
     //회원 탈퇴
     USER_ALREADY_DELETED(409, HttpStatus.CONFLICT, "이미 탈퇴된 사용자입니다."),
     ;
-
+    // ────────────────────────────────────────────────────
     private final int code;
     private final HttpStatus httpStatus;
     private final String message;
