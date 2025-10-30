@@ -66,3 +66,16 @@ def extract_pdf():
 #     print(text)  # 너무 길면 앞부분만 출력
 
 
+from app.modules.pdf_parser import extract_text_from_file
+from app.modules.llm_extractor import extract_owner_info_llm
+
+if __name__ == "__main__":
+    PDF_PATH = r"C:\Users\SSAFY\Desktop\등기부등본.pdf"
+
+    pdf_text = extract_text_from_file(PDF_PATH)
+    result = extract_owner_info_llm(pdf_text)
+
+    print("\n==============================")
+    print("📄 최종 추출 결과")
+    print("==============================")
+    print(result)
