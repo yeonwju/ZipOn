@@ -49,8 +49,8 @@ public class Property {
     @Column(name = "is_certificated")
     private Boolean isCertificated; // 등기부등본 확인 여부
 
-    @Column(name = "certificate_url")
-    private String certificateUrl;
+    @Column(name = "pdf_code")
+    private String pdfCode; // pdf 고유 코드
 
     @Column(name = "area")
     private Double area;
@@ -113,10 +113,6 @@ public class Property {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
-    public void saveCertificateUrl(String url){
-        this.certificateUrl = url;
-    }
 
     public void updateIsCertificated(Boolean isCertificated){
         this.isCertificated = isCertificated;
