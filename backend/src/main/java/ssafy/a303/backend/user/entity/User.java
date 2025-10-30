@@ -30,7 +30,6 @@ public class User {
     private String birth;
     @Column
     private String profileImg;
-    @Enumerated(EnumType.STRING)
     @Column(length = 40)
     private String financeKey;
     @Column
