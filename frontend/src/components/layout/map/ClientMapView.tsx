@@ -4,8 +4,14 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
+import AllFiltersBottomSheet from '@/components/layout/modal/AllFiltersBottomSheet'
+import AreaFilterBottomSheet from '@/components/layout/modal/AreaFilterBottomSheet'
 import BuildingTypeBottomSheet from '@/components/layout/modal/BuildingTypeBottomSheet'
+import DirectionFilterBottomSheet from '@/components/layout/modal/DirectionFilterBottomSheet'
+import FloorFilterBottomSheet from '@/components/layout/modal/FloorFilterBottomSheet'
 import ListingBottomSheet from '@/components/layout/modal/ListingBottomSheet'
+import PriceFilterBottomSheet from '@/components/layout/modal/PriceFilterBottomSheet'
+import RoomCountFilterBottomSheet from '@/components/layout/modal/RoomCountFilterBottomSheet'
 import ListingList from '@/components/map/ListingList'
 import useKakaoLoader from '@/hook/map/useKakaoLoader'
 import useListingMarkers from '@/hook/map/useListingMarkers'
@@ -15,6 +21,7 @@ import { useMapFilter } from '@/hook/map/useMapFilter'
 import useMapInteraction from '@/hook/map/useMapInteraction'
 import useUserLocation from '@/hook/map/useUserLocation'
 import useUserMarker from '@/hook/map/useUserMarker'
+import type { AreaFilter, DirectionFilter, FloorFilter, PriceFilter, RoomCountFilter } from '@/types/filter'
 import type { ListingData } from '@/types/listing'
 import { DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '@/types/map'
 
@@ -53,6 +60,17 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 지도 제어 (지도 인스턴스, 위치 이동)
   const { map, setMap, moveToCurrentLocation, canMoveToLocation } = useMapControls(location)
 
+  // 필터 상태
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>({
+    deposit: { min: 0, max: null },
+    rent: { min: 0, max: null },
+    maintenance: { min: 0, max: null },
+  })
+  const [roomCountFilter, setRoomCountFilter] = useState<RoomCountFilter | undefined>(undefined)
+  const [areaFilter, setAreaFilter] = useState<AreaFilter | undefined>(undefined)
+  const [floorFilter, setFloorFilter] = useState<FloorFilter | undefined>(undefined)
+  const [directionFilter, setDirectionFilter] = useState<DirectionFilter | undefined>(undefined)
+
   // 매물 필터링 (필터 상태, 필터링된 매물)
   const {
     auctionFilter,
@@ -61,13 +79,46 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
     setBuildingType,
     filteredListings,
     isAuctionFilter,
-  } = useMapFilter(initialListings)
+  } = useMapFilter({
+    listings: initialListings,
+    priceFilter,
+    roomCountFilter,
+    areaFilter,
+    floorFilter,
+    directionFilter,
+  })
 
   // 매물 모달 관리 (바텀시트 열기/닫기)
   const { isOpen: isModalOpen, selectedListings, openModal, closeModal } = useListingModal()
 
   // 건물 타입 선택 모달 상태
   const [isBuildingTypeModalOpen, setIsBuildingTypeModalOpen] = useState(false)
+
+  // 필터 모달 상태
+  const [isAllFiltersModalOpen, setIsAllFiltersModalOpen] = useState(false)
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false)
+  const [isRoomCountModalOpen, setIsRoomCountModalOpen] = useState(false)
+  const [isAreaModalOpen, setIsAreaModalOpen] = useState(false)
+  const [isFloorModalOpen, setIsFloorModalOpen] = useState(false)
+  const [isDirectionModalOpen, setIsDirectionModalOpen] = useState(false)
+
+  // 전체 필터 적용
+  const handleApplyAllFilters = () => {
+    setIsAllFiltersModalOpen(false)
+  }
+
+  // 전체 필터 초기화
+  const handleResetAllFilters = () => {
+    setPriceFilter({
+      deposit: { min: 0, max: null },
+      rent: { min: 0, max: null },
+      maintenance: { min: 0, max: null },
+    })
+    setRoomCountFilter(undefined)
+    setAreaFilter(undefined)
+    setFloorFilter(undefined)
+    setDirectionFilter(undefined)
+  }
 
   // 지도 인터랙션 시 모달 자동 닫기 (드래그, 줌 변경)
   useMapInteraction(map, isModalOpen ? closeModal : undefined)
@@ -117,6 +168,9 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
         onAuctionFilterChange={setAuctionFilter}
         onBuildingTypeChange={setBuildingType}
         onOpenBuildingTypeModal={() => setIsBuildingTypeModalOpen(true)}
+        onOpenAllFiltersModal={() => setIsAllFiltersModalOpen(true)}
+        onOpenPriceModal={() => setIsPriceModalOpen(true)}
+        onOpenRoomCountModal={() => setIsRoomCountModalOpen(true)}
         onMoveToCurrentLocation={moveToCurrentLocation}
         canMoveToLocation={canMoveToLocation}
       >
@@ -135,6 +189,64 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
           onClose={() => setIsBuildingTypeModalOpen(false)}
           selectedType={buildingType}
           onSelectType={setBuildingType}
+        />
+
+        {/* 전체 필터 바텀 시트 */}
+        <AllFiltersBottomSheet
+          isOpen={isAllFiltersModalOpen}
+          onClose={() => setIsAllFiltersModalOpen(false)}
+          priceFilter={priceFilter}
+          roomCountFilter={roomCountFilter || 1}
+          areaFilter={areaFilter || { min: 0, max: 80 }}
+          floorFilter={floorFilter || 1}
+          directionFilter={directionFilter || 'south'}
+          onPriceChange={setPriceFilter}
+          onRoomCountChange={setRoomCountFilter}
+          onAreaChange={setAreaFilter}
+          onFloorChange={setFloorFilter}
+          onDirectionChange={setDirectionFilter}
+          onResetFilters={handleResetAllFilters}
+          onApplyFilters={handleApplyAllFilters}
+        />
+
+        {/* 금액 필터 바텀 시트 */}
+        <PriceFilterBottomSheet
+          isOpen={isPriceModalOpen}
+          onClose={() => setIsPriceModalOpen(false)}
+          selectedPrice={priceFilter}
+          onSelectPrice={setPriceFilter}
+        />
+
+        {/* 방수 필터 바텀 시트 */}
+        <RoomCountFilterBottomSheet
+          isOpen={isRoomCountModalOpen}
+          onClose={() => setIsRoomCountModalOpen(false)}
+          selectedRoomCount={roomCountFilter || 1}
+          onSelectRoomCount={setRoomCountFilter}
+        />
+
+        {/* 면적 필터 바텀 시트 */}
+        <AreaFilterBottomSheet
+          isOpen={isAreaModalOpen}
+          onClose={() => setIsAreaModalOpen(false)}
+          selectedArea={areaFilter || { min: 0, max: 80 }}
+          onSelectArea={setAreaFilter}
+        />
+
+        {/* 층수 필터 바텀 시트 */}
+        <FloorFilterBottomSheet
+          isOpen={isFloorModalOpen}
+          onClose={() => setIsFloorModalOpen(false)}
+          selectedFloor={floorFilter || 1}
+          onSelectFloor={setFloorFilter}
+        />
+
+        {/* 해방향 필터 바텀 시트 */}
+        <DirectionFilterBottomSheet
+          isOpen={isDirectionModalOpen}
+          onClose={() => setIsDirectionModalOpen(false)}
+          selectedDirection={directionFilter || 'south'}
+          onSelectDirection={setDirectionFilter}
         />
       </MapOverlay>
     </div>

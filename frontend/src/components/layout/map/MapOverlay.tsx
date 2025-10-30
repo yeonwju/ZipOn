@@ -27,6 +27,21 @@ interface MapOverlayProps {
   onOpenBuildingTypeModal: () => void
 
   /**
+   * 전체 필터 모달 열기
+   */
+  onOpenAllFiltersModal: () => void
+
+  /**
+   * 금액 필터 모달 열기
+   */
+  onOpenPriceModal: () => void
+
+  /**
+   * 방개수 필터 모달 열기
+   */
+  onOpenRoomCountModal: () => void
+
+  /**
    * 현재 위치로 이동 핸들러
    */
   onMoveToCurrentLocation: () => void
@@ -55,7 +70,11 @@ export default function MapOverlay({
   selectedAuctionFilter,
   selectedBuildingType,
   onAuctionFilterChange,
+  onBuildingTypeChange,
   onOpenBuildingTypeModal,
+  onOpenAllFiltersModal,
+  onOpenPriceModal,
+  onOpenRoomCountModal,
   onMoveToCurrentLocation,
   canMoveToLocation = false,
   children,
@@ -83,8 +102,9 @@ export default function MapOverlay({
         {/* 왼쪽: 추가 필터 버튼 */}
         <div className={'flex flex-row gap-2'}>
           <button
+            onClick={onOpenAllFiltersModal}
             className="pointer-events-auto flex items-center justify-center rounded-2xl bg-white px-3 py-1.5 shadow-md transition-all hover:bg-gray-50 active:scale-95"
-            aria-label="추가 필터"
+            aria-label="전체 필터"
           >
             <div className="rotate-90">
               <SlidersHorizontal size={16} />
@@ -92,16 +112,18 @@ export default function MapOverlay({
           </button>
 
           <button
+            onClick={onOpenPriceModal}
             className="pointer-events-auto flex items-center justify-center gap-1 rounded-2xl bg-white px-3 py-1.5 shadow-md transition-all hover:bg-gray-50 active:scale-95"
-            aria-label="추가 필터"
+            aria-label="가격 필터"
           >
             <span className="text-sm font-medium">가격</span>
             <ChevronDown size={16} />
           </button>
 
           <button
+            onClick={onOpenRoomCountModal}
             className="pointer-events-auto flex items-center justify-center gap-1 rounded-2xl bg-white px-3 py-1.5 shadow-md transition-all hover:bg-gray-50 active:scale-95"
-            aria-label="추가 필터"
+            aria-label="방개수 필터"
           >
             <span className="text-sm font-medium">방개수</span>
             <ChevronDown size={16} />
