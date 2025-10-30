@@ -69,6 +69,7 @@ export default function useClusteredMarkers(
     // 개별 마커 생성 및 매핑
     const markers = listings.map(listing => {
       const marker = new window.kakao.maps.Marker({
+        buildingType: '',
         position: new window.kakao.maps.LatLng(listing.lat, listing.lng),
         clickable: true,
         image: markerImage, // 투명 이미지 적용

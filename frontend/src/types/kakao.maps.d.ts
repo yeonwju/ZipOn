@@ -254,6 +254,8 @@ export declare namespace kakao {
      * @property title - 마커 타이틀 (호버 시 표시)
      * @property image - 커스텀 마커 이미지
      * @property clickable - 클릭 가능 여부 (기본값: true)
+     * @property isAuction - 경매 여부
+     * @property buildingType - 빌딩 타입
      */
     interface MarkerOptions {
       map?: Map
@@ -262,6 +264,7 @@ export declare namespace kakao {
       image?: MarkerImage
       clickable?: boolean
       isAuction: boolean
+      buildingType: string
     }
 
     /**

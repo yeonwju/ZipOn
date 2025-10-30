@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { FilterType, ListingData } from '@/types/listing'
+import type { AuctionType, BuildingType, ListingData } from '@/types/listing'
 
 /**
  * 지도 매물 필터링 훅
@@ -12,34 +12,42 @@ import type { FilterType, ListingData } from '@/types/listing'
  *
  * @example
  * ```tsx
- * const { filter, setFilter, filteredListings, isAuctionFilter } = useMapFilter(listings)
+ * const { auctionFilter, setAuctionFilter, buildingType, setBuildingType, filteredListings, isAuctionFilter } = useMapFilter(listings)
  * ```
  */
 export function useMapFilter(listings: ListingData[]) {
-  const [filter, setFilter] = useState<FilterType>('all')
+  const [auctionFilter, setAuctionFilter] = useState<AuctionType>('all')
+  const [buildingType, setBuildingType] = useState<BuildingType>('room')
 
   // 필터링된 매물 목록
   const filteredListings = useMemo(() => {
-    if (filter === 'all') {
-      return listings
+    let result = listings
+
+    // 경매 필터 적용
+    if (auctionFilter === 'auction') {
+      result = result.filter(listing => listing.isAuction)
+    } else if (auctionFilter === 'normal') {
+      result = result.filter(listing => !listing.isAuction)
     }
-    if (filter === 'auction') {
-      return listings.filter(listing => listing.isAuction)
-    }
-    // filter === 'normal'
-    return listings.filter(listing => !listing.isAuction)
-  }, [listings, filter])
+
+    // 건물 타입 필터 적용
+    result = result.filter(listing => listing.buildingType === buildingType)
+
+    return result
+  }, [listings, auctionFilter, buildingType])
 
   // 필터 타입에 따른 boolean 값 (클러스터 색상용)
   const isAuctionFilter = useMemo(() => {
-    if (filter === 'auction') return true
-    if (filter === 'normal') return false
+    if (auctionFilter === 'auction') return true
+    if (auctionFilter === 'normal') return false
     return undefined
-  }, [filter])
+  }, [auctionFilter])
 
   return {
-    filter,
-    setFilter,
+    auctionFilter,
+    setAuctionFilter,
+    buildingType,
+    setBuildingType,
     filteredListings,
     isAuctionFilter,
   }

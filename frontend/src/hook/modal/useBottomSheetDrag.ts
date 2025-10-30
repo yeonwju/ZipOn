@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import type { SheetState } from './useBottomSheetHeight'
 
@@ -191,4 +191,3 @@ export default function useBottomSheetDrag({
     isClosing,
   }
 }
-

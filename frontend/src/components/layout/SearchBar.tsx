@@ -13,10 +13,10 @@ export default function SearchBar() {
   }
 
   return (
-    <div className={'flex w-full items-center rounded-2xl px-4 py-2'}>
+    <div className={'flex h-full w-full items-center rounded-md bg-white'}>
       <Input
-        className={'border-none bg-[#F2F8FC]'}
-        leftIcon={<Search size={18} />}
+        className={'border-none bg-white'}
+        leftIcon={<Search size={15} />}
         rightIcon={
           searchValue && (
             <button

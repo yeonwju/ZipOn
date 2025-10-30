@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 
-import { createListingMarkerElement } from '@/components/ui/ListingMarker'
-import type { ListingData } from '@/types/listing'
+import { createListingMarkerElement } from '@/components/map/ListingMarker'
 import type { kakao } from '@/types/kakao.maps'
+import type { ListingData } from '@/types/listing'
 
 /**
  * 매물을 상세 말풍선 마커로 표시하는 훅

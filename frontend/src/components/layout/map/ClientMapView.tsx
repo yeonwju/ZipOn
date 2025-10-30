@@ -1,9 +1,12 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
-import ListingList from '@/components/item/map/ListingList'
-import BottomSheet from '@/components/layout/modal/BottomSheet'
+import BuildingTypeBottomSheet from '@/components/layout/modal/BuildingTypeBottomSheet'
+import ListingBottomSheet from '@/components/layout/modal/ListingBottomSheet'
+import ListingList from '@/components/map/ListingList'
 import useKakaoLoader from '@/hook/map/useKakaoLoader'
 import useListingMarkers from '@/hook/map/useListingMarkers'
 import { useListingModal } from '@/hook/map/useListingModal'
@@ -43,7 +46,7 @@ interface ClientMapViewProps {
 export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 카카오맵 SDK 로드
   useKakaoLoader()
-
+  const router = useRouter()
   // 사용자 위치 정보
   const { location } = useUserLocation()
 
@@ -51,10 +54,20 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   const { map, setMap, moveToCurrentLocation, canMoveToLocation } = useMapControls(location)
 
   // 매물 필터링 (필터 상태, 필터링된 매물)
-  const { filter, setFilter, filteredListings, isAuctionFilter } = useMapFilter(initialListings)
+  const {
+    auctionFilter,
+    setAuctionFilter,
+    buildingType,
+    setBuildingType,
+    filteredListings,
+    isAuctionFilter,
+  } = useMapFilter(initialListings)
 
   // 매물 모달 관리 (바텀시트 열기/닫기)
   const { isOpen: isModalOpen, selectedListings, openModal, closeModal } = useListingModal()
+
+  // 건물 타입 선택 모달 상태
+  const [isBuildingTypeModalOpen, setIsBuildingTypeModalOpen] = useState(false)
 
   // 지도 인터랙션 시 모달 자동 닫기 (드래그, 줌 변경)
   useMapInteraction(map, isModalOpen ? closeModal : undefined)
@@ -81,7 +94,7 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 매물 카드 클릭 핸들러
   const handleListingClick = (listing: ListingData) => {
     // 매물 상세 페이지로 이동
-    window.location.href = `/listing/${listing.id}`
+    router.push(`/listing/${listing.id}`)
   }
 
   return (
@@ -99,19 +112,30 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
 
       {/* UI 오버레이 (검색바, 필터, 제어 버튼) */}
       <MapOverlay
-        selectedFilter={filter}
-        onFilterChange={setFilter}
+        selectedAuctionFilter={auctionFilter}
+        selectedBuildingType={buildingType}
+        onAuctionFilterChange={setAuctionFilter}
+        onBuildingTypeChange={setBuildingType}
+        onOpenBuildingTypeModal={() => setIsBuildingTypeModalOpen(true)}
         onMoveToCurrentLocation={moveToCurrentLocation}
         canMoveToLocation={canMoveToLocation}
       >
-        {/* 바텀 시트 */}
-        <BottomSheet
+        {/* 매물 목록 바텀 시트 */}
+        <ListingBottomSheet
           isOpen={isModalOpen}
           onClose={closeModal}
           listingCount={selectedListings.length}
         >
           <ListingList listings={selectedListings} onListingClick={handleListingClick} />
-        </BottomSheet>
+        </ListingBottomSheet>
+
+        {/* 건물 타입 선택 바텀 시트 */}
+        <BuildingTypeBottomSheet
+          isOpen={isBuildingTypeModalOpen}
+          onClose={() => setIsBuildingTypeModalOpen(false)}
+          selectedType={buildingType}
+          onSelectType={setBuildingType}
+        />
       </MapOverlay>
     </div>
   )
