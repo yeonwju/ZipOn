@@ -11,7 +11,7 @@ import java.util.Random;
  * - 날짜/시간/고유번호 생성
  * - Header DTO 생성
  */
-public class SSAFYHeaderDTOBuilder {
+public class SSAFYHeaderDTOHelper {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HHmmss");

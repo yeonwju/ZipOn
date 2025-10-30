@@ -1,7 +1,6 @@
 package ssafy.a303.backend.security.oauth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -10,9 +9,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import ssafy.a303.backend.common.finance.SSAFYAPI;
 import ssafy.a303.backend.user.entity.User;
-import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.List;
