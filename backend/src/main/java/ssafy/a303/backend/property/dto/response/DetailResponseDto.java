@@ -12,8 +12,8 @@ public record DetailResponseDto(
 
         // 주소 좌표
         String address,
-        Integer latitude,
-        Integer longitude,
+        Double latitude,
+        Double longitude,
 
         //면적
         Double area,

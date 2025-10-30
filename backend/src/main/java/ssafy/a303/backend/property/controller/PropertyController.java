@@ -119,10 +119,10 @@ public class PropertyController {
      * @return
      */
     @GetMapping("/map")
-    public ResponseEntity<ResponseDTO<List<PropertyMapDto>>> getMap(@RequestParam(required = false) Integer minLat,
-                                                                    @RequestParam(required = false) Integer maxLat,
-                                                                    @RequestParam(required = false) Integer minLng,
-                                                                    @RequestParam(required = false) Integer maxLng)
+    public ResponseEntity<ResponseDTO<List<PropertyMapDto>>> getMap(@RequestParam(required = false) Double minLat,
+                                                                    @RequestParam(required = false) Double maxLat,
+                                                                    @RequestParam(required = false) Double minLng,
+                                                                    @RequestParam(required = false) Double maxLng)
     {
         List<PropertyMapDto> response = propertyService.getMapPoints(minLat, maxLat, minLng, maxLng);
         return ResponseDTO.ok(response, "매물 요약 정보와 위경도 정보 조회");

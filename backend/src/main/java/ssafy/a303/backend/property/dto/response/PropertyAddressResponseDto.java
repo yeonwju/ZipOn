@@ -4,7 +4,7 @@ public record PropertyAddressResponseDto(
         Integer propertySeq,
         String lessorNm,
         String address,
-        Integer latitude,
-        Integer longitude
+        Double latitude,
+        Double longitude
 ) {
 }

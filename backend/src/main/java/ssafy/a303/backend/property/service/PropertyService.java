@@ -39,7 +39,6 @@ public class PropertyService {
      * 이후 등기부등본 검증.
      * @param req
      * @param lessorSeqFromAuth
-     * @param lessorNameFromAuth
      * @return
      */
     @Transactional
@@ -204,7 +203,7 @@ public class PropertyService {
      * @return
      */
     @Transactional
-    public List<PropertyMapDto> getMapPoints(Integer minLat, Integer maxLat, Integer minLng, Integer maxLng) {
+    public List<PropertyMapDto> getMapPoints(Double minLat, Double maxLat, Double minLng, Double maxLng) {
         return propertyRepository.findForMap(minLat, maxLat, minLng, maxLng);
     }
 

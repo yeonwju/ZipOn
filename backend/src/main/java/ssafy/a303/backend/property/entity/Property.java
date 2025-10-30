@@ -41,10 +41,10 @@ public class Property {
     private String address;
 
     @Column(name = "latitude", nullable = false)
-    private Integer latitude;
+    private Double latitude;
 
     @Column(name = "longitude", nullable = false)
-    private Integer longitude;
+    private Double longitude;
 
     @Column(name = "is_certificated")
     private Boolean isCertificated; // 등기부등본 확인 여부

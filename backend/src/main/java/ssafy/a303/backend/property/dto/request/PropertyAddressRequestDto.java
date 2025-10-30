@@ -4,6 +4,6 @@ public record PropertyAddressRequestDto(
         String lessorNm,
         String propertyNm,
         String address,
-        Integer latitude,
-        Integer longitude
+        Double latitude,
+        Double longitude
 ) {}

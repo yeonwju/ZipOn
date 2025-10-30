@@ -36,10 +36,10 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
         and (:minLng is null or p.longitude >= :minLng)
         and (:maxLng is null or p.longitude <= :maxLng)
     """)
-    List<PropertyMapDto> findForMap(@Param("minLat") Integer minLat,
-                                    @Param("maxLat") Integer maxLat,
-                                    @Param("minLng") Integer minLng,
-                                    @Param("maxLng") Integer maxLng);
+    List<PropertyMapDto> findForMap(@Param("minLat") Double minLat,
+                                    @Param("maxLat") Double maxLat,
+                                    @Param("minLng") Double minLng,
+                                    @Param("maxLng") Double maxLng);
 
 
 }
