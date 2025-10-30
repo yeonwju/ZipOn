@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import ssafy.a303.backend.common.response.ErrorCode;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -42,5 +43,21 @@ public class ResponseDTO <T> {
     }
     public static <T>ResponseEntity<ResponseDTO<T>> internalServerError (String message) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseDTO<>(null, message, HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    public static ResponseDTO<?> fail(ErrorCode errorCode, String customMessage) {
+        return ResponseDTO.builder()
+                .status(errorCode.getHttpStatus())
+                .message(customMessage)
+                .data(null)
+                .build();
+    }
+
+    public static ResponseDTO<?> fail(ErrorCode errorCode) {
+        return ResponseDTO.builder()
+                .status(errorCode.getHttpStatus())
+                .message(errorCode.getMessage())
+                .data(null)
+                .build();
     }
 }
