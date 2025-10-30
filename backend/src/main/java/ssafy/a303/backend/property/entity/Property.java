@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import ssafy.a303.backend.property.enums.Facing;
+import ssafy.a303.backend.property.enums.VerificationStatus;
 
 import java.sql.Timestamp;
 
@@ -51,6 +52,9 @@ public class Property {
 
     @Column(name = "pdf_code")
     private String pdfCode; // pdf 고유 코드
+
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus verificationStatus;
 
     @Column(name = "area")
     private Double area;

@@ -1,25 +1,18 @@
 package ssafy.a303.backend.property.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.dto.ResponseDTO;
-import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
-import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
-import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
-import ssafy.a303.backend.property.dto.response.DetailResponseDto;
-import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
-import ssafy.a303.backend.property.dto.response.PropertyMapDto;
-import ssafy.a303.backend.property.dto.response.PropertyUpdateResponseDto;
+import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.service.PropertyService;
+import ssafy.a303.backend.property.service.VerificationService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/properties")
@@ -27,26 +20,36 @@ import java.util.Map;
 public class PropertyController {
 
     private final PropertyService propertyService;
+    private final VerificationService verificationService;
 
     /**
-     * 매물 등록
+     * 매물 검증
      * 1) 매물 주소 입력
      * 2) 등기부등본 업로드
      * 3) 이름, 생일, 주소 적합성 AI 판단
-     * 4) 매물 상세 정보 입력
-     * 5) 매물 최종 등록
-     * @param req
-     * @param userSeq
+     * @param file
+     * @param regiNm
+     * @param regiBirth
+     * @param address
      * @return
      */
-    @PostMapping("")
-    public ResponseEntity<ResponseDTO<PropertyAddressResponseDto>> createProperty(@RequestBody PropertyAddressRequestDto req,
-                                                                                 @AuthenticationPrincipal Integer userSeq)
+    @PostMapping(value = "/verifications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseDTO<VerificationResultResponseDto>> verifyPdf(@RequestParam("file")MultipartFile file,
+                                                                                @RequestParam String regiNm,
+                                                                                @RequestParam String regiBirth,
+                                                                                @RequestParam String address)
     {
-        PropertyAddressResponseDto response = propertyService.submitAddress(req, userSeq);
+        VerificationResultResponseDto res = verificationService.verifyPdf(file, regiNm, regiBirth, address);
 
-        return ResponseDTO.created(response, "매물이 성공적으로 등록되었습니다.");
+        return ResponseDTO.ok(res, "등기부등본이 인증되었습니다.");
     }
+
+    /**
+     * 매물 최종 등록
+     * 4) 매물 상세 정보 입력
+     * 5) 매물 최종 등록
+     */
+
 
 
     /**

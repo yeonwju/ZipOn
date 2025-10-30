@@ -21,7 +21,7 @@ public final class PdfCodeGenerator {
         return Integer.toString(Math.abs(n), 36);
     }
 
-    private static String padLef(String s, int len, char fill) {
+    private static String padLeft(String s, int len, char fill) {
         if(s.length() >= len) return s;
         StringBuilder sb = new StringBuilder(len);
         for (int i = s.length(); i < len; i++) sb.append(fill);
