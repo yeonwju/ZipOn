@@ -24,7 +24,7 @@ export default function BottomNavigation() {
             <li key={href}>
               <Link
                 href={href}
-                className={`flex flex-col items-center gap-1 transition-colors ${
+                className={`flex flex-col items-center transition-colors ${
                   isActive ? 'text-blue-500' : 'text-gray-400'
                 }`}
               >

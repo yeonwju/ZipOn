@@ -14,11 +14,7 @@ export default function ListingDescription({ description }: ListingDescriptionPr
 
   return (
     <section className="mt-2 bg-white px-4 py-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900">상세 설명</h2>
-      <p className="whitespace-pre-wrap text-base leading-relaxed text-gray-700">
-        {description}
-      </p>
+      <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">{description}</p>
     </section>
   )
 }
-

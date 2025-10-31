@@ -39,7 +39,7 @@ interface ListingDetailProps {
  */
 export default function ListingDetail({ listing }: ListingDetailProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full bg-gray-50">
       {/* 컨텐츠 */}
       <main>
         {/* 이미지 갤러리 */}
@@ -55,19 +55,14 @@ export default function ListingDetail({ listing }: ListingDetailProps) {
           floor={listing.floor}
           totalFloor={listing.totalFloor}
           availableDate={listing.availableDate}
+          address={listing.address}
         />
-
-        {/* 주소 */}
-        <section className="bg-white px-4 py-4">
-          <h2 className="mb-2 text-sm font-semibold text-gray-700">위치</h2>
-          <p className="text-base text-gray-900">{listing.address}</p>
-        </section>
-
-        {/* 상세 설명 */}
-        <ListingDescription description={listing.description} />
 
         {/* 특징/옵션 */}
         <ListingFeatures features={listing.features} />
+
+        {/* 상세 설명 */}
+        <ListingDescription description={listing.description} />
       </main>
 
       {/* 고정 하단 버튼 */}
@@ -77,7 +72,7 @@ export default function ListingDetail({ listing }: ListingDetailProps) {
           paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
         }}
       >
-        <button className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition-colors hover:bg-blue-700">
+        <button className="w-full rounded-lg bg-blue-400 py-4 font-semibold text-white transition-colors hover:bg-blue-500">
           문의하기
         </button>
       </footer>
