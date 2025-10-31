@@ -163,7 +163,9 @@ export default function useClusteredMarkers(
     markersRef.current = markers
 
     // 클러스터 클릭 이벤트 리스너 추가
-    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (event?: unknown) => {
+    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (event?: kakao.maps.event.MouseEvent | kakao.maps.Cluster | unknown) => {
+      // clusterclick 이벤트는 Cluster 타입을 전달
+      if (!event) return
       const cluster = event as kakao.maps.Cluster
 
       // 클러스터에 포함된 마커들 가져오기

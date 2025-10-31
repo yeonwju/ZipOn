@@ -126,10 +126,15 @@ export default function BottomSheet({
         {/* 컨텐츠 */}
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-x-hidden overflow-y-auto"
           style={{
-            touchAction: 'pan-y',
+            touchAction: 'pan-y pinch-zoom',
             paddingBottom: 'max(58px, env(safe-area-inset-bottom))',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            minHeight: 0,
+            height: 0,
+            flex: '1 1 auto',
           }}
           onTouchStart={e => e.stopPropagation()}
           onTouchMove={e => e.stopPropagation()}

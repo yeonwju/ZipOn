@@ -77,8 +77,8 @@ export function useMapFilter({
       })
     }
 
-    // 방수 필터 적용
-    if (roomCountFilter) {
+    // 방수 필터 적용 ('all'일 때는 필터 적용 안 함)
+    if (roomCountFilter && roomCountFilter !== 'all') {
       result = result.filter(listing => {
         if (roomCountFilter === '3+') {
           return listing.roomCount >= 3
@@ -89,13 +89,16 @@ export function useMapFilter({
 
     // 면적 필터 적용
     if (areaFilter) {
+      // 면적이 무제한인 경우 (max가 MAX_AREA + 1 이상이면 무제한)
+      const maxArea = areaFilter.max >= 100 ? Infinity : areaFilter.max
       result = result.filter(listing => {
-        return listing.area.pyeong >= areaFilter.min && listing.area.pyeong <= areaFilter.max
+        const listingPyeong = listing.area.pyeong
+        return listingPyeong >= areaFilter.min && listingPyeong <= maxArea
       })
     }
 
-    // 층수 필터 적용
-    if (floorFilter) {
+    // 층수 필터 적용 ('all'일 때는 필터 적용 안 함)
+    if (floorFilter && floorFilter !== 'all') {
       result = result.filter(listing => {
         if (floorFilter === 'B1') {
           return listing.floor < 0
@@ -107,8 +110,8 @@ export function useMapFilter({
       })
     }
 
-    // 해방향 필터 적용
-    if (directionFilter) {
+    // 해방향 필터 적용 ('all'일 때는 필터 적용 안 함)
+    if (directionFilter && directionFilter !== 'all') {
       result = result.filter(listing => listing.direction === directionFilter)
     }
 

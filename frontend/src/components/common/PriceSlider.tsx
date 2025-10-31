@@ -1,16 +1,15 @@
 'use client'
 
-import '@/styles/range-slider.css'
-
-import React from 'react'
+import { Slider } from '@mui/material'
 
 interface PriceSliderProps {
   label: string
   min: number
   max: number | null
   maxLimit: number
-  onMinChange: (value: number) => void
-  onMaxChange: (value: number | null) => void
+  onMinChange?: (value: number) => void
+  onMaxChange?: (value: number | null) => void
+  onChange?: (event: Event, value: number | number[]) => void
 }
 
 /**
@@ -34,79 +33,54 @@ export default function PriceSlider({
   maxLimit,
   onMinChange,
   onMaxChange,
+  onChange,
 }: PriceSliderProps) {
   const maxValue = max ?? maxLimit
-  const minPercent = (min / maxLimit) * 100
-  const maxPercent = (maxValue / maxLimit) * 100
 
-  const handleUnlimited = () => {
-    onMaxChange(null)
-  }
+  const handleSliderChange = (_event: Event, newValue: number | number[]) => {
+    if (typeof newValue === 'number') {
+      return
+    }
 
-  const handleSetMax = () => {
-    if (max === null) {
-      onMaxChange(min + 1000)
+    // onChange가 제공되면 직접 사용 (면적 필터처럼)
+    if (onChange) {
+      onChange(_event, newValue)
+      return
+    }
+
+    // 기존 방식 (onMinChange, onMaxChange 사용)
+    const [newMin, newMax] = newValue
+
+    if (onMinChange) {
+      onMinChange(newMin)
+    }
+    // 최대값이 maxLimit에 도달하면 무제한으로 설정, 아니면 해당 값으로 설정
+    if (onMaxChange) {
+      onMaxChange(newMax === maxLimit ? null : newMax)
     }
   }
 
   return (
-    <div className="mb-8">
+    <div className="mb-4">
       {/* 헤더 */}
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">{label}</h3>
-        <button
-          onClick={max === null ? handleSetMax : handleUnlimited}
-          className="text-sm text-blue-600 hover:text-blue-700"
-        >
-          {max === null ? '최대 금액 설정' : '무제한'}
-        </button>
+      <div className="">
+        <h3 className="text-sm font-semibold text-gray-900">{label}</h3>
       </div>
 
-      {/* 슬라이더 컨테이너 */}
-      <div className="relative px-2 pb-8 pt-2">
-        {/* 트랙 배경 */}
-        <div className="absolute left-2 right-2 top-6 h-1 rounded-full bg-gray-200" />
-
-        {/* 선택된 범위 트랙 */}
-        <div
-          className="absolute top-6 h-1 rounded-full bg-blue-500"
-          style={{
-            left: `calc(0.5rem + ${minPercent}%)`,
-            right: `calc(0.5rem + ${100 - maxPercent}%)`,
-          }}
-        />
-
-        {/* 최소값 슬라이더 */}
-        <input
-          type="range"
-          min="0"
+      {/* MUI Slider */}
+      <div>
+        <Slider
+          value={[min, maxValue]}
+          size={'small'}
+          min={0}
           max={maxLimit}
-          step="100"
-          value={min}
-          onChange={e => onMinChange(Number(e.target.value))}
-          className="price-slider absolute left-0 top-0 h-12 w-full cursor-pointer appearance-none bg-transparent"
-          style={{
-            zIndex: min > maxValue - 1000 ? 5 : 3,
-          }}
-        />
-
-        {/* 최대값 슬라이더 */}
-        <input
-          type="range"
-          min="0"
-          max={maxLimit}
-          step="100"
-          value={maxValue}
-          onChange={e => onMaxChange(Number(e.target.value))}
-          disabled={max === null}
-          className="price-slider absolute left-0 top-0 h-12 w-full cursor-pointer appearance-none bg-transparent"
-          style={{
-            zIndex: 4,
-          }}
+          step={100}
+          onChange={handleSliderChange}
+          valueLabelDisplay="off"
         />
 
         {/* 라벨 */}
-        <div className="relative mt-8 flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-gray-500">
           <span>{formatPrice(min)}</span>
           <span>{max === null ? '무제한' : formatPrice(maxValue)}</span>
         </div>
@@ -114,4 +88,3 @@ export default function PriceSlider({
     </div>
   )
 }
-

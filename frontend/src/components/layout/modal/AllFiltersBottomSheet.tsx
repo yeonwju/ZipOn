@@ -1,13 +1,21 @@
 'use client'
 
-import '@/styles/range-slider.css'
-
 import React, { useState } from 'react'
 
-import PriceSlider from '@/components/common/PriceSlider'
-import type { AreaFilter, DirectionFilter, FloorFilter, PriceFilter, RoomCountFilter } from '@/types/filter'
+import type {
+  AreaFilter,
+  DirectionFilter,
+  FloorFilter,
+  PriceFilter,
+  RoomCountFilter,
+} from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
+import AreaFilterComponent from './filters/AreaFilter'
+import DirectionFilterComponent from './filters/DirectionFilter'
+import FloorFilterComponent from './filters/FloorFilter'
+import PriceFilterComponent from './filters/PriceFilter'
+import RoomCountFilterComponent from './filters/RoomCountFilter'
 
 interface AllFiltersBottomSheetProps {
   isOpen: boolean
@@ -18,40 +26,25 @@ interface AllFiltersBottomSheetProps {
   floorFilter: FloorFilter
   directionFilter: DirectionFilter
   onPriceChange: (price: PriceFilter) => void
-  onRoomCountChange: (count: RoomCountFilter) => void
+  onRoomCountChange: (count: RoomCountFilter | undefined) => void
   onAreaChange: (area: AreaFilter) => void
-  onFloorChange: (floor: FloorFilter) => void
-  onDirectionChange: (direction: DirectionFilter) => void
+  onFloorChange: (floor: FloorFilter | undefined) => void
+  onDirectionChange: (direction: DirectionFilter | undefined) => void
   onResetFilters: () => void
   onApplyFilters: () => void
 }
 
-type FilterSection = 'price' | 'roomCount' | 'area' | 'floor' | 'direction'
-
-const ROOM_COUNT_OPTIONS: { value: RoomCountFilter; label: string }[] = [
-  { value: 1, label: '1개' },
-  { value: 2, label: '2개' },
-  { value: 3, label: '3개' },
-  { value: '3+', label: '3개 이상' },
+// console.log용 DIRECTION_OPTIONS
+const DIRECTION_OPTIONS: { value: DirectionFilter; label: string }[] = [
+  { value: 'all', label: '전체' },
+  { value: 'east', label: '동향' },
+  { value: 'west', label: '서향' },
+  { value: 'south', label: '남향' },
+  { value: 'north', label: '북향' },
 ]
 
-const FLOOR_OPTIONS: { value: FloorFilter; label: string }[] = [
-  { value: 'B1', label: '지하' },
-  { value: 1, label: '1층' },
-  { value: 2, label: '2층' },
-  { value: '2+', label: '2층 이상' },
-]
-
-const DIRECTION_OPTIONS: { value: DirectionFilter; label: string; icon: string }[] = [
-  { value: 'east', label: '동향', icon: '☀️' },
-  { value: 'west', label: '서향', icon: '🌅' },
-  { value: 'south', label: '남향', icon: '🌞' },
-  { value: 'north', label: '북향', icon: '❄️' },
-  { value: 'northwest', label: '북서향', icon: '🌬️' },
-]
-
-const MAX_PRICE = 100000
-const MAX_AREA = 80
+const MAX_AREA = 100 // 면적 최대값: 100평
+const MIN_AREA = 1 // 면적 최소값: 1평
 
 export default function AllFiltersBottomSheet({
   isOpen,
@@ -69,243 +62,162 @@ export default function AllFiltersBottomSheet({
   onResetFilters,
   onApplyFilters,
 }: AllFiltersBottomSheetProps) {
-  const [expandedSection, setExpandedSection] = useState<FilterSection | null>(null)
+  // 임시 상태 관리 (모달이 열릴 때마다 초기화)
+  const [tempPriceFilter, setTempPriceFilter] = useState(priceFilter)
+  const [tempRoomCountFilter, setTempRoomCountFilter] = useState(roomCountFilter)
+  const [tempAreaFilter, setTempAreaFilter] = useState(areaFilter)
+  const [tempFloorFilter, setTempFloorFilter] = useState(floorFilter)
+  const [tempDirectionFilter, setTempDirectionFilter] = useState(directionFilter)
 
-  const toggleSection = (section: FilterSection) => {
-    setExpandedSection(expandedSection === section ? null : section)
+  // isOpen이 변경될 때마다 상태 초기화 (key prop과 함께 사용하여 리마운트)
+  React.useEffect(() => {
+    if (isOpen) {
+      setTempPriceFilter(priceFilter)
+      setTempRoomCountFilter(roomCountFilter)
+      setTempAreaFilter(areaFilter)
+      setTempFloorFilter(floorFilter)
+      setTempDirectionFilter(directionFilter)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
+
+  const handleApply = () => {
+    console.log('=== 전체 필터 적용 ===')
+    console.log('금액 필터:', {
+      보증금: {
+        최소: `${tempPriceFilter.deposit.min}만원`,
+        최대:
+          tempPriceFilter.deposit.max === null ? '무제한' : `${tempPriceFilter.deposit.max}만원`,
+      },
+      월세: {
+        최소: `${tempPriceFilter.rent.min}만원`,
+        최대: tempPriceFilter.rent.max === null ? '무제한' : `${tempPriceFilter.rent.max}만원`,
+      },
+      관리비: {
+        최소: `${tempPriceFilter.maintenance.min}만원`,
+        최대:
+          tempPriceFilter.maintenance.max === null
+            ? '무제한'
+            : `${tempPriceFilter.maintenance.max}만원`,
+      },
+    })
+    console.log(
+      '방 개수:',
+      tempRoomCountFilter === 'all'
+        ? '전체 (필터 없음)'
+        : tempRoomCountFilter === '3+'
+          ? '3개 이상'
+          : `${tempRoomCountFilter}개`
+    )
+    const areaMaxText = tempAreaFilter.max >= MAX_AREA ? '무제한' : `${tempAreaFilter.max}평`
+    console.log('면적:', `${tempAreaFilter.min}평 ~ ${areaMaxText}`)
+    console.log(
+      '층수:',
+      tempFloorFilter === 'all'
+        ? '전체 (필터 없음)'
+        : tempFloorFilter === 'B1'
+          ? '지하'
+          : tempFloorFilter === '2+'
+            ? '2층 이상'
+            : `${tempFloorFilter}층`
+    )
+    console.log(
+      '해방향:',
+      `${DIRECTION_OPTIONS.find(opt => opt.value === tempDirectionFilter)?.label || tempDirectionFilter}`
+    )
+    console.log('원본 데이터:', {
+      priceFilter: tempPriceFilter,
+      roomCountFilter: tempRoomCountFilter,
+      areaFilter: tempAreaFilter,
+      floorFilter: tempFloorFilter,
+      directionFilter: tempDirectionFilter,
+    })
+    console.log('===================')
+
+    onPriceChange(tempPriceFilter)
+    // 방 개수: 'all'은 필터 없음을 의미하므로 undefined로 전달
+    onRoomCountChange(tempRoomCountFilter === 'all' ? undefined : tempRoomCountFilter)
+    onAreaChange(tempAreaFilter)
+    // 층수: 'all'은 필터 없음을 의미하므로 undefined로 전달
+    onFloorChange(tempFloorFilter === 'all' ? undefined : tempFloorFilter)
+    // 해방향: 'all'은 필터 없음을 의미하므로 undefined로 전달
+    onDirectionChange(tempDirectionFilter === 'all' ? undefined : tempDirectionFilter)
+    onApplyFilters()
+  }
+
+  const handleReset = () => {
+    const resetPriceFilter: PriceFilter = {
+      deposit: { min: 0, max: null },
+      rent: { min: 0, max: null },
+      maintenance: { min: 0, max: null },
+      area: { min: MIN_AREA, max: null },
+    }
+    setTempPriceFilter(resetPriceFilter)
+    setTempRoomCountFilter('all')
+    setTempAreaFilter({ min: MIN_AREA, max: MAX_AREA })
+    setTempFloorFilter('all')
+    setTempDirectionFilter('all')
+    onResetFilters()
   }
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} fixedHeight={650} expandable={false}>
-      <div className="flex h-full flex-col px-6 pb-6">
-        <h2 className="mb-1 text-lg font-bold text-gray-900">전체 필터</h2>
-        <p className="mb-4 text-sm text-gray-500">원하는 필터를 선택하세요</p>
+      {isOpen && (
+        <div key={`all-filters-${isOpen}`} className="flex flex-col pb-6">
+          <div className="space-y-3 pb-4">
+            {/* 금액 필터 */}
+            <div className="border-b-8 border-gray-200">
+              <PriceFilterComponent
+                selectedPrice={tempPriceFilter}
+                onPriceChange={setTempPriceFilter}
+                onApply={() => {}} // 버튼 숨김으로 인해 호출되지 않음
+                showButtons={false}
+              />
+            </div>
+            {/* 면적 필터 */}
+            <AreaFilterComponent
+              areaFilter={tempAreaFilter}
+              onAreaChange={setTempAreaFilter}
+              maxLimit={MAX_AREA}
+              minLimit={MIN_AREA}
+            />
+            {/* 방 개수 필터 */}
+            <div className="border-b-8 border-gray-200">
+              <RoomCountFilterComponent
+                selectedRoomCount={tempRoomCountFilter}
+                onRoomCountChange={setTempRoomCountFilter}
+              />
+            </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto">
-          {/* 금액 필터 */}
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <button
-              onClick={() => toggleSection('price')}
-              className="flex w-full items-center justify-between p-4"
-            >
-              <span className="text-base font-medium text-gray-900">금액</span>
-              <span className="text-sm text-gray-500">
-                {expandedSection === 'price' ? '▲' : '▼'}
-              </span>
-            </button>
-            {expandedSection === 'price' && (
-              <div className="border-t border-gray-200 p-4">
-                <PriceSlider
-                  label="보증금"
-                  min={priceFilter.deposit.min}
-                  max={priceFilter.deposit.max}
-                  maxLimit={MAX_PRICE}
-                  onMinChange={value =>
-                    onPriceChange({
-                      ...priceFilter,
-                      deposit: { ...priceFilter.deposit, min: value },
-                    })
-                  }
-                  onMaxChange={value =>
-                    onPriceChange({
-                      ...priceFilter,
-                      deposit: { ...priceFilter.deposit, max: value },
-                    })
-                  }
-                />
-                <PriceSlider
-                  label="월세"
-                  min={priceFilter.rent.min}
-                  max={priceFilter.rent.max}
-                  maxLimit={MAX_PRICE}
-                  onMinChange={value =>
-                    onPriceChange({ ...priceFilter, rent: { ...priceFilter.rent, min: value } })
-                  }
-                  onMaxChange={value =>
-                    onPriceChange({ ...priceFilter, rent: { ...priceFilter.rent, max: value } })
-                  }
-                />
-                <PriceSlider
-                  label="관리비"
-                  min={priceFilter.maintenance.min}
-                  max={priceFilter.maintenance.max}
-                  maxLimit={MAX_PRICE}
-                  onMinChange={value =>
-                    onPriceChange({
-                      ...priceFilter,
-                      maintenance: { ...priceFilter.maintenance, min: value },
-                    })
-                  }
-                  onMaxChange={value =>
-                    onPriceChange({
-                      ...priceFilter,
-                      maintenance: { ...priceFilter.maintenance, max: value },
-                    })
-                  }
-                />
-              </div>
-            )}
+            {/* 층수 필터 */}
+            <FloorFilterComponent
+              selectedFloor={tempFloorFilter}
+              onFloorChange={setTempFloorFilter}
+            />
+            {/* 해방향 필터 */}
+            <DirectionFilterComponent
+              selectedDirection={tempDirectionFilter}
+              onDirectionChange={setTempDirectionFilter}
+            />
           </div>
 
-          {/* 방 개수 필터 */}
-          <div className="rounded-lg border border-gray-200 bg-white">
+          {/* 버튼 */}
+          <div className="flex gap-2 px-6">
             <button
-              onClick={() => toggleSection('roomCount')}
-              className="flex w-full items-center justify-between p-4"
+              onClick={handleReset}
+              className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
-              <span className="text-base font-medium text-gray-900">방 개수</span>
-              <span className="text-sm text-gray-500">
-                {expandedSection === 'roomCount' ? '▲' : '▼'}
-              </span>
+              초기화
             </button>
-            {expandedSection === 'roomCount' && (
-              <div className="border-t border-gray-200 p-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {ROOM_COUNT_OPTIONS.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => onRoomCountChange(option.value)}
-                      className={`rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all ${
-                        roomCountFilter === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-600'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 면적 필터 */}
-          <div className="rounded-lg border border-gray-200 bg-white">
             <button
-              onClick={() => toggleSection('area')}
-              className="flex w-full items-center justify-between p-4"
+              onClick={handleApply}
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
             >
-              <span className="text-base font-medium text-gray-900">면적</span>
-              <span className="text-sm text-gray-500">
-                {expandedSection === 'area' ? '▲' : '▼'}
-              </span>
+              적용
             </button>
-            {expandedSection === 'area' && (
-              <div className="border-t border-gray-200 p-4">
-                <div className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    최소 면적: {areaFilter.min}평
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max={MAX_AREA}
-                    step="1"
-                    value={areaFilter.min}
-                    onChange={e => onAreaChange({ ...areaFilter, min: Number(e.target.value) })}
-                    className="price-slider w-full"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    최대 면적: {areaFilter.max}평
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max={MAX_AREA}
-                    step="1"
-                    value={areaFilter.max}
-                    onChange={e => onAreaChange({ ...areaFilter, max: Number(e.target.value) })}
-                    className="price-slider w-full"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 층수 필터 */}
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <button
-              onClick={() => toggleSection('floor')}
-              className="flex w-full items-center justify-between p-4"
-            >
-              <span className="text-base font-medium text-gray-900">층수</span>
-              <span className="text-sm text-gray-500">
-                {expandedSection === 'floor' ? '▲' : '▼'}
-              </span>
-            </button>
-            {expandedSection === 'floor' && (
-              <div className="border-t border-gray-200 p-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {FLOOR_OPTIONS.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => onFloorChange(option.value)}
-                      className={`rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all ${
-                        floorFilter === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-600'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 해방향 필터 */}
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <button
-              onClick={() => toggleSection('direction')}
-              className="flex w-full items-center justify-between p-4"
-            >
-              <span className="text-base font-medium text-gray-900">해방향</span>
-              <span className="text-sm text-gray-500">
-                {expandedSection === 'direction' ? '▲' : '▼'}
-              </span>
-            </button>
-            {expandedSection === 'direction' && (
-              <div className="border-t border-gray-200 p-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {DIRECTION_OPTIONS.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => onDirectionChange(option.value)}
-                      className={`flex items-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all ${
-                        directionFilter === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-600'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      <span>{option.icon}</span>
-                      <span>{option.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
-
-        {/* 버튼 */}
-        <div className="mt-4 flex gap-3">
-          <button
-            onClick={onResetFilters}
-            className="flex-1 rounded-lg border border-gray-300 py-3 text-base font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-          >
-            초기화
-          </button>
-          <button
-            onClick={onApplyFilters}
-            className="flex-1 rounded-lg bg-blue-600 py-3 text-base font-semibold text-white transition-colors hover:bg-blue-700"
-          >
-            적용
-          </button>
-        </div>
-      </div>
+      )}
     </BottomSheet>
   )
 }

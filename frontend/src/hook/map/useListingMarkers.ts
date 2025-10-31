@@ -1,8 +1,8 @@
 import useClusteredMarkers from '@/hook/map/useClusteredMarkers'
 import useDetailedMarkers from '@/hook/map/useDetailedMarkers'
 import useMapZoomLevel from '@/hook/map/useMapZoomLevel'
-import type { ListingData } from '@/types/listing'
 import type { kakao } from '@/types/kakao.maps'
+import type { ListingData } from '@/types/listing'
 
 /**
  * 지도에 매물 마커를 표시하는 통합 훅

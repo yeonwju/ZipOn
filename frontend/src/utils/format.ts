@@ -49,7 +49,7 @@ export const formatDirection = (direction: DirectionFilter): string => {
     west: '서향',
     south: '남향',
     north: '북향',
-    northwest: '북서향',
+    all: '전체',
   }
   return directionMap[direction]
 }
@@ -67,4 +67,3 @@ export const pyeongToSquareMeter = (pyeong: number): number => {
 export const squareMeterToPyeong = (squareMeter: number): number => {
   return Math.round((squareMeter / 3.3058) * 10) / 10
 }
-
