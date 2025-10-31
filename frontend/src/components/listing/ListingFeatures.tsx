@@ -1,5 +1,3 @@
-import { Check } from 'lucide-react'
-
 interface ListingFeaturesProps {
   features: string[]
 }
@@ -16,20 +14,17 @@ export default function ListingFeatures({ features }: ListingFeaturesProps) {
   }
 
   return (
-    <section className="mt-2 bg-white px-4 py-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900">특징 및 옵션</h2>
-      <div className="grid grid-cols-2 gap-3">
+    <section className="mt-2 bg-white px-4">
+      <div className="flex flex-wrap gap-2">
         {features.map((feature, index) => (
           <div
             key={index}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
+            className="flex items-center gap-2 rounded-lg border border-gray-50 bg-gray-200 px-2 py-0.5"
           >
-            <Check className="h-5 w-5 flex-shrink-0 text-green-600" />
-            <span className="text-sm font-medium text-gray-900">{feature}</span>
+            <span className="text-xs font-medium text-gray-500">{feature}</span>
           </div>
         ))}
       </div>
     </section>
   )
 }
-

@@ -1,4 +1,5 @@
-import { Calendar, Home, Layers } from 'lucide-react'
+import ListingInfoItem from '@/components/listing/ui/ListingInfoItem'
+import { CalendarDays, Grid3x3, House, Layers, MapPin } from 'lucide-react'
 
 interface ListingInfoProps {
   name: string
@@ -9,6 +10,7 @@ interface ListingInfoProps {
   floor: number
   totalFloor: number
   availableDate: string
+  address: string
 }
 
 /**
@@ -25,67 +27,41 @@ export default function ListingInfo({
   floor,
   totalFloor,
   availableDate,
+  address,
 }: ListingInfoProps) {
   return (
-    <section className="bg-white px-4 py-6">
-      <div className={'text-2xl font-bold'}>{name}</div>
+    <section className="bg-white px-3">
+      <div className="text-2xl font-bold">{name}</div>
+
       {/* 가격 */}
-      <div className="mb-6">
-        <div className="mb-2 flex items-baseline gap-2">
+      <div className="mb-3">
+        <div className="flex items-baseline gap-2">
           <span className="text-md font-bold text-gray-900">
-            {deposit >= 10000 ? `${(deposit / 10000).toFixed(1)}억` : `${deposit}만원`}
+            {deposit >= 10000 ? `월세 ${(deposit / 10000).toFixed(1)}억` : `월세 ${deposit}만원`}
           </span>
-          {rent > 0 && <span className="text-md font-semibold text-blue-600">/ {rent}만원</span>}
+          {rent > 0 && <span className="text-md font-semibold text-blue-400">/ {rent}만원</span>}
         </div>
       </div>
 
-      {/* 상세 정보 그리드 */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* 상세 정보 */}
+      <div className="flex flex-wrap gap-2">
         {/* 타입 */}
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-            <Home className="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">타입</p>
-            <p className="font-semibold text-gray-900">{type}</p>
-          </div>
-        </div>
+        <ListingInfoItem icon={<House className={'h-4 w-4'} />} value={type} />
 
         {/* 면적 */}
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
-            <Layers className="h-5 w-5 text-green-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">면적</p>
-            <p className="font-semibold text-gray-900">{area}㎡</p>
-          </div>
-        </div>
+        <ListingInfoItem icon={<Grid3x3 className={'h-4 w-4'} />} value={`${area}㎡`} />
 
         {/* 층수 */}
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
-            <Layers className="h-5 w-5 text-purple-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">층수</p>
-            <p className="font-semibold text-gray-900">
-              {floor}층 / {totalFloor}층
-            </p>
-          </div>
-        </div>
+        <ListingInfoItem
+          icon={<Layers className={'h-4 w-4'} />}
+          value={`${floor}/${totalFloor}층`}
+        />
 
         {/* 입주 가능일 */}
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
-            <Calendar className="h-5 w-5 text-orange-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">입주 가능일</p>
-            <p className="font-semibold text-gray-900">{availableDate}</p>
-          </div>
-        </div>
+        <ListingInfoItem icon={<CalendarDays className={'h-4 w-4'} />} value={availableDate} />
+
+        {/*주소*/}
+        <ListingInfoItem icon={<MapPin className={'h-4 w-4'} />} value={address} />
       </div>
     </section>
   )
