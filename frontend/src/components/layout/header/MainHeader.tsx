@@ -1,5 +1,6 @@
 'use client'
 
+import clsx from 'clsx'
 import { BellRing, Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -35,20 +36,22 @@ export default function MainHeader() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 z-50 flex w-full flex-row items-center justify-between bg-white px-4 py-1 transition-transform duration-300 ease-in-out ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+      className={clsx(
+        'fixed top-0 left-0 z-50 flex w-full items-center justify-between px-3 py-3 transition-all duration-300',
+        'bg-white/70 shadow-[0_1px_0_rgba(0,0,0,0.05)] backdrop-blur-md',
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      )}
     >
       <div className="flex items-center">
-        <Image src="/main-logo.svg" alt="logo" width={50} height={60} />
+        <Image src="/main-logo.svg" alt="logo" width={40} height={40} />
       </div>
 
       <div className="flex flex-row gap-4">
         <Link href="/search" className="flex flex-col items-center transition-colors">
-          <Search size={25} />
+          <Search size={17} />
         </Link>
         <Link href="/notification" className="flex flex-col items-center transition-colors">
-          <BellRing size={25} />
+          <BellRing size={17} />
         </Link>
       </div>
     </nav>

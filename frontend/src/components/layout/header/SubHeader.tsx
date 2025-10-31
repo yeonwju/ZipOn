@@ -1,9 +1,10 @@
 'use client'
 
-import { ArrowLeft, BellRing, Heart, Search, Settings, Share2 } from 'lucide-react'
+import clsx from 'clsx'
+import { ArrowLeft, BellRing, Heart, Search, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { JSX, ReactNode, useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 
 type IconAction = {
   href?: string
@@ -23,14 +24,14 @@ const pageTitleMap: Record<string, string> = {
 
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [
-    { href: '/search', icon: <Search size={25} /> },
-    { href: '/notification', icon: <BellRing size={25} /> },
+    { href: '/search', icon: <Search size={17} /> },
+    { href: '/notification', icon: <BellRing size={17} /> },
   ],
   '/mypage': [
-    { href: '/notification', icon: <BellRing size={25} /> },
-    { href: '/mypage/edit', icon: <Settings size={25} /> },
+    { href: '/notification', icon: <BellRing size={17} /> },
+    { href: '/mypage/edit', icon: <Settings size={17} /> },
   ],
-  '/listing': [{ href: '/like', icon: <Heart size={25} /> }],
+  '/listing': [{ href: '/like', icon: <Heart size={17} /> }],
 }
 
 interface SubHeaderProps {
@@ -39,6 +40,13 @@ interface SubHeaderProps {
   customRightIcons?: IconAction[]
 }
 
+/**
+ * ✨ 토스 스타일 헤더 컴포넌트
+ *
+ * - 스크롤 시 부드럽게 사라짐
+ * - 얇은 글씨와 여백 중심 디자인
+ * - 미세한 blur + 투명도 효과
+ */
 export default function SubHeader({ pathname, title, customRightIcons }: SubHeaderProps) {
   const router = useRouter()
   const [isVisible, setIsVisible] = useState(true)
@@ -48,18 +56,8 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
     const handleScroll = () => {
       const currentScrollY = window.scrollY
 
-      // 스크롤을 내릴 때 (사용자가 아래로 스크롤)
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false)
-      }
-      // 스크롤을 올릴 때 (사용자가 위로 스크롤)
-      else if (currentScrollY < lastScrollY) {
-        setIsVisible(true)
-      }
-      // 맨 위로 스크롤했을 때도 헤더 표시
-      else if (currentScrollY === 0) {
-        setIsVisible(true)
-      }
+      if (currentScrollY > lastScrollY && currentScrollY > 100) setIsVisible(false)
+      else if (currentScrollY < lastScrollY || currentScrollY === 0) setIsVisible(true)
 
       setLastScrollY(currentScrollY)
     }
@@ -75,48 +73,47 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
 
   return (
     <nav
-      className={`fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b border-gray-200 bg-white px-4 py-4 transition-transform duration-300 ease-in-out ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+      className={clsx(
+        'fixed top-0 left-0 z-50 flex w-full items-center justify-between px-3 py-3 transition-all duration-300',
+        'bg-white/70 shadow-[0_1px_0_rgba(0,0,0,0.05)] backdrop-blur-md',
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      )}
     >
       {/* 왼쪽: 뒤로가기 */}
-      <div className="flex items-center">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center transition-colors hover:opacity-70"
-          aria-label="뒤로가기"
-        >
-          <ArrowLeft size={25} />
-        </button>
-      </div>
+      <button
+        onClick={() => router.back()}
+        className="flex items-center justify-center transition-opacity hover:opacity-60"
+        aria-label="뒤로가기"
+      >
+        <ArrowLeft size={17} />
+      </button>
 
       {/* 중앙: 제목 */}
-      <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-medium">{displayTitle}</h1>
+      <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-medium text-gray-900">
+        {displayTitle}
+      </h1>
 
       {/* 오른쪽: 페이지별 아이콘 */}
-      <div className="flex flex-row gap-4">
-        {rightIcons.map((iconAction, index) => {
-          if (iconAction.onClick) {
-            return (
-              <button
-                key={index}
-                onClick={iconAction.onClick}
-                className="flex items-center transition-colors hover:opacity-70"
-              >
-                {iconAction.icon}
-              </button>
-            )
-          }
-          return (
+      <div className="flex flex-row items-center gap-5">
+        {rightIcons.map((iconAction, index) =>
+          iconAction.onClick ? (
+            <button
+              key={index}
+              onClick={iconAction.onClick}
+              className="flex items-center justify-center transition-opacity hover:opacity-60"
+            >
+              {iconAction.icon}
+            </button>
+          ) : (
             <Link
               key={iconAction.href || index}
               href={iconAction.href || '#'}
-              className="flex items-center transition-colors hover:opacity-70"
+              className="flex items-center justify-center transition-opacity hover:opacity-60"
             >
               {iconAction.icon}
             </Link>
           )
-        })}
+        )}
       </div>
     </nav>
   )

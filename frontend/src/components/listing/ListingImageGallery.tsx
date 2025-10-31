@@ -45,7 +45,7 @@ export default function ListingImageGallery({ images }: ListingImageGalleryProps
 
   if (!images || images.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-lg bg-gray-200">
+      <div className="flex h-full items-center justify-center rounded-lg bg-gray-200">
         <p className="text-gray-500">이미지가 없습니다</p>
       </div>
     )

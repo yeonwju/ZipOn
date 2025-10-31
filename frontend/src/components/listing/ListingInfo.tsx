@@ -1,5 +1,6 @@
-import ListingInfoItem from '@/components/listing/ui/ListingInfoItem'
 import { CalendarDays, Grid3x3, House, Layers, MapPin } from 'lucide-react'
+
+import ListingInfoItem from '@/components/listing/ui/ListingInfoItem'
 
 interface ListingInfoProps {
   name: string
