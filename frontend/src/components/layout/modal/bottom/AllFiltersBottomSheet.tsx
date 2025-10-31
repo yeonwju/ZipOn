@@ -11,11 +11,11 @@ import type {
 } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
-import AreaFilterComponent from './filters/AreaFilter'
-import DirectionFilterComponent from './filters/DirectionFilter'
-import FloorFilterComponent from './filters/FloorFilter'
-import PriceFilterComponent from './filters/PriceFilter'
-import RoomCountFilterComponent from './filters/RoomCountFilter'
+import AreaFilterComponent from '@/components/map/filters/AreaFilter'
+import DirectionFilterComponent from '@/components/map/filters/DirectionFilter'
+import FloorFilterComponent from '@/components/map/filters/FloorFilter'
+import PriceFilterComponent from '@/components/map/filters/PriceFilter'
+import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
 
 interface AllFiltersBottomSheetProps {
   isOpen: boolean
@@ -161,7 +161,7 @@ export default function AllFiltersBottomSheet({
   }
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} fixedHeight={650} expandable={false}>
+    <BottomSheet isOpen={isOpen} onClose={onClose} fixedHeight={550} expandable={false}>
       {isOpen && (
         <div key={`all-filters-${isOpen}`} className="flex flex-col pb-6">
           <div className="space-y-3 pb-4">

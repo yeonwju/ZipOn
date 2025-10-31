@@ -27,7 +27,7 @@ export default function RoomCountFilter({
   return (
     <div className="px-6 pb-6">
       <div className="mb-4">
-        <h3 className="text-base font-medium text-gray-900">방 개수</h3>
+        <h3 className="text-sm font-semibold text-gray-900">방 개수</h3>
       </div>
       <div className="flex flex-row flex-wrap gap-2">
         {ROOM_COUNT_OPTIONS.map(option => (

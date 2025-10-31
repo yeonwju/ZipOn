@@ -17,14 +17,11 @@ const FLOOR_OPTIONS: { value: FloorFilter; label: string }[] = [
   { value: '2+', label: '2층 이상' },
 ]
 
-export default function FloorFilter({
-  selectedFloor,
-  onFloorChange,
-}: FloorFilterProps) {
+export default function FloorFilter({ selectedFloor, onFloorChange }: FloorFilterProps) {
   return (
     <div className="border-b-8 border-gray-200 px-6 pb-4">
       <div className="mb-4">
-        <h3 className="text-base font-medium text-gray-900">층수</h3>
+        <h3 className="text-sm font-semibold text-gray-900">층수</h3>
       </div>
       <div className="flex flex-row gap-2">
         {FLOOR_OPTIONS.map(option => (

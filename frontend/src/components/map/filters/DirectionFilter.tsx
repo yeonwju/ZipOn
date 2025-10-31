@@ -24,7 +24,7 @@ export default function DirectionFilter({
   return (
     <div className="border-b-8 border-gray-200 px-6 pb-4">
       <div className="mb-4">
-        <h3 className="text-base font-medium text-gray-900">해방향</h3>
+        <h3 className="text-sm font-semibold text-gray-900">해방향</h3>
       </div>
       <div className="flex flex-row gap-2">
         {DIRECTION_OPTIONS.map(option => (
