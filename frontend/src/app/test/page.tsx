@@ -1,20 +1,8 @@
 'use client'
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function Home() {
   return (
@@ -71,18 +59,22 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Tabs */}
-        <Tabs defaultValue="buttons" className="mb-12">
-          <TabsList className="mb-8 grid w-full grid-cols-5 sm:grid-cols-3 lg:grid-cols-5">
-            <TabsTrigger value="buttons">버튼</TabsTrigger>
-            <TabsTrigger value="badges">배지</TabsTrigger>
-            <TabsTrigger value="alerts">알림</TabsTrigger>
-            <TabsTrigger value="forms">폼</TabsTrigger>
-            <TabsTrigger value="selects">셀렉트</TabsTrigger>
-          </TabsList>
+        {/* Components */}
+        <div className="mb-12">
+          <div className="mb-8 flex flex-wrap gap-2">
+            <span className="rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700">
+              버튼
+            </span>
+            <span className="rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700">
+              배지
+            </span>
+            <span className="rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700">
+              폼
+            </span>
+          </div>
 
           {/* Buttons */}
-          <TabsContent value="buttons" className="space-y-6">
+          <div className="space-y-6">
             <h3 className="text-primary-blue-2 text-2xl font-bold">Button 컴포넌트</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
@@ -124,10 +116,10 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </TabsContent>
+          </div>
 
           {/* Badges */}
-          <TabsContent value="badges" className="space-y-6">
+          <div className="space-y-6">
             <h3 className="text-primary-blue-2 text-2xl font-bold">Badge 컴포넌트</h3>
             <div className="flex flex-wrap gap-3">
               <Badge variant="default">Default</Badge>
@@ -135,68 +127,18 @@ export default function Home() {
               <Badge variant="outline">Outline</Badge>
               <Badge variant="destructive">Destructive</Badge>
             </div>
-          </TabsContent>
-
-          {/* Alerts */}
-          <TabsContent value="alerts" className="space-y-6">
-            <h3 className="text-primary-blue-2 text-2xl font-bold">Alert 컴포넌트</h3>
-            <Alert>
-              <AlertTitle>기본 알림</AlertTitle>
-              <AlertDescription>이것은 기본 알림 메시지입니다.</AlertDescription>
-            </Alert>
-            <Alert variant="destructive">
-              <AlertTitle>오류 알림</AlertTitle>
-              <AlertDescription>문제가 발생했습니다.</AlertDescription>
-            </Alert>
-          </TabsContent>
+          </div>
 
           {/* Forms */}
-          <TabsContent value="forms" className="space-y-6">
+          <div className="space-y-6">
             <h3 className="text-primary-blue-2 text-2xl font-bold">Input 컴포넌트</h3>
             <div className="space-y-3 sm:w-1/2">
               <Input placeholder="기본 입력" />
               <Input type="email" placeholder="이메일 입력" />
               <Input type="password" placeholder="비밀번호 입력" />
             </div>
-          </TabsContent>
-
-          {/* Selects */}
-          <TabsContent value="selects" className="space-y-6">
-            <h3 className="text-primary-blue-2 text-2xl font-bold">Select 컴포넌트</h3>
-            <div className="flex flex-col gap-4 sm:w-1/3">
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="카테고리 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>운동 부위</SelectLabel>
-                    <SelectItem value="full">전신</SelectItem>
-                    <SelectItem value="upper">상체</SelectItem>
-                    <SelectItem value="lower">하체</SelectItem>
-                    <SelectItem value="core">복부</SelectItem>
-                    <SelectSeparator />
-                    <SelectItem value="stretch">스트레칭</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="시간 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>운동 시간</SelectLabel>
-                    <SelectItem value="short">10분 이내</SelectItem>
-                    <SelectItem value="medium">10~30분</SelectItem>
-                    <SelectItem value="long">30분 이상</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </main>
 
       {/* 푸터 */}

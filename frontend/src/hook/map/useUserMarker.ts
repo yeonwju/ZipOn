@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { createUserLocationMarkerElement } from '@/components/ui/UserLocationMarker'
+import { createUserLocationMarkerElement } from '@/components/map/UserLocationMarker'
 import type { kakao } from '@/types/kakao.maps'
 
 /**

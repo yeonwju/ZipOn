@@ -23,7 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           className={cn(
             // 기본 스타일
-            'border-input h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-all outline-none',
+            'h-13 w-full rounded-sm bg-transparent text-sm shadow-sm transition-all outline-none',
             // 포커스 스타일
             'focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-[3px]',
             // 아이콘 위치에 따른 padding 조정

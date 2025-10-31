@@ -7,6 +7,7 @@ interface UseBottomSheetHeightParams {
   sheetState: SheetState
   isDragging: boolean
   dragY: number
+  fixedHeight?: number // 고정 높이 (px) - 지정하면 listingCount 무시
 }
 
 /**
@@ -19,6 +20,7 @@ interface UseBottomSheetHeightParams {
  * @param params.sheetState - 시트 상태 (collapsed | expanded)
  * @param params.isDragging - 드래그 중 여부
  * @param params.dragY - 드래그 이동 거리 (deltaY)
+ * @param params.fixedHeight - 고정 높이 (px, 옵션)
  * @returns 계산된 높이 문자열 (px 단위)
  *
  * @example
@@ -27,7 +29,8 @@ interface UseBottomSheetHeightParams {
  *   listingCount: 3,
  *   sheetState,
  *   isDragging,
- *   dragY
+ *   dragY,
+ *   fixedHeight: 480
  * })
  * ```
  */
@@ -36,9 +39,15 @@ export default function useBottomSheetHeight({
   sheetState,
   isDragging,
   dragY,
+  fixedHeight,
 }: UseBottomSheetHeightParams) {
   // 매물 개수에 따른 collapsed 높이 계산
   const getCollapsedHeight = useCallback(() => {
+    // fixedHeight가 지정되면 그 값 사용
+    if (fixedHeight !== undefined) {
+      return fixedHeight
+    }
+
     const vh = window.innerHeight
 
     if (listingCount === 1) {
@@ -51,7 +60,7 @@ export default function useBottomSheetHeight({
       // 3개 이상: 55vh
       return vh * 0.55
     }
-  }, [listingCount])
+  }, [listingCount, fixedHeight])
 
   // 높이 계산 (드래그 중에는 실시간 조정)
   const getSheetHeight = useCallback(() => {

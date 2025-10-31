@@ -69,6 +69,7 @@ export default function useClusteredMarkers(
     // 개별 마커 생성 및 매핑
     const markers = listings.map(listing => {
       const marker = new window.kakao.maps.Marker({
+        buildingType: '',
         position: new window.kakao.maps.LatLng(listing.lat, listing.lng),
         clickable: true,
         image: markerImage, // 투명 이미지 적용
@@ -162,7 +163,9 @@ export default function useClusteredMarkers(
     markersRef.current = markers
 
     // 클러스터 클릭 이벤트 리스너 추가
-    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (event?: unknown) => {
+    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (event?: kakao.maps.event.MouseEvent | kakao.maps.Cluster | unknown) => {
+      // clusterclick 이벤트는 Cluster 타입을 전달
+      if (!event) return
       const cluster = event as kakao.maps.Cluster
 
       // 클러스터에 포함된 마커들 가져오기

@@ -22,7 +22,7 @@ export default function useContentScroll(
   contentRef: React.RefObject<HTMLDivElement | null>,
   children: React.ReactNode,
   isOpen: boolean,
-  dependencies: unknown[] = []
+  dependencies: React.DependencyList = []
 ): boolean {
   const [hasScroll, setHasScroll] = useState(false)
 
