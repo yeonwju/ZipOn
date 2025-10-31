@@ -1,16 +1,13 @@
 package ssafy.a303.backend.property.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import ssafy.a303.backend.common.dto.ResponseDTO;
+import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
-import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
 import ssafy.a303.backend.property.dto.response.PropertyMapDto;
@@ -18,7 +15,6 @@ import ssafy.a303.backend.property.dto.response.PropertyUpdateResponseDto;
 import ssafy.a303.backend.property.service.PropertyService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/properties")
