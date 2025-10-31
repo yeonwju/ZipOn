@@ -5,7 +5,7 @@ import React from 'react'
 import type { RoomCountFilter } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
-import RoomCountFilterComponent from './filters/RoomCountFilter'
+import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
 
 interface RoomCountFilterBottomSheetProps {
   isOpen: boolean

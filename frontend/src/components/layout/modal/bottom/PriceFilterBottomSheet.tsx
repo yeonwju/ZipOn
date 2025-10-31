@@ -5,7 +5,7 @@ import React from 'react'
 import type { PriceFilter } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
-import PriceFilterComponent from './filters/PriceFilter'
+import PriceFilterComponent from '@/components/map/filters/PriceFilter'
 
 interface PriceFilterBottomSheetProps {
   isOpen: boolean
