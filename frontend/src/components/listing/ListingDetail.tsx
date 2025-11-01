@@ -39,7 +39,7 @@ interface ListingDetailProps {
  */
 export default function ListingDetail({ listing }: ListingDetailProps) {
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full">
       {/* 컨텐츠 */}
       <main>
         {/* 이미지 갤러리 */}

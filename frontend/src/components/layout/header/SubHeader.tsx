@@ -1,7 +1,8 @@
 'use client'
 
+import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
-import { ArrowLeft, BellRing, Heart, Search, Settings } from 'lucide-react'
+import { ArrowLeft, BellRing, CalendarDays, Heart, MailIcon, Search, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
@@ -20,18 +21,57 @@ const pageTitleMap: Record<string, string> = {
   '/home': '홈',
   '/notification': '알림',
   '/listing': '매물 상세',
+  '/calendar': '라이브 일정',
 }
 
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [
     { href: '/search', icon: <Search size={17} /> },
-    { href: '/notification', icon: <BellRing size={17} /> },
+    {
+      href: '/notification',
+      icon: (
+        <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+          <BellRing size={17} />
+        </Badge>
+      ),
+    },
   ],
   '/mypage': [
-    { href: '/notification', icon: <BellRing size={17} /> },
+    {
+      href: '/notification',
+      icon: (
+        <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+          <BellRing size={17} />
+        </Badge>
+      ),
+    },
     { href: '/mypage/edit', icon: <Settings size={17} /> },
   ],
   '/listing': [{ href: '/like', icon: <Heart size={17} /> }],
+  '/live': [
+    {
+      href: '/calendar',
+      icon: <CalendarDays size={17} />,
+    },
+    {
+      href: '/notification',
+      icon: (
+        <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+          <BellRing size={17} />
+        </Badge>
+      ),
+    },
+  ],
+  '/calendar': [
+    {
+      href: '/like',
+      icon: (
+        <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+          <BellRing size={17} />
+        </Badge>
+      ),
+    },
+  ],
 }
 
 interface SubHeaderProps {
@@ -41,7 +81,6 @@ interface SubHeaderProps {
 }
 
 /**
- * ✨ 토스 스타일 헤더 컴포넌트
  *
  * - 스크롤 시 부드럽게 사라짐
  * - 얇은 글씨와 여백 중심 디자인
