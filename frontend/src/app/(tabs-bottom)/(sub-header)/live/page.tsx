@@ -1,6 +1,6 @@
 import { liveItems } from '@/data/LiveItem'
 
-import LiveItems from '../../../../components/item/live/LiveItems'
+import LiveItems from '@/components/live/LiveItems'
 
 const metadata = liveItems
 /**

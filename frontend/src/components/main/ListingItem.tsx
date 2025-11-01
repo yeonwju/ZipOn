@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/common/ui/badge'
 
 export default function ListingItem() {
   return (
