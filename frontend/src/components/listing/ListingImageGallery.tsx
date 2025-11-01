@@ -1,17 +1,17 @@
 'use client'
 
+import { Card, CardContent } from '@mui/material'
 import Image from 'next/image'
 import * as React from 'react'
 
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Carousel,
-  type CarouselApi,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/components/ui/carousel'
+} from '@/components/common/ui/carousel'
 
 interface ListingImageGalleryProps {
   images: string[]
@@ -66,8 +66,6 @@ export default function ListingImageGallery({ images }: ListingImageGalleryProps
                     className="object-cover"
                     priority={index === 0}
                   />
-                  <CarouselPrevious className={'z-10'} />
-                  <CarouselNext className={'z-10'} />
                 </CardContent>
               </Card>
             </CarouselItem>
