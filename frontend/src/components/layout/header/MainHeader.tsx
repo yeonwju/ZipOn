@@ -1,5 +1,6 @@
 'use client'
 
+import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
 import { BellRing, Search } from 'lucide-react'
 import Image from 'next/image'
@@ -51,7 +52,9 @@ export default function MainHeader() {
           <Search size={17} />
         </Link>
         <Link href="/notification" className="flex flex-col items-center transition-colors">
-          <BellRing size={17} />
+          <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+            <BellRing size={17} />
+          </Badge>{' '}
         </Link>
       </div>
     </nav>
