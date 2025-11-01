@@ -9,8 +9,6 @@ import {
   CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@/components/common/ui/carousel'
 
 interface ListingImageGalleryProps {
