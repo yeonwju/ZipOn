@@ -1,11 +1,11 @@
 'use client'
 
+import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
 import { BellRing, Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import Badge from '@mui/material/Badge'
 
 export default function MainHeader() {
   const [isVisible, setIsVisible] = useState(true)
