@@ -3,12 +3,12 @@
 import React, { useMemo, useState } from 'react'
 
 import AddressSearch from '@/components/common/AddressSearch'
+import LiveAuctionPicker from '@/components/live/LiveAuctionPicker'
 import LiveCreateButton from '@/components/live/LiveCreateButton'
 import LiveMapPreview from '@/components/live/LiveMapPreview'
 import LiveTitleInput from '@/components/live/LiveTitleInput'
 import useUserLocation from '@/hook/map/useUserLocation'
 import { calculateDistance } from '@/utils/distance'
-import LiveAuctionPicker from '@/components/live/LiveAuctionPicker'
 
 /**
  * 라이브 방송 생성 페이지

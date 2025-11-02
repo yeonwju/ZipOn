@@ -36,7 +36,7 @@ export default function LiveAuctionPicker({ auctionItems, onSelect }: LiveAuctio
       </label>
 
       <Select onValueChange={onSelect}>
-        <SelectTrigger className="w-full flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm transition-colors outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <SelectTrigger className="w-full flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-500 transition-colors outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
           <SelectValue placeholder="매물 선택" />
         </SelectTrigger>
 
