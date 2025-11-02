@@ -1,9 +1,7 @@
 'use client'
 
-import React from 'react'
-
-import FabDial from '@/components/common/ui/FabDial'
 import LiveItems from '@/components/live/LiveItems'
+import FabDial from '@/components/ui/FabDial'
 import { liveItems } from '@/data/LiveItem'
 const metadata = liveItems
 /**

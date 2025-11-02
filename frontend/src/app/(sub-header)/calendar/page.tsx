@@ -3,7 +3,7 @@
 import { BellPlus } from 'lucide-react'
 import React, { useState } from 'react'
 
-import { Calendar } from '@/components/common/ui/calendar'
+import { Calendar } from '@/components/ui/calendar'
 
 export default function CalendarPage() {
   const today = new Date()

@@ -11,7 +11,7 @@ interface LiveTitleInputProps {
  */
 export default function LiveTitleInput({ value, onChange, maxLength = 50 }: LiveTitleInputProps) {
   return (
-    <div className="bg-white px-4 py-4">
+    <div className="bg-white px-4 pt-4">
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">
           라이브 제목 <span className="text-red-500">*</span>

@@ -1,7 +1,7 @@
 import { Eye, Timer } from 'lucide-react'
 import Image from 'next/image'
 
-import { Badge } from '@/components/common/ui/badge'
+import { Badge } from '@/components/ui/badge'
 
 export default function RecommendLiveItem() {
   return (

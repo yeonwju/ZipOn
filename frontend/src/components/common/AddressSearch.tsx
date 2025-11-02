@@ -110,7 +110,7 @@ export default function AddressSearch({
 
   return (
     <>
-      <div className="bg-white px-4 py-4">
+      <div className="bg-white px-4 pb-4">
         <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
           매물 주소 <span className="text-red-500">*</span>
         </label>

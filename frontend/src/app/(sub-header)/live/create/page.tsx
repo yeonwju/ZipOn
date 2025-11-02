@@ -52,13 +52,12 @@ export default function LiveCreatePage() {
 
   return (
     <>
-      <section className="flex min-h-screen flex-col bg-gray-50 pb-32">
+      <section className="flex min-h-screen flex-col bg-gray-200 pb-32">
         <div className="mx-auto w-full max-w-2xl space-y-2">
-          {/* 라이브 제목 입력 */}
-          <LiveTitleInput value={title} onChange={setTitle} />
-
-          {/* 주소 검색 */}
-          <AddressSearch onAddressSelect={(address, coords) => setAddressCoords(coords)} />
+          <div>
+            <LiveTitleInput value={title} onChange={setTitle} />
+            <AddressSearch onAddressSelect={(address, coords) => setAddressCoords(coords)} />
+          </div>
 
           {/* 지도 미리보기 */}
           <LiveMapPreview

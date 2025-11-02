@@ -4,12 +4,7 @@ import { Card, CardContent } from '@mui/material'
 import Image from 'next/image'
 import * as React from 'react'
 
-import {
-  Carousel,
-  CarouselApi,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/common/ui/carousel'
+import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 
 interface ListingImageGalleryProps {
   images: string[]
