@@ -1,11 +1,13 @@
 package ssafy.a303.backend.broker.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ssafy.a303.backend.broker.dto.request.CompanyStatusRequest;
 import ssafy.a303.backend.broker.service.CompanyService;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -20,14 +22,14 @@ import ssafy.a303.backend.security.support.CookieFactory;
 @RequestMapping("/api/v1/company")
 public class CompanyController {
 
+    private final CompanyService companyService;
     CookieFactory cookieFactory;
     JWTProvider jwtProvider;
 
-    private final CompanyService companyService;
     @PostMapping("/verify")
-    public ResponseEntity<ResponseDTO<Void>> verifyCompany(@RequestBody CompanyStatusRequest companyRequest, HttpServletResponse response, @AuthenticationPrincipal Integer userSeq){
+    public ResponseEntity<ResponseDTO<Void>> verifyCompany(@RequestBody CompanyStatusRequest companyRequest, HttpServletResponse response, @AuthenticationPrincipal Integer userSeq) {
         CompanyStatusRequest.Business company = companyRequest.businesses().get(0);
-        if(companyService.validateCompany(company.b_no(), company.start_dt(), company.p_nm())){
+        if (companyService.validateCompany(company.b_no(), company.start_dt(), company.p_nm())) {
             String token = jwtProvider.generateInstantToken(
                     InstantData.builder()
                             .userSeq(userSeq)
@@ -37,6 +39,7 @@ public class CompanyController {
             );
             response.addCookie(cookieFactory.instantCookie("CP", token));
             return ResponseDTO.ok(null, "운영 중인 사업장 입니다.");
-        } throw new CustomException(ErrorCode.INVALID_TAX_SEQ);
+        }
+        throw new CustomException(ErrorCode.INVALID_TAX_SEQ);
     }
 }
