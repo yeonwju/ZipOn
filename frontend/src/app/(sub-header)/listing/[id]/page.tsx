@@ -1,5 +1,3 @@
-import { notFound } from 'next/navigation'
-
 import ListingDetail from '@/components/listing/ListingDetail'
 
 interface ListingPageProps {

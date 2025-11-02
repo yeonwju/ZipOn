@@ -2,7 +2,7 @@
 
 import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
-import { ArrowLeft, BellRing, CalendarDays, Heart, MailIcon, Search, Settings } from 'lucide-react'
+import { ArrowLeft, BellRing, CalendarDays, Heart, Search, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
@@ -123,7 +123,7 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
       {/* 왼쪽: 뒤로가기 */}
       <button
         onClick={() => router.back()}
-        className="flex items-center justify-center p-2 transition-opacity hover:opacity-60 -ml-2"
+        className="-ml-2 flex items-center justify-center p-2 transition-opacity hover:opacity-60"
         aria-label="뒤로가기"
       >
         <ArrowLeft size={17} />

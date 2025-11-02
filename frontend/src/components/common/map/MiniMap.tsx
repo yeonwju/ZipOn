@@ -50,8 +50,7 @@ export default function MiniMap({ center, height = 300, markers = [] }: MiniMapP
         level: 3,
       }
 
-      const map = new window.kakao.maps.Map(mapContainerRef.current!, mapOption)
-      mapRef.current = map
+      mapRef.current = new window.kakao.maps.Map(mapContainerRef.current!, mapOption)
     }
 
     initMap()

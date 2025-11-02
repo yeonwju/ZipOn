@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 
 import { createListingMarkerElement } from '@/components/map/ListingMarker'
-
 import type { ListingData } from '@/types/listing'
 
 /**
