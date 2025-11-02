@@ -40,5 +40,12 @@ jwt:
   refresh-token-days: 14
 
 frontUrl: ${FRONT_URL:http://localhost:3000}
-ssafyApiUrl: ${SSAFY_API_URL}
-ssafyApiKey: ${SSAFY_API_KEY}
+ssafy:
+  api:
+    url: ${SSAFY_API_URL}
+    key: ${SSAFY_API_KEY}
+
+gov:
+  api:
+    url: http://api.odcloud.kr/api/nts-businessman/v1
+    key: ${GOV_API_KEY}

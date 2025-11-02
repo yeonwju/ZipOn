@@ -18,6 +18,9 @@ public enum ErrorCode {
     TOKEN_TYPE_MISMATCH(401, HttpStatus.UNAUTHORIZED, "토큰 타입이 잘못되었습니다."),
     ACCESS_REFRESH_MISMATCH(401,HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
 
+    // 사업장
+    INVALID_TAX_SEQ(404,HttpStatus.NOT_FOUND,"해당 사업자 등록 번호는 운영 중이지 않습니다."),
+
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),

@@ -14,7 +14,7 @@ public class SSAFYAPI {
 
     private final WebClient client;
 
-    SSAFYAPI(@Value("${ssafyApiUrl}") String baseUrl) {
+    SSAFYAPI(@Value("${ssafy.api.url}") String baseUrl) {
         this.client = WebClient.builder()
                 .baseUrl(baseUrl)
                 .build();

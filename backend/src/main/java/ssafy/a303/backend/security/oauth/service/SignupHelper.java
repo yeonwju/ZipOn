@@ -20,7 +20,7 @@ public class SignupHelper {
 
     private final UserRepository userRepository;
     private final SSAFYAPI ssafyapi;
-    @Value("${ssafyApiKey}")
+    @Value("${ssafy.api.key}")
     private String apiKey;
 
     public User Signup(String email, String name){
