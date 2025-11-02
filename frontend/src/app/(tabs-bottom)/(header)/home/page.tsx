@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 
 import SideScrollCardSection from '@/components/layout/SideScrollCardSection'
-import RecommendLiveItem from '../../../../components/main/RecommendLiveItem'
+
 import ListingItem from '../../../../components/main/ListingItem'
+import RecommendLiveItem from '../../../../components/main/RecommendLiveItem'
 
 export const metadata: Metadata = {
   title: 'HomeOn - 홈',

@@ -29,8 +29,8 @@ export default function MiniMap({ center, height = 300, markers = [] }: MiniMapP
   useKakaoLoader()
 
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<any>(null)
-  const overlaysRef = useRef<any[]>([])
+  const mapRef = useRef<KakaoMap | null>(null)
+  const overlaysRef = useRef<KakaoCustomOverlay[]>([])
 
   // 지도 초기화
   useEffect(() => {

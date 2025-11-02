@@ -2,6 +2,11 @@
 
 import React, { useState } from 'react'
 
+import AreaFilterComponent from '@/components/map/filters/AreaFilter'
+import DirectionFilterComponent from '@/components/map/filters/DirectionFilter'
+import FloorFilterComponent from '@/components/map/filters/FloorFilter'
+import PriceFilterComponent from '@/components/map/filters/PriceFilter'
+import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
 import type {
   AreaFilter,
   DirectionFilter,
@@ -11,11 +16,6 @@ import type {
 } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
-import AreaFilterComponent from '@/components/map/filters/AreaFilter'
-import DirectionFilterComponent from '@/components/map/filters/DirectionFilter'
-import FloorFilterComponent from '@/components/map/filters/FloorFilter'
-import PriceFilterComponent from '@/components/map/filters/PriceFilter'
-import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
 
 interface AllFiltersBottomSheetProps {
   isOpen: boolean

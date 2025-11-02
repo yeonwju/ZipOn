@@ -1,11 +1,9 @@
 'use client'
 
-import React from 'react'
-
+import PriceFilterComponent from '@/components/map/filters/PriceFilter'
 import type { PriceFilter } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
-import PriceFilterComponent from '@/components/map/filters/PriceFilter'
 
 interface PriceFilterBottomSheetProps {
   isOpen: boolean

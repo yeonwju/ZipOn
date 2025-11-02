@@ -29,8 +29,8 @@ interface Position {
  * const { location } = useUserLocation()
  * useUserMarker(map, location, () => console.log('클릭!'))
  */
-export default function useUserMarker(map: any | null, position: Position | null, onClick?: () => void) {
-  const overlayRef = useRef<any>(null)
+export default function useUserMarker(map: KakaoMap | null, position: Position | null, onClick?: () => void) {
+  const overlayRef = useRef<KakaoCustomOverlay | null>(null)
 
   useEffect(() => {
     if (!map || !window.kakao || !position) {

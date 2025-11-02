@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
  *   // 클러스터 모드
  * }
  */
-export default function useMapZoomLevel(map: any): number {
+export default function useMapZoomLevel(map: KakaoMap | null): number {
   const [zoomLevel, setZoomLevel] = useState<number>(3)
 
   useEffect(() => {

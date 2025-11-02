@@ -20,7 +20,7 @@ import { useEffect } from 'react'
  * ```
  */
 export default function useMapInteraction(
-  map: any,
+  map: KakaoMap | null,
   onInteraction?: () => void,
   events: string[] = ['dragstart', 'zoom_changed']
 ) {

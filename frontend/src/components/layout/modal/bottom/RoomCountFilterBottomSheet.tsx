@@ -1,11 +1,9 @@
 'use client'
 
-import React from 'react'
-
+import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
 import type { RoomCountFilter } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'
-import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
 
 interface RoomCountFilterBottomSheetProps {
   isOpen: boolean
