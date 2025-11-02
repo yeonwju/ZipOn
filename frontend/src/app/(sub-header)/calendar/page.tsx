@@ -15,7 +15,6 @@ export default function CalendarPage() {
     new Date(2025, 10, 25),
     today,
   ])
-
   const handleSelect = (date?: Date) => {
     setSelectedDate(date)
   }

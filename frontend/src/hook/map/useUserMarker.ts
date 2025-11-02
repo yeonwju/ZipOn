@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 
 import { createUserLocationMarkerElement } from '@/components/map/UserLocationMarker'
-import type { kakao } from '@/types/kakao.maps'
 
 /**
  * 지도 좌표 타입 정의
@@ -30,12 +29,8 @@ interface Position {
  * const { location } = useUserLocation()
  * useUserMarker(map, location, () => console.log('클릭!'))
  */
-export default function useUserMarker(
-  map: kakao.maps.Map | null,
-  position: Position | null,
-  onClick?: () => void
-) {
-  const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null)
+export default function useUserMarker(map: any | null, position: Position | null, onClick?: () => void) {
+  const overlayRef = useRef<any>(null)
 
   useEffect(() => {
     if (!map || !window.kakao || !position) {

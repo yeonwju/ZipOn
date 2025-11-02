@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import type { kakao } from '@/types/kakao.maps'
+
 
 /**
  * 지도의 줌 레벨을 추적하는 훅
@@ -16,7 +16,7 @@ import type { kakao } from '@/types/kakao.maps'
  *   // 클러스터 모드
  * }
  */
-export default function useMapZoomLevel(map: kakao.maps.Map | null): number {
+export default function useMapZoomLevel(map: any): number {
   const [zoomLevel, setZoomLevel] = useState<number>(3)
 
   useEffect(() => {

@@ -1,7 +1,10 @@
-import { liveItems } from '@/data/LiveItem'
+'use client'
 
+import React from 'react'
+
+import FabDial from '@/components/common/ui/FabDial'
 import LiveItems from '@/components/live/LiveItems'
-
+import { liveItems } from '@/data/LiveItem'
 const metadata = liveItems
 /**
  * 라이브 방송 페이지 (Server Component)
@@ -11,8 +14,9 @@ const metadata = liveItems
  */
 export default function LivePage() {
   return (
-    <section className="py-2">
+    <section>
       <LiveItems items={metadata} />
+      <FabDial />
     </section>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import type { kakao } from '@/types/kakao.maps'
+
 import type { ListingData } from '@/types/listing'
 
 /**
@@ -24,7 +24,7 @@ import type { ListingData } from '@/types/listing'
  * useClusteredMarkers(map, buildingData, onMarkerClick, onClusterClick, zoomLevel >= 4, zoomLevel, true)
  */
 export default function useClusteredMarkers(
-  map: kakao.maps.Map | null,
+  map: any,
   listings: ListingData[],
   onMarkerClick?: (listing: ListingData) => void,
   onClusterClick?: (listings: ListingData[]) => void,
@@ -32,9 +32,9 @@ export default function useClusteredMarkers(
   currentZoomLevel?: number,
   isAuctionFilter?: boolean
 ) {
-  const clustererRef = useRef<kakao.maps.MarkerClusterer | null>(null)
-  const markersRef = useRef<kakao.maps.Marker[]>([])
-  const markerToListingMap = useRef<Map<kakao.maps.Marker, ListingData>>(new Map())
+  const clustererRef = useRef<any>(null)
+  const markersRef = useRef<any[]>([])
+  const markerToListingMap = useRef<Map<any, ListingData>>(new Map())
 
   useEffect(() => {
     // 비활성화 상태이거나 필수 조건이 없으면 실행 안 함
@@ -111,7 +111,7 @@ export default function useClusteredMarkers(
     }
 
     // 클러스터러 생성
-    const clusterStyles: kakao.maps.ClusterStyle[] = [
+    const clusterStyles: any[] = [
       {
         width: '50px',
         height: '50px',
@@ -163,13 +163,13 @@ export default function useClusteredMarkers(
     markersRef.current = markers
 
     // 클러스터 클릭 이벤트 리스너 추가
-    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (event?: kakao.maps.event.MouseEvent | kakao.maps.Cluster | unknown) => {
+    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (event?: any) => {
       // clusterclick 이벤트는 Cluster 타입을 전달
       if (!event) return
-      const cluster = event as kakao.maps.Cluster
+      const cluster = event as any
 
       // 클러스터에 포함된 마커들 가져오기
-      const clusterMarkers = cluster.getMarkers() as kakao.maps.Marker[]
+      const clusterMarkers = cluster.getMarkers() as any[]
 
       // 마커들에 해당하는 매물 데이터 추출
       const clusterListings = clusterMarkers

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { createListingMarkerElement } from '@/components/map/ListingMarker'
-import type { kakao } from '@/types/kakao.maps'
+
 import type { ListingData } from '@/types/listing'
 
 /**
@@ -20,12 +20,12 @@ import type { ListingData } from '@/types/listing'
  * useDetailedMarkers(map, buildingData, onMarkerClick, zoomLevel < 4)
  */
 export default function useDetailedMarkers(
-  map: kakao.maps.Map | null,
+  map: any,
   listings: ListingData[],
   onMarkerClick?: (listing: ListingData) => void,
   enabled: boolean = true
 ) {
-  const overlaysRef = useRef<kakao.maps.CustomOverlay[]>([])
+  const overlaysRef = useRef<any[]>([])
 
   useEffect(() => {
     // 비활성화 상태이거나 필수 조건이 없으면 실행 안 함
