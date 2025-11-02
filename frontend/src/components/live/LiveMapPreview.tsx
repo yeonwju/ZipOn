@@ -65,18 +65,14 @@ export default function LiveMapPreview({
       <div className="mb-4 flex items-center justify-between">
         {/* 범례 */}
         <div className="flex gap-4 text-sm">
-          {currentLocation && (
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-              <span className="text-gray-600">현재 위치</span>
-            </div>
-          )}
-          {addressCoords && (
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-red-500"></div>
-              <span className="text-gray-600">매물 위치</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+            <span className="text-gray-600">현재 위치</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500"></div>
+            <span className="text-gray-600">매물 위치</span>
+          </div>
         </div>
 
         {/* 위치 새로고침 버튼 */}

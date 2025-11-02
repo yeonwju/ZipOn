@@ -22,7 +22,7 @@ export default function LiveTitleInput({ value, onChange, maxLength = 50 }: Live
           onChange={e => onChange(e.target.value)}
           placeholder="예: 강남역 원룸 실시간 투어"
           maxLength={maxLength}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
         />
         <div className="mt-1 text-right text-xs text-gray-500">
           {value.length}/{maxLength}
@@ -31,4 +31,3 @@ export default function LiveTitleInput({ value, onChange, maxLength = 50 }: Live
     </div>
   )
 }
-

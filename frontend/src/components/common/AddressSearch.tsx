@@ -112,7 +112,7 @@ export default function AddressSearch({
     <>
       <div className="bg-white px-4 py-4">
         <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
-          매물 주소<span className="text-red-500">*</span>
+          매물 주소 <span className="text-red-500">*</span>
         </label>
 
         <div className="flex gap-2">
@@ -147,7 +147,7 @@ export default function AddressSearch({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="w-[90vh] bg-white p-0">
           <DialogHeader className="flex items-center justify-center py-4">
-            <DialogTitle>주소 검색</DialogTitle>
+            <DialogTitle className={'text-md'}>주소 검색</DialogTitle>
           </DialogHeader>
 
           {/* DaumPostcode 컴포넌트 */}
