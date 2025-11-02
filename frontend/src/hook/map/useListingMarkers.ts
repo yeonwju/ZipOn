@@ -1,7 +1,7 @@
 import useClusteredMarkers from '@/hook/map/useClusteredMarkers'
 import useDetailedMarkers from '@/hook/map/useDetailedMarkers'
 import useMapZoomLevel from '@/hook/map/useMapZoomLevel'
-import type { kakao } from '@/types/kakao.maps'
+
 import type { ListingData } from '@/types/listing'
 
 /**
@@ -26,7 +26,7 @@ import type { ListingData } from '@/types/listing'
  * }, true)
  */
 export default function useListingMarkers(
-  map: kakao.maps.Map | null,
+  map: any,
   listings: ListingData[],
   onMarkerClick?: (listing: ListingData) => void,
   onClusterClick?: (listings: ListingData[]) => void,

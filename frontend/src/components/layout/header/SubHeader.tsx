@@ -2,7 +2,7 @@
 
 import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
-import { ArrowLeft, BellRing, CalendarDays, Heart, MailIcon, Search, Settings } from 'lucide-react'
+import { ArrowLeft, BellRing, CalendarDays, Heart, Search, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
@@ -17,11 +17,12 @@ const pageTitleMap: Record<string, string> = {
   '/auction': '경매',
   '/mypage': '마이페이지',
   '/like': '찜',
-  '/live': '라이브',
+  '/live/list': '라이브',
   '/home': '홈',
   '/notification': '알림',
   '/listing': '매물 상세',
   '/calendar': '라이브 일정',
+  '/live/create': '라이브 생성',
 }
 
 const rightIconsMap: Record<string, IconAction[]> = {
@@ -48,7 +49,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
     { href: '/mypage/edit', icon: <Settings size={17} /> },
   ],
   '/listing': [{ href: '/like', icon: <Heart size={17} /> }],
-  '/live': [
+  '/live/list': [
     {
       href: '/calendar',
       icon: <CalendarDays size={17} />,
@@ -72,6 +73,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
       ),
     },
   ],
+  '/live/create': [],
 }
 
 interface SubHeaderProps {
@@ -121,7 +123,7 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
       {/* 왼쪽: 뒤로가기 */}
       <button
         onClick={() => router.back()}
-        className="flex items-center justify-center transition-opacity hover:opacity-60"
+        className="-ml-2 flex items-center justify-center p-2 transition-opacity hover:opacity-60"
         aria-label="뒤로가기"
       >
         <ArrowLeft size={17} />

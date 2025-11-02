@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import type { kakao } from '@/types/kakao.maps'
+
 
 /**
  * 지도 인터랙션 이벤트를 감지하는 훅
@@ -20,7 +20,7 @@ import type { kakao } from '@/types/kakao.maps'
  * ```
  */
 export default function useMapInteraction(
-  map: kakao.maps.Map | null,
+  map: any,
   onInteraction?: () => void,
   events: string[] = ['dragstart', 'zoom_changed']
 ) {
