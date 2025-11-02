@@ -18,31 +18,26 @@ const BUILDING_TYPES: {
   type: BuildingType
   label: string
   icon: string
-  description: string
 }[] = [
   {
     type: 'room',
     label: '원투룸',
     icon: '/icons/room.svg',
-    description: '1~2인 가구에 적합한 원룸/투룸',
   },
   {
     type: 'apartment',
     label: '아파트',
     icon: '/icons/apartment.svg',
-    description: '단지형 공동주택',
   },
   {
     type: 'house',
     label: '주택/빌라',
     icon: '/icons/house.svg',
-    description: '단독주택 및 다세대주택',
   },
   {
     type: 'officetel',
     label: '오피스텔',
     icon: '/icons/officetel.svg',
-    description: '주거용 오피스텔',
   },
 ]
 

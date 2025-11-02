@@ -8,6 +8,7 @@ import LiveMapPreview from '@/components/live/LiveMapPreview'
 import LiveTitleInput from '@/components/live/LiveTitleInput'
 import useUserLocation from '@/hook/map/useUserLocation'
 import { calculateDistance } from '@/utils/distance'
+import LiveAuctionPicker from '@/components/live/LiveAuctionPicker'
 
 /**
  * 라이브 방송 생성 페이지
@@ -19,6 +20,20 @@ import { calculateDistance } from '@/utils/distance'
 export default function LiveCreatePage() {
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [title, setTitle] = useState('')
+
+  // selectbox 목데이터
+  const mockAuctionItems = [
+    { value: 'a1', title: '송파 푸르지오' },
+    { value: 'a2', title: '노원 롯데캐슬' },
+    { value: 'a3', title: '강남 래미안 루센티아' },
+    { value: 'a4', title: '목동 하이페리온' },
+    { value: 'a5', title: '마포 자이' },
+    { value: 'a6', title: '잠실 리센츠' },
+    { value: 'a7', title: '용산 센트럴파크' },
+    { value: 'a8', title: '은평 롯데캐슬' },
+    { value: 'a9', title: '위례 자이' },
+    { value: 'a10', title: '청담 더 펜트하우스' },
+  ]
 
   // 현재 위치 가져오기
   const { location: currentLocation, refresh: refreshLocation, isRefreshing } = useUserLocation()
@@ -57,6 +72,7 @@ export default function LiveCreatePage() {
           <div>
             <LiveTitleInput value={title} onChange={setTitle} />
             <AddressSearch onAddressSelect={(address, coords) => setAddressCoords(coords)} />
+            <LiveAuctionPicker auctionItems={mockAuctionItems} />
           </div>
 
           {/* 지도 미리보기 */}

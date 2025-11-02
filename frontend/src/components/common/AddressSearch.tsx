@@ -145,7 +145,7 @@ export default function AddressSearch({
 
       {/* 주소 검색 Dialog (shadcn/ui) */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="w-[90vh] bg-white p-0">
+        <DialogContent className="w-[90vh] bg-white px-2">
           <DialogHeader className="flex items-center justify-center py-4">
             <DialogTitle className={'text-md'}>주소 검색</DialogTitle>
           </DialogHeader>
