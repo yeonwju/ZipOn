@@ -38,14 +38,14 @@ public class SignupHelper {
             Map<String, Object> search = ssafyapi.post("/member/search", null, body);
             String financeKey = null;
             if (search.get("userKey") != null) {
-                System.out.println("----------검색 성공 ---------");
+                // ----------검색 성공 ---------
                 financeKey = search.get("userKey").toString();
             } else {
                 // SSAFY OPENAPI 에서 계정 찾기 - 등록
-                System.out.println("----------검색 실패 ---------");
+                // ----------검색 실패 ---------
                 Map<String, Object> signup = ssafyapi.post("/member", null, body);
                 if(signup.get("userKey") != null){
-                    System.out.println("----------싸피 금융 api 등록 성공 ---------");
+                    // ----------싸피 금융 api 등록 성공 ---------
                     financeKey = signup.get("userKey").toString();
                 }
             }

@@ -9,14 +9,14 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     // --- 회원가입 외부 API ---
     EXTERNAL_API_ERROR(502, HttpStatus.BAD_GATEWAY, "외부 API 연동 중 오류가 발생했습니다."),
+    USER_NOT_FOUND(404, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 
-    // JWT 관련 에러 코드
+    // JWT 관련 에러 코드,
     INVALID_TOKEN(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(401, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     INVALID_CREDENTIALS(401, HttpStatus.UNAUTHORIZED, "잘못된 인증 정보입니다."),
     TOKEN_TYPE_MISMATCH(401, HttpStatus.UNAUTHORIZED, "토큰 타입이 잘못되었습니다."),
     ACCESS_REFRESH_MISMATCH(401,HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
-
 
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST
@@ -32,9 +32,8 @@ public enum ErrorCode {
     ACCESS_DENIED(403, HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     USER_DISABLED(403, HttpStatus.FORBIDDEN, "비활성화된 계정입니다."),
 
-    //404 NOT FOUND
+    //404 NOT FOUND,
     NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 API를 찾을 수 없습니다."),
-    USER_NOT_FOUND(404, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 
     //405 METHOD NOT ALLOWED
     METHOD_NOT_ALLOWED(405, HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 메소드입니다."),
