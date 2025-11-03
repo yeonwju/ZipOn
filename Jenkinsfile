@@ -11,9 +11,11 @@ pipeline {
   options {
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
+
   timestamps()
 
   stages {
+
     stage('Checkout') {
       steps {
         checkout scm
@@ -24,28 +26,31 @@ pipeline {
     stage('Build Images (parallel)') {
       steps {
         script {
+          // .gitsha 파일에서 커밋 해시 읽기
+          def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
+
           parallel(
             FRONTEND: {
-              sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:\\$(cat .gitsha) ./frontend"
+              sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
             },
             BACKEND: {
-              sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:\\$(cat .gitsha) ./backend"
+              sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
             },
             AI: {
-              sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:\\$(cat .gitsha) ./ai"
+              sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
             }
           )
         }
       }
     }
 
-
     stage('Unit Tests (dev only)') {
       when { branch 'dev' }
       steps {
-        sh """
+        sh '''
           echo "[TEST] 여기에 실제 테스트 명령 넣기"
-        """
+          # 예: pytest, npm test 등
+        '''
       }
     }
 
@@ -78,6 +83,7 @@ pipeline {
           if [ -x ${env.HEALTH} ]; then
             ${env.HEALTH} || true
           fi
+
           curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
           curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
           curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
@@ -87,8 +93,14 @@ pipeline {
   }
 
   post {
-    success { echo "✅ Pipeline success" }
-    failure { echo "❌ Pipeline failed. Check above logs." }
-    always  { sh 'docker image prune -f || true' }
+    success {
+      echo "✅ Pipeline success"
+    }
+    failure {
+      echo "❌ Pipeline failed. Check above logs."
+    }
+    always {
+      sh 'docker image prune -f || true'
+    }
   }
 }
