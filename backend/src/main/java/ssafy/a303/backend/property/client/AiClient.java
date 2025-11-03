@@ -7,7 +7,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
-import ssafy.a303.backend.common.dto.CustomException;
+import ssafy.a303.backend.common.exception.CustomException;
 
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.http.MediaType;
