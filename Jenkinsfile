@@ -4,27 +4,27 @@ pipeline {
   environment {
     DOCKER_OPTS   = "--pull"
     HEALTH        = "/usr/local/bin/zipon-health.sh"
-    PROD_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.service.yml"  // compose 프로젝트명 고정 (컨테이너 prefix 정렬)
+    PROD_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.service.yml"
+    PROJECT_NAME  = "zipon-service"
   }
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '30'))
     disableConcurrentBuilds() 
-    // timestamps() 
     timeout(time: 30, unit: 'MINUTES')
   }
 
   stages {
 
     stage('Checkout') {
-      when { anyOf { branch 'main'; branch 'master' } } 
+      when { anyOf { branch 'main'; branch 'master' } }
       steps {
         checkout scm
         sh 'git rev-parse --short HEAD > .gitsha'
       }
     }
 
-    stage('Build Images') {
+    stage('Build Images (parallel)') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
         script {
@@ -47,25 +47,33 @@ pipeline {
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
-        sh """
-          set -e
+        script {
+          echo "[PROD] Deploying with ${env.PROD_COMPOSE}"
 
-          echo "[PROD] Deploying with ${env.PROD_COMPOSE} (project: ${env.PROJECT_NAME})"
-          docker compose -p ${env.PROJECT_NAME} -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
+          sh """
+            set -e
+            if docker compose version >/dev/null 2>&1; then
+              echo "[INFO] Using Docker Compose V2"
+              docker compose -p ${env.PROJECT_NAME} -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
+            elif docker-compose version >/dev/null 2>&1; then
+              echo "[INFO] Using Docker Compose V1"
+              docker-compose -p ${env.PROJECT_NAME} -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
+            else
+              echo "[ERROR] docker compose/docker-compose not found"
+              exit 1
+            fi
 
-          echo "[PROD] Warm-up & health check..."
-          sleep 3
+            echo "[PROD] Warm-up & health check..."
+            sleep 3
+            if [ -x ${env.HEALTH} ]; then
+              ${env.HEALTH} || echo "[WARN] Health check failed"
+            fi
 
-          if [ -x ${env.HEALTH} ]; then
-            if ! ${env.HEALTH}; then
-              echo "[WARN] Health script reported issues"; fi
-          fi
-
-          # 간단 스모크
-          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
-          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
-          curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
-        """
+            curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
+            curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
+            curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
+          """
+        }
       }
     }
   }
@@ -76,7 +84,7 @@ pipeline {
       sh 'docker image prune -f || true'
     }
     failure {
-      echo "❌ PROD deploy failed — check logs above."
+      echo "❌ PROD deploy failed. Check logs above."
     }
     always {
       echo "ℹ️ finished: ${currentBuild.currentResult}"
