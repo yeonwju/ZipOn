@@ -12,6 +12,6 @@ public class InstantData {
     private Instant issueTime;
     private Integer userSeq;
     // company
-    private String taxSeq;      //b_no
-    private String ceo;        //p_nm
+    private String taxSeq;
+    private String ceo;
 }

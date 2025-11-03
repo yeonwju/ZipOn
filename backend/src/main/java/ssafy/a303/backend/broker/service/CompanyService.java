@@ -5,34 +5,97 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ssafy.a303.backend.broker.dto.request.CompanyStatusRequest;
+import ssafy.a303.backend.broker.dto.response.BiznoResponse;
 import ssafy.a303.backend.broker.dto.response.CompanyStatusResponse;
+import ssafy.a303.backend.broker.entity.Company;
+import ssafy.a303.backend.broker.repository.CompanyRepository;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompanyService {
-    private final WebClient webClient;
-    private final String serviceKey;
+    private final CompanyRepository companyRepository;
+    @Value("${gov.api.key}")
+    private String serviceKey;
+    private final WebClient gWebClient;
+
+    @Value("${bizno.key}")
+    private String biznoKey;
+
+    private final WebClient bWebClient;
 
     public CompanyService(
-            @Qualifier("govWebClient") WebClient webClient,
-            @Value("${gov.api.key}") String serviceKey
+            CompanyRepository companyRepository,
+            @Qualifier("govWebClient") WebClient gWebClient,
+            @Qualifier("biznoWebClient") WebClient bWebClient
     ) {
-        this.webClient = webClient;   // 재사용 가능(스레드 세이프)
-        this.serviceKey = serviceKey;
+        this.companyRepository = companyRepository;
+        this.gWebClient = gWebClient;
+        this.bWebClient = bWebClient;
     }
 
-    public boolean validateCompany(String bNo, String startDate, String ownerName) {
-        CompanyStatusRequest.Business company = new CompanyStatusRequest.Business(bNo, startDate, ownerName);
-        CompanyStatusRequest request = new CompanyStatusRequest(List.of(company));
-        CompanyStatusResponse response = webClient.post()
-                .uri(uri -> uri.path("/validate")
+    public boolean cmpStatus(String bNo) {
+        Optional<Company> opt = companyRepository.findCompanyByTaxSeq(bNo);
+        ZoneId zone = ZoneId.of("Asia/Seoul");
+        LocalDate today = LocalDate.now(zone);
+
+        // 오늘 이미 검색 된 경우
+        Company company;
+        if (opt.isPresent()) {
+            company = opt.get();
+            if (company.getCheckAt().equals(today)) {
+                return company.getStatus();
+            }
+        }
+
+        // 검사
+        CompanyStatusRequest request = new CompanyStatusRequest(List.of(bNo));
+        CompanyStatusResponse response = gWebClient.post()
+                .uri(uri -> uri
+                        .path("/status")
                         .queryParam("serviceKey", serviceKey)
                         .build())
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(CompanyStatusResponse.class)
                 .block();
-        return response != null && response.isValid();
+        boolean result = response != null && response.isValid();
+        if (opt.isPresent()) {
+            // 갱신
+            company = opt.get();
+            company.setStatus(result);
+            companyRepository.save(company);
+        } else if(result){
+            company = bizno(bNo);
+            company.setCheckAt(today);
+            companyRepository.save(company);
+        }
+        return result;
+    }
+
+    public Company bizno(String bNo) {
+        BiznoResponse response = bWebClient.get()
+                .uri(uri -> uri
+                        .path("/api/fapi")
+                        .queryParam("key", biznoKey)
+                        .queryParam("gb", 1)
+                        .queryParam("type", "json")
+                        .queryParam("q", bNo)
+                        .build())
+                .retrieve()
+                .bodyToMono(BiznoResponse.class)
+                .block();
+
+        BiznoResponse.Result item = response.items().get(0);
+        Company company = Company
+                .builder()
+                .name(item.company())
+                .taxSeq(item.bno())
+                .status("01".equals(item.bsttcd()))
+                .build();
+        return company;
     }
 }

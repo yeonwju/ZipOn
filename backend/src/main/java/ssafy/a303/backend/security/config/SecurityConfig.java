@@ -75,7 +75,7 @@ public class SecurityConfig {
                                 "/oauth2/**", // google OAuth 시작점
                                 "/login/oauth2/**" // google OAuth 콜백
                         ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .oauth2Login(
                         oauth -> oauth

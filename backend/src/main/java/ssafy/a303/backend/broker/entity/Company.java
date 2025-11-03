@@ -23,8 +23,8 @@ public class Company {
     @Column(name = "check_at")
     private LocalDate checkAt;
 
-    @Column(name = "is_working")
-    private Boolean isWorking;
+    @Column(name = "status")
+    private Boolean status;
 
     @Column(name = "ceo", length = 50)
     private String ceoName;

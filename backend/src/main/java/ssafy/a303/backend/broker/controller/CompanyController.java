@@ -17,24 +17,26 @@ import ssafy.a303.backend.security.jwt.service.JWTProvider;
 import ssafy.a303.backend.security.jwt.token.InstantData;
 import ssafy.a303.backend.security.support.CookieFactory;
 
+import java.time.Instant;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/company")
 public class CompanyController {
 
     private final CompanyService companyService;
-    CookieFactory cookieFactory;
-    JWTProvider jwtProvider;
+    private final CookieFactory cookieFactory;
+    private final JWTProvider jwtProvider;
 
-    @PostMapping("/verify")
-    public ResponseEntity<ResponseDTO<Void>> verifyCompany(@RequestBody CompanyStatusRequest companyRequest, HttpServletResponse response, @AuthenticationPrincipal Integer userSeq) {
-        CompanyStatusRequest.Business company = companyRequest.businesses().get(0);
-        if (companyService.validateCompany(company.b_no(), company.start_dt(), company.p_nm())) {
+    @PostMapping("/status")
+    public ResponseEntity<ResponseDTO<Void>> companyStatusCheck(@RequestBody CompanyStatusRequest companyRequest, HttpServletResponse response, @AuthenticationPrincipal Integer userSeq) {
+        String taxSeq = companyRequest.b_no().get(0);
+        if (companyService.cmpStatus(taxSeq)) {
             String token = jwtProvider.generateInstantToken(
                     InstantData.builder()
+                            .issueTime(Instant.now() )
                             .userSeq(userSeq)
-                            .ceo(company.p_nm())
-                            .taxSeq(company.b_no())
+                            .taxSeq(taxSeq)
                             .build()
             );
             response.addCookie(cookieFactory.instantCookie("CP", token));

@@ -9,12 +9,25 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class BrokerConfig {
 
     @Value("${gov.api.url}")
-    private String url;
+    private String gUrl;
+    @Value("${gov.api.key}")
+    private String serviceKey;
+    @Value("${bizno.url}")
+    private String bUrl;
+    @Value("${bizno.key}")
+    private String biznoKey;
 
     @Bean(name = "govWebClient")
     public WebClient govWebClient() {
         return WebClient.builder()
-                .baseUrl(url)
+                .baseUrl(gUrl)
+                .build();
+    }
+
+    @Bean(name = "biznoWebClient")
+    public WebClient biznoWebClient() {
+        return WebClient.builder()
+                .baseUrl(bUrl)
                 .build();
     }
 }

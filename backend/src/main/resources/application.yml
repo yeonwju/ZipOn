@@ -52,3 +52,7 @@ gov:
     url: http://api.odcloud.kr/api/nts-businessman/v1
     key: ${GOV_API_KEY}
 
+bizno:
+  url: https://bizno.net
+  key: ${BIZNO_API_KEY}
+
