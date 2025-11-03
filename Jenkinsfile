@@ -10,9 +10,8 @@ pipeline {
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '20'))
+    timestamps()
   }
-
-  timestamps()
 
   stages {
 
@@ -26,20 +25,18 @@ pipeline {
     stage('Build Images (parallel)') {
       steps {
         script {
-          // .gitsha 파일에서 커밋 해시 읽기
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
 
-          parallel(
-            FRONTEND: {
-              sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
-            },
-            BACKEND: {
-              sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
-            },
-            AI: {
-              sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
-            }
-          )
+          parallel failFast: false, 
+          FRONTEND: {
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
+          },
+          BACKEND: {
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
+          },
+          AI: {
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
+          }
         }
       }
     }
@@ -48,8 +45,8 @@ pipeline {
       when { branch 'dev' }
       steps {
         sh '''
-          echo "[TEST] 여기에 실제 테스트 명령 넣기"
-          # 예: pytest, npm test 등
+          echo "[TEST] Running test scripts..."
+          # ex) pytest, npm test, gradle test
         '''
       }
     }
@@ -81,7 +78,7 @@ pipeline {
           echo "[PROD] Warm-up & health check..."
           sleep 2
           if [ -x ${env.HEALTH} ]; then
-            ${env.HEALTH} || true
+            ${env.HEALTH} || echo "[WARN] Health check failed"
           fi
 
           curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
