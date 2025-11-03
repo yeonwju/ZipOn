@@ -29,15 +29,8 @@ interface DaumPostcodeData {
  * react-daum-postcode 라이브러리와 shadcn/ui Dialog를 사용하여
  * 주소를 검색하고, 선택한 주소를 자동으로 좌표로 변환합니다.
  *
- * @example
- * ```tsx
- * <AddressSearch
- *   onAddressSelect={(address, coords) => {
- *     console.log('주소:', address)
- *     console.log('좌표:', coords)
- *   }}
- * />
- * ```
+ * 도로명 주소가 존재하면 도로명 주소를 우선 사용하고,
+ * 도로명이 없는 경우에만 지번 주소를 사용합니다.
  */
 export default function AddressSearch({
   onAddressSelect,
@@ -55,8 +48,13 @@ export default function AddressSearch({
    * 주소 선택 완료 핸들러
    */
   const handleAddressComplete = (data: DaumPostcodeData) => {
-    // 선택한 주소 (도로명 주소 우선)
+    //  도로명 주소 우선, 없을 경우 지번 주소 사용
     const selectedAddress = data.roadAddress || data.jibunAddress
+
+    if (!selectedAddress) {
+      setLocalError('선택한 주소에 유효한 도로명 또는 지번 주소가 없습니다.')
+      return
+    }
 
     setAddress(selectedAddress)
     setLocalError(null)
@@ -76,7 +74,6 @@ export default function AddressSearch({
     }
 
     setIsConverting(true)
-
     const geocoder = new window.kakao.maps.services.Geocoder()
 
     geocoder.addressSearch(addressText, (result, status) => {
@@ -87,11 +84,17 @@ export default function AddressSearch({
           lat: parseFloat(result[0].y),
           lng: parseFloat(result[0].x),
         }
-        setSearchedAddress(result[0].address_name)
+
+        //  도로명 주소가 존재하면 도로명 주소 사용, 없을 때만 지번으로 fallback
+        const roadAddress = result[0].road_address?.address_name
+        const jibunAddress = result[0].address?.address_name
+        const finalAddress = roadAddress || jibunAddress || addressText
+
+        setSearchedAddress(finalAddress)
         setLocalError(null)
 
-        // 부모 컴포넌트에 결과 전달
-        onAddressSelect(addressText, coords)
+        //  부모 컴포넌트에 도로명 기준 주소 전달
+        onAddressSelect(finalAddress, coords)
       } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
         setLocalError('검색 결과가 없습니다. 정확한 주소를 입력해주세요.')
       } else {
@@ -139,15 +142,13 @@ export default function AddressSearch({
             주소를 좌표로 변환하는 중...
           </div>
         )}
-
-        {/* 검색 결과 */}
       </div>
 
       {/* 주소 검색 Dialog (shadcn/ui) */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="w-[90vh] bg-white px-2">
           <DialogHeader className="flex items-center justify-center py-4">
-            <DialogTitle className={'text-md'}>주소 검색</DialogTitle>
+            <DialogTitle className="text-md">주소 검색</DialogTitle>
           </DialogHeader>
 
           {/* DaumPostcode 컴포넌트 */}
