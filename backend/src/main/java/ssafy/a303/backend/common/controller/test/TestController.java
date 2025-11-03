@@ -1,6 +1,7 @@
 package ssafy.a303.backend.common.controller.test;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +12,7 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 public class TestController {
 
     @GetMapping("/test")
-    public ResponseEntity<ResponseDTO<Void>> test(){
-        return ResponseDTO.ok(null, "test connect");
+    public ResponseEntity<ResponseDTO<Void>> test(@AuthenticationPrincipal int userSeq){
+        return ResponseDTO.ok(null, "test connect: user_seq :"+userSeq +"번");
     }
 }

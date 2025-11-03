@@ -10,12 +10,8 @@ public class BrokerConfig {
 
     @Value("${gov.api.url}")
     private String gUrl;
-    @Value("${gov.api.key}")
-    private String serviceKey;
     @Value("${bizno.url}")
     private String bUrl;
-    @Value("${bizno.key}")
-    private String biznoKey;
 
     @Bean(name = "govWebClient")
     public WebClient govWebClient() {

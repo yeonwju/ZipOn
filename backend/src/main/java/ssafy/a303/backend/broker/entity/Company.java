@@ -26,12 +26,12 @@ public class Company {
     @Column(name = "status")
     private Boolean status;
 
-    @Column(name = "ceo", length = 50)
-    private String ceoName;
+//    @Column(name = "ceo", length = 50)
+//    private String ceoName;
 
     @Column(name = "name", length = 100)
     private String name;
 
-    @Column(name = "address", length = 200)
-    private String address;
+//    @Column(name = "address", length = 200)
+//    private String address;
 }
