@@ -3,6 +3,7 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import React from 'react'
 
 interface ListingInfo {
   lessorNm: string
@@ -44,13 +45,15 @@ export default function Step2PropertyInfo({
   onComplete,
 }: Step2Props) {
   const updateField = (field: keyof ListingInfo, value: string | boolean) => {
-    onListingInfoChange({ ...listingInfo, [field]: value })
+    const newInfo = { ...listingInfo, [field]: value }
+    onListingInfoChange(newInfo)
+    console.log(`📝 Step2 - ${field} 변경:`, value)
   }
 
   return (
-    <AccordionItem value="item-2" className="border-0 border-b border-gray-200 pb-6">
+    <AccordionItem value="item-2" className="border-0 border-b border-gray-200 px-4 pb-4">
       <AccordionTrigger
-        className={`mb-6 py-0 text-xl font-bold hover:no-underline ${
+        className={`flex items-center py-0 text-xl font-bold hover:no-underline ${
           step1Completed ? 'text-gray-900' : 'cursor-not-allowed text-gray-400'
         }`}
         disabled={!step1Completed}
@@ -63,7 +66,9 @@ export default function Step2PropertyInfo({
           >
             2
           </span>
-          <span>매물 정보</span>
+          <span>
+            매물 정보 <span className="text-red-500">*</span>
+          </span>
           {!step1Completed && (
             <Badge variant="outline" className="border-gray-300 text-gray-500">
               대기중
@@ -85,7 +90,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.lessorNm}
                 onChange={e => updateField('lessorNm', e.target.value)}
                 placeholder="예: 김싸피"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -97,7 +102,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.propertyNm}
                 onChange={e => updateField('propertyNm', e.target.value)}
                 placeholder="예: 멀티캠퍼스"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -113,7 +118,7 @@ export default function Step2PropertyInfo({
             onChange={e => updateField('content', e.target.value)}
             placeholder="이 집은 아주 좋습니다."
             rows={4}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
           />
         </div>
 
@@ -131,7 +136,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.area}
                 onChange={e => updateField('area', e.target.value)}
                 placeholder="예: 84.8"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -141,7 +146,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.areaP}
                 onChange={e => updateField('areaP', e.target.value)}
                 placeholder="예: 32"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -160,7 +165,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.deposit}
                 onChange={e => updateField('deposit', e.target.value)}
                 placeholder="예: 10000000"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -172,7 +177,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.mnRent}
                 onChange={e => updateField('mnRent', e.target.value)}
                 placeholder="예: 800000"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -182,7 +187,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.fee}
                 onChange={e => updateField('fee', e.target.value)}
                 placeholder="예: 50000"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -201,7 +206,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.roomCnt}
                 onChange={e => updateField('roomCnt', e.target.value)}
                 placeholder="예: 2"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -213,7 +218,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.bathroomCnt}
                 onChange={e => updateField('bathroomCnt', e.target.value)}
                 placeholder="예: 1"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -223,7 +228,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.floor}
                 onChange={e => updateField('floor', e.target.value)}
                 placeholder="예: 5"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -231,7 +236,7 @@ export default function Step2PropertyInfo({
               <select
                 value={listingInfo.facing}
                 onChange={e => updateField('facing', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               >
                 <option value="N">북</option>
                 <option value="S">남</option>
@@ -255,7 +260,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.period}
                 onChange={e => updateField('period', e.target.value)}
                 placeholder="예: 24"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -265,7 +270,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.parkingCnt}
                 onChange={e => updateField('parkingCnt', e.target.value)}
                 placeholder="예: 1"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -274,7 +279,7 @@ export default function Step2PropertyInfo({
                 type="date"
                 value={listingInfo.constructionDate}
                 onChange={e => updateField('constructionDate', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -343,7 +348,7 @@ export default function Step2PropertyInfo({
                   type="date"
                   value={listingInfo.aucAt}
                   onChange={e => updateField('aucAt', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
                 />
               </div>
               <div>
@@ -355,7 +360,7 @@ export default function Step2PropertyInfo({
                   value={listingInfo.aucAvailable}
                   onChange={e => updateField('aucAvailable', e.target.value)}
                   placeholder="예: 12월 10일 오후 시간대 희망합니다."
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
                 />
               </div>
             </div>
@@ -377,4 +382,3 @@ export default function Step2PropertyInfo({
     </AccordionItem>
   )
 }
-

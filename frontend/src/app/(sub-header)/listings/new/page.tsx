@@ -11,71 +11,108 @@ import Step2PropertyInfo from '@/components/listings/Step2PropertyInfo'
 import Step3AdditionalInfo from '@/components/listings/Step3AdditionalInfo'
 
 export default function NewListingPage() {
-  // 카카오맵 API 로드
   useKakaoLoader()
-  
   const { refresh: refreshLocation, isRefreshing } = useUserLocation()
+
+  // Step1 데이터
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
-  const [address, setAddress] = useState<string>('')
-  const [file, setFile] = useState<File | null>(null)
+  const [baseAddress, setBaseAddress] = useState<string>('') // 기본 주소
+  const [detailAddress, setDetailAddress] = useState<string>('') // 상세 주소
+  const [files, setFiles] = useState<File[]>([])
 
   // 단계별 완료 상태
   const [step1Completed, setStep1Completed] = useState(false)
   const [step2Completed, setStep2Completed] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
-
-  // 현재 열려있는 아코디언
   const [currentAccordion, setCurrentAccordion] = useState('item-1')
 
-  // 매물 정보 상태 (API 스펙에 맞게)
+  // Step2 매물 정보 상태
   const [listingInfo, setListingInfo] = useState({
-    lessorNm: '', // 임대인 이름
-    propertyNm: '', // 매물 이름
-    content: '', // 내용
-    area: '', // 면적 (제곱미터)
-    areaP: '', // 평수
-    deposit: '', // 보증금
-    mnRent: '', // 월세
-    fee: '', // 관리비
-    period: '', // 계약 기간 (개월)
-    floor: '', // 층수
-    facing: 'N', // 방향 (N, S, E, W)
-    roomCnt: '', // 방 개수
-    bathroomCnt: '', // 욕실 개수
-    constructionDate: '', // 준공일
-    parkingCnt: '', // 주차 대수
-    hasElevator: false, // 엘리베이터 유무
-    petAvailable: false, // 반려동물 가능 여부
-    isAucPref: false, // 경매 선호 여부
-    isBrkPref: false, // 중개 선호 여부
-    aucAt: '', // 경매 날짜
-    aucAvailable: '', // 경매 가능 시간
+    lessorNm: '',
+    propertyNm: '',
+    content: '',
+    area: '',
+    areaP: '',
+    deposit: '',
+    mnRent: '',
+    fee: '',
+    period: '',
+    floor: '',
+    facing: 'N',
+    roomCnt: '',
+    bathroomCnt: '',
+    constructionDate: '',
+    parkingCnt: '',
+    hasElevator: false,
+    petAvailable: false,
+    isAucPref: false,
+    isBrkPref: false,
+    aucAt: '',
+    aucAvailable: '',
   })
 
-  // 인증 버튼 활성화 조건
-  const canVerify = addressCoords !== null && file !== null && !step1Completed
+  // Step3 추가 정보 상태
+  const [additionalInfo, setAdditionalInfo] = useState({
+    images: [] as File[],
+    notes: '',
+  })
 
-  // 인증 처리
+  // 인증 버튼 활성화 조건 (주소 + 상세주소 + 파일)
+  const canVerify = !!(
+    addressCoords !== null &&
+    baseAddress.trim() &&
+    detailAddress.trim() &&
+    files.length > 0 &&
+    !step1Completed
+  )
+
+  // Step1 핸들러들
+  const handleAddressSelect = (selectedAddress: string, coords: { lat: number; lng: number }) => {
+    setBaseAddress(selectedAddress)
+    setAddressCoords(coords)
+    console.log('✅ Step1 - 주소 선택:', selectedAddress, coords)
+  }
+
+  const handleDetailAddressChange = (detail: string) => {
+    setDetailAddress(detail)
+    console.log('✅ Step1 - 상세주소 입력:', detail)
+  }
+
+  const handleFileChange = (newFiles: File[]) => {
+    setFiles(newFiles)
+    console.log('✅ Step1 - 파일 변경:', newFiles.map(f => f.name))
+  }
+
   const handleVerify = () => {
     if (!canVerify) return
     setIsVerifying(true)
-    // 실제로는 API 호출을 해야 하지만, 여기서는 시뮬레이션
+
+    const fullAddress = `${baseAddress} ${detailAddress}`
+    console.log('✅ Step1 - 인증 시작:', {
+      fullAddress,
+      files: files.map(f => f.name),
+      coords: addressCoords,
+    })
+
+    // 실제로는 API 호출 (여기선 시뮬레이션)
     setTimeout(() => {
       setStep1Completed(true)
       setIsVerifying(false)
-      setCurrentAccordion('item-2') // 2단계 자동 열기
+      setCurrentAccordion('item-2')
+      console.log('✅ Step1 - 인증 완료')
     }, 1000)
   }
 
-  // 주소 선택 핸들러
-  const handleAddressSelect = (selectedAddress: string, coords: { lat: number; lng: number }) => {
-    setAddress(selectedAddress)
-    setAddressCoords(coords)
+  // Step2 핸들러
+  const handleListingInfoChange = (info: typeof listingInfo) => {
+    setListingInfo(info)
+    console.log('✅ Step2 - 매물 정보 변경:', info)
   }
 
-  // 파일 변경 핸들러
-  const handleFileChange = (newFile: File | null) => {
-    setFile(newFile)
+  // Step3 핸들러
+  const handleAdditionalInfoChange = (info: typeof additionalInfo) => {
+    setAdditionalInfo(info)
+    console.log('✅ Step3 - 추가 정보 변경:', info)
   }
 
   // 매물 정보 입력 완료 조건
@@ -92,19 +129,24 @@ export default function NewListingPage() {
 
   // 최종 제출
   const handleSubmit = async () => {
+    const fullAddress = `${baseAddress} ${detailAddress}`.trim()
+
     const formData = {
+      // Step1 데이터
+      address: fullAddress,
+      latitude: addressCoords?.lat || 0,
+      longitude: addressCoords?.lng || 0,
+      verificationFiles: files.map(file => file.name),
+
+      // Step2 데이터
       lessorNm: listingInfo.lessorNm,
       propertyNm: listingInfo.propertyNm,
       content: listingInfo.content,
-      address: address,
-      latitude: addressCoords?.lat || 0,
-      longitude: addressCoords?.lng || 0,
       area: parseFloat(listingInfo.area) || 0,
       areaP: parseFloat(listingInfo.areaP) || 0,
       deposit: parseInt(listingInfo.deposit) || 0,
       mnRent: parseInt(listingInfo.mnRent) || 0,
       fee: parseInt(listingInfo.fee) || 0,
-      images: [], // 이미지는 별도 업로드 필요
       period: parseInt(listingInfo.period) || 0,
       floor: parseInt(listingInfo.floor) || 0,
       facing: listingInfo.facing,
@@ -118,56 +160,39 @@ export default function NewListingPage() {
       isBrkPref: listingInfo.isBrkPref,
       aucAt: listingInfo.aucAt,
       aucAvailable: listingInfo.aucAvailable,
+
+      // Step3 데이터
+      images: additionalInfo.images.map(img => img.name),
+      notes: additionalInfo.notes,
     }
 
-    console.log('제출할 데이터:', formData)
-
-    // TODO: 실제 API POST 요청
-    // try {
-    //   const response = await fetch('/api/listings', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(formData),
-    //   })
-    //   const data = await response.json()
-    //   // 성공 처리
-    // } catch (error) {
-    //   // 에러 처리
-    // }
-
+    console.log('🚀 최종 제출 데이터:', formData)
     alert('매물 등록이 완료되었습니다!')
   }
 
   return (
     <>
-      <div className="mx-auto w-full max-w-4xl px-4 py-8 pb-32">
-        {/* 페이지 헤더 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">매물 등록</h1>
-          <p className="mt-2 text-base text-gray-600">매물 정보를 입력하고 등록해주세요</p>
-        </div>
-
+      <div className="mx-auto w-full max-w-4xl py-4 pb-32">
         <Accordion
           type="single"
           collapsible
           className="w-full space-y-6"
           value={currentAccordion}
           onValueChange={value => {
-            // 2, 3단계는 1단계 완료 후에만 열 수 있음
-            if ((value === 'item-2' || value === 'item-3') && !step1Completed) {
-              return
-            }
+            if ((value === 'item-2' || value === 'item-3') && !step1Completed) return
             setCurrentAccordion(value)
           }}
         >
           <Step1PropertyVerification
             step1Completed={step1Completed}
             isVerifying={isVerifying}
-            address={address}
+            baseAddress={baseAddress}
+            detailAddress={detailAddress}
             addressCoords={addressCoords}
-            file={file}
+            files={files}
             canVerify={canVerify}
             onAddressSelect={handleAddressSelect}
+            onDetailAddressChange={handleDetailAddressChange}
             onFileChange={handleFileChange}
             onVerify={handleVerify}
             refreshLocation={refreshLocation}
@@ -178,14 +203,19 @@ export default function NewListingPage() {
             step1Completed={step1Completed}
             listingInfo={listingInfo}
             canCompleteStep2={canCompleteStep2}
-            onListingInfoChange={setListingInfo}
+            onListingInfoChange={handleListingInfoChange}
             onComplete={() => {
               setStep2Completed(true)
               setCurrentAccordion('')
+              console.log('✅ Step2 - 입력 완료')
             }}
           />
 
-          <Step3AdditionalInfo step1Completed={step1Completed} />
+          <Step3AdditionalInfo
+            step1Completed={step1Completed}
+            additionalInfo={additionalInfo}
+            onAdditionalInfoChange={handleAdditionalInfoChange}
+          />
         </Accordion>
       </div>
 
