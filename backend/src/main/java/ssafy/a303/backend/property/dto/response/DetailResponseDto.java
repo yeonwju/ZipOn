@@ -1,5 +1,6 @@
 package ssafy.a303.backend.property.dto.response;
 
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
@@ -43,6 +44,9 @@ public record DetailResponseDto(
         // 경매, 중개 선호 설정
         Boolean isAucPref,
         Boolean isBrkPref,
+
+        // 중개 성사 여부
+        Boolean isLinked,
 
         // 경매 관련
         String aucAt,

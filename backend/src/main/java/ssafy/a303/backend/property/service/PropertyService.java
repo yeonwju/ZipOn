@@ -175,6 +175,7 @@ public class PropertyService {
                         p.getPetAvailable(),
                         aucInfo.getIsAucPref(),
                         aucInfo.getIsBrkPref(),
+                        p.getIsLinked(),
                         aucInfo.getAucAt(),
                         aucInfo.getAucAvailable()
             );
@@ -209,6 +210,7 @@ public class PropertyService {
                 p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(), p.getConstructionDate(),
                 p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
                 aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
+                p.getIsLinked(),
                 aucInfo.getAucAt(), aucInfo.getAucAvailable()
         );
         return detail;

@@ -31,6 +31,7 @@ public record PropertyRegiResponseDto(
         Boolean petAvailable,
         Boolean isAucPref,
         Boolean isBrkPref,
+        Boolean isLinked,
         String aucAt,
         String aucAvailable
 ) {
