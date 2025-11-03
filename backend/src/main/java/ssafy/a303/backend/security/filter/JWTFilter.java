@@ -33,12 +33,14 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        // ---- token 읽기 ----
+        // ---- token ----
         String accessToken = null;
+        // ---- dev 확인용 ---
         String header = request.getHeader("Authorization");
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             accessToken = header.substring(7);
         }
+        // ---- Cookie ----
         if (accessToken == null && request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
                 if ("AT".equals(c.getName())) {

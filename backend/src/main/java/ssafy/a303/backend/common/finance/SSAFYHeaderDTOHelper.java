@@ -15,7 +15,7 @@ public class SSAFYHeaderDTOHelper {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HHmmss");
-    @Value("${ssafyApiKey}")
+    @Value("${ssafy.api.key}")
     private static String apiKey;
 
     /**

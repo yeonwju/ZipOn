@@ -9,10 +9,12 @@ public class CookieFactory {
 
     private final int accessHours;
     private final int refreshDays;
+    private final int instantMinute;
 
-    public CookieFactory(@Value("${jwt.access-token-hours}") int accessHours, @Value("${jwt.refresh-token-days}") int refreshDays) {
+    public CookieFactory(@Value("${jwt.access-token-hours}") int accessHours, @Value("${jwt.refresh-token-days}") int refreshDays, @Value("${instant-minute}") int instantMinute) {
         this.accessHours = accessHours * 60 * 60;
         this.refreshDays = refreshDays * 60 * 60 * 24;
+        this.instantMinute = instantMinute * 60;
     }
 
     private Cookie bake(String name, String token, int life) {
@@ -30,5 +32,8 @@ public class CookieFactory {
 
     public Cookie refreshCookie(String token) {
         return bake("RT", token, refreshDays);
+    }
+    public Cookie instantCookie(String name, String token){
+        return bake(name, token, instantMinute);
     }
 }

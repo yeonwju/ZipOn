@@ -16,4 +16,8 @@ public class TokenData {
     Instant issueTime;
     String jti;
     long ver;
+    // 사용자 정보
+    String name;
+    String tel;
+    String birth;
 }

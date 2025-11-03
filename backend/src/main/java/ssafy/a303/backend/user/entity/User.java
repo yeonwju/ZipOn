@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userSeq;
+    private Integer userSeq;
     @Column(nullable = false, length = 64)
     private String email;
     @Column(nullable = false)

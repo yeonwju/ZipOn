@@ -14,6 +14,7 @@ import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.security.jwt.entity.TokenPair;
 import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
+import ssafy.a303.backend.security.jwt.token.InstantData;
 import ssafy.a303.backend.security.jwt.token.TokenData;
 import ssafy.a303.backend.security.jwt.token.TokenType;
 
@@ -36,6 +37,8 @@ public class JWTProvider {
     private long accessHours;
     @Value("${jwt.refresh-token-days}")
     private long refreshDays;
+    @Value("${instant-minute}")
+    private int instantMinute;
     private final TokenPairRepository tokenPairRepository;
 
     @PostConstruct
@@ -54,6 +57,9 @@ public class JWTProvider {
                 .claim("role", tokenData.getRole())
                 .claim("tokenType", TokenType.ACCESS.name())
                 .claim("jti", tokenData.getJti())
+                .claim("name", tokenData.getName())
+                .claim("tel", tokenData.getTel())
+                .claim("birth", tokenData.getBirth())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -68,6 +74,20 @@ public class JWTProvider {
                 .setIssuedAt(Date.from(now))
                 .setExpiration(expiry)
                 .claim("tokenType", TokenType.REFRESH.name())
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateInstantToken(InstantData instantData){
+        Instant now = instantData.getIssueTime();
+        Duration life = Duration.ofMinutes(instantMinute);
+        Date expiry = Date.from(now.plus(life));
+        return Jwts.builder()
+                .setSubject(String.valueOf(instantData.getUserSeq()))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(expiry)
+                .claim("taxSeq", instantData.getTaxSeq())
+                .claim("ceo",instantData.getCeo())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
