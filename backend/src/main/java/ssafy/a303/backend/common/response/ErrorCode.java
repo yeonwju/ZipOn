@@ -80,7 +80,8 @@ public enum ErrorCode {
 
     // PDF 검증
     EMPTY_PDF_FILE(400, HttpStatus.BAD_REQUEST, "파일이 비어 있습니다."),
-    ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다.")
+    ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다."),
+    VERIFICATION_FAILED(400, HttpStatus.BAD_REQUEST, "등기부등본이 매물 정보와 일치하지 않습니다.")
     ;
     // ────────────────────────────────────────────────────
     private final int code;

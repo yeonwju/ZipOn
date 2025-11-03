@@ -42,6 +42,11 @@ public class VerificationService {
             throw new CustomException(ErrorCode.AI_NO_RESPONSE, ex);
         }
 
+        // 검증 결과 판단
+        if(isCertificated != true){
+            throw new CustomException(ErrorCode.VERIFICATION_FAILED, ErrorCode.VERIFICATION_FAILED.getMessage());
+        }
+
         // 결과를 dto로 변환
         return new VerificationResultResponseDto(pdfCode, isCertificated);
     }
