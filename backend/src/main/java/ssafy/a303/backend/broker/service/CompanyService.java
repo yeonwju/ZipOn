@@ -43,9 +43,9 @@ public class CompanyService {
         LocalDate today = LocalDate.now(zone);
 
         // 오늘 이미 검색 된 경우
-        Company company;
+
         if (opt.isPresent()) {
-            company = opt.get();
+            Company company = opt.get();
             if (company.getCheckAt().equals(today)) {
                 return company.getStatus();
             }
@@ -65,11 +65,12 @@ public class CompanyService {
         boolean result = response != null && response.isValid();
         if (opt.isPresent()) {
             // 갱신
-            company = opt.get();
+            Company company = opt.get();
             company.setStatus(result);
             companyRepository.save(company);
         } else if (result) {
-            company = bizno(bNo);
+            // 새로 등록
+            Company company = bizno(bNo);
             company.setCheckAt(today);
             companyRepository.save(company);
         }
