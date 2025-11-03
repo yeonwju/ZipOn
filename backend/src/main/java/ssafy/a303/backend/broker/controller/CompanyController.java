@@ -20,21 +20,11 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 public class CompanyController {
 
     private final CompanyService companyService;
-//    private final CookieFactory cookieFactory;
-//    private final JWTProvider jwtProvider;
 
     @PostMapping("/status")
     public ResponseEntity<ResponseDTO<Void>> companyStatusCheck(@RequestBody CompanyStatusRequest companyRequest) {
         String taxSeq = companyRequest.b_no().get(0);
         if (companyService.cmpStatus(taxSeq)) {
-//            String token = jwtProvider.generateInstantToken(
-//                    InstantData.builder()
-//                            .issueTime(Instant.now() )
-//                            .userSeq(userSeq)
-//                            .taxSeq(taxSeq)
-//                            .build()
-//            );
-//            response.addCookie(cookieFactory.instantCookie("CP", token));
             return ResponseDTO.ok(null, "운영 중인 사업장 입니다.");
         }
         throw new CustomException(ErrorCode.INVALID_TAX_SEQ);
