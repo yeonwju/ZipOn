@@ -40,3 +40,5 @@ jwt:
   refresh-token-days: 14
 
 frontUrl: ${FRONT_URL:http://localhost:3000}
+ssafyApiUrl: ${SSAFY_API_URL}
+ssafyApiKey: ${SSAFY_API_KEY}

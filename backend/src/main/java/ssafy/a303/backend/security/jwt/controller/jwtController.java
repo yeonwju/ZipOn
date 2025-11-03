@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ssafy.a303.backend.common.dto.ResponseDTO;
+import ssafy.a303.backend.common.response.ResponseDTO;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.security.jwt.service.JWTProvider;
 import ssafy.a303.backend.security.support.CookieFactory;
 
@@ -33,12 +35,11 @@ public class jwtController {
             }
         }
         if (accessToken == null || refreshToken == null) {
-            return ResponseDTO.unauthorized("Bad Cookies");
+            throw new CustomException(ErrorCode.EXPIRED_TOKEN);
         }
-        if (!jwtProvider.isTokenValid(accessToken))
-            return ResponseDTO.unauthorized("Bad Access Token");
-        if(!jwtProvider.isTokenValid(refreshToken))
-            return ResponseDTO.unauthorized("Bad Refresh Token");
+        if (!jwtProvider.isTokenValid(accessToken) || !jwtProvider.isTokenValid(refreshToken))
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+
         String[] tokens = jwtProvider.getNewAccessTokenByRefreshToken(accessToken, refreshToken);
         Cookie accessCookie = cookieFactory.accessCookie(tokens[0]);
         Cookie refreshCookie = cookieFactory.refreshCookie(tokens[1]);

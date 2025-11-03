@@ -8,8 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ssafy.a303.backend.common.dto.CustomException;
-import ssafy.a303.backend.common.dto.ResponseDTO;
+import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.common.response.ErrorCode;
 
 @Slf4j
