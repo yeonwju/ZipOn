@@ -25,13 +25,20 @@ pipeline {
       steps {
         script {
           parallel(
-            FRONTEND: { sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:\\$(cat .gitsha) ./frontend" },
-            BACKEND : { sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest  -t zipon-backend:\\$(cat .gitsha)  ./backend" },
-            AI      : { sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest       -t zipon-ai:\\$(cat .gitsha)       ./ai" }
+            FRONTEND: {
+              sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:\\$(cat .gitsha) ./frontend"
+            },
+            BACKEND: {
+              sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:\\$(cat .gitsha) ./backend"
+            },
+            AI: {
+              sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:\\$(cat .gitsha) ./ai"
+            }
           )
         }
       }
     }
+
 
     stage('Unit Tests (dev only)') {
       when { branch 'dev' }
