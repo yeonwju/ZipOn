@@ -3,7 +3,17 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import React from 'react'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
+import { ImageIcon, X } from 'lucide-react'
+import React, { useRef } from 'react'
+import SelectPicker from '@/components/live/SelectPicker'
 
 interface ListingInfo {
   lessorNm: string
@@ -19,16 +29,12 @@ interface ListingInfo {
   facing: string
   roomCnt: string
   bathroomCnt: string
-  constructionDate: string
-  parkingCnt: string
-  hasElevator: boolean
-  petAvailable: boolean
-  isAucPref: boolean
-  isBrkPref: boolean
-  aucAt: string
-  aucAvailable: string
+  images: File[]
 }
-
+interface SelectItem {
+  value: string
+  title: string
+}
 interface Step2Props {
   step1Completed: boolean
   listingInfo: ListingInfo
@@ -36,6 +42,12 @@ interface Step2Props {
   onListingInfoChange: (info: ListingInfo) => void
   onComplete: () => void
 }
+const mockAuctionItems = [
+  { value: '1', title: '동향' },
+  { value: '2', title: '서향' },
+  { value: '3', title: '남향' },
+  { value: '4', title: '북향' },
+]
 
 export default function Step2PropertyInfo({
   step1Completed,
@@ -44,10 +56,31 @@ export default function Step2PropertyInfo({
   onListingInfoChange,
   onComplete,
 }: Step2Props) {
-  const updateField = (field: keyof ListingInfo, value: string | boolean) => {
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
+
+  const updateField = (field: keyof ListingInfo, value: string | boolean | File[]) => {
     const newInfo = { ...listingInfo, [field]: value }
     onListingInfoChange(newInfo)
     console.log(`📝 Step2 - ${field} 변경:`, value)
+  }
+
+  const handleImageClick = () => imageInputRef.current?.click()
+
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    if (selectedFiles.length > 0) {
+      updateField('images', [...listingInfo.images, ...selectedFiles])
+    }
+  }
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = listingInfo.images.filter((_, i) => i !== index)
+    updateField('images', newImages)
+  }
+
+  // 이미지 미리보기 URL 생성
+  const getImagePreview = (file: File) => {
+    return URL.createObjectURL(file)
   }
 
   return (
@@ -76,33 +109,33 @@ export default function Step2PropertyInfo({
           )}
         </div>
       </AccordionTrigger>
-      <AccordionContent className="flex flex-col gap-8 pt-4">
+      <AccordionContent className="flex flex-col gap-6 pt-4">
         {/* 기본 정보 */}
         <div>
           <h3 className="mb-4 text-lg font-bold text-gray-900">기본 정보</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 임대인 이름 <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={listingInfo.lessorNm}
                 onChange={e => updateField('lessorNm', e.target.value)}
-                placeholder="예: 김싸피"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 김싸피"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 매물 이름 <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={listingInfo.propertyNm}
                 onChange={e => updateField('propertyNm', e.target.value)}
-                placeholder="예: 멀티캠퍼스"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 멀티캠퍼스"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -110,7 +143,7 @@ export default function Step2PropertyInfo({
 
         {/* 상세 설명 */}
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-900">
+          <label className="mb-2 block text-sm font-medium text-gray-900">
             상세 설명 <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -127,7 +160,7 @@ export default function Step2PropertyInfo({
           <h3 className="mb-4 text-lg font-bold text-gray-900">면적</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 면적 (㎡) <span className="text-red-500">*</span>
               </label>
               <input
@@ -135,18 +168,18 @@ export default function Step2PropertyInfo({
                 step="0.1"
                 value={listingInfo.area}
                 onChange={e => updateField('area', e.target.value)}
-                placeholder="예: 84.8"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 84.8"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">평수</label>
+              <label className="mb-2 block text-sm font-medium text-gray-900">평수</label>
               <input
                 type="number"
                 value={listingInfo.areaP}
                 onChange={e => updateField('areaP', e.target.value)}
-                placeholder="예: 32"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 32"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -155,217 +188,146 @@ export default function Step2PropertyInfo({
         {/* 가격 정보 */}
         <div>
           <h3 className="mb-4 text-lg font-bold text-gray-900">가격</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 보증금 (원) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={listingInfo.deposit}
                 onChange={e => updateField('deposit', e.target.value)}
-                placeholder="예: 10000000"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 10000000"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 월세 (원) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={listingInfo.mnRent}
                 onChange={e => updateField('mnRent', e.target.value)}
-                placeholder="예: 800000"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 800000"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">관리비 (원)</label>
+              <label className="mb-2 block text-sm font-medium text-gray-900">관리비 (원)</label>
               <input
                 type="number"
                 value={listingInfo.fee}
                 onChange={e => updateField('fee', e.target.value)}
-                placeholder="예: 50000"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 50000"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
-        {/* 매물 상세 정보 */}
         <div>
           <h3 className="mb-4 text-lg font-bold text-gray-900">매물 상세</h3>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="flex flex-row gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 방 개수 <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={listingInfo.roomCnt}
                 onChange={e => updateField('roomCnt', e.target.value)}
-                placeholder="예: 2"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 2"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
                 욕실 개수 <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={listingInfo.bathroomCnt}
                 onChange={e => updateField('bathroomCnt', e.target.value)}
-                placeholder="예: 1"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 1"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">층수</label>
+              <label className="mb-2 block text-sm font-medium text-gray-900">층수</label>
               <input
                 type="number"
                 value={listingInfo.floor}
                 onChange={e => updateField('floor', e.target.value)}
-                placeholder="예: 5"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                placeholder="ex: 5"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">방향</label>
-              <select
-                value={listingInfo.facing}
-                onChange={e => updateField('facing', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-              >
-                <option value="N">북</option>
-                <option value="S">남</option>
-                <option value="E">동</option>
-                <option value="W">서</option>
-              </select>
             </div>
           </div>
         </div>
 
         {/* 추가 정보 */}
-        <div>
-          <h3 className="mb-4 text-lg font-bold text-gray-900">추가 정보</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
-                계약 기간 (개월)
-              </label>
-              <input
-                type="number"
-                value={listingInfo.period}
-                onChange={e => updateField('period', e.target.value)}
-                placeholder="예: 24"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">주차 대수</label>
-              <input
-                type="number"
-                value={listingInfo.parkingCnt}
-                onChange={e => updateField('parkingCnt', e.target.value)}
-                placeholder="예: 1"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">준공일</label>
-              <input
-                type="date"
-                value={listingInfo.constructionDate}
-                onChange={e => updateField('constructionDate', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* 옵션 */}
-        <div>
-          <h3 className="mb-4 text-lg font-bold text-gray-900">편의시설 및 옵션</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={listingInfo.hasElevator}
-                onChange={e => updateField('hasElevator', e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-              <span className="text-sm font-medium text-gray-900">엘리베이터 있음</span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={listingInfo.petAvailable}
-                onChange={e => updateField('petAvailable', e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-              <span className="text-sm font-medium text-gray-900">반려동물 가능</span>
-            </label>
-          </div>
-        </div>
-
-        {/* 거래 방식 */}
-        <div>
-          <h3 className="mb-4 text-lg font-bold text-gray-900">거래 방식</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={listingInfo.isAucPref}
-                onChange={e => updateField('isAucPref', e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-              <span className="text-sm font-medium text-gray-900">경매 선호</span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={listingInfo.isBrkPref}
-                onChange={e => updateField('isBrkPref', e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-              <span className="text-sm font-medium text-gray-900">중개 선호</span>
-            </label>
-          </div>
-        </div>
-
-        {/* 경매 정보 (경매 선호 시) */}
-        {listingInfo.isAucPref && (
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <h3 className="mb-4 text-lg font-bold text-gray-900">경매 정보</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-900">
-                  경매 희망 날짜
-                </label>
-                <input
-                  type="date"
-                  value={listingInfo.aucAt}
-                  onChange={e => updateField('aucAt', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-900">
-                  경매 가능 시간
-                </label>
-                <input
-                  type="text"
-                  value={listingInfo.aucAvailable}
-                  onChange={e => updateField('aucAvailable', e.target.value)}
-                  placeholder="예: 12월 10일 오후 시간대 희망합니다."
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                />
-              </div>
-            </div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">계약 기간 (개월)</label>
+            <input
+              type="number"
+              value={listingInfo.period}
+              onChange={e => updateField('period', e.target.value)}
+              placeholder="ex: 24"
+              className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+            />
           </div>
-        )}
+          <SelectPicker title={'방향'} description={'방향 목록'} auctionItems={mockAuctionItems} />
+        </div>
+
+        {/* 매물 이미지 업로드 */}
+        <div>
+          <h3 className="mb-4 text-lg font-bold text-gray-900">사진</h3>
+
+          <div className="grid grid-cols-3 gap-4">
+            {listingInfo.images.map((image, index) => (
+              <div key={index} className="group relative aspect-square overflow-hidden rounded-lg">
+                <img
+                  src={getImagePreview(image)}
+                  alt={`미리보기 ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute top-0.5 right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition-all hover:bg-black/70"
+                  aria-label="이미지 삭제"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ))}
+
+            {/* 사진 추가 버튼 */}
+            <button
+              type="button"
+              onClick={handleImageClick}
+              className="group relative flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 transition-all hover:border-blue-500 hover:bg-blue-50"
+            >
+              <ImageIcon
+                className="text-gray-400 transition-colors group-hover:text-blue-500"
+                size={32}
+              />
+              <span className="text-sm font-medium text-gray-600 transition-colors group-hover:text-blue-600">
+                사진 추가
+              </span>
+            </button>
+          </div>
+
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageInputChange}
+            className="hidden"
+            multiple
+          />
+        </div>
 
         {/* 입력 완료 버튼 */}
         <div className="flex justify-end pt-4">
@@ -373,7 +335,7 @@ export default function Step2PropertyInfo({
             onClick={onComplete}
             disabled={!canCompleteStep2}
             size="lg"
-            className="h-12 bg-blue-500 px-8 text-base font-semibold text-white hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400"
+            className="h-12 bg-blue-500 px-8 text-base font-medium text-white hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400"
           >
             입력 완료
           </Button>

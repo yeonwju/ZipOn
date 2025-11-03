@@ -2,20 +2,17 @@
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty'
-import { ImageIcon, X } from 'lucide-react'
-import React, { useRef } from 'react'
+import React from 'react'
 
 interface AdditionalInfo {
-  images: File[]
+  constructionDate: string
+  parkingCnt: string
+  hasElevator: boolean
+  petAvailable: boolean
+  isAucPref: boolean
+  isBrkPref: boolean
+  aucAt: string
+  aucAvailable: string
   notes: string
 }
 
@@ -30,33 +27,10 @@ export default function Step3AdditionalInfo({
   additionalInfo,
   onAdditionalInfoChange,
 }: Step3Props) {
-  const imageInputRef = useRef<HTMLInputElement | null>(null)
-
-  const handleImageClick = () => imageInputRef.current?.click()
-
-  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || [])
-    if (selectedFiles.length > 0) {
-      onAdditionalInfoChange({
-        ...additionalInfo,
-        images: [...additionalInfo.images, ...selectedFiles],
-      })
-    }
-  }
-
-  const handleRemoveImage = (index: number) => {
-    const newImages = additionalInfo.images.filter((_, i) => i !== index)
-    onAdditionalInfoChange({
-      ...additionalInfo,
-      images: newImages,
-    })
-  }
-
-  const handleNotesChange = (notes: string) => {
-    onAdditionalInfoChange({
-      ...additionalInfo,
-      notes,
-    })
+  const updateField = (field: keyof AdditionalInfo, value: string | boolean) => {
+    const newInfo = { ...additionalInfo, [field]: value }
+    onAdditionalInfoChange(newInfo)
+    console.log(`📝 Step3 - ${field} 변경:`, value)
   }
 
   return (
@@ -89,90 +63,120 @@ export default function Step3AdditionalInfo({
         </div>
       </AccordionTrigger>
       <AccordionContent className="flex flex-col gap-8 pt-4">
-        {/* 매물 이미지 업로드 */}
+        {/* 건물 정보 */}
         <div>
-          <h3 className="mb-4 text-lg font-bold text-gray-900">매물 사진</h3>
-
-          <Empty className="group flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 py-8 text-center transition-all hover:border-blue-500 hover:bg-blue-50">
-            {additionalInfo.images.length === 0 ? (
-              <>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <ImageIcon
-                      className="text-gray-400 transition-colors group-hover:text-blue-500"
-                      size={32}
-                    />
-                  </EmptyMedia>
-                  <EmptyTitle className="mt-3 text-base font-medium text-gray-900">
-                    사진을 업로드하세요
-                  </EmptyTitle>
-                  <EmptyDescription className="mt-1 text-sm text-gray-500">
-                    JPG, PNG 파일을 업로드할 수 있습니다 (선택사항)
-                  </EmptyDescription>
-                </EmptyHeader>
-
-                <EmptyContent>
-                  <Button
-                    type="button"
-                    onClick={handleImageClick}
-                    className="mt-4 h-10 bg-blue-500 px-6 text-sm font-semibold text-white hover:bg-blue-600"
-                  >
-                    사진 선택
-                  </Button>
-                  <input
-                    ref={imageInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageInputChange}
-                    className="hidden"
-                    multiple
-                  />
-                </EmptyContent>
-              </>
-            ) : (
-              <div className="flex w-full flex-col gap-2">
-                {additionalInfo.images.map((image, index) => (
-                  <div
-                    key={index}
-                    className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-5 py-3 shadow-sm"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
-                        <ImageIcon className="text-blue-500" size={18} />
-                      </div>
-                      <span className="max-w-[200px] truncate text-sm font-medium text-gray-900">
-                        {image.name}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveImage(index)}
-                      className="ml-2 text-gray-400 transition hover:text-red-500"
-                      aria-label="이미지 삭제"
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
-                ))}
-
-                <Button
-                  type="button"
-                  onClick={handleImageClick}
-                  variant="outline"
-                  className="mt-2 h-9 border-blue-400 text-blue-500 hover:bg-blue-50"
-                >
-                  다른 사진 추가
-                </Button>
-              </div>
-            )}
-          </Empty>
+          <h3 className="mb-4 text-lg font-bold text-gray-900">건물 정보</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-gray-900">주차 대수</label>
+              <input
+                type="number"
+                value={additionalInfo.parkingCnt}
+                onChange={e => updateField('parkingCnt', e.target.value)}
+                placeholder="예: 1"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-gray-900">준공일</label>
+              <input
+                type="date"
+                value={additionalInfo.constructionDate}
+                onChange={e => updateField('constructionDate', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+              />
+            </div>
+          </div>
         </div>
+
+        {/* 편의시설 및 옵션 */}
+        <div>
+          <h3 className="mb-4 text-lg font-bold text-gray-900">편의시설 및 옵션</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={additionalInfo.hasElevator}
+                onChange={e => updateField('hasElevator', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+              <span className="text-sm font-medium text-gray-900">엘리베이터 있음</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={additionalInfo.petAvailable}
+                onChange={e => updateField('petAvailable', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+              <span className="text-sm font-medium text-gray-900">반려동물 가능</span>
+            </label>
+          </div>
+        </div>
+
+        {/* 거래 방식 */}
+        <div>
+          <h3 className="mb-4 text-lg font-bold text-gray-900">거래 방식</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={additionalInfo.isAucPref}
+                onChange={e => updateField('isAucPref', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+              <span className="text-sm font-medium text-gray-900">경매 선호</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={additionalInfo.isBrkPref}
+                onChange={e => updateField('isBrkPref', e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+              <span className="text-sm font-medium text-gray-900">중개 선호</span>
+            </label>
+          </div>
+        </div>
+
+        {/* 경매 정보 (경매 선호 시) */}
+        {additionalInfo.isAucPref && (
+          <div>
+            <h3 className="mb-4 text-lg font-bold text-gray-900">경매 정보</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-900">
+                  경매 희망 날짜
+                </label>
+                <input
+                  type="date"
+                  value={additionalInfo.aucAt}
+                  onChange={e => updateField('aucAt', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-900">
+                  경매 가능 시간
+                </label>
+                <input
+                  type="text"
+                  value={additionalInfo.aucAvailable}
+                  onChange={e => updateField('aucAvailable', e.target.value)}
+                  placeholder="예: 12월 10일 오후 시간대 희망합니다."
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 기타 특이사항 */}
         <div>
           <h3 className="mb-4 text-lg font-bold text-gray-900">기타 특이사항</h3>
           <textarea
             value={additionalInfo.notes}
-            onChange={e => handleNotesChange(e.target.value)}
+            onChange={e => updateField('notes', e.target.value)}
             placeholder="추가로 전달하고 싶은 내용을 입력해주세요 (선택사항)"
             rows={5}
             className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"

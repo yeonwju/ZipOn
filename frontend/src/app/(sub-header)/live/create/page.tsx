@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 
 import AddressSearch from '@/components/common/AddressSearch'
-import LiveAuctionPicker from '@/components/live/LiveAuctionPicker'
+import SelectPicker from '@/components/live/SelectPicker'
 import LiveCreateButton from '@/components/live/LiveCreateButton'
 import LiveMapPreview from '@/components/live/LiveMapPreview'
 import LiveTitleInput from '@/components/live/LiveTitleInput'
@@ -21,7 +21,7 @@ import { calculateDistance } from '@/utils/distance'
 export default function LiveCreatePage() {
   // 카카오맵 API 로드
   useKakaoLoader()
-  
+
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [title, setTitle] = useState('')
 
@@ -78,7 +78,11 @@ export default function LiveCreatePage() {
             <div className={'px-4 py-2'}>
               <AddressSearch onAddressSelect={(address, coords) => setAddressCoords(coords)} />
             </div>
-            <LiveAuctionPicker auctionItems={mockAuctionItems} />
+            <SelectPicker
+              title={'방송할 매물 선택'}
+              description={'경매 대기 목록'}
+              auctionItems={mockAuctionItems}
+            />
           </div>
 
           {/* 지도 미리보기 */}

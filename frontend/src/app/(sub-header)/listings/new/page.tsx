@@ -41,6 +41,11 @@ export default function NewListingPage() {
     facing: 'N',
     roomCnt: '',
     bathroomCnt: '',
+    images: [] as File[],
+  })
+
+  // Step3 추가 정보 상태
+  const [additionalInfo, setAdditionalInfo] = useState({
     constructionDate: '',
     parkingCnt: '',
     hasElevator: false,
@@ -49,11 +54,6 @@ export default function NewListingPage() {
     isBrkPref: false,
     aucAt: '',
     aucAvailable: '',
-  })
-
-  // Step3 추가 정보 상태
-  const [additionalInfo, setAdditionalInfo] = useState({
-    images: [] as File[],
     notes: '',
   })
 
@@ -70,17 +70,20 @@ export default function NewListingPage() {
   const handleAddressSelect = (selectedAddress: string, coords: { lat: number; lng: number }) => {
     setBaseAddress(selectedAddress)
     setAddressCoords(coords)
-    console.log('✅ Step1 - 주소 선택:', selectedAddress, coords)
+    console.log(' Step1 - 주소 선택:', selectedAddress, coords)
   }
 
   const handleDetailAddressChange = (detail: string) => {
     setDetailAddress(detail)
-    console.log('✅ Step1 - 상세주소 입력:', detail)
+    console.log(' Step1 - 상세주소 입력:', detail)
   }
 
   const handleFileChange = (newFiles: File[]) => {
     setFiles(newFiles)
-    console.log('✅ Step1 - 파일 변경:', newFiles.map(f => f.name))
+    console.log(
+      ' Step1 - 파일 변경:',
+      newFiles.map(f => f.name)
+    )
   }
 
   const handleVerify = () => {
@@ -88,7 +91,7 @@ export default function NewListingPage() {
     setIsVerifying(true)
 
     const fullAddress = `${baseAddress} ${detailAddress}`
-    console.log('✅ Step1 - 인증 시작:', {
+    console.log(' Step1 - 인증 시작:', {
       fullAddress,
       files: files.map(f => f.name),
       coords: addressCoords,
@@ -99,20 +102,20 @@ export default function NewListingPage() {
       setStep1Completed(true)
       setIsVerifying(false)
       setCurrentAccordion('item-2')
-      console.log('✅ Step1 - 인증 완료')
+      console.log(' Step1 - 인증 완료')
     }, 1000)
   }
 
   // Step2 핸들러
   const handleListingInfoChange = (info: typeof listingInfo) => {
     setListingInfo(info)
-    console.log('✅ Step2 - 매물 정보 변경:', info)
+    console.log(' Step2 - 매물 정보 변경:', info)
   }
 
   // Step3 핸들러
   const handleAdditionalInfoChange = (info: typeof additionalInfo) => {
     setAdditionalInfo(info)
-    console.log('✅ Step3 - 추가 정보 변경:', info)
+    console.log(' Step3 - 추가 정보 변경:', info)
   }
 
   // 매물 정보 입력 완료 조건
@@ -152,21 +155,21 @@ export default function NewListingPage() {
       facing: listingInfo.facing,
       roomCnt: parseInt(listingInfo.roomCnt) || 0,
       bathroomCnt: parseInt(listingInfo.bathroomCnt) || 0,
-      constructionDate: listingInfo.constructionDate,
-      parkingCnt: parseInt(listingInfo.parkingCnt) || 0,
-      hasElevator: listingInfo.hasElevator,
-      petAvailable: listingInfo.petAvailable,
-      isAucPref: listingInfo.isAucPref,
-      isBrkPref: listingInfo.isBrkPref,
-      aucAt: listingInfo.aucAt,
-      aucAvailable: listingInfo.aucAvailable,
+      images: listingInfo.images.map(img => img.name),
 
       // Step3 데이터
-      images: additionalInfo.images.map(img => img.name),
+      constructionDate: additionalInfo.constructionDate,
+      parkingCnt: parseInt(additionalInfo.parkingCnt) || 0,
+      hasElevator: additionalInfo.hasElevator,
+      petAvailable: additionalInfo.petAvailable,
+      isAucPref: additionalInfo.isAucPref,
+      isBrkPref: additionalInfo.isBrkPref,
+      aucAt: additionalInfo.aucAt,
+      aucAvailable: additionalInfo.aucAvailable,
       notes: additionalInfo.notes,
     }
 
-    console.log('🚀 최종 제출 데이터:', formData)
+    console.log(' 최종 제출 데이터:', formData)
     alert('매물 등록이 완료되었습니다!')
   }
 
@@ -207,7 +210,7 @@ export default function NewListingPage() {
             onComplete={() => {
               setStep2Completed(true)
               setCurrentAccordion('')
-              console.log('✅ Step2 - 입력 완료')
+              console.log(' Step2 - 입력 완료')
             }}
           />
 

@@ -21,6 +21,8 @@ interface AuctionItem {
 interface LiveAuctionPickerProps {
   auctionItems: AuctionItem[]
   onSelect?: (value: string) => void
+  title: string
+  description: string
 }
 
 /**
@@ -28,16 +30,21 @@ interface LiveAuctionPickerProps {
  * - 경매 대기 중인 매물 리스트를 받아 셀렉트로 표시
  * - 최대 7개까지만 보이고 이후는 스크롤 가능
  */
-export default function LiveAuctionPicker({ auctionItems, onSelect }: LiveAuctionPickerProps) {
+export default function SelectPicker({
+  auctionItems,
+  onSelect,
+  title,
+  description,
+}: LiveAuctionPickerProps) {
   return (
     <div className="bg-white px-4 pb-4">
       <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
-        방송할 매물 선택 <span className="text-red-500">*</span>
+        {title} <span className="text-red-500">*</span>
       </label>
 
       <Select onValueChange={onSelect}>
         <SelectTrigger className="w-full flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-500 transition-colors outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-          <SelectValue placeholder="매물 선택" />
+          <SelectValue placeholder="선택" />
         </SelectTrigger>
 
         <SelectContent
@@ -46,7 +53,7 @@ export default function LiveAuctionPicker({ auctionItems, onSelect }: LiveAuctio
         >
           <SelectGroup className="sticky top-0 z-20 w-full border-b border-gray-200 bg-white">
             <SelectLabel className="px-2 py-2 text-xs font-medium text-gray-600">
-              경매 대기 목록
+              {description}
             </SelectLabel>
           </SelectGroup>
 
