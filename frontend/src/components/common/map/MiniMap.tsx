@@ -36,10 +36,19 @@ export default function MiniMap({ center, height = 300, markers = [] }: MiniMapP
   useEffect(() => {
     if (!mapContainerRef.current) return
 
+    let attempts = 0
+    const maxAttempts = 50 // 50 * 100ms = 5초
+
     // 카카오맵 API 로드 대기
     const initMap = () => {
+      attempts++
+
       if (!window.kakao?.maps) {
-        setTimeout(initMap, 100) // 100ms 후 재시도
+        if (attempts < maxAttempts) {
+          setTimeout(initMap, 100) // 100ms 후 재시도
+        } else {
+          console.error('카카오맵 API 로드 실패: 시간 초과')
+        }
         return
       }
 
