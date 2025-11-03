@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record BiznoResponse(List<Result> items) {
+public record BiznoResponse(int resultCode, List<Result> items) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Result(
             String company,     //회사명

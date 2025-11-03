@@ -9,6 +9,8 @@ import ssafy.a303.backend.broker.dto.response.BiznoResponse;
 import ssafy.a303.backend.broker.dto.response.CompanyStatusResponse;
 import ssafy.a303.backend.broker.entity.Company;
 import ssafy.a303.backend.broker.repository.CompanyRepository;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -18,14 +20,12 @@ import java.util.Optional;
 @Service
 public class CompanyService {
     private final CompanyRepository companyRepository;
+    private final WebClient gWebClient;
+    private final WebClient bWebClient;
     @Value("${gov.api.key}")
     private String serviceKey;
-    private final WebClient gWebClient;
-
     @Value("${bizno.key}")
     private String biznoKey;
-
-    private final WebClient bWebClient;
 
     public CompanyService(
             CompanyRepository companyRepository,
@@ -68,7 +68,7 @@ public class CompanyService {
             company = opt.get();
             company.setStatus(result);
             companyRepository.save(company);
-        } else if(result){
+        } else if (result) {
             company = bizno(bNo);
             company.setCheckAt(today);
             companyRepository.save(company);
@@ -89,13 +89,23 @@ public class CompanyService {
                 .bodyToMono(BiznoResponse.class)
                 .block();
 
+        if (response == null) throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
+
+        int resultCode = response.resultCode();
+        switch (resultCode) {
+            case 0:
+                break;
+            case -3:
+                throw new CustomException(ErrorCode.EXTERNAL_API_LIMIT);
+            default:
+                throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
+        }
         BiznoResponse.Result item = response.items().get(0);
-        Company company = Company
+        return Company
                 .builder()
                 .name(item.company())
                 .taxSeq(item.bno())
                 .status("01".equals(item.bsttcd()))
                 .build();
-        return company;
     }
 }
