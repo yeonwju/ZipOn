@@ -104,7 +104,7 @@ public class CompanyService {
         return Company
                 .builder()
                 .name(item.company())
-                .taxSeq(item.bno())
+                .taxSeq(item.bno().replaceAll("-",""))
                 .status("01".equals(item.bsttcd()))
                 .build();
     }
