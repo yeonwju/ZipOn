@@ -1,0 +1,161 @@
+'use client'
+
+import Badge from '@mui/material/Badge'
+import clsx from 'clsx'
+import {
+  ArrowLeft,
+  BellRing,
+  CalendarDays,
+  Heart,
+  MessageCircle,
+  Search,
+  Settings,
+} from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { JSX, useEffect, useState } from 'react'
+
+type IconAction = {
+  href?: string
+  onClick?: () => void
+  icon: JSX.Element
+}
+
+/* ---------------------------------------------------
+ *  1. 헬퍼 함수: 공통 Badge 아이콘 생성
+ * --------------------------------------------------- */
+const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string): IconAction => ({
+  href,
+  icon: (
+    <Badge color="primary" badgeContent={badgeContent ?? '1'} variant="dot" overlap="circular">
+      {icon}
+    </Badge>
+  ),
+})
+
+/* ---------------------------------------------------
+ *  2. 공통 아이콘 세트 정의
+ * --------------------------------------------------- */
+const ICONS = {
+  search: { href: '/search', icon: <Search size={17} /> },
+  notification: createBadgeIcon(<BellRing size={17} />, '/notification'),
+  chat: createBadgeIcon(<MessageCircle size={17} />, '/chat'),
+  settings: { href: '/mypage/edit', icon: <Settings size={17} /> },
+  calendar: { href: '/calendar', icon: <CalendarDays size={17} /> },
+  like: { href: '/like', icon: <Heart size={17} /> },
+}
+
+/* ---------------------------------------------------
+ * 🗂 3. 페이지별 아이콘 구성 맵
+ * --------------------------------------------------- */
+const rightIconsMap: Record<string, IconAction[]> = {
+  default: [ICONS.search, ICONS.notification, ICONS.chat],
+
+  '/mypage': [ICONS.notification, ICONS.chat, ICONS.settings],
+
+  '/listing': [ICONS.like],
+
+  '/live/list': [ICONS.calendar, ICONS.notification, ICONS.chat],
+
+  '/calendar': [ICONS.notification, ICONS.chat],
+
+  '/live/create': [],
+}
+
+/* ---------------------------------------------------
+ * 🏷 4. 페이지 타이틀 맵
+ * --------------------------------------------------- */
+const pageTitleMap: Record<string, string> = {
+  '/auction': '경매',
+  '/mypage': '마이페이지',
+  '/like': '찜',
+  '/live/list': '라이브',
+  '/home': '홈',
+  '/notification': '알림',
+  '/listings': '매물',
+  '/listing': '',
+  '/calendar': '라이브 일정',
+  '/live/create': '라이브 생성',
+}
+
+/* ---------------------------------------------------
+ *  5. SubHeader 컴포넌트
+ * --------------------------------------------------- */
+interface SubHeaderProps {
+  pathname: string
+  title?: string
+  customRightIcons?: IconAction[]
+}
+
+export default function SubHeader({ pathname, title, customRightIcons }: SubHeaderProps) {
+  const router = useRouter()
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY > lastScrollY && currentScrollY > 100) setIsVisible(false)
+      else if (currentScrollY < lastScrollY || currentScrollY === 0) setIsVisible(true)
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY])
+
+  const titleKey = Object.keys(pageTitleMap).find(key => pathname.startsWith(key))
+  const displayTitle = title || (titleKey ? pageTitleMap[titleKey] : '')
+  const rightIcons =
+    customRightIcons || (titleKey && rightIconsMap[titleKey]) || rightIconsMap.default
+
+  return (
+    <nav
+      className={clsx(
+        'fixed top-0 left-0 z-50 flex w-full items-center justify-between py-0.5 pl-3 transition-all duration-300',
+        'bg-white/70 shadow-[0_1px_0_rgba(0,0,0,0.05)] backdrop-blur-md',
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      )}
+    >
+      {/* 왼쪽: 뒤로가기 */}
+      <button
+        onClick={() => router.back()}
+        className="-ml-2 flex items-center justify-center p-2 transition-opacity hover:opacity-60"
+        aria-label="뒤로가기"
+      >
+        <ArrowLeft size={17} />
+      </button>
+
+      {/* 중앙: 제목 */}
+      <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-medium text-gray-900">
+        {displayTitle}
+      </h1>
+
+      {/* 오른쪽: 페이지별 아이콘 */}
+      {/* 오른쪽: 페이지별 아이콘 */}
+      <div className="flex flex-row items-center">
+        {' '}
+        {/* gap 조금 줄임 */}
+        {rightIcons.map((action, i) =>
+          action.onClick ? (
+            <button
+              key={i}
+              onClick={action.onClick}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-gray-100 active:bg-gray-200"
+            >
+              {action.icon}
+            </button>
+          ) : (
+            <Link
+              key={action.href || i}
+              href={action.href || '#'}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-gray-100 active:bg-gray-200"
+            >
+              {action.icon}
+            </Link>
+          )
+        )}
+      </div>
+    </nav>
+  )
+}

@@ -1,0 +1,60 @@
+import type { Metadata } from 'next'
+
+import SideScrollCardSection from '@/components/layout/SideScrollCardSection'
+
+import ListingItem from '../../../../components/main/ListingItem'
+import RecommendLiveItem from '../../../../components/main/RecommendLiveItem'
+
+export const metadata: Metadata = {
+  title: 'HomeOn - 홈',
+  description: '실시간 인기 방송과 추천 매물을 확인하세요',
+}
+
+/**
+ * 홈 페이지 (Server Component)
+ *
+ * 실시간 인기 방송, 추천 매물, 경매 임박 매물을 표시합니다.
+ * 향후 API 연결 시 서버에서 데이터를 페칭하여 표시합니다.
+ */
+export default function HomePage() {
+  return (
+    <section className="flex flex-col gap-10 p-2">
+      <SideScrollCardSection title="실시간 인기 방송" cardMinWidth="220px">
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+        <RecommendLiveItem />
+      </SideScrollCardSection>
+
+      <SideScrollCardSection title="추천 매물">
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+      </SideScrollCardSection>
+
+      <SideScrollCardSection title="경매 임박 매물">
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+        <ListingItem />
+      </SideScrollCardSection>
+    </section>
+  )
+}
