@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ssafy.a303.backend.common.dto.ResponseDTO;
+import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.service.PropertyService;

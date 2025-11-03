@@ -4,9 +4,9 @@ spring:
       on-profile: dev
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/zipon
-    username: a303
-    password: a303pw
+    url: jdbc:postgresql://localhost:5432/jeepon
+    username: ${DB_USER}
+    password: ${DB_PW}
 
   jpa:
     hibernate:
