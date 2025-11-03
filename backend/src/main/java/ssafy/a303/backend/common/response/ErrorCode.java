@@ -75,6 +75,9 @@ public enum ErrorCode {
     // FAST API 연결
     AI_NO_RESPONSE(500, HttpStatus.BAD_GATEWAY, "AI 서버와 연결을 실패했습니다."),
 
+    // 사진 등록
+    IMAGE_LIMIT_EXCEEDS(500, HttpStatus.BAD_REQUEST, "이미지는 최대 20장까지 업로드할 수 있습니다."),
+
     // PDF 검증
     EMPTY_PDF_FILE(400, HttpStatus.BAD_REQUEST, "파일이 비어 있습니다."),
     ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다.")

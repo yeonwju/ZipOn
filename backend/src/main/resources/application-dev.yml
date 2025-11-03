@@ -21,6 +21,17 @@ spring:
 ai:
   base-url: http://fastapi:8000
 
+cloud:
+  aws:
+    s3:
+      bucket: dfsfsf
+    region:
+      static: ap-east-1
+    credentials:
+      access-key: sdfsdf
+      secret-key: sdfsdfsd
+
+
 logging:
   level:
     org.hibernate.SQL: debug

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 import ssafy.a303.backend.property.enums.VerificationStatus;
 
@@ -37,6 +38,9 @@ public class Property {
 
     @Column(name = "property_nm", length = 100)
     private String propertyNm;
+
+    @Enumerated(EnumType.STRING)
+    private Building buildingType;
 
     @Column(name = "address", nullable = false, length = 150)
     private String address;
@@ -109,6 +113,9 @@ public class Property {
 
     @Column(name = "traded_at", length = 50)
     private String tradedAt;
+
+    @Column(name = "is_linked")
+    private Boolean isLinked;
 
     @CreationTimestamp
     @Column(name = "created_at")

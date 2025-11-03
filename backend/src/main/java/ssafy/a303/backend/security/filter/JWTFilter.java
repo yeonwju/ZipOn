@@ -47,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 }
             }
         }
-
+        System.out.println("--------------------제가보이세요?-------AT : "+accessToken);
         if (accessToken != null && jwtProvider.isTokenValid(accessToken)) {
             TokenData tokenData = jwtProvider.parseToken(accessToken);
             int userSeq = tokenData.getUserSeq();

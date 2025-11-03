@@ -1,18 +1,17 @@
-package ssafy.a303.backend.property.dto.request;
+package ssafy.a303.backend.property.dto.response;
 
-import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
 
-public record PropertyDetailRequestDto(
-        String address,
+public record PropertyRegiResponseDto(
+        Integer propertySeq,
+        String lessorNm,
         String propertyNm,
-        Building buildingType,
+        String content,
+        String address,
         Double latitude,
         Double longitude,
-        String lessorNm,
-        String content,
         Double area,
         Integer areaP,
         Long deposit,
