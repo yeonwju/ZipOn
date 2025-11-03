@@ -175,11 +175,11 @@ export default function NewListingPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-4xl py-4 pb-32">
+      <div className="mx-auto w-full max-w-4xl pb-32">
         <Accordion
           type="single"
           collapsible
-          className="w-full space-y-6"
+          className="w-full"
           value={currentAccordion}
           onValueChange={value => {
             if ((value === 'item-2' || value === 'item-3') && !step1Completed) return

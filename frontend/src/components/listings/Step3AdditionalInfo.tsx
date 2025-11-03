@@ -70,7 +70,7 @@ export default function Step3AdditionalInfo({
   }
 
   return (
-    <AccordionItem value="item-3" className="border-0 border-b border-gray-200 px-4 pb-4">
+    <AccordionItem value="item-3" className="border-0 border-b border-gray-200 px-4 py-6">
       <AccordionTrigger
         className={`flex items-center py-0 text-xl font-bold hover:no-underline ${
           step1Completed ? 'text-gray-900' : 'cursor-not-allowed text-gray-400'
