@@ -8,24 +8,23 @@ public final class PdfCodeGenerator {
 
     private static final SecureRandom RND = new SecureRandom();
     private static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+    private static final char[] BASE36 = "1234567890abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     private PdfCodeGenerator() {}
 
     public static String next(String prefix) {
         String ts = LocalDateTime.now().format(TS);
-        String rand = toBase36(RND.nextInt(36 * 36 * 36 * 36 * 36 * 36));
-        return String.format("%s-%s-%s", prefix, ts, padLeft(rand, 6, '0')).toUpperCase();
+        String rand = randomBase36(6);
+        return String.format("%s-%s-%s", prefix, ts, rand).toUpperCase();
     }
 
-    private static String toBase36(int n) {
-        return Integer.toString(Math.abs(n), 36);
-    }
-
-    private static String padLeft(String s, int len, char fill) {
-        if(s.length() >= len) return s;
+    private static String randomBase36(int len) {
+        if (len <= 0) throw new IllegalArgumentException("len must be positive");
         StringBuilder sb = new StringBuilder(len);
-        for (int i = s.length(); i < len; i++) sb.append(fill);
-        sb.append(s);
+        for (int i = 0; i < len; i++) {
+            int idx = RND.nextInt(36); // 36는 항상 양수 bound
+            sb.append(BASE36[idx]);
+        }
         return sb.toString();
     }
 }
