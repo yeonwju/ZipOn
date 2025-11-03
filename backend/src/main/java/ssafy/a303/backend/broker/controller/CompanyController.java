@@ -24,7 +24,7 @@ public class CompanyController {
 //    private final JWTProvider jwtProvider;
 
     @PostMapping("/status")
-    public ResponseEntity<ResponseDTO<Void>> companyStatusCheck(@RequestBody CompanyStatusRequest companyRequest, HttpServletResponse response, @AuthenticationPrincipal Integer userSeq) {
+    public ResponseEntity<ResponseDTO<Void>> companyStatusCheck(@RequestBody CompanyStatusRequest companyRequest) {
         String taxSeq = companyRequest.b_no().get(0);
         if (companyService.cmpStatus(taxSeq)) {
 //            String token = jwtProvider.generateInstantToken(
