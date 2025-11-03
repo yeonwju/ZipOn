@@ -1,4 +1,4 @@
-package ssafy.a303.backend.common.dto;
+package ssafy.a303.backend.common.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

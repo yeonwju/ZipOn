@@ -9,20 +9,17 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.security.oauth.principal.CustomOidcPrincipal;
-import ssafy.a303.backend.user.entity.Role;
 import ssafy.a303.backend.user.entity.User;
-import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CustomOidcUserService extends OidcUserService {
 
-    private final UserRepository userRepository;
+    private final SignupHelper signupHelper;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -31,19 +28,7 @@ public class CustomOidcUserService extends OidcUserService {
         String email = oidcUser.getAttributes().get("email").toString();
         String name = oidcUser.getAttributes().get("name").toString();
 
-        Optional<User> optionalUser = userRepository.findUserByEmailAndDeletedAtIsNull(email);
-        User user;
-        if (optionalUser.isEmpty()) {
-            user = User.builder()
-                    .email(email)
-                    .name(name)
-                    .nickname(name)
-                    .role(Role.USER)
-                    .build();
-            userRepository.save(user);
-        } else {
-            user = optionalUser.get();
-        }
+        User user = signupHelper.Signup(email, name);
 
         String nameAttributeKey = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 

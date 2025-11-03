@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import ssafy.a303.backend.common.dto.ResponseDTO;
+import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyAucInfoUpdateRequestDto;
 import ssafy.a303.backend.property.dto.response.PropertyAucInfoUpdateResponseDto;
-import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.service.PropertyAucInfoService;
 
 @RestController
