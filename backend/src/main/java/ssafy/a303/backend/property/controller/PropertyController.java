@@ -40,7 +40,6 @@ public class PropertyController {
                                                                                 @RequestParam String address)
     {
         VerificationResultResponseDto res = verificationService.verifyPdf(file, regiNm, regiBirth, address);
-
         return ResponseDTO.ok(res, "등기부등본이 인증되었습니다.");
     }
 
