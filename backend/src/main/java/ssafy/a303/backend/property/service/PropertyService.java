@@ -73,9 +73,10 @@ public class PropertyService {
 
     /**
      * 매물 상세 정보 등록
-     * @param propertySeq
-     * @param lessorSeq
+     * @param userSeq
      * @param req
+     * @param images
+     * @return
      */
     @Transactional
     public PropertyRegiResponseDto submitDetail(Integer userSeq, PropertyDetailRequestDto req, List<MultipartFile> images) {
@@ -156,6 +157,7 @@ public class PropertyService {
                         p.getAddress(),
                         p.getLatitude(),
                         p.getLongitude(),
+                        p.getBuildingType(),
                         p.getArea(),
                         p.getAreaP(),
                         p.getDeposit(),
@@ -199,7 +201,7 @@ public class PropertyService {
                 .toList();
 
         DetailResponseDto detail = new DetailResponseDto(
-                p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                propertySeq, p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),

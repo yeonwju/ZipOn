@@ -1,5 +1,6 @@
 package ssafy.a303.backend.property.dto.response;
 
+import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public record PropertyRegiResponseDto(
         String address,
         Double latitude,
         Double longitude,
+        Building buildingType,
         Double area,
         Integer areaP,
         Long deposit,

@@ -6,6 +6,8 @@ import java.util.List;
 
 public record DetailResponseDto(
         //기본 정보
+
+        Integer propertySeq,
         String lessorNm,
         String propertyNm,
         String content,
