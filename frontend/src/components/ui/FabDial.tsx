@@ -1,7 +1,6 @@
 'use client'
 
 import { Plus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { JSX, useState } from 'react'
 
 type Action = {
@@ -10,17 +9,12 @@ type Action = {
   onClick?: () => void
 }
 
-export default function FabDial() {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
+interface FabDialProps {
+  actions: Action[]
+}
 
-  const actions: Action[] = [
-    {
-      icon: <Plus className="h-5 w-5" />,
-      name: '라이브 생성',
-      onClick: () => router.push('/live/create'),
-    },
-  ]
+export default function FabDial({ actions }: FabDialProps) {
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="fixed right-3 bottom-17 z-50 flex flex-col items-end space-y-3">

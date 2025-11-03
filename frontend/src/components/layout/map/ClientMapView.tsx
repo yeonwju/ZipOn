@@ -146,7 +146,7 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 매물 카드 클릭 핸들러
   const handleListingClick = (listing: ListingData) => {
     // 매물 상세 페이지로 이동
-    router.push(`/listing/${listing.id}`)
+    router.push(`/listings/${listing.id}`)
   }
 
   return (

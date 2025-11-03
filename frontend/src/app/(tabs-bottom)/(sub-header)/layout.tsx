@@ -12,7 +12,7 @@ export default function SubHeaderLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen">
       <ClientSubHeader />
-      <main className="pt-14">{children}</main>
+      <main className="pt-11.5">{children}</main>
     </div>
   )
 }
