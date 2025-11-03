@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import requests
 from dotenv import load_dotenv
 
@@ -10,81 +11,100 @@ GMS_API_URL = os.getenv("GMS_API_URL", "https://gms.ssafy.io/gmsapi/api.openai.c
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1")
 
 def extract_owner_info_llm(pdf_text: str) -> dict:
-    print("[INFO] GMS LLM 분석 시작...")
+    print("[INFO] 🧠 GMS LLM 리스크 평가 통합 호출 중...")
 
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {GMS_KEY}",
     }
 
-    body = {
-        "model": MODEL_NAME,
-        "input": f"""
-다음은 등기부등본의 OCR 추출 원문입니다.
+    prompt = f"""
+다음은 등기부등본의 OCR 원문입니다.
+이 텍스트를 기반으로 아래 항목을 JSON 형식으로 정확히 추출하세요.
 
-이 텍스트에서 아래 3가지 항목만 JSON으로 정확히 추출하세요:
-1. 소유자 이름
-2. 주민등록번호 앞 6자리 (예: 710410)
-3. 건물 주소
+---
+1️⃣ 소유자 이름
+2️⃣ 주민등록번호 앞 6자리 (예: 710410)
+3️⃣ 건물 주소 ([집합건물] 옆의 주소)
+4️⃣ **집을 담보로 한 근저당권 설정 내역**  
+   - 각 근저당권마다 다음 정보를 포함하세요:  
+     {{
+       "no": "번호(예: 1, 2, 3...)",
+       "amount": "채권최고액(금액)",
+       "creditor": "채권자명"
+     }}
+   - `"을 구"` 섹션 안에서 **줄 단위로 분석**하세요.
+   - 줄에 번호(예: "1", "2")가 있고, 그 **바로 다음 줄에 "근저당권설정"**이라는 단어가 있으면  
+     그 번호를 가진 새로운 근저당권 항목으로 간주합니다.
+   - 이후 `"1번근저당권설정등기말소"`, `"1번근저당권설정등"`, `"1번근저당권해지"` 등의 표현이 나타나면  
+     해당 번호(예: 1번)의 근저당권은 이미 **말소 또는 해지된 것**으로 간주하고 목록에서 제외하세요.
+   - 즉, 같은 번호의 `"근저당권설정"`과 `"근저당권설정등기말소"`가 함께 존재하면  
+     **그 근저당권은 유효하지 않습니다.**
+   - `"말소"` 또는 `"해지"`만 등장하고 `"근저당권설정"`이 없는 경우는 무시하세요.
+   - 최종 JSON에는 해지되지 않은(**active**) 근저당권만 포함하세요.  
+5️⃣ **압류, 가압류, 임차권 등 권리 제한 사항**
 
-출력은 반드시 아래 JSON 형식만 사용하세요:
+그리고 다음 규칙으로 위험도 점수(risk_score)를 계산하세요:
+
+- 근저당권, 압류, 가압류, 임차권 등이 전혀 없으면 **5점 (매우 안전)**
+- 근저당권이 1건만 있고 권리 제한이 없으면 **4점 (안전)**
+- 근저당권 2건 이상이거나 임차권·가압류가 존재하면 **3점 (보통)**
+- 압류가 있거나 다수의 권리 제한이 있으면 **2점 (주의)**
+- 복잡한 권리 관계나 다수 근저당권이 존재하면 **1점 (위험)**
+
+출력은 반드시 아래 JSON 형식으로 하세요:
+```json
 {{
   "owner": "이름",
   "birth": "생년월일6자리",
-  "address": "주소"
+  "address": "주소",
+  "mortgages": [
+    {{
+      "no": 1,
+      "amount": "금94,800,000원",
+      "creditor": "주식회사신한은행"
+    }}
+  ],
+  "restriction": "압류, 가압류 없음",
+  "risk_score": 4,
+  "risk_reason": "근저당권 1건(금94,800,000원, 신한은행), 권리제한 없음 "
 }}
+
 
 문서 원문:
 {pdf_text[:12000]}
 """
-    }
 
-    response = requests.post(GMS_API_URL, headers=headers, json=body)
+    body = {"model": MODEL_NAME, "input": prompt}
+    res = requests.post(GMS_API_URL, headers=headers, json=body)
 
-    print(f"[DEBUG] HTTP Status: {response.status_code}")
-    print("[DEBUG] Raw Response Body:")
-    print(response.text[:800] + "..." if len(response.text) > 800 else response.text)
+    print(f"[DEBUG] HTTP Status: {res.status_code}")
+    if res.status_code != 200:
+        return {"error": res.text}
 
-    if response.status_code != 200:
-        print(f"[ERROR] GMS API 호출 실패: {response.status_code}")
-        return {"error": response.text}
-
-    result_data = response.json()
-
-    # ✅ 응답 구조 안전 탐색
-    content = None
+    result_data = res.json()
     if "output" in result_data:
         content = result_data["output"][0]["content"][0].get("text", "")
     elif "choices" in result_data:
         content = result_data["choices"][0]["message"]["content"]
     else:
-        print("[WARN] 예상치 못한 응답 구조.")
-        print(result_data)
-        return {"owner": None, "birth": None, "address": None}
+        content = ""
 
-    print("\n[LLM 응답 원문]")
-    print(content)
+    
+    clean_text = re.sub(r"^```[a-zA-Z]*|```$", "", content.strip(), flags=re.MULTILINE)
 
-    # ✅ JSON 파싱 시도
+    
+    json_match = re.search(r"\{[\s\S]*\}", clean_text)
+    if json_match:
+        clean_text = json_match.group(0)
+
+   
     try:
-        parsed = json.loads(content)
+        parsed = json.loads(clean_text)
     except json.JSONDecodeError:
-        print("[WARN] 모델이 JSON 형식을 안 지킴. 문자열 내에서 강제 추출 시도 중...")
-        parsed = _fallback_parse(content)
+        print("[ERROR] ⚠️ JSONDecodeError 발생 — 원문에 코드블록 포함된 가능성 있음.")
+        parsed = {"error": "JSONDecodeError", "raw": content}
 
-    print("\n[INFO] LLM 추출 결과 ✅")
+    print("\n[INFO] ✅ LLM 리스크 평가 완료")
     print(json.dumps(parsed, ensure_ascii=False, indent=2))
     return parsed
-
-
-def _fallback_parse(text: str) -> dict:
-    """단순 문자열에서 owner/birth/address 패턴 추출"""
-    import re
-    owner = re.search(r"소유자[:\s]*([가-힣]+)", text)
-    birth = re.search(r"(\d{6})", text)
-    addr = re.search(r"([가-힣\s\d\-]+(시|군|구)\s*[가-힣\d\s\-]+(동|로|길)[^\n]*)", text)
-    return {
-        "owner": owner.group(1) if owner else None,
-        "birth": birth.group(1) if birth else None,
-        "address": addr.group(1) if addr else None,
-    }
