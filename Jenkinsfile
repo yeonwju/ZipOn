@@ -10,7 +10,7 @@ pipeline {
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '20'))
-    timestamps()
+    // timestamps() 
   }
 
   stages {
@@ -27,7 +27,7 @@ pipeline {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
 
-          parallel failFast: false, 
+          parallel failFast: false,
           FRONTEND: {
             sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
           },
