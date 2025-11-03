@@ -2,18 +2,16 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_OPTS   = "--pull"
-    HEALTH        = "/usr/local/bin/zipon-health.sh"
-    DEV_COMPOSE   = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
-    DEV_FRONT_URL = "https://dev-zipon.duckdns.org/"
-    DEV_BACK_URL  = "https://dev-zipon.duckdns.org/api/"
-    DEV_AI_URL    = "https://dev-zipon.duckdns.org/ai/"
+    DOCKER_OPTS = "--pull"
+    HEALTH = "/usr/local/bin/zipon-health.sh"
+    PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
+    DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
   }
 
   options {
-    timestamps()
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
+  timestamps()
 
   stages {
     stage('Checkout') {
@@ -27,50 +25,63 @@ pipeline {
       steps {
         script {
           parallel(
-            FRONTEND: { sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:\$(cat .gitsha) ./frontend" },
-            BACKEND : { sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest  -t zipon-backend:\$(cat .gitsha)  ./backend" },
-            AI      : { sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest       -t zipon-ai:\$(cat .gitsha)       ./ai" }
+            FRONTEND: { sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:\\$(cat .gitsha) ./frontend" },
+            BACKEND : { sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest  -t zipon-backend:\\$(cat .gitsha)  ./backend" },
+            AI      : { sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest       -t zipon-ai:\\$(cat .gitsha)       ./ai" }
           )
         }
       }
     }
 
-
-    stage('Unit Tests') {
+    stage('Unit Tests (dev only)') {
+      when { branch 'dev' }
       steps {
         sh """
           echo "[TEST] 여기에 실제 테스트 명령 넣기"
-          # 예시:
-          # (cd frontend && npm ci && npm test)
-          # (cd backend && ./gradlew test)
-          # (cd ai && pytest)
         """
       }
     }
 
-    stage('Deploy DEV') {
+    stage('Deploy DEV (optional)') {
+      when { branch 'dev' }
+      steps {
+        script {
+          def devComposeExists = sh(script: "test -f ${env.DEV_COMPOSE}", returnStatus: true) == 0
+          if (devComposeExists) {
+            sh """
+              echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
+              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
+            """
+          } else {
+            echo "[DEV] ${env.DEV_COMPOSE} not found. Skipping deploy."
+          }
+        }
+      }
+    }
+
+    stage('Deploy PROD (main/master)') {
+      when { anyOf { branch 'main'; branch 'master' } }
       steps {
         sh """
-          test -f ${env.DEV_COMPOSE} || { echo "[DEV] compose가 없습니다: ${env.DEV_COMPOSE}"; exit 1; }
+          echo "[PROD] Deploying with ${env.PROD_COMPOSE}"
+          docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
 
-          echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
-          docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
-
-          echo "[DEV] Warm-up & health check..."
+          echo "[PROD] Warm-up & health check..."
           sleep 2
-          if [ -x ${env.HEALTH} ]; then ${env.HEALTH} || true; fi
-
-          curl -s -o /dev/null -w "FRONT /    -> %{http_code}\\n" ${env.DEV_FRONT_URL}
-          curl -s -o /dev/null -w "BACK  /api/-> %{http_code}\\n" ${env.DEV_BACK_URL}
-          curl -s -o /dev/null -w "AI    /ai/ -> %{http_code}\\n" ${env.DEV_AI_URL}
+          if [ -x ${env.HEALTH} ]; then
+            ${env.HEALTH} || true
+          fi
+          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
+          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
+          curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
         """
       }
     }
   }
 
   post {
-    success { echo "✅ DEV pipeline success" }
-    failure { echo "❌ DEV pipeline failed" }
+    success { echo "✅ Pipeline success" }
+    failure { echo "❌ Pipeline failed. Check above logs." }
     always  { sh 'docker image prune -f || true' }
   }
 }
