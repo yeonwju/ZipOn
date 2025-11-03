@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.response.ResponseDTO;
+import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.service.PropertyService;
@@ -48,7 +50,14 @@ public class PropertyController {
      * 4) 매물 상세 정보 입력
      * 5) 매물 최종 등록
      */
-
+    @PostMapping(value = "/detail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseDTO<PropertyRegiResponseDto>> createProperty(@RequestPart PropertyDetailRequestDto req,
+                                                                               @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                                                               @AuthenticationPrincipal Integer userSeq)
+    {
+        PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
+        return ResponseDTO.created(res, "매물 등록 완료");
+    }
 
 
     /**

@@ -60,6 +60,10 @@ dependencies {
 	//web client
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	//s3
+	implementation 'software.amazon.awssdk:s3:2.25.60'
+	implementation 'commons-io:commons-io:2.16.1'
 }
 
 tasks.named('test') {

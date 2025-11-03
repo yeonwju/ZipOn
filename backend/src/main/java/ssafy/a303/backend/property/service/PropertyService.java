@@ -4,21 +4,23 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
-import ssafy.a303.backend.property.dto.response.DetailResponseDto;
-import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
-import ssafy.a303.backend.property.dto.response.PropertyMapDto;
-import ssafy.a303.backend.property.dto.response.PropertyUpdateResponseDto;
+import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
+import ssafy.a303.backend.property.entity.PropertyImage;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
+import ssafy.a303.backend.property.util.S3Uploader;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +32,7 @@ public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final PropertyImageRepository propertyImageRepository;
+    private final S3Uploader s3Uploader;
 
     /**
      * 매물 등록 단계 중 첫단계,
@@ -75,41 +78,104 @@ public class PropertyService {
      * @param req
      */
     @Transactional
-    public void submitPropertyDetail(Integer propertySeq, Integer lessorSeq, PropertyDetailRequestDto req) {
-        // 매물 소유권 확인
-        Property p = propertyRepository.findByPropertySeqAndLessorSeq(propertySeq, lessorSeq)
-                .orElseThrow(()->new IllegalArgumentException("매물을 찾을 수 없거나 권한이 없습니다."));
+    public PropertyRegiResponseDto submitDetail(Integer userSeq, PropertyDetailRequestDto req, List<MultipartFile> images) {
 
-        // 상세 정보 등록
-        if (req.content() != null) p.setContent(req.content());
-        if (req.area() != null) p.setArea(req.area());
-        if (req.areaP() != null) p.setAreaP(req.areaP());
-        if (req.deposit() != null) p.setDeposit(req.deposit());
-        if (req.mnRent() != null) p.setMnRent(req.mnRent());
-        if (req.fee() != null) p.setFee(req.fee());
-        if (req.thumbnail() != null) p.setThumbnail(req.thumbnail());
-        if (req.period() != null) p.setPeriod(req.period());
-        if (req.floor() != null) p.setFloor(req.floor());
-        if (req.facing() != null) p.setFacing(req.facing());
-        if (req.roomCnt() != null) p.setRoomCnt(req.roomCnt());
-        if (req.bathroomCnt() != null) p.setBathroomCnt(req.bathroomCnt());
-        if (req.constructionDate() != null) p.setConstructionDate(req.constructionDate());
-        if (req.parkingCnt() != null) p.setParkingCnt(req.parkingCnt());
-        if (req.hasElevator() != null) p.setHasElevator(req.hasElevator());
-        if (req.petAvailable() != null) p.setPetAvailable(req.petAvailable());
+        //로그인 유저와 등록하려는 사람의 이름이 동일한지.
+
+
+        // 매물 정보 등록
+        Property p = Property.builder()
+                .lessorSeq(userSeq)
+                .address(req.address())
+                .propertyNm(req.propertyNm())
+                .buildingType(req.buildingType())
+                .latitude(req.latitude())
+                .longitude(req.longitude())
+                .lessorNm(req.lessorNm())
+                .content(req.content())
+                .area(req.area())
+                .areaP(req.areaP())
+                .deposit(req.deposit())
+                .mnRent(req.mnRent())
+                .fee(req.fee())
+                .period(req.period())
+                .floor(req.floor())
+                .facing(req.facing())
+                .roomCnt(req.roomCnt())
+                .constructionDate(req.constructionDate())
+                .bathroomCnt(req.bathroomCnt())
+                .parkingCnt(req.parkingCnt())
+                .hasElevator(req.hasElevator())
+                .petAvailable(req.petAvailable())
+                .build();
+        propertyRepository.save(p);
 
         // 경매, 중개인 희망 등록
-        PropertyAucInfo info = propertyAucInfoRepository.findByPropertySeq(propertySeq)
-                .orElseGet(()->PropertyAucInfo.builder()
-                        .propertySeq(propertySeq)
-                        .build());
+        PropertyAucInfo aucInfo = PropertyAucInfo.builder()
+                .propertySeq(p.getPropertySeq())
+                .isAucPref(req.isAucPref())
+                .isBrkPref(req.isBrkPref())
+                .aucAt(req.aucAt())
+                .aucAvailable(req.aucAvailable())
+                .build();
+        propertyAucInfoRepository.save(aucInfo);
 
-        if (req.isAucPref() != null) info.setIsAucPref(req.isAucPref());
-        if (req.isBrkPref() != null) info.setIsBrkPref(req.isBrkPref());
-        if (req.aucAt() != null) info.setAucAt(req.aucAt());
-        if (req.aucAvailable() != null) info.setAucAvailable(req.aucAvailable());
+        // 이미지 S3 업로드
+        List<String> s3keys = new ArrayList<>();
+        List<String> imageUrls = new ArrayList<>();
 
-        propertyAucInfoRepository.save(info);
+        if(images != null && !images.isEmpty()) {
+            if(images.size() >= 20) {
+                throw new CustomException(ErrorCode.IMAGE_LIMIT_EXCEEDS);
+            }
+
+            int sortOrder = 1;
+            for(MultipartFile file : images) {
+                if (file.isEmpty()) continue;
+
+                String key = s3Uploader.uploadImage(p.getPropertySeq(), file);
+
+                PropertyImage img = PropertyImage.builder()
+                        .propertySeq(p.getPropertySeq())
+                        .s3Key(key)
+                        .imgOrder(sortOrder++)
+                        .build();
+                propertyImageRepository.save(img);
+
+                //s3 리스트에도 추가
+                s3keys.add(key);
+
+                imageUrls.add(s3Uploader.publicUrl(key));
+            }
+        }
+            return new PropertyRegiResponseDto(
+                        p.getPropertySeq(),
+                        p.getLessorNm(),
+                        p.getPropertyNm(),
+                        p.getContent(),
+                        p.getAddress(),
+                        p.getLatitude(),
+                        p.getLongitude(),
+                        p.getArea(),
+                        p.getAreaP(),
+                        p.getDeposit(),
+                        p.getMnRent(),
+                        p.getFee(),
+                        s3keys,
+                        p.getPeriod(),
+                        p.getFloor(),
+                        p.getFacing(),
+                        p.getRoomCnt(),
+                        p.getBathroomCnt(),
+                        p.getConstructionDate(),
+                        p.getParkingCnt(),
+                        p.getHasElevator(),
+                        p.getPetAvailable(),
+                        aucInfo.getIsAucPref(),
+                        aucInfo.getIsBrkPref(),
+                        aucInfo.getAucAt(),
+                        aucInfo.getAucAvailable()
+            );
     }
 
     /**
