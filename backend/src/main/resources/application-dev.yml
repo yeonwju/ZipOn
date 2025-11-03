@@ -13,6 +13,14 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+ai:
+  base-url: http://fastapi:8000
+
 logging:
   level:
     org.hibernate.SQL: debug
@@ -21,3 +29,4 @@ logging:
 #    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
 #    org.springframework.web.servlet.DispatcherServlet: DEBUG
 #    org.apache.coyote.http11: DEBUG
+

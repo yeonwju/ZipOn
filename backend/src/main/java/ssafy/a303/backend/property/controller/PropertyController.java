@@ -1,18 +1,16 @@
 package ssafy.a303.backend.property.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import ssafy.a303.backend.common.response.ResponseDTO;
-import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
-import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
+import org.springframework.web.multipart.MultipartFile;
+import ssafy.a303.backend.common.dto.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
-import ssafy.a303.backend.property.dto.response.DetailResponseDto;
-import ssafy.a303.backend.property.dto.response.PropertyAddressResponseDto;
-import ssafy.a303.backend.property.dto.response.PropertyMapDto;
-import ssafy.a303.backend.property.dto.response.PropertyUpdateResponseDto;
+import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.service.PropertyService;
+import ssafy.a303.backend.property.service.VerificationService;
 
 import java.util.List;
 
@@ -22,74 +20,36 @@ import java.util.List;
 public class PropertyController {
 
     private final PropertyService propertyService;
+    private final VerificationService verificationService;
 
     /**
-     * 매물 주소 등록
-     * @param req
-     * @param userSeq
+     * 매물 검증
+     * 1) 매물 주소 입력
+     * 2) 등기부등본 업로드
+     * 3) 이름, 생일, 주소 적합성 AI 판단
+     * @param file
+     * @param regiNm
+     * @param regiBirth
+     * @param address
      * @return
      */
-    @PostMapping("/address")
-    public ResponseEntity<ResponseDTO<PropertyAddressResponseDto>> submitAddress(@RequestBody PropertyAddressRequestDto req,
-                                                                                 //@AuthenticationPrincipal Integer userSeq
-                                                                                @RequestParam Integer userSeq)
+    @PostMapping(value = "/verifications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseDTO<VerificationResultResponseDto>> verifyPdf(@RequestParam("file")MultipartFile file,
+                                                                                @RequestParam String regiNm,
+                                                                                @RequestParam String regiBirth,
+                                                                                @RequestParam String address)
     {
-        PropertyAddressResponseDto response = propertyService.submitAddress(req, userSeq);
-
-        return ResponseDTO.created(response, "매물이 성공적으로 등록되었습니다.");
+        VerificationResultResponseDto res = verificationService.verifyPdf(file, regiNm, regiBirth, address);
+        return ResponseDTO.ok(res, "등기부등본이 인증되었습니다.");
     }
-
-//    /**
-//     * 등기부등본 등록 API
-//     * @param propertySeq
-//     * @param file
-//     * @param userSeq
-//     * @return
-//     */
-//    @PostMapping("/certificates")
-//    public ResponseEntity<Map<String, Object>> uploadCertificate(
-//            @PathVariable Integer propertySeq,
-//            @RequestPart("file")MultipartFile file,
-//            @AuthenticationPrincipal Integer userSeq
-//
-//    ) {
-//        String url = propertyService.uploadCertificatePdf(propertySeq, userSeq, file);
-//
-//        //-------------나머지
-//    }
-//
-//    /**
-//     * 등기부등본 검증 여부 확인
-//     * @param propertySeq
-//     * @param req
-//     * @param userSeq
-//     * @return
-//     */
-//    @PostMapping("/{propertySeq}/verify")
-//    public ResponseEntity<Map<String, Object>> verifyCertificate(
-//            @PathVariable Integer propertySeq,
-//            @RequestBody VerifyRequestDto req,
-//            @AuthenticationPrincipal Integer userSeq
-//    ) {
-//        propertyService.verifyCertificate(propertySeq, userSeq, req.isCertificated());
-//    }
 
     /**
-     * 매물 상세 정보 등록
-     * @param propertySeq
-     * @param req
-     * @param userSeq
-     * @return
+     * 매물 최종 등록
+     * 4) 매물 상세 정보 입력
+     * 5) 매물 최종 등록
      */
-    @PatchMapping("/{propertySeq}/details")
-    public ResponseEntity<ResponseDTO<Void>> submitPropertyDetail(@PathVariable Integer propertySeq,
-                                                            @RequestBody PropertyDetailRequestDto req,
-//                                                            @AuthenticationPrincipal Integer userSeq
-                                                            @RequestParam Integer userSeq)
-    {
-        propertyService.submitPropertyDetail(propertySeq, userSeq, req);
-        return ResponseDTO.ok(null, "매물 상세 정보가 등록되었습니다.");
-    }
+
+
 
     /**
      * 매물 상세 정보 조회

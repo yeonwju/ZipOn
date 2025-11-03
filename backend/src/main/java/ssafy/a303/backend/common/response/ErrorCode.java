@@ -71,6 +71,13 @@ public enum ErrorCode {
 
     //회원 탈퇴
     USER_ALREADY_DELETED(409, HttpStatus.CONFLICT, "이미 탈퇴된 사용자입니다."),
+
+    // FAST API 연결
+    AI_NO_RESPONSE(500, HttpStatus.BAD_GATEWAY, "AI 서버와 연결을 실패했습니다."),
+
+    // PDF 검증
+    EMPTY_PDF_FILE(400, HttpStatus.BAD_REQUEST, "파일이 비어 있습니다."),
+    ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다.")
     ;
     // ────────────────────────────────────────────────────
     private final int code;
