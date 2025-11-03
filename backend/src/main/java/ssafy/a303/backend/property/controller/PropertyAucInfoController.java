@@ -3,6 +3,7 @@ package ssafy.a303.backend.property.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyAucInfoUpdateRequestDto;
@@ -19,8 +20,7 @@ public class PropertyAucInfoController {
     @PatchMapping("/{propertySeq}")
     public ResponseEntity<ResponseDTO<PropertyAucInfoUpdateResponseDto>> updateAucInfo(@PathVariable Integer propertySeq,
                                                                                        @RequestBody PropertyAucInfoUpdateRequestDto req,
-//                                                           @AuthenticationPrincipal Integer userSeq,
-                                                                                       @RequestParam Integer userSeq)
+                                                                                       @AuthenticationPrincipal Integer userSeq)
     {
         PropertyAucInfoUpdateResponseDto response = aucInfoService.updateAucInfo(propertySeq, req, userSeq);
         return ResponseDTO.ok(response, "매물 경매 정보가 수정되었습니다.");

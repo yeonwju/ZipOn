@@ -6,12 +6,12 @@ import ssafy.a303.backend.property.enums.Facing;
 import java.util.List;
 
 public record PropertyDetailRequestDto(
+        String lessorNm,
         String address,
         String propertyNm,
-        Building buildingType,
         Double latitude,
         Double longitude,
-        String lessorNm,
+        Building buildingType,
         String content,
         Double area,
         Integer areaP,

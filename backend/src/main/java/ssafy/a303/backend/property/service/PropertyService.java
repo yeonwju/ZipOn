@@ -47,7 +47,7 @@ public class PropertyService {
                                                     Integer lessorSeqFromAuth) {
         // 이미 등록된 매물인지 검증
         if(propertyRepository.existsByAddressAndLessorSeq(req.address(), lessorSeqFromAuth)){
-            throw new IllegalArgumentException("이미 동일 주소의 매물이 등록되어 있습니다.");
+            throw new CustomException(ErrorCode.ADDRESS_DUPLICATE);
         }
 
         // 임대인 id, 이름, 매물 주소, 위도, 경도 db에 저장
@@ -73,14 +73,16 @@ public class PropertyService {
 
     /**
      * 매물 상세 정보 등록
-     * @param propertySeq
-     * @param lessorSeq
+     * @param userSeq
      * @param req
+     * @param images
+     * @return
      */
     @Transactional
     public PropertyRegiResponseDto submitDetail(Integer userSeq, PropertyDetailRequestDto req, List<MultipartFile> images) {
 
         //로그인 유저와 등록하려는 사람의 이름이 동일한지.
+        //token에 이름 정보
 
 
         // 매물 정보 등록
@@ -156,6 +158,7 @@ public class PropertyService {
                         p.getAddress(),
                         p.getLatitude(),
                         p.getLongitude(),
+                        p.getBuildingType(),
                         p.getArea(),
                         p.getAreaP(),
                         p.getDeposit(),
@@ -173,6 +176,7 @@ public class PropertyService {
                         p.getPetAvailable(),
                         aucInfo.getIsAucPref(),
                         aucInfo.getIsBrkPref(),
+                        p.getIsLinked(),
                         aucInfo.getAucAt(),
                         aucInfo.getAucAvailable()
             );
@@ -186,11 +190,10 @@ public class PropertyService {
     @Transactional
     public DetailResponseDto getPropertyDetail(Integer propertySeq) {
         Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
-                .orElseThrow(() -> new IllegalArgumentException("해당 매물을 조회할 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
         PropertyAucInfo aucInfo = propertyAucInfoRepository.findByPropertySeq(propertySeq)
-                .orElseThrow(() -> new IllegalArgumentException("해당 매물 경매 정보가 없습니다."));
-
+                .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
 
         // 이미지 리스트
         List<String> images = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq)
@@ -199,7 +202,7 @@ public class PropertyService {
                 .toList();
 
         DetailResponseDto detail = new DetailResponseDto(
-                p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                propertySeq, p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),
@@ -207,6 +210,7 @@ public class PropertyService {
                 p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(), p.getConstructionDate(),
                 p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
                 aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
+                p.getIsLinked(),
                 aucInfo.getAucAt(), aucInfo.getAucAvailable()
         );
         return detail;
@@ -233,7 +237,7 @@ public class PropertyService {
      */
     public void assertCanEdit(Property p, Integer userSeq) {
         if(userSeq == null || !Objects.equals(userSeq, p.getLessorSeq()))
-            throw new IllegalStateException("수정 권한이 없습니다. 작성한 매물만 수정할 수 있습니다.");
+            throw new CustomException(ErrorCode.NO_AUTHORIZATION);
     }
 
     /**
@@ -246,7 +250,7 @@ public class PropertyService {
     @Transactional
     public PropertyUpdateResponseDto updateProperty(Integer propertySeq, PropertyUpdateRequestDto req, Integer userSeq){
         Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 매물입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
         assertCanEdit(p, userSeq);
 
@@ -282,7 +286,7 @@ public class PropertyService {
     @Transactional
     public void deleteProperty(Integer propertySeq, Integer userSeq) {
         Property p =propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
-                .orElseThrow(() -> new IllegalArgumentException("이미 삭제되엇거나 존재하지 않는 매물입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
         assertCanEdit(p, userSeq);
         p.delete(OffsetDateTime.now(ZoneId.of("Asia/Seoul")).toString());

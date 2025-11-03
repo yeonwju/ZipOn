@@ -2,6 +2,7 @@ package ssafy.a303.backend.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -84,7 +85,15 @@ public enum ErrorCode {
     // PDF 검증
     EMPTY_PDF_FILE(400, HttpStatus.BAD_REQUEST, "파일이 비어 있습니다."),
     ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다."),
-    VERIFICATION_FAILED(400, HttpStatus.BAD_REQUEST, "등기부등본이 매물 정보와 일치하지 않습니다.")
+    VERIFICATION_FAILED(400, HttpStatus.BAD_REQUEST, "등기부등본이 매물 정보와 일치하지 않습니다."),
+
+    // 매물 관련
+    ADDRESS_DUPLICATE(400, HttpStatus.BAD_REQUEST, "이미 동일 주소의 매물이 등록되어 있습니다."),
+    PROPERTY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물이 삭제되었거나 존재하지 않습니다."),
+    AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "래당 매물의 경매 정보가 존재하지 않습니다."),
+
+    NO_AUTHORIZATION(400, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
+
     ;
     // ────────────────────────────────────────────────────
     private final int code;

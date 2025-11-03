@@ -114,7 +114,7 @@ public class Property {
     @Column(name = "traded_at", length = 50)
     private String tradedAt;
 
-    @Column(name = "is_linked")
+    @Column(name = "is_linked", columnDefinition = "false")
     private Boolean isLinked;
 
     @CreationTimestamp
