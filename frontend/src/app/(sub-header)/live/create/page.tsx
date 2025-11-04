@@ -3,11 +3,12 @@
 import React, { useMemo, useState } from 'react'
 
 import AddressSearch from '@/components/common/AddressSearch'
-import LiveAuctionPicker from '@/components/live/LiveAuctionPicker'
+import SelectPicker from '@/components/live/SelectPicker'
 import LiveCreateButton from '@/components/live/LiveCreateButton'
 import LiveMapPreview from '@/components/live/LiveMapPreview'
 import LiveTitleInput from '@/components/live/LiveTitleInput'
 import useUserLocation from '@/hook/map/useUserLocation'
+import useKakaoLoader from '@/hook/map/useKakaoLoader'
 import { calculateDistance } from '@/utils/distance'
 
 /**
@@ -18,6 +19,9 @@ import { calculateDistance } from '@/utils/distance'
  * - 현재 위치와 입력한 주소 위치를 함께 지도에 표시
  */
 export default function LiveCreatePage() {
+  // 카카오맵 API 로드
+  useKakaoLoader()
+
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [title, setTitle] = useState('')
 
@@ -68,11 +72,17 @@ export default function LiveCreatePage() {
   return (
     <>
       <section className="flex min-h-screen flex-col bg-gray-200 pb-32">
-        <div className="mx-auto w-full max-w-2xl space-y-2">
+        <div className="mx-auto w-full max-w-2xl space-y-2 bg-white">
           <div>
             <LiveTitleInput value={title} onChange={setTitle} />
-            <AddressSearch onAddressSelect={(address, coords) => setAddressCoords(coords)} />
-            <LiveAuctionPicker auctionItems={mockAuctionItems} />
+            <div className={'px-4 py-2'}>
+              <AddressSearch onAddressSelect={(address, coords) => setAddressCoords(coords)} />
+            </div>
+            <SelectPicker
+              title={'방송할 매물 선택'}
+              description={'경매 대기 목록'}
+              auctionItems={mockAuctionItems}
+            />
           </div>
 
           {/* 지도 미리보기 */}
@@ -82,6 +92,8 @@ export default function LiveCreatePage() {
             distance={distance}
             onRefreshLocation={refreshLocation}
             isRefreshing={isRefreshing}
+            isCurrentLocation={true}
+            height={200}
           />
         </div>
       </section>

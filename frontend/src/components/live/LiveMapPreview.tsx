@@ -7,7 +7,7 @@ import { formatDistance } from '@/utils/distance'
 
 interface LiveMapPreviewProps {
   /** 현재 위치 좌표 */
-  currentLocation: { lat: number; lng: number } | null
+  currentLocation?: { lat: number; lng: number } | null
   /** 검색한 주소 좌표 */
   addressCoords: { lat: number; lng: number } | null
   /** 두 위치 간 거리 (미터) */
@@ -16,6 +16,9 @@ interface LiveMapPreviewProps {
   onRefreshLocation: () => void
   /** 새로고침 중 여부 */
   isRefreshing: boolean
+  /** 현애 위치 출력 여부*/
+  isCurrentLocation: boolean
+  height: number
 }
 
 /**
@@ -30,6 +33,8 @@ export default function LiveMapPreview({
   distance,
   onRefreshLocation,
   isRefreshing,
+  isCurrentLocation,
+  height,
 }: LiveMapPreviewProps) {
   // 표시할 마커 목록 생성
   const markers = []
@@ -60,18 +65,21 @@ export default function LiveMapPreview({
   const isWithinDistance = distance !== null && distance <= 100
 
   return (
-    <div className="bg-white p-6">
+    <div className="rounded-xl border border-gray-200 bg-white p-5">
       {/* 헤더 (범례 + 새로고침) */}
       <div className="mb-4 flex items-center justify-between">
         {/* 범례 */}
         <div className="flex gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-            <span className="text-gray-600">현재 위치</span>
-          </div>
+          {isCurrentLocation && (
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+              <span className="font-medium text-gray-700">현재 위치</span>
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-red-500"></div>
-            <span className="text-gray-600">매물 위치</span>
+            <span className="font-medium text-gray-700">매물 위치</span>
           </div>
         </div>
 
@@ -79,7 +87,7 @@ export default function LiveMapPreview({
         <button
           onClick={onRefreshLocation}
           disabled={isRefreshing}
-          className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
           title="현재 위치 새로고침"
         >
           <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
@@ -89,7 +97,7 @@ export default function LiveMapPreview({
 
       {/* 지도 */}
       <div className="relative">
-        <MiniMap center={mapCenter} height={300} markers={markers} />
+        <MiniMap center={mapCenter} height={height} markers={markers} />
 
         {/* 새로고침 중 오버레이 */}
         {isRefreshing && (
