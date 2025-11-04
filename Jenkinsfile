@@ -5,8 +5,9 @@ pipeline {
     DOCKER_OPTS = "--pull"
     HEALTH = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
+    DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    SPRING_DATASOURCE_URL = credentials('SPRING_DATASOURCE_URL')       // jdbc:postgresql://zipondev-db:5432/appdb
+    SPRING_DATASOURCE_URL = credentials('SPRING_DATASOURCE_URL')
     SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
     SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
     GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
@@ -21,7 +22,6 @@ pipeline {
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '20'))
-    // timestamps()
   }
 
   stages {
@@ -36,10 +36,41 @@ pipeline {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
+
           parallel failFast: false,
-          FRONTEND: { sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend" },
-          BACKEND:  { sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest  -t zipon-backend:${gitsha}  ./backend"  },
-          AI:       { sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest       -t zipon-ai:${gitsha}       ./ai"       }
+          FRONTEND: {
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
+          },
+          BACKEND: {
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
+          },
+          AI: {
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
+          }
+        }
+      }
+    }
+
+    stage('Unit Tests (dev only)') {
+      when { branch 'dev' }
+      steps {
+        sh 'echo "[TEST] Running test scripts..."'
+      }
+    }
+
+    stage('Deploy DEV') {
+      when { branch 'dev' }
+      steps {
+        script {
+          def devComposeExists = sh(script: "test -f ${env.DEV_COMPOSE}", returnStatus: true) == 0
+          if (devComposeExists) {
+            sh """
+              echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
+              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
+            """
+          } else {
+            echo "[DEV] ${env.DEV_COMPOSE} not found. Skipping deploy."
+          }
         }
       }
     }
@@ -66,8 +97,14 @@ pipeline {
   }
 
   post {
-    success { echo "✅ Pipeline success" }
-    failure { echo "❌ Pipeline failed. Check above logs." }
-    always  { sh 'docker image prune -f || true' }
+    success {
+      echo "✅ Pipeline success"
+    }
+    failure {
+      echo "❌ Pipeline failed. Check above logs."
+    }
+    always {
+      sh 'docker image prune -f || true'
+    }
   }
 }
