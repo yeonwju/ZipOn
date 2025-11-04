@@ -1,9 +1,4 @@
-from fastapi import FastAPI
-from app.modules.pdf_parser import extract_text_from_file
-import os
-
-
-# main.py
+# 백엔드 통신용
 from fastapi import FastAPI, UploadFile, Form
 from app.schemas.verify_state import VerifyState
 
@@ -59,18 +54,18 @@ async def verify_endpoint(
 
 
 
-
+## 로컬 테스트용 
 from app.schemas.verify_state import VerifyState
 from app.agent.verify_agent import create_pdf_verifier_graph
 from pathlib import Path
 
 if __name__ == "__main__":
     # === 테스트용 PDF 및 사용자 입력 ===
-    pdf_path = Path(r"C:\Users\SSAFY\Desktop\등기부등본.pdf")
+    pdf_path = Path(r"C:\Users\SSAFY\Desktop\등기부등본4.pdf")
     user_input = {
-        "owner": "이미정",
-        "birth": "710410",
-        "address": "경기도 광명시 철산동 119-2 가산디오스텔 오피스텔 제5층 제506호",
+        "owner": "전병영",
+        "birth": "620424",
+        "address": "인천광역시 서구 금곡동 722-2 102동 703호",
     }
 
     # === PDF 파일 읽기 ===

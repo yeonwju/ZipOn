@@ -8,5 +8,5 @@ class VerifyState(TypedDict, total=False):
     verified: Optional[bool]           # 최종 판별 결과 (True/False)
     num_try: int                       # 재시도 횟수
     error: Optional[str]               # 오류 메시지 (디버깅용)
-    risk_score: Optional[int]
-    risk_reason: Optional[str]
+    risk_score: Optional[int]          # 채점기준에 맞는 점수
+    risk_reason: Optional[str]         # 점수 산정 이유

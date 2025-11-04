@@ -67,7 +67,7 @@ def extract_owner_info_llm(pdf_text: str) -> dict:
   ],
   "restriction": "압류, 가압류 없음",
   "risk_score": 4,
-  "risk_reason": "근저당권 1건(금94,800,000원, 신한은행), 권리제한 없음 "
+  "risk_reason": "근저당권 1건, 권리제한 없음 "
 }}
 
 
