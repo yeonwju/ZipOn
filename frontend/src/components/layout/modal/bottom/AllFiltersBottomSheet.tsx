@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react'
 
-import AreaFilterComponent from '@/components/features/listings/filters/AreaFilter'
-import DirectionFilterComponent from '@/components/features/listings/filters/DirectionFilter'
-import FloorFilterComponent from '@/components/features/listings/filters/FloorFilter'
-import PriceFilterComponent from '@/components/features/listings/filters/PriceFilter'
-import RoomCountFilterComponent from '@/components/features/listings/filters/RoomCountFilter'
+import {
+  AreaFilter as AreaFilterComponent,
+  DirectionFilter as DirectionFilterComponent,
+  FloorFilter as FloorFilterComponent,
+  PriceFilter as PriceFilterComponent,
+  RoomCountFilter as RoomCountFilterComponent,
+} from '@/components/features/listings'
 import type {
   AreaFilter,
   DirectionFilter,

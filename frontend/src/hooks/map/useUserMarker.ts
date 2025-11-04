@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { createUserLocationMarkerElement } from '@/components/features/map/UserLocationMarker'
+import { createUserLocationMarkerElement } from '@/components/features/map'
 
 /**
  * 지도 좌표 타입 정의

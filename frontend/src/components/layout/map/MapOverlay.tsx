@@ -1,9 +1,8 @@
 import { ChevronDown, SlidersHorizontal } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import AuctionTypeFilter from '@/components/features/listings/filters/AuctionTypeFilter'
-import BuildingTypeFilter from '@/components/features/listings/filters/BuildingTypeFilter'
-import MapControls from '@/components/features/map/MapControls'
+import { AuctionTypeFilter, BuildingTypeFilter } from '@/components/features/listings'
+import { MapControls } from '@/components/features/map'
 import SearchBar from '@/components/layout/SearchBar'
 import type { AuctionType, BuildingType } from '@/types/listing'
 

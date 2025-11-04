@@ -4,12 +4,13 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
-import ListingList from '@/components/features/listings/ListingList'
+import { ListingList } from '@/components/features/listings'
 import AllFiltersBottomSheet from '@/components/layout/modal/bottom/AllFiltersBottomSheet'
 import BuildingTypeBottomSheet from '@/components/layout/modal/bottom/BuildingTypeBottomSheet'
 import ListingBottomSheet from '@/components/layout/modal/bottom/ListingBottomSheet'
 import PriceFilterBottomSheet from '@/components/layout/modal/bottom/PriceFilterBottomSheet'
 import RoomCountFilterBottomSheet from '@/components/layout/modal/bottom/RoomCountFilterBottomSheet'
+import { ROUTES } from '@/constants/routes'
 import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 import useListingMarkers from '@/hooks/map/useListingMarkers'
 import { useListingModal } from '@/hooks/map/useListingModal'
@@ -146,7 +147,7 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 매물 카드 클릭 핸들러
   const handleListingClick = (listing: ListingData) => {
     // 매물 상세 페이지로 이동
-    router.push(`/listings/${listing.id}`)
+    router.push(ROUTES.LISTING_DETAIL(listing.id))
   }
 
   return (

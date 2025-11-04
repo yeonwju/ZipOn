@@ -1,4 +1,4 @@
-import LiveItem from '@/components/features/live/LiveItem'
+import { LiveItem } from '@/components/features/live'
 import { LiveItemProps } from '@/data/LiveItem'
 
 export interface LiveItemsProps {

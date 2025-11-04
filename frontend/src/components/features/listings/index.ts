@@ -2,17 +2,11 @@
  * 매물 컴포넌트 Barrel Export
  */
 
-// 목록/카드
-export { default as ListingCard } from './ListingCard'
+// 목록
 export { default as ListingList } from './ListingList'
 
 // 상세
-export { default as ListingDescription } from './detail/ListingDescription'
 export { default as ListingDetail } from './detail/ListingDetail'
-export { default as ListingFeatures } from './detail/ListingFeatures'
-export { default as ListingImageGallery } from './detail/ListingImageGallery'
-export { default as ListingInfo } from './detail/ListingInfo'
-export { default as ListingInfoItem } from './detail/ListingInfoItem'
 
 // 등록 폼
 export { default as Step1PropertyVerification } from './form/Step1PropertyVerification'

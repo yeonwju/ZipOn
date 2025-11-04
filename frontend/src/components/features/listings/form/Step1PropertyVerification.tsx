@@ -5,7 +5,7 @@ import React from 'react'
 
 import AddressSearch from '@/components/common/AddressSearch'
 import FileUploadArea from '@/components/common/FileUploadArea'
-import LiveMapPreview from '@/components/features/live/LiveMapPreview'
+import { LiveMapPreview } from '@/components/features/live'
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

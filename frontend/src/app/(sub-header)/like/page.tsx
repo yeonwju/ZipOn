@@ -1,4 +1,4 @@
-import ListingItem from '@/components/features/home/ListingItem'
+import { ListingItem } from '@/components/features/home'
 
 /**
  * 찜한 매물 페이지 (Server Component)
