@@ -1,6 +1,6 @@
 'use client'
 
-import PriceFilterComponent from '@/components/map/filters/PriceFilter'
+import PriceFilterComponent from '@/components/features/listings/filters/PriceFilter'
 import type { PriceFilter } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'

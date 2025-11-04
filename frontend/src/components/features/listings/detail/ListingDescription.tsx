@@ -17,4 +17,5 @@ export default function ListingDescription({ description }: ListingDescriptionPr
       <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">{description}</p>
     </section>
   )
-}
+} 
+

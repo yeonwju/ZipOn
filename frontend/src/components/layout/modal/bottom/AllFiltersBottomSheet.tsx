@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react'
 
-import AreaFilterComponent from '@/components/map/filters/AreaFilter'
-import DirectionFilterComponent from '@/components/map/filters/DirectionFilter'
-import FloorFilterComponent from '@/components/map/filters/FloorFilter'
-import PriceFilterComponent from '@/components/map/filters/PriceFilter'
-import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
+import AreaFilterComponent from '@/components/features/listings/filters/AreaFilter'
+import DirectionFilterComponent from '@/components/features/listings/filters/DirectionFilter'
+import FloorFilterComponent from '@/components/features/listings/filters/FloorFilter'
+import PriceFilterComponent from '@/components/features/listings/filters/PriceFilter'
+import RoomCountFilterComponent from '@/components/features/listings/filters/RoomCountFilter'
 import type {
   AreaFilter,
   DirectionFilter,

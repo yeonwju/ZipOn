@@ -1,6 +1,6 @@
 'use client'
 
-import RoomCountFilterComponent from '@/components/map/filters/RoomCountFilter'
+import RoomCountFilterComponent from '@/components/features/listings/filters/RoomCountFilter'
 import type { RoomCountFilter } from '@/types/filter'
 
 import BottomSheet from './BottomSheet'

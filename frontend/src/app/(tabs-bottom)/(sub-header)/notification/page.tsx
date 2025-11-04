@@ -1,4 +1,4 @@
-import NotificationCard from '@/components/notification/NotificationItem'
+import NotificationCard from '@/components/features/notification/NotificationItem'
 
 export default function NotificationPage() {
   return (

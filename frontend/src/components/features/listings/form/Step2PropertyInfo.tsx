@@ -3,7 +3,7 @@
 import React from 'react'
 
 import ImageUploadGrid from '@/components/common/ImageUploadGrid'
-import SelectPicker from '@/components/live/SelectPicker'
+import SelectPicker from '@/components/features/live/SelectPicker'
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
