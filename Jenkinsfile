@@ -7,7 +7,6 @@ pipeline {
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    # 🔹 Jenkins Credentials (GitLab Secrets 동기화된 버전)
     SPRING_DATASOURCE_URL = credentials('SPRING_DATASOURCE_URL')
     SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
     SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
@@ -58,7 +57,6 @@ pipeline {
       steps {
         sh '''
           echo "[TEST] Running test scripts..."
-          # ex) pytest, npm test, gradle test
         '''
       }
     }
