@@ -22,7 +22,7 @@ public class CompanyController {
     @PostMapping("/status")
     public ResponseEntity<ResponseDTO<Void>> companyStatusCheck(@RequestBody CompanyStatusRequest companyRequest) {
         String taxSeq = companyRequest.b_no().get(0);
-        if (companyService.cmpStatus(taxSeq)) {
+        if (companyService.checkCompany(taxSeq).getStatus()) {
             return ResponseDTO.ok(null, "운영 중인 사업장 입니다.");
         }
         throw new CustomException(ErrorCode.INVALID_TAX_SEQ);

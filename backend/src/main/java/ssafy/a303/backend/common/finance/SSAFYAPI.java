@@ -20,8 +20,11 @@ public class SSAFYAPI {
                 .build();
     }
 
-    private Map<String, Object> send(HttpMethod method, String path,
-                                     Map<String, Object> header, Map<String, Object> body) {
+    private Map<String, Object> send(
+            HttpMethod method, String path,
+            Map<String, Object> header,
+            Map<String, Object> body
+    ) {
         Map<String, Object> request = new HashMap<>();
         if (header != null) request.put("header", header);
         if (body != null) request.putAll(body);
@@ -29,9 +32,7 @@ public class SSAFYAPI {
         return client.method(method)
                 .uri(path)
                 .bodyValue(request)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
+                .exchangeToMono(resp -> resp.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>(){}))
                 .block();
     }
 

@@ -37,47 +37,39 @@ public class CompanyService {
         this.bWebClient = bWebClient;
     }
 
-    public boolean cmpStatus(String bNo) {
+    public Company checkCompany(String bNo) {
         Optional<Company> opt = companyRepository.findCompanyByTaxSeq(bNo);
         ZoneId zone = ZoneId.of("Asia/Seoul");
         LocalDate today = LocalDate.now(zone);
 
         // 오늘 이미 검색 된 경우
-
         if (opt.isPresent()) {
             Company company = opt.get();
             if (company.getCheckAt().equals(today)) {
-                return company.getStatus();
+                return company;
             }
         }
-
         // 검사
-        CompanyStatusRequest request = new CompanyStatusRequest(List.of(bNo));
-        CompanyStatusResponse response = gWebClient.post()
-                .uri(uri -> uri
-                        .path("/status")
-                        .queryParam("serviceKey", serviceKey)
-                        .build())
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(CompanyStatusResponse.class)
-                .block();
-        boolean result = response != null && response.isValid();
+        boolean result = searchAtGov(bNo);
+
+        // 갱신 또는 등록
         if (opt.isPresent()) {
             // 갱신
             Company company = opt.get();
             company.setStatus(result);
             companyRepository.save(company);
+            return company;
         } else if (result) {
             // 새로 등록
-            Company company = bizno(bNo);
+            Company company = searchAtBizNo(bNo);
             company.setCheckAt(today);
             companyRepository.save(company);
+            return company;
         }
-        return result;
+        throw new CustomException(ErrorCode.INVALID_TAX_SEQ);
     }
 
-    public Company bizno(String bNo) {
+    public Company searchAtBizNo(String bNo) {
         BiznoResponse response = bWebClient.get()
                 .uri(uri -> uri
                         .path("/api/fapi")
@@ -108,5 +100,19 @@ public class CompanyService {
                 .taxSeq(item.bno().replaceAll("-",""))
                 .status("01".equals(item.bsttcd()))
                 .build();
+    }
+
+    public boolean searchAtGov(String bNo){
+        CompanyStatusRequest request = new CompanyStatusRequest(List.of(bNo));
+        CompanyStatusResponse response = gWebClient.post()
+                .uri(uri -> uri
+                        .path("/status")
+                        .queryParam("serviceKey", serviceKey)
+                        .build())
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(CompanyStatusResponse.class)
+                .block();
+        return response != null && response.isValid();
     }
 }

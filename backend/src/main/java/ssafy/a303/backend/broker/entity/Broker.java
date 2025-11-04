@@ -7,7 +7,7 @@ import ssafy.a303.backend.user.entity.User;
 @Entity
 @Getter
 @Setter
-@Table
+@Table(name = "broker")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
