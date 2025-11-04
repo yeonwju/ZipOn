@@ -42,5 +42,5 @@ logging:
 #    org.apache.coyote.http11: DEBUG
 
 # Elasticsearch 설정
-elasitcsearch:
-  uris: https://localhost:9200
+elasticsearch:
+  uris: http://localhost:9200

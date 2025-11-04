@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class EsConfig {
 
     @Bean
-    public ElasticsearchClient esClient(@Value("${elasticsearch.uris}") String uris) {
+    public ElasticsearchClient esClient(@Value("${elasticsearch.uris:https://localhost:9200}") String uris) {
         //yml 파일의 elasticsearch uris 값 불러오기
 
         /**
