@@ -4,7 +4,7 @@ spring:
       on-profile: dev
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/jeepon
+    url: jdbc:postgresql://localhost:5432/zipon
     username: ${DB_USER}
     password: ${DB_PW}
 

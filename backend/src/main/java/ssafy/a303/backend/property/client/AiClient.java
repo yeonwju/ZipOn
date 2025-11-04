@@ -21,7 +21,7 @@ public class AiClient {
         this.client = builder.baseUrl(baseUrl).build(); // 항상 초기화
     }
 
-    public boolean verifySync(String pdfCode, MultipartFile pdf, String regiNm, String regiBirth, String address) {
+    public VerificationResultResponseDto verifySync(String pdfCode, MultipartFile pdf, String regiNm, String regiBirth, String address) {
 
         MultipartBodyBuilder mb = new MultipartBodyBuilder();
         mb.part("pdfCode", pdfCode);
@@ -44,7 +44,7 @@ public class AiClient {
         if(res == null) {
             throw new CustomException(ErrorCode.AI_NO_RESPONSE);
         }
-        return res.isCertificated();
+        return res;
     }
 
 }

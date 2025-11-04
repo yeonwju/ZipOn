@@ -31,9 +31,9 @@ public class VerificationService {
         String pdfCode = PdfCodeGenerator.next("REG");
 
         // AI 동기 호출, boolean 수신
-        boolean isCertificated;
+        VerificationResultResponseDto result;
         try {
-            isCertificated = aiClient.verifySync(pdfCode, pdf, regiNm, regiBirth, address);
+            result = aiClient.verifySync(pdfCode, pdf, regiNm, regiBirth, address);
         } catch (CustomException ce) {
             // AiClient 내부에서 CustomException 던지는 경우 그대로 전달
             throw ce;
@@ -43,11 +43,11 @@ public class VerificationService {
         }
 
         // 검증 결과 판단
-        if(isCertificated != true){
-            throw new CustomException(ErrorCode.VERIFICATION_FAILED, ErrorCode.VERIFICATION_FAILED.getMessage());
+        if(!result.isCertificated()){
+            throw new CustomException(ErrorCode.VERIFICATION_FAILED);
         }
 
         // 결과를 dto로 변환
-        return new VerificationResultResponseDto(pdfCode, isCertificated);
+        return new VerificationResultResponseDto(pdfCode, result.isCertificated(), result.riskScore(), result.riskReason());
     }
 }
