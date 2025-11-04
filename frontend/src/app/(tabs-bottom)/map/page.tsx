@@ -1,4 +1,4 @@
-import { ClientMapView } from '@/components/layout/map/ClientMapView'
+import { ClientMapView } from '@/components/features/map'
 import { getListings } from '@/services/listingService'
 
 /**

@@ -1,16 +1,12 @@
 'use client'
 
 import { Plus } from 'lucide-react'
-import { JSX, useState } from 'react'
+import { useState } from 'react'
 
-type Action = {
-  icon: JSX.Element
-  name: string
-  onClick?: () => void
-}
+import { FabAction } from '@/types/common'
 
 interface FabDialProps {
-  actions: Action[]
+  actions: FabAction[]
 }
 
 export default function FabDial({ actions }: FabDialProps) {

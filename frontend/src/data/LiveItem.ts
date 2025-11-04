@@ -1,14 +1,8 @@
-export interface LiveItemProps {
-  id: number
-  imgSrc: string
-  title: string
-  viewCnt: number
-  chatCnt: number
-  brokerName: string
-  brokerImgSrc: string
-}
+import { LiveItemData } from '@/types/models/live'
 
-export const liveItems: LiveItemProps[] = [
+export type LiveItemProps = LiveItemData
+
+export const liveItems: LiveItemData[] = [
   {
     id: 1,
     imgSrc: '/live-room.svg',

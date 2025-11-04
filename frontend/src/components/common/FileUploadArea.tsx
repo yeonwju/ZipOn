@@ -1,5 +1,9 @@
 'use client'
 
+import { File, X } from 'lucide-react'
+import Image from 'next/image'
+import React, { useRef } from 'react'
+
 import { Button } from '@/components/ui/button'
 import {
   Empty,
@@ -9,9 +13,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { File, X } from 'lucide-react'
-import React, { useRef } from 'react'
-import Image from 'next/image'
 
 interface FileUploadAreaProps {
   files: File[]
@@ -55,12 +56,7 @@ export default function FileUploadArea({
           <>
             <EmptyHeader className={'flex flex-col'}>
               <EmptyMedia variant="default">
-                <Image
-                  src={'/icons/file-image.png'}
-                  alt={'파일이미지'}
-                  width={150}
-                  height={100}
-                />
+                <Image src={'/icons/file-image.png'} alt={'파일이미지'} width={150} height={100} />
               </EmptyMedia>
               <div>
                 <EmptyTitle className="text-base font-medium text-gray-900">
@@ -115,4 +111,3 @@ export default function FileUploadArea({
     </div>
   )
 }
-

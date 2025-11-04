@@ -1,14 +1,17 @@
 'use client'
 
-import { Accordion } from '@/components/ui/accordion'
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { CheckCircle2 } from 'lucide-react'
-import useUserLocation from '@/hook/map/useUserLocation'
+import React, { useState } from 'react'
+
+import { 
+  Step1PropertyVerification, 
+  Step2PropertyInfo, 
+  Step3AdditionalInfo 
+} from '@/components/features/listings'
+import { Accordion } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 import useKakaoLoader from '@/hook/map/useKakaoLoader'
-import Step1PropertyVerification from '@/components/listings/Step1PropertyVerification'
-import Step2PropertyInfo from '@/components/listings/Step2PropertyInfo'
-import Step3AdditionalInfo from '@/components/listings/Step3AdditionalInfo'
+import useUserLocation from '@/hook/map/useUserLocation'
 
 export default function NewListingPage() {
   useKakaoLoader()

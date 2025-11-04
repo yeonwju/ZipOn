@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import ListingTopTabs from '@/components/layout/header/ListingsTopTabs'
 import FabDial from '@/components/ui/FabDial'
+import { ROUTES } from '@/constants'
 
 export default function ListingsPage() {
   const [activeTab, setActiveTab] = useState<'auction' | 'general' | 'broker'>('auction')
@@ -14,7 +15,7 @@ export default function ListingsPage() {
     {
       icon: <HousePlus className="h-5 w-5" />,
       name: '매물 등록',
-      onClick: () => router.push('/listings/new'),
+      onClick: () => router.push(ROUTES.LISTING_NEW),
     },
   ]
   return (

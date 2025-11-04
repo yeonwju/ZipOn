@@ -3,8 +3,9 @@
 import { Video } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import LiveItems from '@/components/live/LiveItems'
+import { LiveItems } from '@/components/features/live'
 import FabDial from '@/components/ui/FabDial'
+import { ROUTES } from '@/constants'
 import { liveItems } from '@/data/LiveItem'
 const metadata = liveItems
 /**
@@ -20,7 +21,7 @@ export default function LivePage() {
     {
       icon: <Video className="h-5 w-5" />,
       name: '라이브 생성',
-      onClick: () => router.push('/live/create'),
+      onClick: () => router.push(ROUTES.LIVE_CREATE),
     },
   ]
   return (

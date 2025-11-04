@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import DaumPostcode from 'react-daum-postcode'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DaumPostcodeData } from '@/types/daum'
 
 interface AddressSearchProps {
   /** 주소 선택 완료 시 호출되는 콜백 */
@@ -15,13 +16,6 @@ interface AddressSearchProps {
   /** 로딩 상태 */
   isLoading?: boolean
   title?: string
-}
-
-interface DaumPostcodeData {
-  address: string
-  roadAddress: string
-  jibunAddress: string
-  zonecode: string
 }
 
 /**

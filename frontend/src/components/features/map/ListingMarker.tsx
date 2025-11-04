@@ -1,0 +1,59 @@
+import type { ListingData } from '@/types/listing'
+
+/**
+ * 매물 마커 UI를 생성하는 함수
+ *
+ * 말풍선 형태의 마커로 보증금/월세 정보를 표시합니다.
+ * 중앙 하단의 삼각형 꼬리가 정확한 좌표를 가리킵니다.
+ *
+ * @param listing - 매물 데이터
+ * @param onClick - 클릭 콜백
+ */
+export function createListingMarkerElement(
+  listing: ListingData,
+  onClick?: (listing: ListingData) => void
+): HTMLDivElement {
+  const container = document.createElement('div')
+  // pb-[6px]: 꼬리 길이만큼 하단 패딩 추가하여 꼬리 끝이 정확히 좌표를 가리키도록 함
+  container.className = `relative cursor-pointer transform transition-transform hover:scale-110 pb-[6px]`
+
+  // 경매/일반에 따른 색상 설정
+  const isAuction = listing.isAuction
+  const primaryColor = isAuction ? 'bg-red-500' : 'bg-blue-500'
+  const textColor = isAuction ? 'text-red-500' : 'text-blue-500'
+  const borderColor = isAuction ? 'border-red-500' : 'border-blue-500'
+  const arrowColor = isAuction ? 'after:border-t-red-500' : 'after:border-t-blue-500'
+
+  // 💰 말풍선 본체 컨테이너
+  const priceLabel = document.createElement('div')
+  priceLabel.className = `
+    relative rounded-md shadow-md flex flex-col text-center text-xs font-bold
+    after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-[-6px]
+    after:border-l-[6px] after:border-r-[6px] after:border-t-[6px]
+    after:border-l-transparent after:border-r-transparent ${arrowColor}
+  `
+
+  //  보증금 박스 (말풍선 상단)
+  const depositBox = document.createElement('div')
+  depositBox.className = `${primaryColor} text-white px-3 py-1 rounded-t-md`
+
+  depositBox.textContent =
+    listing.deposit >= 10000 ? `${listing.deposit / 10000}억` : `${listing.deposit}만`
+
+  //  월세 박스 (말풍선 하단, 있는 경우에만)
+  const rentBox = document.createElement('div')
+  rentBox.className = `bg-white ${textColor} border ${borderColor} px-3 py-1 rounded-b-md`
+  rentBox.textContent = listing.rent > 0 ? `${listing.rent}만` : '매매'
+
+  // ️ DOM 구조 조립
+  priceLabel.appendChild(depositBox)
+  priceLabel.appendChild(rentBox)
+  container.appendChild(priceLabel)
+
+  //  클릭 이벤트 등록
+  if (onClick) {
+    container.addEventListener('click', () => onClick(listing))
+  }
+
+  return container
+}

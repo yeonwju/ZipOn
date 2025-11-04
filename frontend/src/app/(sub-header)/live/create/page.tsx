@@ -3,12 +3,14 @@
 import React, { useMemo, useState } from 'react'
 
 import AddressSearch from '@/components/common/AddressSearch'
-import SelectPicker from '@/components/live/SelectPicker'
-import LiveCreateButton from '@/components/live/LiveCreateButton'
-import LiveMapPreview from '@/components/live/LiveMapPreview'
-import LiveTitleInput from '@/components/live/LiveTitleInput'
-import useUserLocation from '@/hook/map/useUserLocation'
+import {
+  LiveCreateButton,
+  LiveMapPreview,
+  LiveTitleInput,
+  SelectPicker,
+} from '@/components/features/live'
 import useKakaoLoader from '@/hook/map/useKakaoLoader'
+import useUserLocation from '@/hook/map/useUserLocation'
 import { calculateDistance } from '@/utils/distance'
 
 /**
