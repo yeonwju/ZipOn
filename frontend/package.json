@@ -44,7 +44,8 @@
     "tailwind-merge": "^3.3.1",
     "typescript-eslint": "^8.46.2",
     "vaul": "^1.1.2",
-    "workbox-webpack-plugin": "^7.3.0"
+    "workbox-webpack-plugin": "^7.3.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
