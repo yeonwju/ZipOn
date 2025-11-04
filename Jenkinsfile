@@ -6,11 +6,23 @@ pipeline {
     HEALTH = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
+
+    # 🔹 Jenkins Credentials (GitLab Secrets 동기화된 버전)
+    SPRING_DATASOURCE_URL = credentials('SPRING_DATASOURCE_URL')
+    SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
+    SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
+    GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
+    SSAFY_API_KEY = credentials('SSAFY_API_KEY')
+    SSAFY_API_URL = credentials('SSAFY_API_URL')
+    GOV_API_KEY = credentials('GOV_API_KEY')
+    BIZNO_API_KEY = credentials('BIZNO_API_KEY')
+    BIZNO_API_URL = credentials('BIZNO_API_URL')
+    REDIS_PASSWORD = credentials('REDIS_PASSWORD')
   }
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '20'))
-    // timestamps() 
   }
 
   stages {
@@ -51,7 +63,7 @@ pipeline {
       }
     }
 
-    stage('Deploy DEV (optional)') {
+    stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
         script {
@@ -59,7 +71,20 @@ pipeline {
           if (devComposeExists) {
             sh """
               echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
-              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
+
+              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans \\
+                -e SPRING_PROFILES_ACTIVE=dev \\
+                -e SPRING_DATASOURCE_URL="$SPRING_DATASOURCE_URL" \\
+                -e SPRING_DATASOURCE_USERNAME="$SPRING_DATASOURCE_USERNAME" \\
+                -e SPRING_DATASOURCE_PASSWORD="$SPRING_DATASOURCE_PASSWORD" \\
+                -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \\
+                -e GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \\
+                -e SSAFY_API_KEY="$SSAFY_API_KEY" \\
+                -e SSAFY_API_URL="$SSAFY_API_URL" \\
+                -e GOV_API_KEY="$GOV_API_KEY" \\
+                -e BIZNO_API_KEY="$BIZNO_API_KEY" \\
+                -e BIZNO_API_URL="$BIZNO_API_URL" \\
+                -e REDIS_PASSWORD="$REDIS_PASSWORD"
             """
           } else {
             echo "[DEV] ${env.DEV_COMPOSE} not found. Skipping deploy."
@@ -68,15 +93,28 @@ pipeline {
       }
     }
 
-    stage('Deploy PROD (main/master)') {
+    stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
         sh """
           echo "[PROD] Deploying with ${env.PROD_COMPOSE}"
-          docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
+
+          docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans \\
+            -e SPRING_PROFILES_ACTIVE=prod \\
+            -e SPRING_DATASOURCE_URL="$SPRING_DATASOURCE_URL" \\
+            -e SPRING_DATASOURCE_USERNAME="$SPRING_DATASOURCE_USERNAME" \\
+            -e SPRING_DATASOURCE_PASSWORD="$SPRING_DATASOURCE_PASSWORD" \\
+            -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \\
+            -e GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \\
+            -e SSAFY_API_KEY="$SSAFY_API_KEY" \\
+            -e SSAFY_API_URL="$SSAFY_API_URL" \\
+            -e GOV_API_KEY="$GOV_API_KEY" \\
+            -e BIZNO_API_KEY="$BIZNO_API_KEY" \\
+            -e BIZNO_API_URL="$BIZNO_API_URL" \\
+            -e REDIS_PASSWORD="$REDIS_PASSWORD"
 
           echo "[PROD] Warm-up & health check..."
-          sleep 2
+          sleep 3
           if [ -x ${env.HEALTH} ]; then
             ${env.HEALTH} || echo "[WARN] Health check failed"
           fi
