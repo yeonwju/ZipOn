@@ -28,8 +28,8 @@ export const useUserStore = create<UserState>()(
         birth: '1990-01-01',
         profileImg: '/profile.svg',
         socialType: 'google',
-        isBroker: true,
-        isVerified: true,
+        isBroker: false,
+        isVerified: false,
       },
 
       setUser: user =>

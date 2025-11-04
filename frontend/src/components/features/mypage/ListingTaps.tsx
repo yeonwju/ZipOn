@@ -6,10 +6,10 @@ import { useUserStore } from '@/store/user'
 export default function ListingTaps() {
   const { user } = useUserStore.getState()
   return (
-    <>
+    <div>
       <Tabs
         defaultValue={'auction'}
-        className={'mt-2 flex w-full flex-col items-center justify-center'}
+        className={'mt-1 flex w-full flex-col items-center justify-center'}
       >
         <TabsList className={'w-full'}>
           {user?.isBroker ? (
@@ -31,7 +31,7 @@ export default function ListingTaps() {
               </TabsTrigger>
             </div>
           ) : (
-            <div className={'flex w-full flex-row'}>
+            <div className={'grid w-full grid-cols-2 rounded-md bg-[#F2F8FC] p-1'}>
               <TabsTrigger value={'auction'} className={'flex-1 data-[state=active]:bg-white'}>
                 경매 내역
               </TabsTrigger>
@@ -48,6 +48,6 @@ export default function ListingTaps() {
         <TabsContent value={'general-listings'}>일반 매물 입니다.</TabsContent>
         <TabsContent value={'auction-listings'}>경매 매물 입니다.</TabsContent>
       </Tabs>
-    </>
+    </div>
   )
 }
