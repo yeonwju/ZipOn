@@ -14,13 +14,12 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import org.springframework.stereotype.Component;
 import ssafy.a303.backend.security.jwt.entity.TokenPair;
 import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
+import ssafy.a303.backend.security.jwt.service.JWTProvider;
 import ssafy.a303.backend.security.jwt.token.TokenData;
 import ssafy.a303.backend.security.support.CookieFactory;
-import ssafy.a303.backend.security.jwt.service.JWTProvider;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -30,23 +29,22 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
     private final JWTProvider jwtProvider;
     private final CookieFactory cookieFactory;
     private final TokenPairRepository tokenPairRepository;
-
-    @Value("${frontUrl}")
-    private String frontUrl;
     private final SavedRequestAwareAuthenticationSuccessHandler delegate =
             new SavedRequestAwareAuthenticationSuccessHandler();
+    @Value("${frontUrl}")
+    private String frontUrl;
 
     @PostConstruct
-    void init(){
-        delegate.setDefaultTargetUrl(frontUrl);
-        delegate.setAlwaysUseDefaultTargetUrl(false);
+    void init() {
+        delegate.setAlwaysUseDefaultTargetUrl(true);
     }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         OAuth2User p = (OAuth2User) authentication.getPrincipal();
         Integer userSeq = p.getAttribute("userSeq");
-        String role     = p.getAttribute("role");
+        String role = p.getAttribute("role");
         // ---- 쿠키 발급 ----
         TokenData tokenData = TokenData.builder()
                 .userSeq(userSeq)
@@ -76,6 +74,7 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         response.addCookie(RefreshCookie);
 
         // ---- 이동 ----
-        delegate.onAuthenticationSuccess(request,response,authentication);
+        delegate.setDefaultTargetUrl(frontUrl+"/auth/success?redirect_uri="+request.getParameter("redirect_uri"));
+        delegate.onAuthenticationSuccess(request, response, authentication);
     }
 }

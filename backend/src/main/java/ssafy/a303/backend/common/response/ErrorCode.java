@@ -18,10 +18,13 @@ public enum ErrorCode {
     EXPIRED_TOKEN(401, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     INVALID_CREDENTIALS(401, HttpStatus.UNAUTHORIZED, "잘못된 인증 정보입니다."),
     TOKEN_TYPE_MISMATCH(401, HttpStatus.UNAUTHORIZED, "토큰 타입이 잘못되었습니다."),
-    ACCESS_REFRESH_MISMATCH(401,HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
+    ACCESS_REFRESH_MISMATCH(401, HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
 
     // 사업장
-    INVALID_TAX_SEQ(404,HttpStatus.NOT_FOUND,"해당 사업자 등록 번호는 운영 중이지 않습니다."),
+    INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND,"해당 사업자 등록 번호는 운영 중이지 않습니다."),
+    INVALID_FILE_NOTFOUND(404, HttpStatus.NO_CONTENT,"파일이 없습니다."),
+    INVALID_FILE_TYPE(400, HttpStatus.BAD_REQUEST,"파일 타입이 올바르지 않습니다."),
+    FILE_TOO_LARGE(413, HttpStatus.PAYLOAD_TOO_LARGE,"파일이 너무 큽니다."),
 
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST
