@@ -1,5 +1,6 @@
-import {Profile} from "@/components/features";
-import {useUserStore} from "@/store/user";
+import { Profile } from '@/components/features'
+import ListingTaps from '@/components/features/mypage/ListingTaps'
+import { useUserStore } from '@/store/user'
 
 /**
  * 마이페이지 (Server Component)
@@ -9,11 +10,12 @@ import {useUserStore} from "@/store/user";
  */
 
 export default function MyPage() {
-  const {user} = useUserStore.getState()
+  const { user } = useUserStore.getState()
 
   return (
-    <section className="p-4">
-      <Profile user={user}/>
+    <section className="flex w-full flex-col p-4">
+      <Profile user={user} />
+      <ListingTaps />
     </section>
   )
 }
