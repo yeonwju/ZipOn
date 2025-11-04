@@ -25,7 +25,6 @@ pipeline {
   }
 
   stages {
-
     stage('Checkout') {
       steps {
         checkout scm
@@ -55,9 +54,7 @@ pipeline {
     stage('Unit Tests (dev only)') {
       when { branch 'dev' }
       steps {
-        sh '''
-          echo "[TEST] Running test scripts..."
-        '''
+        sh 'echo "[TEST] Running test scripts..."'
       }
     }
 
@@ -69,20 +66,7 @@ pipeline {
           if (devComposeExists) {
             sh """
               echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
-
-              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans \\
-                -e SPRING_PROFILES_ACTIVE=dev \\
-                -e SPRING_DATASOURCE_URL="$SPRING_DATASOURCE_URL" \\
-                -e SPRING_DATASOURCE_USERNAME="$SPRING_DATASOURCE_USERNAME" \\
-                -e SPRING_DATASOURCE_PASSWORD="$SPRING_DATASOURCE_PASSWORD" \\
-                -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \\
-                -e GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \\
-                -e SSAFY_API_KEY="$SSAFY_API_KEY" \\
-                -e SSAFY_API_URL="$SSAFY_API_URL" \\
-                -e GOV_API_KEY="$GOV_API_KEY" \\
-                -e BIZNO_API_KEY="$BIZNO_API_KEY" \\
-                -e BIZNO_API_URL="$BIZNO_API_URL" \\
-                -e REDIS_PASSWORD="$REDIS_PASSWORD"
+              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
             """
           } else {
             echo "[DEV] ${env.DEV_COMPOSE} not found. Skipping deploy."
@@ -96,20 +80,7 @@ pipeline {
       steps {
         sh """
           echo "[PROD] Deploying with ${env.PROD_COMPOSE}"
-
-          docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans \\
-            -e SPRING_PROFILES_ACTIVE=prod \\
-            -e SPRING_DATASOURCE_URL="$SPRING_DATASOURCE_URL" \\
-            -e SPRING_DATASOURCE_USERNAME="$SPRING_DATASOURCE_USERNAME" \\
-            -e SPRING_DATASOURCE_PASSWORD="$SPRING_DATASOURCE_PASSWORD" \\
-            -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \\
-            -e GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \\
-            -e SSAFY_API_KEY="$SSAFY_API_KEY" \\
-            -e SSAFY_API_URL="$SSAFY_API_URL" \\
-            -e GOV_API_KEY="$GOV_API_KEY" \\
-            -e BIZNO_API_KEY="$BIZNO_API_KEY" \\
-            -e BIZNO_API_URL="$BIZNO_API_URL" \\
-            -e REDIS_PASSWORD="$REDIS_PASSWORD"
+          docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
 
           echo "[PROD] Warm-up & health check..."
           sleep 3
