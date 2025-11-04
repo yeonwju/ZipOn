@@ -17,7 +17,7 @@ def create_pdf_verifier_graph():
     graph.add_node("extract_llm", extract_llm_node)
     graph.add_node("compare", compare_node)
 
-    
+    #조건부 엣지
     def pdf_next_condition(state: VerifyState):
         """PDF 추출 후 이동할 노드 결정"""
         if not state.get("pdf_text"):  # 추출 실패
@@ -37,6 +37,13 @@ def create_pdf_verifier_graph():
             return "end"
         return "compare"
     
+    graph.add_edge("extract_pdf", "extract_llm")  # 기본 흐름
+    graph.add_edge("extract_llm", "compare")
+    graph.add_edge("compare", END)
+
+    # 진입점 설정
+    graph.set_entry_point("extract_pdf")
+
     # 엣지 연결 
     graph.add_conditional_edges("extract_pdf", pdf_next_condition, {
         "extract_pdf": "extract_pdf",
@@ -47,9 +54,5 @@ def create_pdf_verifier_graph():
         "compare": "compare",
         "end": END
     })
-    graph.add_edge("compare", END)
-
-    # 진입점 설정
-    graph.set_entry_point("extract_pdf")
 
     return graph.compile()
