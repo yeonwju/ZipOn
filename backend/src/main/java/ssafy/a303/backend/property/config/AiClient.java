@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.client;
+package ssafy.a303.backend.property.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.MultipartBodyBuilder;

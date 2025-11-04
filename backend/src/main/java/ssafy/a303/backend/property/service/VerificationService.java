@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
-import ssafy.a303.backend.property.client.AiClient;
+import ssafy.a303.backend.property.config.AiClient;
 import ssafy.a303.backend.property.dto.response.VerificationResultResponseDto;
 
 @Service
