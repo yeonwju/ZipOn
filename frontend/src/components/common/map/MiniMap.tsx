@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 
 import { createAddressLocationMarkerElement } from '@/components/map/AddressLocationMarker'
 import { createUserLocationMarkerElement } from '@/components/map/UserLocationMarker'
-import useKakaoLoader from '@/hook/map/useKakaoLoader'
+import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 
 interface MiniMapProps {
   /** 지도 중심 좌표 */

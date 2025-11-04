@@ -1,6 +1,6 @@
-import useClusteredMarkers from '@/hook/map/useClusteredMarkers'
-import useDetailedMarkers from '@/hook/map/useDetailedMarkers'
-import useMapZoomLevel from '@/hook/map/useMapZoomLevel'
+import useClusteredMarkers from '@/hooks/map/useClusteredMarkers'
+import useDetailedMarkers from '@/hooks/map/useDetailedMarkers'
+import useMapZoomLevel from '@/hooks/map/useMapZoomLevel'
 import type { ListingData } from '@/types/listing'
 
 /**

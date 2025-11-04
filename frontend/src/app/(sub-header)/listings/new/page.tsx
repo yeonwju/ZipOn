@@ -10,8 +10,8 @@ import {
 } from '@/components/features/listings'
 import { Accordion } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
-import useKakaoLoader from '@/hook/map/useKakaoLoader'
-import useUserLocation from '@/hook/map/useUserLocation'
+import useKakaoLoader from '@/hooks/map/useKakaoLoader'
+import useUserLocation from '@/hooks/map/useUserLocation'
 
 export default function NewListingPage() {
   useKakaoLoader()

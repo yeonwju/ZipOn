@@ -9,8 +9,8 @@ import {
   LiveTitleInput,
   SelectPicker,
 } from '@/components/features/live'
-import useKakaoLoader from '@/hook/map/useKakaoLoader'
-import useUserLocation from '@/hook/map/useUserLocation'
+import useKakaoLoader from '@/hooks/map/useKakaoLoader'
+import useUserLocation from '@/hooks/map/useUserLocation'
 import { calculateDistance } from '@/utils/distance'
 
 /**

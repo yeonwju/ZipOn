@@ -10,14 +10,14 @@ import ListingBottomSheet from '@/components/layout/modal/bottom/ListingBottomSh
 import PriceFilterBottomSheet from '@/components/layout/modal/bottom/PriceFilterBottomSheet'
 import RoomCountFilterBottomSheet from '@/components/layout/modal/bottom/RoomCountFilterBottomSheet'
 import ListingList from '@/components/map/ListingList'
-import useKakaoLoader from '@/hook/map/useKakaoLoader'
-import useListingMarkers from '@/hook/map/useListingMarkers'
-import { useListingModal } from '@/hook/map/useListingModal'
-import { useMapControls } from '@/hook/map/useMapControls'
-import { useMapFilter } from '@/hook/map/useMapFilter'
-import useMapInteraction from '@/hook/map/useMapInteraction'
-import useUserLocation from '@/hook/map/useUserLocation'
-import useUserMarker from '@/hook/map/useUserMarker'
+import useKakaoLoader from '@/hooks/map/useKakaoLoader'
+import useListingMarkers from '@/hooks/map/useListingMarkers'
+import { useListingModal } from '@/hooks/map/useListingModal'
+import { useMapControls } from '@/hooks/map/useMapControls'
+import { useMapFilter } from '@/hooks/map/useMapFilter'
+import useMapInteraction from '@/hooks/map/useMapInteraction'
+import useUserLocation from '@/hooks/map/useUserLocation'
+import useUserMarker from '@/hooks/map/useUserMarker'
 import type {
   AreaFilter,
   DirectionFilter,

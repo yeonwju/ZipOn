@@ -2,9 +2,9 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import useBottomSheetDrag from '@/hook/modal/useBottomSheetDrag'
-import useBottomSheetHeight, { type SheetState } from '@/hook/modal/useBottomSheetHeight'
-import useContentScroll from '@/hook/modal/useContentScroll'
+import useBottomSheetDrag from '@/hooks/modal/useBottomSheetDrag'
+import useBottomSheetHeight, { type SheetState } from '@/hooks/modal/useBottomSheetHeight'
+import useContentScroll from '@/hooks/modal/useContentScroll'
 
 interface BottomSheetProps {
   isOpen: boolean
