@@ -2,10 +2,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export interface User {
-  name: string
+  name: string | null
   nickname: string | null
   tel: string
   birth: string
+  email: string
   profileImg: string
   socialType: string | null
   isBroker: boolean
@@ -26,6 +27,7 @@ export const useUserStore = create<UserState>()(
         nickname: '김도현 닉네임',
         tel: '010-1234-5678',
         birth: '1990-01-01',
+        email: 'dojin8351@gmail.com',
         profileImg: '/profile.svg',
         socialType: 'google',
         isBroker: false,

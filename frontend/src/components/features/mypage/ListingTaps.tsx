@@ -3,17 +3,21 @@ import { Tabs, TabsList } from '@radix-ui/react-tabs'
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
 import { useUserStore } from '@/store/user'
 
-export default function ListingTaps() {
+interface ListingTapsProps {
+  className?: string
+}
+
+export default function ListingTaps({ className }: ListingTapsProps) {
   const { user } = useUserStore.getState()
+
+  const isBrokerUser = user?.isBroker
+
   return (
-    <div>
-      <Tabs
-        defaultValue={'auction'}
-        className={'mt-1 flex w-full flex-col items-center justify-center'}
-      >
+    <div className={className}>
+      <Tabs defaultValue={'auction'} className={'flex w-full flex-col items-center justify-center'}>
         <TabsList className={'w-full'}>
-          {user?.isBroker ? (
-            <div className={'grid w-full grid-cols-3 rounded-md bg-[#F2F8FC] p-1'}>
+          {isBrokerUser ? (
+            <div className={'grid w-full grid-cols-3 rounded-md bg-gray-100 p-1'}>
               <TabsTrigger value={'auction'} className={'flex-1 data-[state=active]:bg-white'}>
                 경매 내역
               </TabsTrigger>
@@ -31,7 +35,7 @@ export default function ListingTaps() {
               </TabsTrigger>
             </div>
           ) : (
-            <div className={'grid w-full grid-cols-2 rounded-md bg-[#F2F8FC] p-1'}>
+            <div className={'grid w-full grid-cols-2 rounded-md bg-gray-100 p-1'}>
               <TabsTrigger value={'auction'} className={'flex-1 data-[state=active]:bg-white'}>
                 경매 내역
               </TabsTrigger>

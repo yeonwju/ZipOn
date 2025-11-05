@@ -1,7 +1,5 @@
 import { Profile } from '@/components/features'
 import ListingTaps from '@/components/features/mypage/ListingTaps'
-import { useUserStore } from '@/store/user'
-import AuthOptionGroup from '@/components/features/mypage/AuthOptionGroup'
 
 /**
  * 마이페이지 (Server Component)
@@ -11,13 +9,12 @@ import AuthOptionGroup from '@/components/features/mypage/AuthOptionGroup'
  */
 
 export default function MyPage() {
-  const { user } = useUserStore.getState()
-
   return (
     <section className="flex w-full flex-col p-4">
-      <Profile user={user} />
-      <AuthOptionGroup />
-      <ListingTaps />
+      <section className={'p-2'}>
+        <Profile />
+      </section>
+      <ListingTaps className={'mt-4'} />
     </section>
   )
 }
