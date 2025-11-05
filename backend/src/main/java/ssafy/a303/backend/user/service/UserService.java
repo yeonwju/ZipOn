@@ -20,6 +20,7 @@ public class UserService {
         if(opt.isEmpty()) throw new CustomException(ErrorCode.USER_NOT_FOUND);
         User user = opt.get();
         return new MeResponseDTO(
+                user.getEmail(),
                 user.getNickname(),
                 user.getName(),
                 user.getTel(),
