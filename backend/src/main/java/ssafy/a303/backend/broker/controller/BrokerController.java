@@ -20,7 +20,7 @@ public class BrokerController {
     private final BrokerService brokerService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO<Void>> enrollSimple(
+    public ResponseEntity<ResponseDTO<Void>> enroll(
             @AuthenticationPrincipal int userSeq,
             @RequestPart("taxSeq") String taxSeq,
             @RequestPart("license") MultipartFile licensePdf
