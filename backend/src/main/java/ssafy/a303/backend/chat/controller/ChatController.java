@@ -62,7 +62,7 @@ public class ChatController {
     }
 
     /**
-     * ✅ 해당 채팅방 메시지 읽음처리
+     * 해당 채팅방 메시지 읽음처리
      */
     @PostMapping("/room/{roomSeq}/read")
     public ResponseEntity<ResponseDTO<Void>> readMessages(@PathVariable Integer roomSeq) {
