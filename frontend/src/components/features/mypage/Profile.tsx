@@ -12,7 +12,11 @@ export default function Profile() {
   const hasNickname = user?.nickname !== null && user?.nickname !== undefined
 
   return (
-    <div className={'flex flex-row items-center gap-5'}>
+    <div
+      className={
+        'flex flex-row items-center gap-3 rounded-3xl border-2 border-gray-200 p-5 shadow-md'
+      }
+    >
       {/* 아바타 */}
       <div className={'relative'}>
         <Avatar className={'h-20 w-20 rounded-3xl border-3 border-gray-100 shadow-lg'}>

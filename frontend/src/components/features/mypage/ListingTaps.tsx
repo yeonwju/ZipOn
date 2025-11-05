@@ -2,9 +2,8 @@ import { Tabs, TabsList } from '@radix-ui/react-tabs'
 import { Suspense } from 'react'
 
 import AuctionHistoryList from '@/components/features/mypage/autcion-history/AuctionHistoryList'
-import AuctionHistoryListSkeleton from '@/components/features/mypage/autcion-history/skeleton/AuctionHistoryListSkeleton'
+import AuctionHistoryListSkeleton from '@/components/features/mypage/skeleton/AuctionHistoryListSkeleton'
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
-import { mockAuctionHistories } from '@/data/AuctionHistory'
 import { useUserStore } from '@/store/user'
 
 interface ListingTapsProps {
@@ -13,8 +12,6 @@ interface ListingTapsProps {
 
 export default function ListingTaps({ className }: ListingTapsProps) {
   const { user } = useUserStore.getState()
-  // 아래는 임의 데이터 입니다.
-  const auctionHistory = mockAuctionHistories
   const isBrokerUser = user?.isBroker
 
   return (
@@ -54,15 +51,18 @@ export default function ListingTaps({ className }: ListingTapsProps) {
           )}
         </TabsList>
         <TabsContent value={'auction'} className={'w-full'}>
-          <Suspense fallback={<AuctionHistoryListSkeleton className={'mt-2 flex flex-col gap-2'} />}>
-            <AuctionHistoryList
-              auctionHistory={auctionHistory}
-              className={'mt-2 flex flex-col gap-2'}
-            />
+          <Suspense
+            fallback={<AuctionHistoryListSkeleton className={'mt-2 flex flex-col gap-2'} />}
+          >
+            <AuctionHistoryList className={'mt-2 flex flex-col gap-2'} />
           </Suspense>
         </TabsContent>
-        <TabsContent value={'general-listings'} className={'w-full'}>일반 매물 입니다.</TabsContent>
-        <TabsContent value={'auction-listings'} className={'w-full'}>경매 매물 입니다.</TabsContent>
+        <TabsContent value={'general-listings'} className={'w-full'}>
+          일반 매물 입니다.
+        </TabsContent>
+        <TabsContent value={'auction-listings'} className={'w-full'}>
+          경매 매물 입니다.
+        </TabsContent>
       </Tabs>
     </div>
   )

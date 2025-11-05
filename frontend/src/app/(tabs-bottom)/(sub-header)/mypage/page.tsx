@@ -11,8 +11,8 @@ import ListingTaps from '@/components/features/mypage/ListingTaps'
 // 아래값은 임의 데이터 입니다.
 export default function MyPage() {
   return (
-    <section className="flex w-full flex-col p-4">
-      <section className={'p-2'}>
+    <section className="flex w-full flex-col p-4 pb-18">
+      <section>
         <Profile />
       </section>
       <ListingTaps className={'mt-4'} />

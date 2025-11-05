@@ -17,7 +17,7 @@ export default function AuthOptionGroup() {
         {isBrokerAuthEnabled ? (
           <button
             className={
-              'inline-flex items-center gap-2 rounded-full border border-green-400 bg-green-300 px-2 py-1'
+              'inline-flex items-center gap-1 rounded-full border border-green-400 bg-green-300 px-2 py-1'
             }
             disabled
           >
@@ -27,7 +27,7 @@ export default function AuthOptionGroup() {
         ) : (
           <button
             className={
-              'inline-flex cursor-pointer items-center gap-2 rounded-full border border-red-400 bg-red-300 px-2 py-1'
+              'inline-flex cursor-pointer items-center gap-1 rounded-full border border-red-400 bg-red-300 px-2 py-1'
             }
           >
             <PrivacyTipIcon fontSize={'inherit'} className="text-white" />
@@ -38,7 +38,7 @@ export default function AuthOptionGroup() {
         {isPhoneAuthEnabled ? (
           <button
             className={
-              'inline-flex items-center gap-2 rounded-full border border-green-400 bg-green-300 px-2 py-1'
+              'inline-flex items-center gap-1 rounded-full border border-green-400 bg-green-300 px-2 py-1'
             }
             disabled
           >
@@ -48,7 +48,7 @@ export default function AuthOptionGroup() {
         ) : (
           <button
             className={
-              'inline-flex cursor-pointer items-center gap-2 rounded-full border border-red-400 bg-red-300 px-2 py-1'
+              'inline-flex cursor-pointer items-center gap-1 rounded-full border border-red-400 bg-red-300 px-2 py-1'
             }
           >
             <PrivacyTipIcon fontSize={'inherit'} className="text-white" />
