@@ -16,7 +16,7 @@ __pycache__/
 .env
 .env.*
 
-# Dependency lock files (optional if managed elsewhere)
+# Dependency lock files
 Pipfile
 Pipfile.lock
 poetry.lock
@@ -29,14 +29,16 @@ dist/
 # Logs
 *.log
 
-# Jupyter notebooks checkpoints
+# Jupyter notebooks
 .ipynb_checkpoints/
+*.ipynb
+notebooks/
 
 # OS-specific files
 .DS_Store
 Thumbs.db
 
-# VSCode / JetBrains IDE configs
+# IDE configs
 .vscode/
 .idea/
 
@@ -45,20 +47,36 @@ Thumbs.db
 *.bak
 *.swp
 *.swo
-
-# Ignore uploaded or temp data folders (optional)
 uploads/
 temp/
 tmp/
 
-# ==============================
-# uv / project-specific
-# ==============================
+# uv
 uv.lock
 
-# (Optional) Ignore example configs only if they’re local
-# !.env.example  ← keep the template version
+# Keep only template env files
 !.env.example
 
-#data
-/data/raw_laws/
+# ==============================
+# LangChain / AI Project-specific
+# ==============================
+
+# Vector DBs (Chroma)
+chroma_db/
+chroma/
+index/
+*.sqlite3
+*.bin
+
+# AI preprocessed data
+data/
+raw_laws/
+processed/
+outputs/
+cache/
+__cache__/
+
+# SSAFY AI project subfolders
+ai/uploads/
+ai/data/
+ai/notebooks/chroma_db/
