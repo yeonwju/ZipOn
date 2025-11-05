@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/constants'
 import { authFetch } from '@/lib/fetch'
 import type { User } from '@/store/user'
 
@@ -48,7 +49,7 @@ function transformUserResponse(apiUser: UserApiResponse): User {
  */
 export async function fetchCurrentUser(): Promise<User | null> {
   try {
-    const result = await authFetch.get<ApiResponse<UserApiResponse>>('/user/me')
+    const result = await authFetch.get<ApiResponse<UserApiResponse>>(API_ENDPOINTS.USER_INFO)
 
     console.log('🔵 [authService] API 응답:', result)
 

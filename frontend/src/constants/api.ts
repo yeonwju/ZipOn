@@ -2,27 +2,24 @@
  * API 엔드포인트 상수
  */
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+export const API_BASE_URL = 'http://localhost:8080'
 
 export const API_ENDPOINTS = {
   // 매물
-  LISTINGS: '/api/listings',
-  LISTING_BY_ID: (id: number | string) => `/api/listings/${id}`,
-  LISTING_CREATE: '/api/listings',
-
-  // 라이브
-  LIVE: '/api/live',
-  LIVE_BY_ID: (id: number | string) => `/api/live/${id}`,
-  LIVE_CREATE: '/api/live',
+  LISTINGS_VERIFY: '/api/v1/properties/verifications',
+  LISTINGS_DETAIL_REGISTER: '/api/v1/properties/details',
+  LISTINGS_DETAIL: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
+  LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
+  LISTINGS_UPDATE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
+  LISTINGS_AUCTION_STATE_UPDATE: (propertySeq: number) => `/api/v1/properties/auc/${propertySeq}`,
+  LISTINGS_DELETE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
 
   // 사용자
-  USER_PROFILE: '/api/user/profile',
-  USER_LIKES: '/api/user/likes',
-
-  // 업로드
-  UPLOAD_IMAGE: '/api/upload/image',
-  UPLOAD_FILE: '/api/upload/file',
+  ACCESS_TOKEN_REFRESH: '/api/v1/jwt/refresh',
+  GOOGLE_LOGIN: '/oauth2/authorization/google',
+  USER_INFO: '/api/v1/user/me',
+  COMPANY_STATUS: '/api/v1/company/status',
+  BROKER_VERIFY: '/api/v1/broker',
 } as const
 
 export const API_TIMEOUT = 10000 // 10초
-

@@ -13,7 +13,7 @@ interface AuctionHistoryListProps {
   className?: string
 }
 
-const INITIAL_DISPLAY_COUNT = 2
+const INITIAL_DISPLAY_COUNT = 3
 
 /**
  * 경매 내역 리스트

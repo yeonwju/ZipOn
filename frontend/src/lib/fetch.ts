@@ -1,12 +1,11 @@
 /**
  * Fetch API Wrapper
- * 
+ *
  * axios처럼 사용할 수 있는 fetch 래퍼
  * - authFetch: 쿠키 포함 (인증 필요한 요청)
  * - publicFetch: 쿠키 미포함 (공개 요청)
  */
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+import { API_BASE_URL } from '@/constants'
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean>
@@ -24,7 +23,7 @@ async function baseFetch(
 
   // URL 생성
   let url = `${API_BASE_URL}${endpoint}`
-  
+
   // 쿼리 파라미터 추가
   if (params) {
     const searchParams = new URLSearchParams()
@@ -228,4 +227,3 @@ export const publicFetch = {
     return baseFetch(endpoint, { ...options, method: 'DELETE' }, false) as Promise<TResponse>
   },
 }
-
