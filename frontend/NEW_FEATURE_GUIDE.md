@@ -201,7 +201,7 @@ export default function LikeButton({
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-
+ 
     setIsLoading(true)
 
     // 🔄 백엔드 연동 전: 로컬 상태만 변경
@@ -222,11 +222,7 @@ export default function LikeButton({
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className={`
-        flex items-center justify-center rounded-full p-2 transition-all
-        ${isLiked ? 'bg-red-50' : 'bg-gray-100'}
-        ${isLoading ? 'opacity-50' : ''}
-      `}
+      className="flex items-center justify-center rounded-full p-2 transition-all"
     >
       <Heart
         size={size}
@@ -254,8 +250,7 @@ interface LikeListItemProps {
 
 export default function LikeListItem({ listing }: LikeListItemProps) {
   return (
-    <Link 
-      href={ROUTES.LISTING_DETAIL(listing.id)}
+    <Link href={ROUTES.LISTING_DETAIL(listing.id)}
       className="flex items-center gap-4 border-b p-4 hover:bg-gray-50"
     >
       <Image
@@ -273,6 +268,7 @@ export default function LikeListItem({ listing }: LikeListItemProps) {
           <span className="font-medium text-blue-600">
             {listing.deposit.toLocaleString()}만원
           </span>
+          {' / '}
           <span className="font-medium text-blue-600">
             {listing.rent.toLocaleString()}만원
           </span>
@@ -427,36 +423,36 @@ src/
 
 새 기능 추가 시:
 
-- [ ] **타입 정의** (`types/models/`)
-  - 도메인 모델 타입 작성
-  - `models/index.ts`에 export 추가
-  
-- [ ] **상수 추가** (`constants/api.ts`)
-  - API 엔드포인트 추가
-  
-- [ ] **API 함수** (`services/api/`)
-  - API 호출 함수 작성
-  - 백엔드 연동 전에는 Mock 데이터 반환
-  
-- [ ] **React Query Hook** (`hooks/queries/`)
-  - Custom Hook 작성
-  - 백엔드 연동 전에는 `enabled: false` 또는 주석 처리
-  
-- [ ] **컴포넌트 생성** (`components/features/`)
-  - 기능별 폴더 생성
-  - 관련 컴포넌트 작성
-  
-- [ ] **Barrel Export** (`index.ts`)
-  - 컴포넌트 폴더에 `index.ts` 생성
-  - `features/index.ts`에도 추가
-  
+- [ ] **타입 정의** (types/models/)
+    - 도메인 모델 타입 작성
+    - models/index.ts에 export 추가
+
+- [ ] **상수 추가** (constants/api.ts)
+    - API 엔드포인트 추가
+
+- [ ] **API 함수** (services/api/)
+    - API 호출 함수 작성
+    - 백엔드 연동 전에는 Mock 데이터 반환
+
+- [ ] **React Query Hook** (hooks/queries/)
+    - Custom Hook 작성
+    - 백엔드 연동 전에는 enabled: false 또는 주석 처리
+
+- [ ] **컴포넌트 생성** (components/features/)
+    - 기능별 폴더 생성
+    - 관련 컴포넌트 작성
+
+- [ ] **Barrel Export** (index.ts)
+    - 컴포넌트 폴더에 index.ts 생성
+    - features/index.ts에도 추가
+
 - [ ] **페이지 사용**
-  - 페이지에서 컴포넌트 import
-  - ROUTES 상수 사용
-  
+    - 페이지에서 컴포넌트 import
+    - ROUTES 상수 사용
+
 - [ ] **빌드 테스트**
-  - `npm run build` 실행
-  - 오류 없는지 확인
+    - npm run build 실행
+    - 오류 없는지 확인
 
 ---
 
@@ -549,31 +545,31 @@ import LikeListItem from '@/components/features/likes/LikeListItem'
 ```bash
 # 1. 타입 파일 생성
 touch src/types/models/[기능명].ts
-# → interface 정의
-# → models/index.ts에 export 추가
+# interface 정의
+# models/index.ts에 export 추가
 
 # 2. API 엔드포인트 추가
-# → constants/api.ts 수정
+# constants/api.ts 수정
 
 # 3. API 함수 생성
 touch src/services/api/[기능명].ts
-# → API 함수 작성 (Mock 데이터)
+# API 함수 작성 (Mock 데이터)
 
 # 4. React Query Hook 생성
 touch src/hooks/queries/use[기능명].ts
-# → Custom Hook 작성 (주석 처리)
+# Custom Hook 작성 (주석 처리)
 
 # 5. 컴포넌트 폴더 생성
 mkdir src/components/features/[기능명]
 touch src/components/features/[기능명]/index.ts
-# → 컴포넌트 작성
-# → index.ts에 export
+# 컴포넌트 작성
+# index.ts에 export
 
 # 6. features/index.ts에 추가
-# → export * from './[기능명]'
+# export * from './[기능명]'
 
 # 7. 페이지에서 사용
-# → import { Component } from '@/components/features/[기능명]'
+# import { Component } from '@/components/features/[기능명]'
 
 # 8. 빌드 테스트
 npm run build
@@ -592,7 +588,7 @@ npm run build
 ## 💬 팁
 
 1. **작은 단위로 개발**
-   - 타입 → API → Hook → 컴포넌트 순서대로
+   - 타입 - API - Hook - 컴포넌트 순서대로
    - 각 단계마다 빌드 테스트
 
 2. **Mock 데이터 먼저**
