@@ -273,7 +273,6 @@ export default function LikeListItem({ listing }: LikeListItemProps) {
           <span className="font-medium text-blue-600">
             {listing.deposit.toLocaleString()}만원
           </span>
-          {' / '}
           <span className="font-medium text-blue-600">
             {listing.rent.toLocaleString()}만원
           </span>
@@ -390,7 +389,7 @@ src/
 ```
 
 ---
-
+ 
 ## 🔄 다른 기능 추가 예제
 
 ### 예제 1: 알림(Notification) 기능

@@ -6,7 +6,8 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import { useUserStore } from '@/store/user'
 
 export default function AuthOptionGroup() {
-  const { user } = useUserStore.getState()
+  //  hook 사용 - store 변경 시 자동 리렌더링
+  const user = useUserStore(state => state.user)
 
   const isBrokerAuthEnabled = user?.isBroker && user?.isVerified
   const isPhoneAuthEnabled = user?.isVerified
