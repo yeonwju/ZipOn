@@ -2,8 +2,10 @@ package ssafy.a303.backend.property.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 import ssafy.a303.backend.property.enums.VerificationStatus;
@@ -114,7 +116,8 @@ public class Property {
     @Column(name = "traded_at", length = 50)
     private String tradedAt;
 
-    @Column(name = "is_linked", columnDefinition = "false")
+    @Column(name = "is_linked")
+    @ColumnDefault("false")
     private Boolean isLinked;
 
     @CreationTimestamp

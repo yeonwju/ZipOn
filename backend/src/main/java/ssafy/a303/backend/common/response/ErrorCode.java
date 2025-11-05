@@ -94,6 +94,20 @@ public enum ErrorCode {
 
     NO_AUTHORIZATION(400, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 
+    // STOMP 관련
+    INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),
+    INVALID_DESTINATION(400, HttpStatus.BAD_REQUEST, "STOMP 구독 경로(destination)가 누락되었거나 올바르지 않습니다. (예: /sub/chat/{roomId})"),
+    INVALID_ROOM_ID(400, HttpStatus.BAD_REQUEST, "채팅방 ID 형식이 올바르지 않습니다. (숫자여야 합니다.)"),
+    UNAUTHORIZED_CHAT_ACCESS(403, HttpStatus.FORBIDDEN, "해당 채팅방에 접근 권한이 없습니다."),
+    UNSUPPORTED_CATEGORY(400, HttpStatus.BAD_REQUEST, "지원하지 않는 구독 카테고리입니다."),
+
+    // 채팅 관련
+    CHAT_SELF_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "자기 자신과는 채팅할 수 없습니다."),
+    CHAT_ROOM_NOT_FOUND(404, HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
+    CHAT_MESSAGE_SAVE_FAILED(500, HttpStatus.INTERNAL_SERVER_ERROR, "채팅 메시지 저장 중 오류가 발생했습니다."),
+    CHAT_PARTICIPANT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "채팅 참여자를 찾을 수 없습니다."),
+    INVALID_CHAT_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 채팅 요청입니다."),
+    BROKER_NOT_FOUND(404, HttpStatus.NOT_FOUND, "중개인 정보를 찾을 수 없습니다."),
     ;
     // ────────────────────────────────────────────────────
     private final int code;
