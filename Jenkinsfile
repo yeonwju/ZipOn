@@ -2,7 +2,6 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_OPTS = ""
     HEALTH = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
@@ -60,16 +59,16 @@ pipeline {
           parallel failFast: false,
           FRONTEND: {
             sh """
-              docker build ${env.DOCKER_OPTS} \
+              docker build \
                 --build-arg NEXT_PUBLIC_API_BASE_URL=${env.FRONT_API_BASE_URL} \
                 -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
             """
           },
           BACKEND: {
-            sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
+            sh "docker build -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
           },
           AI: {
-            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
+            sh "docker build -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
           }
         }
       }
