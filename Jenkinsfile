@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_OPTS = "--pull"
+    DOCKER_OPTS = ""
     HEALTH = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"

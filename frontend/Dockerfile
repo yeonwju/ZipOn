@@ -3,11 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ENV NPM_CONFIG_CACHE=/root/.npm
+
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV NODE_ENV=production
 
 COPY package*.json ./
+
 RUN npm ci
 
 COPY . .
@@ -25,6 +28,8 @@ ENV PORT=3000
 
 COPY --from=builder /app ./
 
-# 3000포트로 서비스 (호스트 매핑: dev=23000, prod=13000)
+ENV NPM_CONFIG_CACHE=/root/.npm
+
 EXPOSE 3000
+
 CMD ["npm", "run", "start"]
