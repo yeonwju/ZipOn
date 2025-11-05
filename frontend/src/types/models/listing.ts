@@ -1,6 +1,6 @@
 /**
  * 매물 도메인 모델
- * 
+ *
  * listing.ts, listingDetail.ts, listings.ts를 통합
  */
 
@@ -94,4 +94,3 @@ export interface ListingAdditionalInfo {
   aucAvailable: string
   notes: string
 }
-

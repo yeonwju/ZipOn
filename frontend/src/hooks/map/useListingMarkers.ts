@@ -1,7 +1,7 @@
 import useClusteredMarkers from '@/hooks/map/useClusteredMarkers'
 import useDetailedMarkers from '@/hooks/map/useDetailedMarkers'
 import useMapZoomLevel from '@/hooks/map/useMapZoomLevel'
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 지도에 매물 마커를 표시하는 통합 훅

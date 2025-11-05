@@ -19,3 +19,6 @@ export * from './home'
 // notification
 export * from './notification'
 
+// mypage
+export * from './mypage'
+

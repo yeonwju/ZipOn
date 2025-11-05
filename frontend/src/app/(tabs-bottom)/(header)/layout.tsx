@@ -12,7 +12,7 @@ export default function HeaderLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen">
       <MainHeader />
-      <main className="pt-14">{children}</main>
+      <main className="pt-14 pb-13">{children}</main>
     </div>
   )
 }

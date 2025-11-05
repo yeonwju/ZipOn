@@ -1,4 +1,4 @@
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 매물 마커 UI를 생성하는 함수

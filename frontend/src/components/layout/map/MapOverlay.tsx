@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { AuctionTypeFilter, BuildingTypeFilter } from '@/components/features/listings'
 import { MapControls } from '@/components/features/map'
 import SearchBar from '@/components/layout/SearchBar'
-import type { AuctionType, BuildingType } from '@/types/listing'
+import type { AuctionType, BuildingType } from '@/types/models/listing'
 
 interface MapOverlayProps {
   /**

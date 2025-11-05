@@ -7,6 +7,7 @@ import { LiveItems } from '@/components/features/live'
 import FabDial from '@/components/ui/FabDial'
 import { ROUTES } from '@/constants'
 import { liveItems } from '@/data/LiveItem'
+import { useUserStore } from '@/store/user'
 const metadata = liveItems
 /**
  * 라이브 방송 페이지 (Server Component)
@@ -17,6 +18,7 @@ const metadata = liveItems
 
 export default function LivePage() {
   const router = useRouter()
+  const { user } = useUserStore()
   const actions = [
     {
       icon: <Video className="h-5 w-5" />,
@@ -25,9 +27,9 @@ export default function LivePage() {
     },
   ]
   return (
-    <section>
+    <section className={'pb-13.5'}>
       <LiveItems items={metadata} />
-      <FabDial actions={actions} />
+      {user?.isVerified && user?.isBroker && <FabDial actions={actions} />}
     </section>
   )
 }

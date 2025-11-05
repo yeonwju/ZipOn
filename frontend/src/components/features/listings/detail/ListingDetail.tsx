@@ -1,6 +1,6 @@
 'use client'
 
-import { ListingDetailData } from '@/types/listingDetail'
+import { ListingDetailData } from '@/types'
 
 import ListingDescription from './ListingDescription'
 import ListingFeatures from './ListingFeatures'

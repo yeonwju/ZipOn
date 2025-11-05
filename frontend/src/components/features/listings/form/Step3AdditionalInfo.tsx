@@ -10,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { AdditionalInfo } from '@/types/listings'
+import { ListingAdditionalInfo as AdditionalInfo } from '@/types/models/listing'
 
 interface Step3Props {
   step1Completed: boolean
