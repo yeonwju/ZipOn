@@ -1,14 +1,16 @@
 package ssafy.a303.backend.sms.service;
 
 import com.solapi.sdk.SolapiClient;
-import com.solapi.sdk.message.model.Message;
 import com.solapi.sdk.message.dto.response.MultipleDetailMessageSentResponse;
+import com.solapi.sdk.message.model.Message;
 import com.solapi.sdk.message.service.DefaultMessageService;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SmsService {
 
     @Value("${solapi.key}")
@@ -41,7 +43,7 @@ public class SmsService {
             message.setText(String.format("[집온] 인증 번호입니다. %s", randomCode()));
 
             MultipleDetailMessageSentResponse response = this.messageService.send(message);
-            System.out.println(response);
+            // System.out.println(response);
 
             return response;
         } catch (Exception e) {
