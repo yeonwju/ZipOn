@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 매물 모달(바텀시트) 관리 훅

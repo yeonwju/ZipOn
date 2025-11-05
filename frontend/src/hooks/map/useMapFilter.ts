@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { AreaFilter, DirectionFilter, FloorFilter, PriceFilter, RoomCountFilter } from '@/types/filter'
-import type { AuctionType, BuildingType, ListingData } from '@/types/listing'
+import type { AuctionType, BuildingType, ListingData } from '@/types/models/listing'
 
 interface UseMapFilterParams {
   listings: ListingData[]

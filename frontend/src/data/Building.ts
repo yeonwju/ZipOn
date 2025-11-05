@@ -1,4 +1,4 @@
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 건물 매물 샘플 데이터

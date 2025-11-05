@@ -26,7 +26,7 @@ import type {
   PriceFilter,
   RoomCountFilter,
 } from '@/types/filter'
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 import { DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '@/types/map'
 
 import MapOverlay from './MapOverlay'

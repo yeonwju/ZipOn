@@ -1,4 +1,4 @@
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 import ListingCard from './ListingCard'
 

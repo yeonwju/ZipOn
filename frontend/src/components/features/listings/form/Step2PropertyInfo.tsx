@@ -7,7 +7,8 @@ import { SelectPicker } from '@/components/features/live'
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ListingInfo, SelectItem } from '@/types/listings'
+import { SelectItem } from '@/types'
+import { ListingFormInfo as ListingInfo } from '@/types/models/listing'
 
 interface Step2Props {
   step1Completed: boolean

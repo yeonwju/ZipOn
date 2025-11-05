@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 interface ListingCardProps {
   listing: ListingData

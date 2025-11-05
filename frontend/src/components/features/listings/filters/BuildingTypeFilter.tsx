@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import React from 'react'
 
-import type { BuildingType } from '@/types/listing'
+import type { BuildingType } from '@/types/models/listing'
 
 interface BuildingTypeFilterProps {
   selectedFilter: BuildingType

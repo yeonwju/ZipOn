@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import type { AuctionType } from '@/types/listing'
+import type { AuctionType } from '@/types/models/listing'
 
 interface MapFilterProps {
   selectedFilter: AuctionType

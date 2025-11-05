@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { createListingMarkerElement } from '@/components/features/map'
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 매물을 상세 말풍선 마커로 표시하는 훅

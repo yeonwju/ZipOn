@@ -3,7 +3,7 @@
  */
 
 import type { DirectionFilter, FloorFilter, RoomCountFilter } from '@/types/filter'
-import type { AuctionType, BuildingType } from '@/types/listing'
+import type { AuctionType, BuildingType } from '@/types/models/listing'
 
 // 방 개수 옵션
 export const ROOM_COUNT_OPTIONS: { value: RoomCountFilter; label: string }[] = [
