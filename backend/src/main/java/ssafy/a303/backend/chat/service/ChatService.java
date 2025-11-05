@@ -156,6 +156,7 @@ public class ChatService {
 
         // 9) 채팅방 목록 반환
         return result;
+
     }
 
     /**
