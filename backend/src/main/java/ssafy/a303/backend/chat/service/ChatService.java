@@ -91,6 +91,7 @@ public class ChatService {
             chatParticipantRepository.save(ChatParticipant.builder().chatRoom(chatRoom).user(opponent).build());
 
             isNew = true;
+
         }
 
         return ChatRoomResponseDto.builder()
