@@ -160,7 +160,7 @@ public class ChatService {
     }
 
     /**
-     * ✅ 특정 채팅방 메시지 목록 조회
+     * 특정 채팅방 메시지 목록 조회
      */
     public List<ChatMessageResponseDto> getChatHistory(Integer roomSeq) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomSeq)
@@ -182,7 +182,7 @@ public class ChatService {
     }
 
     /**
-     * ✅ STOMP 구독 시 채팅방 참여자 검증
+     * STOMP 구독 시 채팅방 참여자 검증
      * WebSocket 연결 시 해당 유저가 해당 채팅방의 참여자인지 확인한다.
      *
      * @param userSeqString STOMP 인증에서 넘어온 사용자 seq (문자열)
@@ -202,7 +202,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        // ✅ 이 방에 이 유저가 "참가자"인지 확인
+        // 이 방에 이 유저가 "참가자"인지 확인
         boolean exists = chatParticipantRepository.existsByChatRoomAndUser(chatRoom, user);
 
         log.info("[CHAT][AUTH] STOMP 구독 권한 확인 → userSeq={}, roomSeq={}, 참여여부={}", userSeq, roomSeq, exists);
@@ -211,7 +211,7 @@ public class ChatService {
     }
 
     /**
-     * ✅ 메시지 저장 + 읽음 상태 생성 + 응답 DTO 반환
+     * 메시지 저장 + 읽음 상태 생성 + 응답 DTO 반환
      */
     public ChatMessageResponseDto saveMessage(Integer roomSeq, ChatMessageRequestDto requestDto, User sender) {
 
@@ -228,7 +228,7 @@ public class ChatService {
                 .build();
         chatMessageRepository.save(message);
 
-        // ✅ 참여자별 읽음 상태 생성
+        // 참여자별 읽음 상태 생성
         List<ChatParticipant> participants = chatParticipantRepository.findAllByChatRoom(chatRoom);
         for (ChatParticipant participant : participants) {
             messageReadStatusRepository.save(MessageReadStatus.builder()
@@ -252,7 +252,7 @@ public class ChatService {
     }
 
     /**
-     * ✅ 메시지 읽음 처리
+     * 메시지 읽음 처리
      */
     public void readMessages(Integer roomSeq) {
 

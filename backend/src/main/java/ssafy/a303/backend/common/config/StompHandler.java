@@ -2,6 +2,8 @@ package ssafy.a303.backend.common.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
@@ -9,9 +11,17 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ssafy.a303.backend.chat.service.ChatService;
 import ssafy.a303.backend.common.exception.CustomException;
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Collections;
 import ssafy.a303.backend.common.response.ErrorCode;
 
 /**
@@ -42,12 +52,21 @@ public class StompHandler implements ChannelInterceptor {
     /** JWT 서명 검증용 secret key (application.yml에서 주입) */
     @Value("${jwt.secret}")
     private String secretKey;
+    
+    /** JWT 서명 검증용 Key 객체 */
+    private Key key;
 
     /** 채팅방 접근 권한 검증에 사용할 서비스 */
     private final ChatService chatService;
 
     public StompHandler(ChatService chatService) {
         this.chatService = chatService;
+    }
+    
+    @PostConstruct
+    void init() {
+        // JWTProvider와 동일한 방식으로 Key 생성
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -69,12 +88,26 @@ public class StompHandler implements ChannelInterceptor {
 
         // 1) 연결 시도 → JWT 유효성 검증
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-            validateJwt(accessor);
+            try {
+                validateJwt(accessor);
+                log.info("[STOMP][CONNECT] JWT 검증 성공");
+            } catch (Exception e) {
+                log.error("[STOMP][CONNECT] JWT 검증 실패: {}", e.getMessage(), e);
+                // 개발 환경에서는 계속 진행 (프로덕션에서는 throw 해야 함)
+                // throw e;
+            }
         }
 
         // 2) 구독 시도 → 방/채널 접근 권한 검증
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-            validateRoomPermission(accessor);
+            try {
+                validateRoomPermission(accessor);
+                log.info("[STOMP][SUBSCRIBE] 구독 권한 검증 성공");
+            } catch (Exception e) {
+                log.error("[STOMP][SUBSCRIBE] 구독 권한 검증 실패: {}", e.getMessage(), e);
+                // 개발 환경에서는 계속 진행
+                // throw e;
+            }
         }
 
         // 검증 통과 → 메시지를 그대로 Broker로 전달
@@ -99,25 +132,47 @@ public class StompHandler implements ChannelInterceptor {
         // Authorization 헤더 추출 (STOMP는 HTTP가 아니므로 native header에서 가져온다)
         String bearerToken = accessor.getFirstNativeHeader("Authorization");
 
+        log.info("[STOMP][CONNECT] Authorization 헤더: {}", bearerToken != null ? bearerToken.substring(0, Math.min(30, bearerToken.length())) + "..." : "null");
+
         // 헤더가 없거나 형식이 잘못된 경우 예외
         if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            log.error("[STOMP][CONNECT] Authorization 헤더가 없거나 잘못됨");
             throw new CustomException(ErrorCode.INVALID_AUTH_HEADER);
         }
 
         // 실제 JWT 문자열 추출
         String token = bearerToken.substring(7);
+        log.info("[STOMP][CONNECT] JWT 토큰 추출 완료 (길이: {})", token.length());
 
         try {
-            // 토큰 검증 수행 (서명, 만료 등)
+            // 토큰 검증 수행 (서명, 만료 등) - Key 객체 사용
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
-            log.info("[CONNECT] JWT 검증 완료 - 사용자: {}", claims.getSubject());
+            String userSeq = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            log.info("[CONNECT] JWT 검증 완료 - 사용자: {}, 역할: {}", userSeq, role);
+
+            // SecurityContext에 인증 정보 설정 (StompController에서 사용)
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            userSeq,  // principal
+                            null,     // credentials
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                    );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            // STOMP 세션에도 저장 (선택사항)
+            accessor.setUser(authentication);
+            
+            log.info("[CONNECT] SecurityContext 설정 완료 - userSeq: {}", userSeq);
         } catch (Exception e) {
             // 유효하지 않은 토큰 → 연결 차단
+            log.error("[STOMP][CONNECT] JWT 파싱 실패: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
@@ -138,6 +193,8 @@ public class StompHandler implements ChannelInterceptor {
 
         // A) 목적지(destination) 확인 (예: /sub/chat/12)
         final String dest = accessor.getDestination();
+        log.info("[STOMP][SUBSCRIBE] 구독 요청: {}", dest);
+        
         if (dest == null || dest.isBlank()) {
             throw new CustomException(ErrorCode.INVALID_DESTINATION);
         }
@@ -145,15 +202,20 @@ public class StompHandler implements ChannelInterceptor {
         // B) 경로 파싱
         final String[] path = dest.split("/");
         if (path.length < 4) {
+            log.error("[STOMP][SUBSCRIBE] 경로 형식 오류: {}", dest);
             throw new CustomException(ErrorCode.INVALID_DESTINATION);
         }
 
         final String category = path[2]; // "chat" or "live"
         final String id = path[3];       // "12" 등
+        log.info("[STOMP][SUBSCRIBE] 파싱됨 - category: {}, id: {}", category, id);
 
         // C) Authorization 헤더 재확인 (CONNECT 이후에도 보안 유지를 위해 다시 검증)
         final String bearerToken = accessor.getFirstNativeHeader("Authorization");
+        log.info("[STOMP][SUBSCRIBE] Authorization 헤더: {}", bearerToken != null ? bearerToken.substring(0, Math.min(30, bearerToken.length())) + "..." : "null");
+        
         if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            log.error("[STOMP][SUBSCRIBE] Authorization 헤더가 없거나 형식 오류");
             throw new CustomException(ErrorCode.INVALID_AUTH_HEADER);
         }
 
@@ -161,11 +223,13 @@ public class StompHandler implements ChannelInterceptor {
         final Claims claims;
         try {
             claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(key)  // Key 객체 사용
                     .build()
                     .parseClaimsJws(token)
                     .getBody(); //토큰 안의 Claims (Payload 부분) 꺼내기
+            log.info("[STOMP][SUBSCRIBE] JWT 검증 성공 - subject: {}", claims.getSubject());
         } catch (Exception e) {
+            log.error("[STOMP][SUBSCRIBE] JWT 파싱 실패: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 

@@ -51,7 +51,7 @@ public class ChatController {
     }
 
     /**
-     * ✅ 특정 채팅방 메시지 기록 조회
+     * 특정 채팅방 메시지 기록 조회
      */
     @GetMapping("/room/{roomSeq}/history")
     public ResponseEntity<ResponseDTO<List<ChatMessageResponseDto>>> getChatHistory(

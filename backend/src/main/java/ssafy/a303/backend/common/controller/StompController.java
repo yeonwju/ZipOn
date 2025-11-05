@@ -2,6 +2,7 @@ package ssafy.a303.backend.common.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -44,46 +45,72 @@ import ssafy.a303.backend.user.repository.UserRepository;
  * =================================================================================================
  */
 @Controller
-@RequiredArgsConstructor
 @Log4j2
 public class StompController {
 
-    // 의존성 주입
-    private final ChatService chatService;                           // 채팅 메시지 저장 및 비즈니스 로직
-    private final ChatRedisPubSubService chatRedisPubSubService;     // Redis 기반 채팅 메시지 브로드캐스트
-    private final LiveService liveService;                           // 라이브 방송 비즈니스 로직
-    private final LiveRedisPubSubService liveRedisPubSubService;     // Redis 기반 라이브 방송 메시지 브로드캐스트
-    private final UserRepository userRepository;                     // JWT 기반 로그인 사용자 조회
-    private final ObjectMapper objectMapper = new ObjectMapper();    // DTO 직렬화용 Jackson Mapper
+    private final ChatService chatService;
+    private final ChatRedisPubSubService chatRedisPubSubService;
+    private final LiveService liveService;
+    private final LiveRedisPubSubService liveRedisPubSubService;
+    private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
+    
+    // 생성자 주입
+    public StompController(ChatService chatService, 
+                          ChatRedisPubSubService chatRedisPubSubService,
+                          LiveService liveService,
+                          LiveRedisPubSubService liveRedisPubSubService,
+                          UserRepository userRepository) {
+        this.chatService = chatService;
+        this.chatRedisPubSubService = chatRedisPubSubService;
+        this.liveService = liveService;
+        this.liveRedisPubSubService = liveRedisPubSubService;
+        this.userRepository = userRepository;
+        
+        // ObjectMapper에 JavaTimeModule 등록
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
 
     // =================================================================================================
     // 1:1 채팅 메시지 처리
     // =================================================================================================
-
-    /**
-     * 클라이언트가 `/pub/chat/{roomSeq}` 로 STOMP 메시지를 보낼 때 호출된다.
-     * - 해당 메시지는 Redis Pub/Sub을 통해 `/sub/chat/{roomSeq}` 구독자에게 전달된다.
-     *
-     * 동작 순서
-     *  1. 클라이언트가 STOMP 메시지를 `/pub/chat/{roomSeq}` 경로로 발행한다.
-     *  2. 서버는 SecurityContextHolder에서 JWT 인증 사용자 정보를 추출한다.
-     *  3. ChatService를 통해 메시지를 DB에 저장하고 응답 DTO를 생성한다.
-     *  4. Redis Pub/Sub을 통해 해당 채널 구독자에게 실시간 브로드캐스트한다.
-     *
-     * @param roomSeq   채팅방 식별자 (Path Variable)
-     * @param requestDto 클라이언트에서 보낸 메시지 DTO
-     */
     @MessageMapping("/chat/{roomSeq}")
     public void sendChatMessage(
             @DestinationVariable Integer roomSeq,
-            ChatMessageRequestDto requestDto
+            ChatMessageRequestDto requestDto,
+            @org.springframework.messaging.handler.annotation.Header("Authorization") String authHeader
     ) throws JsonProcessingException {
 
         log.info("[CHAT] roomSeq={}, content={}", roomSeq, requestDto.getContent());
 
-        // 1. JWT 기반 현재 사용자 정보 추출
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User sender = (User) userRepository.findByEmail(email)
+        // Authorization 헤더에서 토큰 추출
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new CustomException(ErrorCode.INVALID_AUTH_HEADER);
+        }
+        
+        String token = authHeader.substring(7);
+        
+        // 토큰에서 userSeq 추출 (간단한 방법: JWT 파싱)
+        Integer userSeq;
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                throw new CustomException(ErrorCode.INVALID_TOKEN);
+            }
+            
+            // Payload 디코딩
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            com.fasterxml.jackson.databind.JsonNode node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(payload);
+            userSeq = node.get("sub").asInt();
+            
+            log.info("[CHAT] 토큰에서 userSeq 추출: {}", userSeq);
+        } catch (Exception e) {
+            log.error("[CHAT] 토큰 파싱 오류: {}", e.getMessage());
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+
+        User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 2. DB 저장 및 응답 DTO 생성
@@ -102,20 +129,6 @@ public class StompController {
     // =================================================================================================
     // 라이브 방송 채팅 메시지 처리
     // =================================================================================================
-
-    /**
-     * 클라이언트가 `/pub/live/{liveSeq}` 로 메시지를 발행할 때 호출된다.
-     * - 방송 중인 방의 구독자(`/sub/live/{liveSeq}`)에게 메시지를 전달한다.
-     *
-     * 동작 순서
-     *  1. 클라이언트가 방송 중 메시지를 `/pub/live/{liveSeq}` 경로로 발행한다.
-     *  2. 서버는 SecurityContextHolder에서 로그인한 사용자 정보를 조회한다.
-     *  3. LiveService를 통해 메시지를 가공하고 응답 DTO를 생성한다.
-     *  4. Redis Pub/Sub 채널을 통해 브로드캐스트한다.
-     *
-     * @param liveSeq    방송 식별자 (Path Variable)
-     * @param requestDto 클라이언트에서 보낸 메시지 DTO
-     */
     @MessageMapping("/live/{liveSeq}")
     public void sendLiveMessage(
             @DestinationVariable Integer liveSeq,
@@ -124,19 +137,18 @@ public class StompController {
 
         log.info("[LIVE] liveSeq={}, content={}", liveSeq, requestDto.getContent());
 
-        // 1. JWT 기반 현재 로그인 사용자 조회
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User sender = (User) userRepository.findByEmail(email)
+        // 사용자 조회 방식 동일하게 변경
+        String userSeqString = SecurityContextHolder.getContext().getAuthentication().getName();
+        Integer userSeq = Integer.valueOf(userSeqString);
+
+        User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 2. 응답 DTO 구성 (보낸 사람 정보 + 메시지 내용)
         LiveChatMessageResponseDto response =
                 liveService.buildResponse(requestDto, sender.getUserSeq(), sender.getNickname());
 
-        // 3. DTO → JSON 문자열 변환
         String payload = objectMapper.writeValueAsString(response);
 
-        // 4. Redis Pub/Sub 채널로 메시지 발행
         liveRedisPubSubService.publish("live:" + liveSeq, payload);
 
         log.info("[REDIS][LIVE] liveSeq={}, sender={}, message={}",

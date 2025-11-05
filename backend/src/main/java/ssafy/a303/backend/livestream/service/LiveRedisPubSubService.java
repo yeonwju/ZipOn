@@ -2,6 +2,7 @@ package ssafy.a303.backend.livestream.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,14 +19,18 @@ public class LiveRedisPubSubService implements MessageListener {
 
     private final StringRedisTemplate redisTemplate;
     private final SimpMessageSendingOperations messagingTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     public LiveRedisPubSubService(
-            @Qualifier("liveRedisTemplate") StringRedisTemplate redisTemplate, // ✅ 생성자 파라미터에 붙이기
+            @Qualifier("liveRedisTemplate") StringRedisTemplate redisTemplate,
             SimpMessageSendingOperations messagingTemplate
     ) {
         this.redisTemplate = redisTemplate;
         this.messagingTemplate = messagingTemplate;
+        
+        // ObjectMapper에 JavaTimeModule 등록
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     public void publish(String channel, String message) {
