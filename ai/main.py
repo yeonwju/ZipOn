@@ -102,3 +102,4 @@ if __name__ == "__main__":
     print(f"⚖️  위험도 점수: {final_state.get('risk_score')}")
     print(f"🧠 AI 평가 사유: {final_state.get('risk_reason')}")
     print(f"⚠️ 오류 메시지: {final_state.get('error')}")
+
