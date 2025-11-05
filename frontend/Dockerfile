@@ -6,14 +6,14 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ libc6-compat
 
 ENV NPM_CONFIG_CACHE=/root/.npm
-ENV NODE_ENV=production
 
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NODE_ENV=development
 
 COPY package*.json ./
 
-RUN npm ci && npm install -D @tailwindcss/postcss postcss autoprefixer
+RUN npm ci
 
 COPY . .
 
