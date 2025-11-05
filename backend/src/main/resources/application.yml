@@ -59,3 +59,4 @@ bizno:
 solapi:
   key: ${SOLAPI_API_KEY}
   secret-key: ${SOLAPI_API_SECRET_KEY}
+  tel: ${SOLAPI_API_TEL}
