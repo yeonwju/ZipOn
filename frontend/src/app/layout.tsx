@@ -5,40 +5,53 @@ import React from 'react'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | HomeOn',
-    default: 'HomeOn - 당신의 집을 찾아드립니다',
+    template: '%s | ZipOn',
+    default: 'ZipOn - 실시간 신뢰기반 임대/중개 플랫폼',
   },
   description: '실시간 라이브 방송으로 매물을 확인하세요',
   keywords: ['부동산', '매물', '라이브', '집', '아파트', '원룸'],
-  authors: [{ name: 'HomeOn Team' }],
+  authors: [{ name: 'ZipOn Team' }],
   openGraph: {
-    title: 'HomeOn',
+    title: 'ZipOn',
     description: '실시간 라이브 방송으로 매물을 확인하세요',
     type: 'website',
     locale: 'ko_KR',
   },
+  manifest: '/manifest.webmanifest',
+  themeColor: '#0ea5e9',
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      // iOS 홈화면: 180x180 권장
+      { url: '/icons/zipon-180.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 }
 
-/**
- * 루트 레이아웃 (Server Component)
- *
- * 모든 페이지에 공통으로 적용되는 최상위 레이아웃입니다.
- * HTML 구조와 전역 메타데이터를 정의합니다.
- */
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko" suppressHydrationWarning className="h-full">
       <head>
+        {/* manifest 중복 링크는 호환성 강화를 위해 유지해도 OK */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#0ea5e9" />
+
         <link
           rel="stylesheet"
           as="style"
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
+
+        {/* ✅ iOS 전용 */}
+        <link rel="apple-touch-icon" href="/icons/zipon-180.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        {/* 둘 중 하나만 선택 → 여기서는 블랙 반투명 추천 */}
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="ZipOn" />
       </head>
       <body
         suppressHydrationWarning
