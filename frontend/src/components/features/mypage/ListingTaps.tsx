@@ -5,7 +5,7 @@ import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
 
 interface ListingTapsProps {
   className?: string
-  isBroker: boolean
+  isBroker: boolean | null | undefined
 }
 
 export default function ListingTaps({ className, isBroker }: ListingTapsProps) {
