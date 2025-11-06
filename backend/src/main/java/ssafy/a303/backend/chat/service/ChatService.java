@@ -53,7 +53,7 @@ public class ChatService {
 
         // 채팅 상대 결정
         User opponent;
-        if (requestDto.isAucPref()) { // 중개인
+        if (requestDto.getAucPref()) { // 중개인
             Integer brkSeq = Optional.ofNullable(property.getBrkSeq())
                     .orElseThrow(() -> new CustomException(ErrorCode.BROKER_NOT_FOUND));
 
@@ -96,7 +96,7 @@ public class ChatService {
 
         return ChatRoomResponseDto.builder()
                 .roomSeq(chatRoom.getId())
-                .isNew(isNew)
+                .newRoom(isNew)
                 .opponent(ChatRoomResponseDto.OpponentDto.builder()
                         .userSeq(opponent.getUserSeq())
                         .name(opponent.getName())

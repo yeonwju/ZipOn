@@ -1,5 +1,8 @@
 package ssafy.a303.backend.chat.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +19,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ChatMessageRequestDto {
+
+    @Schema(description = "채팅방 식별자", example = "1")
+    @NotNull
     private Integer roomSeq;   // 채팅방 식별자 (chat_room.room_seq)
+
+    @Schema(description = "메시지 내용", example = "안녕하세요")
+    @NotBlank
     private String content;    // 메시지 내용
 }

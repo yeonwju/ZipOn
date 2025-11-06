@@ -1,5 +1,8 @@
 package ssafy.a303.backend.chat.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,17 +18,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ChatRoomResponseDto {
+
+    @Schema(description = "채팅방 식별자", example = "1")
     private Integer roomSeq;
-    private boolean isNew;
+
+    @JsonProperty("isNew")
+    @Schema(description = "신규 생성 여부", example = "true")
+    private Boolean newRoom;
+
+    @Schema(description = "상대방 정보")
     private OpponentDto opponent;
 
-    @Getter
+    @Getter  // 내부 클래스는 클래스 레벨에 @Getter 유지 (정상 동작)
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class OpponentDto {
+
+        @Schema(description = "상대방 사용자 식별자", example = "2")
         private Integer userSeq;
+
+        @Schema(description = "상대방 이름", example = "홍길동")
         private String name;
+
+        @Schema(description = "상대방 닉네임", example = "집주인")
         private String nickname;
     }
 }
