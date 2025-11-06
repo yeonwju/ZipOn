@@ -1,4 +1,4 @@
-const SW_VERSION = 'v1.0.3'
+const SW_VERSION = `${Date.now()}`
 const PRECACHE = `precache-${SW_VERSION}`
 const RUNTIME = `runtime-${SW_VERSION}`
 
