@@ -21,9 +21,6 @@ public enum ErrorCode {
 
     // 사업장
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
-    INVALID_FILE_NOTFOUND(404, HttpStatus.NO_CONTENT, "파일이 없습니다."),
-    INVALID_FILE_TYPE(400, HttpStatus.BAD_REQUEST, "파일 타입이 올바르지 않습니다."),
-    FILE_TOO_LARGE(413, HttpStatus.PAYLOAD_TOO_LARGE, "파일이 너무 큽니다."),
 
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST

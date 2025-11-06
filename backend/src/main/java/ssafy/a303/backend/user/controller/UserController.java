@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.sms.service.SmsService;
+import ssafy.a303.backend.user.dto.request.VerifyUserRequest;
 import ssafy.a303.backend.user.dto.response.MeResponseDTO;
 import ssafy.a303.backend.user.service.UserService;
 
@@ -23,9 +24,9 @@ public class UserController {
         return ResponseDTO.ok(meResponseDTO, "사용자를 조회하였습니다.");
     }
 
-    @PostMapping
-    public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestPart String tel) {
-        service.send(userSeq, tel);
+    @PostMapping("/verify/sms")
+    public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestBody VerifyUserRequest verifyUserRequest) {
+        service.send(userSeq, verifyUserRequest.tel());
         return ResponseDTO.ok(null, "문자를 발송하였습니다.");
     }
 

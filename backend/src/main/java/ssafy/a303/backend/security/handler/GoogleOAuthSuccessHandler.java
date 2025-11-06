@@ -11,6 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import ssafy.a303.backend.security.jwt.entity.TokenPair;
 import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
@@ -33,10 +36,18 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
             new SavedRequestAwareAuthenticationSuccessHandler();
     @Value("${frontUrl}")
     private String frontUrl;
+    private final RequestCache requestCache = createRequestCache();
+
+    private RequestCache createRequestCache() {
+        HttpSessionRequestCache cache = new HttpSessionRequestCache();
+        cache.setCreateSessionAllowed(true); // 세션 없으면 만들어서 저장 허용
+        return cache;
+    }
 
     @PostConstruct
     void init() {
-        delegate.setAlwaysUseDefaultTargetUrl(true);
+        delegate.setDefaultTargetUrl(frontUrl);
+        delegate.setAlwaysUseDefaultTargetUrl(false);
     }
 
     @Override
@@ -74,7 +85,13 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         response.addCookie(RefreshCookie);
 
         // ---- 이동 ----
-        delegate.setDefaultTargetUrl(frontUrl+"/auth/success?redirect_uri="+request.getParameter("redirect_uri"));
+        SavedRequest saved = requestCache.getRequest(request, response);
+        if (saved != null) {
+            String[] param = saved.getParameterValues("redirect_url");
+            if (param != null && param.length > 0) {
+                response.sendRedirect(String.format("%s/%s", frontUrl, param[0]));
+            }
+        }
         delegate.onAuthenticationSuccess(request, response, authentication);
     }
 }
