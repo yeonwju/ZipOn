@@ -14,6 +14,7 @@ export default function MyPageClient({ user }: MyPageClientProps) {
   const { setUser } = useUserStore()
 
   useEffect(() => {
+    console.log('user', user)
     setUser(user)
   }, [user, setUser])
 
@@ -22,7 +23,7 @@ export default function MyPageClient({ user }: MyPageClientProps) {
       <section>
         <Profile />
       </section>
-      <ListingTaps className={'mt-4'} isBroker={user?.isBroker} />
+      <ListingTaps className={'mt-4'} />
     </section>
   )
 }

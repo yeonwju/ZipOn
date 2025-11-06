@@ -7,7 +7,7 @@ interface AuctionHistoryListSkeletonProps {
 export default function AuctionHistoryListSkeleton({ className }: AuctionHistoryListSkeletonProps) {
   return (
     <div className={className}>
-      {Array.from({ length: 3 }).map((_, index) => (
+      {Array.from({ length: 2 }).map((_, index) => (
         <AuctionHistoryCardSkeleton key={index} />
       ))}
       <Skeleton className="h-10 w-full" />
