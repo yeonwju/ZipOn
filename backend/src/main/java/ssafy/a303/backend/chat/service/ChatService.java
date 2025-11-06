@@ -267,4 +267,31 @@ public class ChatService {
             if (!status.isRead()) status.markRead();
         }
     }
+
+    /**
+     * 채팅방 나가기
+     */
+    public void leaveRoom(Integer roomId) {
+        // 1. 채팅방 조회
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 2. 현재 로그인 사용자 조회
+        Integer currentUserSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        User currentUser = userRepository.findById(currentUserSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 3. 참여자 엔티티 조회
+        ChatParticipant participant = chatParticipantRepository.findByChatRoomAndUser(room, currentUser)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_PARTICIPANT_NOT_FOUND));
+
+        // 4. 채팅방에서 나가는 사용자를 제거
+        chatParticipantRepository.delete(participant);
+
+        // 5. 남은 참여자 수 확인 후 방 제거 여부 결정
+        List<ChatParticipant> remainingParticipants = chatParticipantRepository.findAllByChatRoom(room);
+        if (remainingParticipants.isEmpty()) {
+            chatRoomRepository.delete(room);
+        }
+    }
 }

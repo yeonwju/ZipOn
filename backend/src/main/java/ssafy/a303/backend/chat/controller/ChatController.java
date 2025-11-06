@@ -69,4 +69,13 @@ public class ChatController {
         chatService.readMessages(roomSeq);
         return ResponseDTO.ok(null, "읽음 처리 완료되었습니다.");
     }
+
+    /**
+     * 채팅방 나가기
+     */
+    @DeleteMapping("room/{roomId}/leave")
+    public ResponseEntity<ResponseDTO<Void>> leaveRoom(@PathVariable Integer roomId) {
+         chatService.leaveRoom(roomId);
+         return ResponseDTO.ok(null, "채팅방에서 정상적으로 퇴장하였습니다.");
+    }
 }

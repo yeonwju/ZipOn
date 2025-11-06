@@ -11,7 +11,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,16 +30,16 @@ import ssafy.a303.backend.common.response.ErrorCode;
  *  - WebSocket(STOMP) 인바운드 메시지를 가로채 인증/인가 로직을 수행하는 인터셉터
  *  - Spring Security FilterChain은 HTTP 요청에만 작동하므로,
  *    STOMP(WebSocket) 메시지는 직접 JWT 검증을 수행해야 한다.
- *
+
  * 주요 동작:
  *   1) CONNECT → 클라이언트가 웹소켓 연결 시도 시 JWT 유효성 검증
  *   2) SUBSCRIBE → 특정 Topic(예: 채팅방)에 구독 요청 시 접근 권한 검증
  *   3) (선택) SEND → 메시지 발송 시에도 필요 시 검증 로직 추가 가능
- *
+
  * STOMP 헤더 구조:
  *   - 클라이언트는 Authorization 헤더를 "native header"에 담아 전송해야 한다.
  *     예: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *
+
  * 예시 구독 경로 규칙:
  *   - /sub/chat/{roomId} → 1:1 채팅방 (참가자만 접근 가능)
  *   - /sub/live/{liveId} → 실시간 방송 (공개 접근 가능)
@@ -75,7 +74,7 @@ public class StompHandler implements ChannelInterceptor {
      * STOMP 인바운드 메시지를 가로채는 핵심 메서드.
      *  - message: 클라이언트가 보낸 STOMP 프레임
      *  - channel: 메시지가 전달될 채널
-     *
+
      * Command에 따라 검증 로직 분기:
      *  - CONNECT → JWT 토큰 유효성 확인
      *  - SUBSCRIBE → 구독 권한(방 접근 가능 여부) 확인
@@ -120,12 +119,10 @@ public class StompHandler implements ChannelInterceptor {
 
     /**
      * 클라이언트의 STOMP CONNECT 요청 시 JWT 유효성을 검증한다.
-     *
      * 검증 순서:
      *  1) Authorization 헤더 존재 확인
      *  2) "Bearer " 접두어 제거 후 실제 토큰 추출
      *  3) JJWT로 서명키 검증 및 만료 확인
-     *
      * 예외 발생 시 → CustomException으로 차단 (ErrorCode.INVALID_AUTH_HEADER 등)
      */
     private void validateJwt(StompHeaderAccessor accessor) {
@@ -184,7 +181,6 @@ public class StompHandler implements ChannelInterceptor {
     /**
      * 사용자가 특정 Topic(/sub/...)을 구독하려 할 때
      * 경로 규칙 및 사용자 권한을 검증한다.
-     *
      * 예:
      *   /sub/chat/12 → category=chat, id=12
      *   /sub/live/5  → category=live, id=5

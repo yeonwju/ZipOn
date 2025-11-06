@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -79,7 +80,7 @@ public class StompController {
     public void sendChatMessage(
             @DestinationVariable Integer roomSeq,
             ChatMessageRequestDto requestDto,
-            @org.springframework.messaging.handler.annotation.Header("Authorization") String authHeader
+            @Header("Authorization") String authHeader
     ) throws JsonProcessingException {
 
         log.info("[CHAT] roomSeq={}, content={}", roomSeq, requestDto.getContent());
