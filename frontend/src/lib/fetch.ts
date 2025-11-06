@@ -1,11 +1,11 @@
 /**
  * Fetch API Wrapper
  *
- * axios처럼 사용할 수 있는 fetch 래퍼
  * - authFetch: 쿠키 포함 (인증 필요한 요청)
  * - publicFetch: 쿠키 미포함 (공개 요청)
  */
 import { API_BASE_URL } from '@/constants'
+import { cookies } from 'next/headers'
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean>
@@ -44,7 +44,26 @@ async function baseFetch(
 
   // 쿠키 포함 여부
   if (includeCredentials) {
-    fetchOptions.credentials = 'include'
+    if (typeof window === 'undefined') {
+      // 서버 사이드: cookies()로 읽어서 헤더에 추가
+      try {
+        const cookieStore = await cookies()
+        const accessToken = cookieStore.get('AT')?.value
+
+        if (accessToken) {
+          fetchOptions.headers = {
+            ...fetchOptions.headers,
+            Cookie: `AT=${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
+          }
+        }
+      } catch (error) {
+        console.error('[authFetch] 쿠키 읽기 실패:', error)
+      }
+    } else {
+      // 클라이언트 사이드: credentials: 'include'
+      fetchOptions.credentials = 'include'
+    }
   }
 
   // 요청 실행
@@ -52,11 +71,19 @@ async function baseFetch(
 
   // 에러 처리
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || `HTTP Error: ${response.status}`)
+    const contentType = response.headers.get('content-type')
+
+    // JSON 에러 응답 처리
+    if (contentType?.includes('application/json')) {
+      const error = await response.json()
+      throw new Error(error.message || `HTTP Error: ${response.status}`)
+    }
+
+    // HTML 에러 응답 처리
+    throw new Error(`HTTP Error ${response.status}: ${response.statusText}`)
   }
 
-  // JSON 응답 파싱
+  // 성공 응답 파싱
   return response.json()
 }
 
@@ -64,19 +91,10 @@ async function baseFetch(
  * 인증이 필요한 요청 (쿠키 포함)
  */
 export const authFetch = {
-  /**
-   * GET 요청
-   * @template TResponse - 응답 데이터 타입
-   */
   get: <TResponse = unknown>(endpoint: string, options?: FetchOptions) => {
     return baseFetch(endpoint, { ...options, method: 'GET' }, true) as Promise<TResponse>
   },
 
-  /**
-   * POST 요청
-   * @template TResponse - 응답 데이터 타입
-   * @template TData - 요청 데이터 타입
-   */
   post: <TResponse = unknown, TData = unknown>(
     endpoint: string,
     data?: TData,
@@ -93,11 +111,6 @@ export const authFetch = {
     ) as Promise<TResponse>
   },
 
-  /**
-   * PUT 요청
-   * @template TResponse - 응답 데이터 타입
-   * @template TData - 요청 데이터 타입
-   */
   put: <TResponse = unknown, TData = unknown>(
     endpoint: string,
     data?: TData,
@@ -114,11 +127,6 @@ export const authFetch = {
     ) as Promise<TResponse>
   },
 
-  /**
-   * PATCH 요청
-   * @template TResponse - 응답 데이터 타입
-   * @template TData - 요청 데이터 타입
-   */
   patch: <TResponse = unknown, TData = unknown>(
     endpoint: string,
     data?: TData,
@@ -135,10 +143,6 @@ export const authFetch = {
     ) as Promise<TResponse>
   },
 
-  /**
-   * DELETE 요청
-   * @template TResponse - 응답 데이터 타입
-   */
   delete: <TResponse = unknown>(endpoint: string, options?: FetchOptions) => {
     return baseFetch(endpoint, { ...options, method: 'DELETE' }, true) as Promise<TResponse>
   },
@@ -148,19 +152,10 @@ export const authFetch = {
  * 인증이 필요없는 공개 요청 (쿠키 미포함)
  */
 export const publicFetch = {
-  /**
-   * GET 요청
-   * @template TResponse - 응답 데이터 타입
-   */
   get: <TResponse = unknown>(endpoint: string, options?: FetchOptions) => {
     return baseFetch(endpoint, { ...options, method: 'GET' }, false) as Promise<TResponse>
   },
 
-  /**
-   * POST 요청
-   * @template TResponse - 응답 데이터 타입
-   * @template TData - 요청 데이터 타입
-   */
   post: <TResponse = unknown, TData = unknown>(
     endpoint: string,
     data?: TData,
@@ -177,11 +172,6 @@ export const publicFetch = {
     ) as Promise<TResponse>
   },
 
-  /**
-   * PUT 요청
-   * @template TResponse - 응답 데이터 타입
-   * @template TData - 요청 데이터 타입
-   */
   put: <TResponse = unknown, TData = unknown>(
     endpoint: string,
     data?: TData,
@@ -198,11 +188,6 @@ export const publicFetch = {
     ) as Promise<TResponse>
   },
 
-  /**
-   * PATCH 요청
-   * @template TResponse - 응답 데이터 타입
-   * @template TData - 요청 데이터 타입
-   */
   patch: <TResponse = unknown, TData = unknown>(
     endpoint: string,
     data?: TData,
@@ -219,10 +204,6 @@ export const publicFetch = {
     ) as Promise<TResponse>
   },
 
-  /**
-   * DELETE 요청
-   * @template TResponse - 응답 데이터 타입
-   */
   delete: <TResponse = unknown>(endpoint: string, options?: FetchOptions) => {
     return baseFetch(endpoint, { ...options, method: 'DELETE' }, false) as Promise<TResponse>
   },

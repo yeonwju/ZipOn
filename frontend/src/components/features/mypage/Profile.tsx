@@ -9,14 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useUserStore } from '@/store/user'
 
 export default function Profile() {
-  //  컴포넌트 안에서 hook 사용 - store 변경 시 자동 리렌더링
   const user = useUserStore(state => state.user)
 
   const hasName = user?.name !== null && user?.name !== undefined
   const hasNickname = user?.nickname !== null && user?.nickname !== undefined
-
-  // 디버깅용 로그
-  console.log('Profile - user:', user)
 
   return (
     <div
