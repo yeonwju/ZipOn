@@ -31,6 +31,11 @@ spring:
           google:
             issuer-uri: https://accounts.google.com
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 server:
   port: 8080
 
@@ -55,4 +60,6 @@ gov:
 bizno:
   url: https://bizno.net
   key: ${BIZNO_API_KEY}
+
+
 
