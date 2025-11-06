@@ -25,21 +25,27 @@ public class Property {
     @Column(name = "property_seq")
     private Integer propertySeq;
 
+    // 임대인 이름
     @Column(name = "lessor_seq", nullable = false)
     private Integer lessorSeq;
 
+    // 중개인 user seq
     @Column(name = "brk_seq")
     private Integer brkSeq;
 
+    // 매물 설명
     @Column(name = "content")
     private String content;
 
+    //매물 주인 이름
     @Column(name = "lessor_nm", length = 50)
-    private String lessorNm; //매물 주인 이름
+    private String lessorNm; 
 
+    // 매물 이름
     @Column(name = "property_nm", length = 100)
     private String propertyNm;
 
+    // 건물 타입
     @Enumerated(EnumType.STRING)
     private Building buildingType;
 

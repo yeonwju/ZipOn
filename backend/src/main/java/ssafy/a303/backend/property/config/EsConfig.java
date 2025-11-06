@@ -14,30 +14,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EsConfig {
 
+    @Value("${elasticsearch.host:localhost}")
+    private String host;
+
+    @Value("${elasticsearch.port:9200}")
+    private int port;
+
     @Bean
-    public ElasticsearchClient esClient(@Value("${elasticsearch.uris:https://localhost:9200}") String uris) {
-        //yml 파일의 elasticsearch uris 값 불러오기
+    public RestClient restClient() {
+        // low-level REST client (기본 http 통신)
+        return RestClient.builder(new HttpHost(host, port, "http")).build();
+    }
 
-        /**
-         * 저수준 client
-         * ES 서버와 실제 HTTP 통신을 담당하는 기본 객체
-         */
-        RestClient low = RestClient
-                .builder(HttpHost.create(uris))
-                .build();
+    @Bean
+    public ElasticsearchClient elasticsearchClient(RestClient restClient) {
+        // Transport 계층 설정
+        ElasticsearchTransport transport =
+                new RestClientTransport(restClient, new JacksonJsonpMapper());
 
-        /**
-         * 전송 계층
-         * restclient 위에 json 직렬화 기능을 입힌 중간 계층
-         */
-        ElasticsearchTransport transport = new RestClientTransport(low, new JacksonJsonpMapper());
-
-        /**
-         * Elasticsearch Java API Client의 핵심 클래스
-         * 실제로 사용하는 고수준 api 클라이언트
-         */
+        // Elasticsearch 고수준 Java API Client 생성
         return new ElasticsearchClient(transport);
-
-
     }
 }
