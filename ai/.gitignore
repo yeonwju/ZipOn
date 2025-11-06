@@ -76,7 +76,7 @@ outputs/
 cache/
 __cache__/
 
-# SSAFY AI project subfolders
+# AI project subfolders
 ai/uploads/
 ai/data/
 ai/notebooks/chroma_db/

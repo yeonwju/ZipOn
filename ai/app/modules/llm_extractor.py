@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GMS_KEY = os.getenv("GMS_KEY")
-GMS_API_URL = os.getenv("GMS_API_URL", "https://gms.ssafy.io/gmsapi/api.openai.com/v1/responses")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1")
+GMS_API_URL = os.getenv("GMS_API_URL")
+MODEL_NAME = os.getenv("MODEL_NAME")
 
 def extract_owner_info_llm(pdf_text: str) -> dict:
     print("[INFO] 🧠 GMS LLM 리스크 평가 통합 호출 중...")
