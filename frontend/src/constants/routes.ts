@@ -19,6 +19,9 @@ export const ROUTES = {
   LIVE_LIST: '/live',
   LIVE_CREATE: '/live/create',
 
+  // 마이페이지
+  MY_LISTINGS: '/mypage/my-listings',
+  MY_AUCTIONS_HISTORY: '/mypage/my-auction',
   // 기타
   CALENDAR: '/calendar',
   LIKE: '/like',

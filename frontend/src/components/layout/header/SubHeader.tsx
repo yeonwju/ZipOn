@@ -51,6 +51,10 @@ const ICONS = {
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
 
+  '/mypage/my-listings': [ICONS.notification, ICONS.chat],
+
+  '/mypage/my-auction': [ICONS.notification, ICONS.chat],
+
   '/mypage': [ICONS.notification, ICONS.chat, ICONS.settings],
 
   '/listing': [ICONS.like],
@@ -66,8 +70,10 @@ const rightIconsMap: Record<string, IconAction[]> = {
  * 🏷 4. 페이지 타이틀 맵
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
-  '/auction': '경매',
+  '/mypage/my-listings': '내 매물',
+  '/mypage/my-auction': '내 경매 내역',
   '/mypage': '마이페이지',
+  '/auction': '경매',
   '/like': '찜',
   '/live/list': '라이브',
   '/home': '홈',
@@ -104,7 +110,11 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
-  const titleKey = Object.keys(pageTitleMap).find(key => pathname.startsWith(key))
+  // 긴 경로부터 매칭 (예: /mypage/my-listings가 /mypage보다 먼저 체크되도록)
+  const titleKey = Object.keys(pageTitleMap)
+    .sort((a, b) => b.length - a.length) // 길이 내림차순 정렬
+    .find(key => pathname.startsWith(key))
+
   const displayTitle = title || (titleKey ? pageTitleMap[titleKey] : '')
   const rightIcons =
     customRightIcons || (titleKey && rightIconsMap[titleKey]) || rightIconsMap.default

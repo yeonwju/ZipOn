@@ -7,6 +7,7 @@ import MyListingListSkeleton from '@/components/features/mypage/skeleton/MyListi
 import { SearchX } from 'lucide-react'
 import Link from 'next/link'
 import MyListingCard from '@/components/features/mypage/my-listings/MyListingCard'
+import { ROUTES } from '@/constants'
 
 interface MyListingListProps {
   className?: string
@@ -71,7 +72,7 @@ export default function MyListingList({ className }: MyListingListProps) {
 
       {hasMore && (
         <Link
-          href="/my-listings"
+          href={ROUTES.MY_LISTINGS}
           className="mt-2 w-full rounded-md border-2 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
         >
           더보기
