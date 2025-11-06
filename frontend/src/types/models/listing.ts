@@ -94,3 +94,18 @@ export interface ListingAdditionalInfo {
   aucAvailable: string
   notes: string
 }
+
+/**
+ * 내 매물 찾기
+ */
+export interface MyListing {
+  id: number
+  address: string
+  detailAddress: string | null
+  deposit: number
+  rent: number
+  isAuction: boolean
+  buildingType: string // 원투룸, 오피스텔. 아파트. 주택빌라
+  roomCount: number
+  connectBroker: string | null // 중개 성사여부 (pending, success, fail)
+}

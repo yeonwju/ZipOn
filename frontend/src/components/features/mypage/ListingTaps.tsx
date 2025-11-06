@@ -4,6 +4,7 @@ import AuctionHistoryList from '@/components/features/mypage/autcion-history/Auc
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
 import { useUserStore } from '@/store/user'
 import { LockKeyhole } from 'lucide-react'
+import MyListingList from '@/components/features/mypage/my-listings/MyListingList'
 
 interface ListingTapsProps {
   className?: string
@@ -33,7 +34,7 @@ export default function ListingTaps({ className }: ListingTapsProps) {
         </TabsContent>
         <TabsContent value={'listings'} className="w-full">
           {isVerified && isBrokerUser ? (
-            <div>asdfasdf</div>
+            <MyListingList className={'mt-2 flex flex-col gap-2'} />
           ) : (
             <div className="mt-2 flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-9 text-center">
               <LockKeyhole size={40} className="text-gray-400" />

@@ -3,12 +3,11 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { mockAuctionHistories } from '@/data/AuctionHistory'
-import type { AuctionHistory } from '@/types/api/mypage/auctionHistory'
-
 import AuctionHistoryListSkeleton from '../skeleton/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
-import { LockKeyhole, SearchX } from 'lucide-react'
+import { SearchX } from 'lucide-react'
+import { AuctionHistory } from '@/types/models/auction'
+import { mockAuctionHistories } from '@/data/AuctionHistory'
 
 interface AuctionHistoryListProps {
   className?: string
@@ -40,8 +39,8 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
         await new Promise(resolve => setTimeout(resolve, 2000))
 
         // 💡 테스트: Empty State 확인용 (데이터 있는 상태로 되돌리려면 아래 두 줄 바꾸기)
-        setAuctionHistory([]) // ← Empty State 테스트
-        // setAuctionHistory(mockAuctionHistories)  // ← 정상 데이터
+        // setAuctionHistory([]) // ← Empty State 테스트
+        setAuctionHistory(mockAuctionHistories) // ← 정상 데이터
       } catch (error) {
         console.error('Failed to fetch auction history:', error)
         setAuctionHistory([])
@@ -84,7 +83,7 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
       {hasMore && (
         <Link
           href="/auction-history"
-          className="mt-4 w-full rounded-md border border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="mt-2 w-full rounded-md border-2 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
         >
           더보기
         </Link>

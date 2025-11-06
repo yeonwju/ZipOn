@@ -19,7 +19,7 @@ export default function MyPageClient({ user }: MyPageClientProps) {
   }, [user, setUser])
 
   return (
-    <section className="flex w-full flex-col p-4 pb-18">
+    <section className="flex w-full flex-col p-4 pb-16">
       <section>
         <Profile />
       </section>

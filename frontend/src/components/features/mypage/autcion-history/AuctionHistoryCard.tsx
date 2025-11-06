@@ -1,6 +1,5 @@
 import Image from 'next/image'
-
-import type { AuctionHistory } from '@/types/api/mypage/auctionHistory'
+import { AuctionHistory } from '@/types/models/auction'
 
 interface AuctionHistoryCardProps {
   auctionHistory: AuctionHistory
