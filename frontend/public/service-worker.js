@@ -2,7 +2,7 @@ const SW_VERSION = 'v1.0.3'
 const PRECACHE = `precache-${SW_VERSION}`
 const RUNTIME = `runtime-${SW_VERSION}`
 
-const STATIC_ASSETS = ['/icons/zipon.png']
+const STATIC_ASSETS = ['/manifest.webmanifest', '/icons/zipon.png']
 
 // 백 개발 이후 수정 예정
 const NO_CACHE_PATHS = ['/api/auth', '/api/payment', '/api/account']
@@ -53,10 +53,7 @@ self.addEventListener('activate', event => {
 
       try {
         const res = await fetch('/offline', { cache: 'no-cache' })
-        if (res.ok) {
-          const cache = await caches.open(PRECACHE)
-          await cache.put('/offline', res.clone())
-        }
+        if (res.ok) (await caches.open(PRECACHE)).put('/offline', res.clone())
       } catch {}
 
       await self.clients.claim()
@@ -65,9 +62,7 @@ self.addEventListener('activate', event => {
 })
 
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting()
-  }
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting()
 })
 
 self.addEventListener('fetch', event => {
@@ -75,16 +70,34 @@ self.addEventListener('fetch', event => {
 
   if (isNoCache(req.url)) return
 
+  const url = new URL(req.url)
+  if (url.pathname.startsWith('/api')) {
+    event.respondWith(
+      (async () => {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))
+        try {
+          const res = await Promise.race([fetch(req), timeout])
+          const cache = await caches.open(RUNTIME)
+          cache.put(req, res.clone())
+          return res
+        } catch {
+          const cached = await caches.match(req)
+          if (cached) return cached
+          throw new Error('API offline and no cache')
+        }
+      })()
+    )
+    return
+  }
+
   if (req.mode === 'navigate') {
     event.respondWith(
       (async () => {
         try {
           const preload = await event.preloadResponse
           if (preload) return preload
-
           const net = await fetch(req)
-          const cache = await caches.open(RUNTIME)
-          cache.put(req, net.clone())
+          ;(await caches.open(RUNTIME)).put(req, net.clone())
           return net
         } catch {
           // 캐시된 페이지가 있으면 우선
@@ -102,10 +115,8 @@ self.addEventListener('fetch', event => {
     )
     return
   }
-
   // 정적: Stale-While-Revalidate
-  const dest = req.destination
-  if (['image', 'font', 'style', 'script'].includes(dest)) {
+  if (['image', 'font', 'style', 'script'].includes(req.destination)) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(RUNTIME)
