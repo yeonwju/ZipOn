@@ -1,13 +1,14 @@
 package ssafy.a303.backend.sms.service;
 
 import com.solapi.sdk.SolapiClient;
-import com.solapi.sdk.message.dto.response.MultipleDetailMessageSentResponse;
 import com.solapi.sdk.message.model.Message;
 import com.solapi.sdk.message.service.DefaultMessageService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -35,20 +36,29 @@ public class SmsService {
         this.messageService = SolapiClient.INSTANCE.createInstance(solapiKey, solapiSecretKey);
     }
 
-    public MultipleDetailMessageSentResponse send(String tel) {
+    public void send(int userSeq, String tel) {
+        if (sendAble(userSeq)) throw new CustomException(ErrorCode.EXTERNAL_API_LIMIT);
+
+        Message message = new Message();
+        message.setFrom(solapiTel);
+        message.setTo(tel);
+        String code = randomCode();
+        message.setText(String.format("[집온] 인증 번호입니다. %s", code));
         try {
-            Message message = new Message();
-            message.setFrom(solapiTel);
-            message.setTo(tel);
-            message.setText(String.format("[집온] 인증 번호입니다. %s", randomCode()));
-
-            MultipleDetailMessageSentResponse response = this.messageService.send(message);
-            // System.out.println(response);
-
-            return response;
+            messageService.send(message);
         } catch (Exception e) {
-            e.fillInStackTrace();
+            throw new CustomException(ErrorCode.EXTERNAL_API_ERROR, e);
         }
-        return null;
+        throw new CustomException(ErrorCode.EXTERNAL_API_ERROR, "핸드폰 외부 API 오류");
     }
+
+    // redis 연결 후 사용할 예정
+    private boolean sendAble(int userSeq) {
+        return true;
+    }
+
+    private void saveCode(int userSeq, String tel, String code){
+
+    }
+
 }

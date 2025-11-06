@@ -7,6 +7,8 @@ public record MeResponseDTO(
         String tel,
         String birth,
         String profileImg,
-        String Role
+        String Role,
+        boolean isVerified,
+        boolean isBroker
 ) {
 }
