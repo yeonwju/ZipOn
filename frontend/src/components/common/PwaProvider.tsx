@@ -1,6 +1,11 @@
 'use client'
-
 import { useEffect } from 'react'
+
+declare global {
+  interface Window {
+    __swReg?: ServiceWorkerRegistration
+  }
+}
 
 export default function PwaProvider() {
   useEffect(() => {
@@ -14,16 +19,27 @@ export default function PwaProvider() {
     navigator.serviceWorker
       .register(swUrl, { scope: '/' })
       .then(reg => {
+        window.__swReg = reg
+
+        // 새 SW 발견되면 UI에 알림 이벤트 발행
         reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing
-          if (!newWorker) return
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          const nw = reg.installing
+          if (!nw) return
+          nw.addEventListener('statechange', () => {
+            const installed = nw.state === 'installed'
+            const hasOld = !!navigator.serviceWorker.controller
+            if (installed && hasOld) {
+              window.dispatchEvent(new CustomEvent('sw-update-available'))
             }
           })
         })
       })
       .catch(console.error)
+
+    // 업데이트 적용 완료되면 자동 새로고침
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      location.reload()
+    })
   }, [])
 
   return null
