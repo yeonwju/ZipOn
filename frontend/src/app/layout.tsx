@@ -3,6 +3,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 import React from 'react'
 
+import PwaProvider from '@/components/common/PwaProvider'
+
 export const metadata: Metadata = {
   title: {
     template: '%s | ZipOn',
@@ -24,10 +26,7 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [
-      // iOS 홈화면: 180x180 권장
-      { url: '/icons/zipon-180.png', sizes: '180x180', type: 'image/png' },
-    ],
+    apple: [{ url: '/icons/zipon-180.png', sizes: '180x180', type: 'image/png' }],
   },
 }
 
@@ -35,7 +34,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ko" suppressHydrationWarning className="h-full">
       <head>
-        {/* manifest 중복 링크는 호환성 강화를 위해 유지해도 OK */}
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#0ea5e9" />
 
@@ -46,10 +44,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
 
-        {/* ✅ iOS 전용 */}
         <link rel="apple-touch-icon" href="/icons/zipon-180.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        {/* 둘 중 하나만 선택 → 여기서는 블랙 반투명 추천 */}
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="ZipOn" />
       </head>
@@ -58,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         className="h-full"
         style={{ fontFamily: 'Pretendard, system-ui, -apple-system, sans-serif' }}
       >
+        <PwaProvider />
         {children}
       </body>
     </html>
