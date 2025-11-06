@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    DOCKER_OPTS = "--pull"
     HEALTH = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
@@ -21,7 +22,6 @@ pipeline {
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '20'))
-    // timestamps()
   }
 
   stages {
@@ -32,25 +32,6 @@ pipeline {
       }
     }
 
-    stage('Resolve Env URLs') {
-      steps {
-        script {
-          env.DEV_API_BASE_URL  = 'https://dev-zipon.duckdns.org/api'
-          env.PROD_API_BASE_URL = 'https://zipon.duckdns.org/api'
-
-          if (env.BRANCH_NAME == 'dev') {
-            env.FRONT_API_BASE_URL = env.DEV_API_BASE_URL
-          } else if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'main') {
-            env.FRONT_API_BASE_URL = env.PROD_API_BASE_URL
-          } else {
-            env.FRONT_API_BASE_URL = env.DEV_API_BASE_URL
-          }
-
-          echo "Using FRONT_API_BASE_URL = ${env.FRONT_API_BASE_URL}"
-        }
-      }
-    }
-
     stage('Build Images (parallel)') {
       steps {
         script {
@@ -58,17 +39,13 @@ pipeline {
 
           parallel failFast: false,
           FRONTEND: {
-            sh """
-              docker build \
-                --build-arg NEXT_PUBLIC_API_BASE_URL=${env.FRONT_API_BASE_URL} \
-                -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
-            """
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
           },
           BACKEND: {
-            sh "docker build -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
           },
           AI: {
-            sh "docker build -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
           }
         }
       }
@@ -90,11 +67,6 @@ pipeline {
             sh """
               echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
               docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
-
-              # (옵션) 간단 헬스체크
-              curl -s -o /dev/null -w "DEV FRONT / -> %{http_code}\\n" https://dev-zipon.duckdns.org/
-              curl -s -o /dev/null -w "DEV BACK /api/ -> %{http_code}\\n" https://dev-zipon.duckdns.org/api/
-              curl -s -o /dev/null -w "DEV AI /ai/ -> %{http_code}\\n" https://dev-zipon.duckdns.org/ai/
             """
           } else {
             echo "[DEV] ${env.DEV_COMPOSE} not found. Skipping deploy."
@@ -116,17 +88,23 @@ pipeline {
             ${env.HEALTH} || echo "[WARN] Health check failed"
           fi
 
-          curl -s -o /dev/null -w "PROD FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
-          curl -s -o /dev/null -w "PROD BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
-          curl -s -o /dev/null -w "PROD AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
+          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
+          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
+          curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
         """
       }
     }
   }
 
   post {
-    success { echo "✅ Pipeline success" }
-    failure { echo "❌ Pipeline failed. Check above logs." }
-    always  { sh 'docker image prune -f || true' }
+    success {
+      echo "✅ Pipeline success"
+    }
+    failure {
+      echo "❌ Pipeline failed. Check above logs."
+    }
+    always {
+      sh 'docker image prune -f || true'
+    }
   }
 }
