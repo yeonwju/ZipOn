@@ -28,89 +28,93 @@ export default function AuctionHistoryCard({ auctionHistory }: AuctionHistoryCar
   const remaining = getRemainingTime(auctionHistory.endDate)
 
   return (
-    <div className="flex w-full flex-col rounded-md border border-gray-200 p-3 shadow-sm">
-      <div className="flex flex-row items-start gap-3">
+    <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex flex-row items-center gap-2.5">
         {/* 이미지 */}
-        <div className="relative flex-1">
+        <div className="relative w-24 flex-shrink-0">
           <Image
             src="/live-room.svg"
             alt="매물 이미지"
-            width={200}
-            height={200}
-            className="w-full rounded-md border border-gray-100 object-cover"
+            width={96}
+            height={96}
+            className="h-24 w-24 rounded-md object-cover"
           />
-          {/* 상단 뱃지 영역 */}
-          <div className={'mt-2.5 flex flex-row items-start gap-1'}>
+        </div>
+
+        {/* 텍스트 정보 */}
+        <div className="flex flex-1 flex-col gap-0.5">
+          {/* 뱃지 영역 */}
+          <div className="flex flex-wrap items-center gap-1">
             {/* 진행 상태 */}
             <div
-              className={`inline-flex w-[75px] items-center justify-center rounded-full px-2.5 py-0.5 ${
+              className={`inline-flex items-center rounded-full px-1.5 py-0.5 ${
                 auctionHistory.auctionState
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-gray-200 text-gray-700'
               }`}
             >
-              <span className="text-xs font-medium">
-                {auctionHistory.auctionState ? '경매 진행중' : '경매 종료'}
+              <span className="text-[10px] font-medium">
+                {auctionHistory.auctionState ? '진행중' : '종료'}
               </span>
             </div>
 
-            {/* 남은 시간 — '마감됨'은 표시 안 함 */}
+            {/* 남은 시간 */}
             {remaining !== '마감됨' && (
-              <div className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5">
-                <span className="text-xs font-medium text-blue-700">{remaining}</span>
+              <div className="inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5">
+                <span className="text-[10px] font-medium text-blue-700">{remaining}</span>
               </div>
             )}
 
             {/* 대기 순위 */}
             {!auctionHistory.auctionState && auctionHistory.waitingNumber && (
-              <div className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5">
-                <span className="text-xs font-medium text-orange-600">
-                  대기: {auctionHistory.waitingNumber}위
+              <div className="inline-flex items-center rounded-full bg-orange-100 px-1.5 py-0.5">
+                <span className="text-[10px] font-medium text-orange-600">
+                  대기 {auctionHistory.waitingNumber}위
                 </span>
               </div>
             )}
           </div>
-        </div>
-        {/* 텍스트 정보 */}
-        <div className="flex flex-1 flex-col gap-1">
-          <span className="line-clamp-2 text-base font-semibold text-gray-800">
-            {auctionHistory.title}
-          </span>
+          {/* 상단: 제목 + 뱃지들 */}
+          <div className="flex items-center gap-1">
+            <span className="line-clamp-1 text-sm font-semibold text-gray-900">
+              {auctionHistory.title}
+            </span>
+          </div>
 
           {/* 입찰가 */}
           {auctionHistory.price && (
-            <div className="mt-2 flex flex-col gap-0.5">
+            <div className="mt-1 flex items-baseline gap-1">
               <span className="text-xs text-gray-500">내 입찰가</span>
-              <span className="text-lg font-bold text-blue-600">
+              <span className="text-base font-bold text-blue-600">
                 {auctionHistory.price.toLocaleString('ko-KR')}
-                <span className="text-sm font-normal text-gray-500">원</span>
               </span>
+              <span className="text-xs text-gray-500">원</span>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* 하단 버튼 영역 */}
-      <div className="mt-3 flex w-full justify-center gap-2">
-        {auctionHistory.auctionState ? (
-          <>
-            <button className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-semibold text-gray-400 hover:bg-gray-200">
-              상세보기
-            </button>
-            <button className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-semibold text-gray-400 hover:bg-gray-200">
-              결제하기
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-semibold text-gray-400 hover:bg-gray-200">
-              포기하기
-            </button>
-            <button className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1 text-sm font-semibold text-gray-400 hover:bg-gray-200">
-              결제하기
-            </button>
-          </>
-        )}
+          {/* 버튼 영역 */}
+          <div className="mt-1.5 flex gap-1.5">
+            {auctionHistory.auctionState ? (
+              <>
+                <button className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                  상세
+                </button>
+                <button className="flex-1 rounded border border-blue-300 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50">
+                  결제
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                  포기
+                </button>
+                <button className="flex-1 rounded border border-blue-300 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50">
+                  결제
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
