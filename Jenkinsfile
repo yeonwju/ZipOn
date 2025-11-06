@@ -37,9 +37,21 @@ pipeline {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
 
+          // Jenkins 멀티브랜치 기본 변수 (환경파일 아님)
+          def FRONT_API_BASE_URL = (env.BRANCH_NAME == 'dev') 
+            ? 'https://dev-zipon.duckdns.org/api'
+            : 'https://zipon.duckdns.org/api'
+
+          echo "Using FRONT_API_BASE_URL = ${FRONT_API_BASE_URL}"
+          echo "Building images for commit ${gitsha} (branch=${env.BRANCH_NAME})"
+
           parallel failFast: false,
           FRONTEND: {
-            sh "docker build ${env.DOCKER_OPTS} -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend"
+            sh """
+              docker build ${env.DOCKER_OPTS} \
+                --build-arg NEXT_PUBLIC_API_BASE_URL='${FRONT_API_BASE_URL}' \
+                -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
+            """
           },
           BACKEND: {
             sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
