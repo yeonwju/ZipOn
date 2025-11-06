@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '@/constants'
 import { authFetch } from '@/lib/fetch'
-import type { User } from '@/store/user'
+import { User } from '@/types/models/user'
 
 /**
  * 인증 관련 API 서비스
@@ -26,19 +26,5 @@ export async function fetchCurrentUser(): Promise<User | null> {
   } catch (error) {
     console.error('[authService] 사용자 정보 가져오기 실패:', error)
     return null
-  }
-}
-
-/**
- * 로그아웃
- */
-export async function logout(): Promise<boolean> {
-  try {
-    //  authFetch.post 사용 (쿠키 자동 포함)
-    await authFetch.post('/auth/logout')
-    return true
-  } catch (error) {
-    console.error('Error logging out:', error)
-    return false
   }
 }

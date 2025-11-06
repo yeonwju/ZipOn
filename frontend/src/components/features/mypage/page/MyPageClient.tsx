@@ -3,7 +3,8 @@
 import { useEffect } from 'react'
 import { Profile } from '@/components/features'
 import ListingTaps from '@/components/features/mypage/ListingTaps'
-import { User, useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user'
+import { User } from '@/types/models/user'
 
 interface MyPageClientProps {
   user: User | null
@@ -12,7 +13,6 @@ interface MyPageClientProps {
 export default function MyPageClient({ user }: MyPageClientProps) {
   const { setUser } = useUserStore()
 
-  // ✅ SSR에서 받은 user를 Zustand에 반영
   useEffect(() => {
     setUser(user)
   }, [user, setUser])
