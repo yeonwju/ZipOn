@@ -2,7 +2,13 @@ const SW_VERSION = 'v1.0.3'
 const PRECACHE = `precache-${SW_VERSION}`
 const RUNTIME = `runtime-${SW_VERSION}`
 
-const STATIC_ASSETS = ['/manifest.webmanifest', '/icons/zipon.png']
+const STATIC_ASSETS = [
+  '/manifest.webmanifest',
+  '/icons/zipon.png',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/maskable-512.png',
+]
 
 // 백 개발 이후 수정 예정
 const NO_CACHE_PATHS = ['/api/auth', '/api/payment', '/api/account']
