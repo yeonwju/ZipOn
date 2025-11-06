@@ -2,20 +2,22 @@
 
 import clsx from 'clsx'
 
-interface ListingTopTabsProps {
-  activeTab: 'auction' | 'general' | 'broker'
-  onTabChange: (key: 'auction' | 'general' | 'broker') => void
+export interface Tab<T extends string = string> {
+  key: T
+  label: string
 }
 
-export default function ListingTopTabs({ activeTab, onTabChange }: ListingTopTabsProps) {
-  type TabKey = 'auction' | 'general' | 'broker'
+interface ListingTopTabsProps<T extends string> {
+  activeTab: T
+  onTabChange: (key: T) => void
+  tabs: Tab<T>[]
+}
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'auction', label: '경매' },
-    { key: 'general', label: '일반 매물' },
-    { key: 'broker', label: '중개' },
-  ]
-
+export default function ListingTopTabs<T extends string>({
+  activeTab,
+  onTabChange,
+  tabs,
+}: ListingTopTabsProps<T>) {
   return (
     <nav
       className={clsx(

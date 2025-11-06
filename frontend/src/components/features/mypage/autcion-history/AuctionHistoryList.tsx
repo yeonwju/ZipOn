@@ -3,17 +3,18 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { mockAuctionHistories } from '@/data/AuctionHistory'
-import type { AuctionHistory } from '@/types/api/mypage/auctionHistory'
-
 import AuctionHistoryListSkeleton from '../skeleton/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
+import { SearchX } from 'lucide-react'
+import { AuctionHistory } from '@/types/models/auction'
+import { mockAuctionHistories } from '@/data/AuctionHistory'
+import { ROUTES } from '@/constants'
 
 interface AuctionHistoryListProps {
   className?: string
 }
 
-const INITIAL_DISPLAY_COUNT = 3
+const INITIAL_DISPLAY_COUNT = 2
 
 /**
  * 경매 내역 리스트
@@ -35,9 +36,12 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
         // const data = await response.json()
         // setAuctionHistory(data.data)
 
-        // 시뮬레이션 딜레이 (3초)
-        await new Promise(resolve => setTimeout(resolve, 3000))
-        setAuctionHistory(mockAuctionHistories)
+        // 시뮬레이션 딜레이
+        await new Promise(resolve => setTimeout(resolve, 2000))
+
+        // 💡 테스트: Empty State 확인용 (데이터 있는 상태로 되돌리려면 아래 두 줄 바꾸기)
+        // setAuctionHistory([]) // ← Empty State 테스트
+        setAuctionHistory(mockAuctionHistories) // ← 정상 데이터
       } catch (error) {
         console.error('Failed to fetch auction history:', error)
         setAuctionHistory([])
@@ -54,6 +58,18 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
     return <AuctionHistoryListSkeleton className={className} />
   }
 
+  // 데이터가 없거나 null일 때
+  if (!auctionHistory || auctionHistory.length === 0) {
+    return (
+      <div className={className}>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">
+          <SearchX size={40} className="text-gray-400" />
+          <p className="text-sm text-gray-500">경매 참여 내역이 없습니다.</p>
+        </div>
+      </div>
+    )
+  }
+
   const displayedItems = auctionHistory.slice(0, INITIAL_DISPLAY_COUNT)
   const hasMore = auctionHistory.length > INITIAL_DISPLAY_COUNT
 
@@ -67,8 +83,8 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
 
       {hasMore && (
         <Link
-          href="" // TODO: 더보기 페이지 경로 입력
-          className="mt-4 w-full rounded-md border border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          href={ROUTES.MY_AUCTIONS_HISTORY}
+          className="mt-2 w-full rounded-md border-2 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
         >
           더보기
         </Link>

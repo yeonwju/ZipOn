@@ -2,19 +2,18 @@
 
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import Link from 'next/link'
 
 function OnboardContent() {
   const searchParams = useSearchParams()
 
-  // 리다이렉트 파라미터 가져오기
-  const redirectPath = searchParams.get('redirect_uri') || '/home'
+  // 리다이렉트 파라미터 가져오기 (null이면 기본값)
+  const redirectPath = searchParams.get('redirect') || '/home'
 
-  const handleGoogleLogin = () => {
-    const loginUrl = new URL('http://localhost:8080/oauth2/authorization/google')
-    loginUrl.searchParams.set('redirect_uri', `http://localhost:3000${redirectPath}`)
-
-    window.location.href = loginUrl.toString()
-  }
+  // URL 수동 조합 (인코딩 처리)
+  const loginUrl = new URL(
+    `http://localhost:8080/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
+  )
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -24,12 +23,12 @@ function OnboardContent() {
           <p className="mt-2 text-gray-600">시작하려면 로그인해주세요</p>
         </div>
 
-        <button
-          onClick={handleGoogleLogin}
+        <Link
+          href={loginUrl.toString()}
           className="w-full rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600"
         >
           Google로 시작하기
-        </button>
+        </Link>
       </div>
     </div>
   )

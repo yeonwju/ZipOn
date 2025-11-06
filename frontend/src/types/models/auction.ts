@@ -1,4 +1,7 @@
-export type AuctionHistory = {
+/**
+ * 내 경매 내역
+ */
+export interface AuctionHistory {
   id: string // 내가 참여한 경매 인덱싱 번호
   title: string // 경매 매물 이름
   endDate: string // 경매 마감 날짜

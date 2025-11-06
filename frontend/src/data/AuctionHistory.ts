@@ -1,4 +1,4 @@
-import { AuctionHistory } from '@/types/api/mypage/auctionHistory'
+import { AuctionHistory } from '@/types/models/auction'
 
 export const mockAuctionHistories: AuctionHistory[] = [
   {

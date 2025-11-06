@@ -14,15 +14,16 @@ export default function MyPageClient({ user }: MyPageClientProps) {
   const { setUser } = useUserStore()
 
   useEffect(() => {
+    console.log('user', user)
     setUser(user)
   }, [user, setUser])
 
   return (
-    <section className="flex w-full flex-col p-4 pb-18">
+    <section className="flex w-full flex-col p-4 pb-16">
       <section>
         <Profile />
       </section>
-      <ListingTaps className={'mt-4'} isBroker={user?.isBroker} />
+      <ListingTaps className={'mt-4'} />
     </section>
   )
 }
