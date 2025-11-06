@@ -89,7 +89,7 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         if (saved != null) {
             String[] param = saved.getParameterValues("redirect_url");
             if (param != null && param.length > 0) {
-                response.sendRedirect(String.format("%s/%s", frontUrl, param[0]));
+                response.sendRedirect(String.format("%s%s", frontUrl, param[0]));
                 return;
             }
         }
