@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import React from 'react'
 
 import PwaProvider from '@/components/common/PwaProvider'
+import InstallPrompt from '@/components/ui/InstallPrompt'
 
 export const metadata: Metadata = {
   title: {
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       >
         <PwaProvider />
         {children}
+        <InstallPrompt />
       </body>
     </html>
   )
