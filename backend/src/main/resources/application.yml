@@ -56,3 +56,8 @@ bizno:
   url: https://bizno.net
   key: ${BIZNO_API_KEY}
 
+elasticsearch:
+  host: ${ES_URL}
+  port: 9200
+  index:
+    property: my_index
