@@ -163,8 +163,16 @@ pipeline {
   }
 
   post {
-    success { echo "✅ Pipeline success" }
-    failure { echo "❌ Pipeline failed. Check above logs." }
-    always  { sh 'docker image prune -f || true' }
+    always {
+      node {
+        echo "✅ Build finished. Cleaning workspace..."
+        sh 'docker system prune -af || true'
+      }
+    }
+    failure {
+      node {
+        echo "❌ Pipeline failed. Check logs."
+      }
+    }
   }
 }
