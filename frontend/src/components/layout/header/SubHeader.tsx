@@ -72,7 +72,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
   '/verify/phone': '휴대폰 인증',
-  '/verify/business': '중개인 인증',
+  '/verify/business': '사업자 인증',
   '/mypage/my-listings': '내 매물',
   '/mypage/my-auction': '내 경매 내역',
   '/mypage': '마이페이지',

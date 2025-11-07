@@ -40,7 +40,7 @@ export default function ListingTaps({ className }: ListingTapsProps) {
               <LockKeyhole size={40} className="text-gray-400" />
               <p className="text-base font-medium">접근 권한이 없습니다</p>
               <p className="text-sm text-gray-400">
-                중개인 인증, 휴대폰 인증을 완료하시면 매물 등록 및 관리 기능을 이용하실 수 있습니다.
+                사업자 인증, 휴대폰 인증을 완료하시면 매물 등록 및 관리 기능을 이용하실 수 있습니다.
               </p>
             </div>
           )}
