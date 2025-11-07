@@ -50,7 +50,8 @@ const ICONS = {
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
-
+  '/verify/phone': [],
+  '/verify/business': [],
   '/mypage/my-listings': [ICONS.notification, ICONS.chat],
 
   '/mypage/my-auction': [ICONS.notification, ICONS.chat],
@@ -70,6 +71,8 @@ const rightIconsMap: Record<string, IconAction[]> = {
  * 🏷 4. 페이지 타이틀 맵
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
+  '/verify/phone': '휴대폰 인증',
+  '/verify/business': '중개인 인증',
   '/mypage/my-listings': '내 매물',
   '/mypage/my-auction': '내 경매 내역',
   '/mypage': '마이페이지',
