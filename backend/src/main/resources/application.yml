@@ -61,5 +61,9 @@ bizno:
   url: https://bizno.net
   key: ${BIZNO_API_KEY}
 
+openvidu:
+  url: ${OPENVIDU_URL}
+  secret: ${OPENVIDU_SECRET}
+
 
 
