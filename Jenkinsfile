@@ -1,3 +1,4 @@
+// Jenkinsfile
 pipeline {
   agent any
 
@@ -11,7 +12,7 @@ pipeline {
     // --- Database Credentials ---
     SPRING_DATASOURCE_URL      = credentials('SPRING_DATASOURCE_URL')
     SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
-    SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
+    // SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
 
     // --- OAuth / API Keys ---
     GOOGLE_CLIENT_ID           = credentials('GOOGLE_CLIENT_ID')
@@ -25,25 +26,26 @@ pipeline {
 
     // --- Redis & External APIs ---
     REDIS_HOST = 'zipondev-redis'
-    REDIS_PORT = '6379'
-    SOLAPI_API_KEY             = credentials('SOLAPI_API_KEY')
-    SOLAPI_API_SECRET_KEY      = credentials('SOLAPI_API_SECRET_KEY')
-    SOLAPI_API_TEL             = credentials('SOLAPI_API_TEL')
+    REDIS_PORT = '6379'  // 비번 사용 안 함
 
-    // --- OpenVidu (Video Conference) ---
-    OPENVIDU_URL               = credentials('OPENVIDU_URL')
-    OPENVIDU_SECRET            = credentials('OPENVIDU_SECRET')
+    SOLAPI_API_KEY        = credentials('SOLAPI_API_KEY')
+    SOLAPI_API_SECRET_KEY = credentials('SOLAPI_API_SECRET_KEY')
+    SOLAPI_API_TEL        = credentials('SOLAPI_API_TEL')
+
+    // --- OpenVidu ---
+    OPENVIDU_URL    = credentials('OPENVIDU_URL')
+    OPENVIDU_SECRET = credentials('OPENVIDU_SECRET')
 
     // --- Frontend Build Variables ---
     NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
-    NEXT_PUBLIC_PWA_ENABLE     = '1'
+    NEXT_PUBLIC_PWA_ENABLE        = '1'
 
     // --- AWS / S3 ---
-    AWS_REGION   = "ap-northeast-2"
-    S3_SWAGGER   = "s3://zipon-media/dev/swagger/swagger.json"
+    AWS_REGION = "ap-northeast-2"
+    S3_SWAGGER = "s3://zipon-media/dev/swagger/swagger.json"
 
     // --- Elasticsearch ---
-    ES_URL = 'http://zipondev-elasticsearch:9200'
+    ES_URL            = 'http://zipondev-elasticsearch:9200'
     ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
   }
 
@@ -76,18 +78,27 @@ pipeline {
           parallel failFast: false,
           FRONTEND: {
             sh """
+              set -e
               docker build ${env.DOCKER_OPTS} \
                 --build-arg NEXT_PUBLIC_API_BASE_URL='${FRONT_API_BASE_URL}' \
-                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
-                --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
+                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=\$NEXT_PUBLIC_KAKAO_MAP_API_KEY \
+                --build-arg NEXT_PUBLIC_PWA_ENABLE=\$NEXT_PUBLIC_PWA_ENABLE \
                 -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
             """
           },
           BACKEND: {
-            sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
+            sh """
+              set -e
+              docker build ${env.DOCKER_OPTS} \
+                -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
+            """
           },
           AI: {
-            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true"
+            sh """
+              set -e
+              docker build ${env.DOCKER_OPTS} \
+                -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
+            """
           }
         }
       }
@@ -111,16 +122,17 @@ pipeline {
               echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
               docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
-              echo "[DEV] Health check (up to 60s)..."
+              echo "[DEV] Health check via host port (up to 60s)..."
               for i in \$(seq 1 60); do
                 if curl -sf http://127.0.0.1:28080/actuator/health || \
                    curl -sf http://127.0.0.1:28080/api/actuator/health; then
-                  echo "[DEV] OK on attempt \$i"; break
+                  echo "[DEV] OK on attempt \$i"
+                  break
                 fi
                 sleep 1
                 if [ "\$i" -eq 60 ]; then
                   echo "[DEV] health check failed after 60s"
-                  docker logs --tail=200 zipondev-backend || true
+                  docker compose -f ${env.DEV_COMPOSE} logs --tail=200 zipondev-backend || true
                   exit 1
                 fi
               done
@@ -138,14 +150,16 @@ pipeline {
         sh '''
           set -e
           mkdir -p build
-          for i in {1..10}; do
-            curl -fsS http://127.0.0.1:28080/v3/api-docs > build/swagger.json && break
-            echo "[DEV] swagger not ready, retrying ($i/10)..."
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:28080/v3/api-docs > build/swagger.json; then
+              break
+            fi
+            echo "[DEV] swagger not ready, retrying ($i/20)..."
             sleep 2
           done
           test -s build/swagger.json
           echo "[DEV] OpenAPI saved to build/swagger.json (size: $(wc -c < build/swagger.json))"
-          # aws s3 cp build/swagger.json $S3_SWAGGER --region $AWS_REGION --cache-control max-age=60 || true
+          # aws s3 cp build/swagger.json "$S3_SWAGGER" --region "$AWS_REGION" --cache-control max-age=60 || true
         '''
       }
     }
@@ -158,14 +172,13 @@ pipeline {
           echo "[PROD] Deploying with ${env.PROD_COMPOSE}"
           docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
 
-          echo "[PROD] Warm-up & health check..."
+          echo "[PROD] External warm-up checks..."
           if [ -x ${env.HEALTH} ]; then
-            ${env.HEALTH} || echo "[WARN] Health check script failed"
+            ${env.HEALTH} || echo "[WARN] Health script failed (ignored)"
           fi
-
-          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/
-          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/
-          curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/
+          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/ || true
+          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/ || true
+          curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/ || true
         """
       }
     }
