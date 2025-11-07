@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { ListingDetail } from '@/components/features/listings'
 
 interface ListingPageProps {

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { redirect } from 'next/navigation'
 import { fetchCurrentUser } from '@/services/authService'
 import MyPageClient from '@/components/features/mypage/page/MyPageClient'

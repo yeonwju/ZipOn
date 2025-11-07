@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NotificationItem } from '@/components/features/notification'
 
 export default function NotificationPage() {

@@ -1,4 +1,6 @@
 'use client'
+export const dynamic = 'force-dynamic'
+
 import ListingTopTabs from '@/components/layout/header/ListingsTopTabs'
 import { useRouter } from 'next/navigation'
 import { useUserStore } from '@/store/user'

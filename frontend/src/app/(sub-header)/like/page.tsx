@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { ListingItem } from '@/components/features/home'
 
 /**
