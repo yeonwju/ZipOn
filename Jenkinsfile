@@ -26,7 +26,6 @@ pipeline {
     // --- Redis & External APIs ---
     REDIS_HOST = 'zipondev-redis'
     REDIS_PORT = '6379'
-    REDIS_PASSWORD = credentials('REDIS_PASSWORD')
     SOLAPI_API_KEY             = credentials('SOLAPI_API_KEY')
     SOLAPI_API_SECRET_KEY      = credentials('SOLAPI_API_SECRET_KEY')
     SOLAPI_API_TEL             = credentials('SOLAPI_API_TEL')
