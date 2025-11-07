@@ -1,4 +1,3 @@
-// Jenkinsfile
 pipeline {
   agent any
 
@@ -12,22 +11,22 @@ pipeline {
     // --- Database Credentials ---
     SPRING_DATASOURCE_URL      = credentials('SPRING_DATASOURCE_URL')
     SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
-    // SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
+    SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
 
     // --- OAuth / API Keys ---
     GOOGLE_CLIENT_ID           = credentials('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET       = credentials('GOOGLE_CLIENT_SECRET')
-
     SSAFY_API_KEY              = credentials('SSAFY_API_KEY')
     SSAFY_API_URL              = credentials('SSAFY_API_URL')
     GOV_API_KEY                = credentials('GOV_API_KEY')
     BIZNO_API_KEY              = credentials('BIZNO_API_KEY')
     BIZNO_API_URL              = credentials('BIZNO_API_URL')
 
-    // --- Redis & External APIs ---
+    // --- Redis (no password) ---
     REDIS_HOST = 'zipondev-redis'
-    REDIS_PORT = '6379'  // 비번 사용 안 함
+    REDIS_PORT = '6379'
 
+    // --- SOLAPI ---
     SOLAPI_API_KEY        = credentials('SOLAPI_API_KEY')
     SOLAPI_API_SECRET_KEY = credentials('SOLAPI_API_SECRET_KEY')
     SOLAPI_API_TEL        = credentials('SOLAPI_API_TEL')
@@ -50,7 +49,6 @@ pipeline {
   }
 
   options {
-    // timestamps()
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
@@ -67,7 +65,6 @@ pipeline {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
-
           def FRONT_API_BASE_URL = (env.BRANCH_NAME == 'dev')
             ? 'https://dev-zipon.duckdns.org/api'
             : 'https://zipon.duckdns.org/api'
@@ -79,7 +76,7 @@ pipeline {
           FRONTEND: {
             sh """
               set -e
-              docker build ${env.DOCKER_OPTS} \
+              docker build ${DOCKER_OPTS} \
                 --build-arg NEXT_PUBLIC_API_BASE_URL='${FRONT_API_BASE_URL}' \
                 --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=\$NEXT_PUBLIC_KAKAO_MAP_API_KEY \
                 --build-arg NEXT_PUBLIC_PWA_ENABLE=\$NEXT_PUBLIC_PWA_ENABLE \
@@ -89,14 +86,14 @@ pipeline {
           BACKEND: {
             sh """
               set -e
-              docker build ${env.DOCKER_OPTS} \
+              docker build ${DOCKER_OPTS} \
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
             """
           },
           AI: {
             sh """
               set -e
-              docker build ${env.DOCKER_OPTS} \
+              docker build ${DOCKER_OPTS} \
                 -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
             """
           }
@@ -115,31 +112,24 @@ pipeline {
       when { branch 'dev' }
       steps {
         script {
-          def devComposeExists = sh(script: "test -f ${env.DEV_COMPOSE}", returnStatus: true) == 0
-          if (devComposeExists) {
-            sh """
-              set -e
-              echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
-              docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
+          sh '''
+            set -e
+            echo "[DEV] Deploying with ${DEV_COMPOSE}"
+            docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
-              echo "[DEV] Health check via host port (up to 60s)..."
-              for i in \$(seq 1 60); do
-                if curl -sf http://127.0.0.1:28080/actuator/health || \
-                   curl -sf http://127.0.0.1:28080/api/actuator/health; then
-                  echo "[DEV] OK on attempt \$i"
-                  break
-                fi
-                sleep 1
-                if [ "\$i" -eq 60 ]; then
-                  echo "[DEV] health check failed after 60s"
-                  docker compose -f ${env.DEV_COMPOSE} logs --tail=200 zipondev-backend || true
-                  exit 1
-                fi
-              done
-            """
-          } else {
-            echo "[WARN] ${env.DEV_COMPOSE} not found — skipping dev deploy."
-          }
+            echo "[DEV] Health check via /v3/api-docs (up to 60s)..."
+            for i in $(seq 1 60); do
+              if curl -sf http://127.0.0.1:28080/v3/api-docs; then
+                echo "[DEV] OK on attempt $i"
+                exit 0
+              fi
+              sleep 2
+            done
+
+            echo "[DEV] health check failed after 60s"
+            docker compose -f ${DEV_COMPOSE} logs --tail=200 zipondev-backend || true
+            exit 1
+          '''
         }
       }
     }
@@ -150,16 +140,17 @@ pipeline {
         sh '''
           set -e
           mkdir -p build
+          echo "[DEV] Exporting Swagger JSON..."
           for i in {1..20}; do
-            if curl -fsS http://127.0.0.1:28080/v3/api-docs > build/swagger.json; then
+            if curl -fsS http://127.0.0.1:28080/v3/api-docs -o build/swagger.json; then
               break
             fi
             echo "[DEV] swagger not ready, retrying ($i/20)..."
             sleep 2
           done
           test -s build/swagger.json
-          echo "[DEV] OpenAPI saved to build/swagger.json (size: $(wc -c < build/swagger.json))"
-          # aws s3 cp build/swagger.json "$S3_SWAGGER" --region "$AWS_REGION" --cache-control max-age=60 || true
+          echo "[DEV] OpenAPI saved (size: $(wc -c < build/swagger.json))"
+          # aws s3 cp build/swagger.json $S3_SWAGGER --region $AWS_REGION --cache-control max-age=60 || true
         '''
       }
     }
@@ -167,19 +158,24 @@ pipeline {
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
-        sh """
+        sh '''
           set -e
-          echo "[PROD] Deploying with ${env.PROD_COMPOSE}"
-          docker compose -f ${env.PROD_COMPOSE} up -d --force-recreate --remove-orphans
+          echo "[PROD] Deploying with ${PROD_COMPOSE}"
+          docker compose -f ${PROD_COMPOSE} up -d --force-recreate --remove-orphans
 
-          echo "[PROD] External warm-up checks..."
-          if [ -x ${env.HEALTH} ]; then
-            ${env.HEALTH} || echo "[WARN] Health script failed (ignored)"
-          fi
-          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/ || true
-          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/ || true
-          curl -s -o /dev/null -w "AI /ai/ -> %{http_code}\\n" https://zipon.duckdns.org/ai/ || true
-        """
+          echo "[PROD] Health check via /v3/api-docs (up to 60s)..."
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8080/v3/api-docs; then
+              echo "[PROD] OK on attempt $i"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "[PROD] health check failed after 60s"
+          docker compose -f ${PROD_COMPOSE} logs --tail=200 ziponprod-backend || true
+          exit 1
+        '''
       }
     }
   }
