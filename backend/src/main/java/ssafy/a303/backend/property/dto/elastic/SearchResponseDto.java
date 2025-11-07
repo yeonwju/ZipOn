@@ -36,6 +36,6 @@ public record SearchResponseDto(
         // 층
         Short floor,
         // 생성일
-        Instant createdAt
+        String createdAt
 ) {
 }

@@ -34,5 +34,5 @@ public class PropertyDocument {
     private Short roomCnt;
     private Short floor;
 
-    private Instant createdAt;
+    private String createdAt;
 }

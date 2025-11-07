@@ -8,7 +8,9 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQueryBuilders;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.JsonData;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.property.dto.elastic.PropertyDocument;
@@ -20,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PropertySearchService {
@@ -62,23 +65,23 @@ public class PropertySearchService {
 
         /** 필터 조건 */
         // 지역 필터
-        if (notBlank(r.si()))   filters.add(term("si",   r.si()));  //시
-        if (notBlank(r.gu()))   filters.add(term("gu",   r.gu()));  // 구
-        if (notBlank(r.dong())) filters.add(term("dong", r.dong()));  // 동
-
-        // 가격 범위 필터
-        addRange(filters, "deposit",   r.depositMin(), r.depositMax());
-        addRange(filters, "mnRent",   r.mnRentMin(),  r.mnRentMax());
-        addRange(filters, "fee",       r.feeMin(),     r.feeMax());
-
-        // 조건 범위 필터
-        addRange(filters, "area",      r.areaMin(),    r.areaMax());
-        addRange(filters, "roomCnt",r.roomCountMin(), r.roomCountMax());
-        addRange(filters, "floor",     r.floorMin(),   r.floorMax());
-
-        // 다중 값 필터
-        if (nonEmpty(r.facings()))       filters.add(terms("facing", r.facings()));
-        if (nonEmpty(r.buildingTypes())) filters.add(terms("buildingType", r.buildingTypes()));
+//        if (notBlank(r.si()))   filters.add(term("si",   r.si()));  //시
+//        if (notBlank(r.gu()))   filters.add(term("gu",   r.gu()));  // 구
+//        if (notBlank(r.dong())) filters.add(term("dong", r.dong()));  // 동
+//
+//        // 가격 범위 필터
+//        addRange(filters, "deposit",   r.depositMin(), r.depositMax());
+//        addRange(filters, "mnRent",   r.mnRentMin(),  r.mnRentMax());
+//        addRange(filters, "fee",       r.feeMin(),     r.feeMax());
+//
+//        // 조건 범위 필터
+//        addRange(filters, "area",      r.areaMin(),    r.areaMax());
+//        addRange(filters, "roomCnt",r.roomCountMin(), r.roomCountMax());
+//        addRange(filters, "floor",     r.floorMin(),   r.floorMax());
+//
+//        // 다중 값 필터
+//        if (nonEmpty(r.facings()))       filters.add(terms("facing", r.facings()));
+//        if (nonEmpty(r.buildingTypes())) filters.add(terms("buildingType", r.buildingTypes()));
 
         /** 최종 bool 조립*/
         Query finalQuery;
@@ -95,6 +98,18 @@ public class PropertySearchService {
         /** 정렬 */
         String sortField = (r.sortField() == null || r.sortField().isBlank()) ? "createdAt" : r.sortField();
         SortOrder sortOrder = ("asc".equalsIgnoreCase(r.sortOrder())) ? SortOrder.Asc : SortOrder.Desc;
+
+        var resp = es.search(s -> s
+                        .index(index)
+                        .query(finalQuery),
+                JsonNode.class
+        );
+
+        resp.hits().hits().forEach(h -> {
+            log.info("ID={}", h.id());
+            log.info("SRC={}", h.source().toPrettyString()); // _source JSON 확인
+        });
+
 
         /** ES 검색 실행 */
         // highlight: title, description 하이라이트 필요시 사용
