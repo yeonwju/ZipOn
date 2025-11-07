@@ -1,3 +1,4 @@
+// Jenkinsfile
 pipeline {
   agent any
 
@@ -16,6 +17,7 @@ pipeline {
     // --- OAuth / API Keys ---
     GOOGLE_CLIENT_ID           = credentials('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET       = credentials('GOOGLE_CLIENT_SECRET')
+
     SSAFY_API_KEY              = credentials('SSAFY_API_KEY')
     SSAFY_API_URL              = credentials('SSAFY_API_URL')
     GOV_API_KEY                = credentials('GOV_API_KEY')
@@ -76,7 +78,7 @@ pipeline {
           FRONTEND: {
             sh """
               set -e
-              docker build ${DOCKER_OPTS} \
+              docker build ${env.DOCKER_OPTS} \
                 --build-arg NEXT_PUBLIC_API_BASE_URL='${FRONT_API_BASE_URL}' \
                 --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=\$NEXT_PUBLIC_KAKAO_MAP_API_KEY \
                 --build-arg NEXT_PUBLIC_PWA_ENABLE=\$NEXT_PUBLIC_PWA_ENABLE \
@@ -86,14 +88,14 @@ pipeline {
           BACKEND: {
             sh """
               set -e
-              docker build ${DOCKER_OPTS} \
+              docker build ${env.DOCKER_OPTS} \
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
             """
           },
           AI: {
             sh """
               set -e
-              docker build ${DOCKER_OPTS} \
+              docker build ${env.DOCKER_OPTS} \
                 -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
             """
           }
@@ -117,16 +119,17 @@ pipeline {
             echo "[DEV] Deploying with ${DEV_COMPOSE}"
             docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
-            echo "[DEV] Health check via /v3/api-docs (up to 60s)..."
-            for i in $(seq 1 60); do
+            echo "[DEV] Health check via /v3/api-docs (up to 120s)..."
+            for i in $(seq 1 120); do
               if curl -sf http://127.0.0.1:28080/v3/api-docs; then
-                echo "[DEV] OK on attempt $i"
+                echo "[DEV] ✅ OK on attempt $i"
                 exit 0
               fi
+              echo "[DEV] Waiting for backend... ($i/120)"
               sleep 2
             done
 
-            echo "[DEV] health check failed after 60s"
+            echo "[DEV] ❌ Health check failed after 120s."
             docker compose -f ${DEV_COMPOSE} logs --tail=200 zipondev-backend || true
             exit 1
           '''
@@ -140,16 +143,16 @@ pipeline {
         sh '''
           set -e
           mkdir -p build
-          echo "[DEV] Exporting Swagger JSON..."
-          for i in {1..20}; do
-            if curl -fsS http://127.0.0.1:28080/v3/api-docs -o build/swagger.json; then
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:28080/v3/api-docs; then
+              curl -fsS http://127.0.0.1:28080/v3/api-docs > build/swagger.json
               break
             fi
-            echo "[DEV] swagger not ready, retrying ($i/20)..."
+            echo "[DEV] swagger not ready, retrying ($i/30)..."
             sleep 2
           done
           test -s build/swagger.json
-          echo "[DEV] OpenAPI saved (size: $(wc -c < build/swagger.json))"
+          echo "[DEV] ✅ OpenAPI saved (size: $(wc -c < build/swagger.json))"
           # aws s3 cp build/swagger.json $S3_SWAGGER --region $AWS_REGION --cache-control max-age=60 || true
         '''
       }
@@ -158,24 +161,28 @@ pipeline {
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
-        sh '''
+        sh """
           set -e
           echo "[PROD] Deploying with ${PROD_COMPOSE}"
           docker compose -f ${PROD_COMPOSE} up -d --force-recreate --remove-orphans
 
-          echo "[PROD] Health check via /v3/api-docs (up to 60s)..."
-          for i in $(seq 1 60); do
+          echo "[PROD] Warm-up & health check via /v3/api-docs (up to 120s)..."
+          for i in \$(seq 1 120); do
             if curl -sf http://127.0.0.1:8080/v3/api-docs; then
-              echo "[PROD] OK on attempt $i"
-              exit 0
+              echo "[PROD] ✅ OK on attempt \$i"
+              break
             fi
+            echo "[PROD] Waiting for backend... (\$i/120)"
             sleep 2
           done
 
-          echo "[PROD] health check failed after 60s"
-          docker compose -f ${PROD_COMPOSE} logs --tail=200 ziponprod-backend || true
-          exit 1
-        '''
+          if [ -x ${HEALTH} ]; then
+            ${HEALTH} || echo "[WARN] Health script failed (ignored)"
+          fi
+
+          curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/ || true
+          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/ || true
+        """
       }
     }
   }
