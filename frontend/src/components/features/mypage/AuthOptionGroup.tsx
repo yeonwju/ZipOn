@@ -24,7 +24,7 @@ export default function AuthOptionGroup() {
             disabled
           >
             <VerifiedUserIcon fontSize={'inherit'} className={'text-white'} />
-            <span className={'text-xs font-medium text-white'}>중개인 인증</span>
+            <span className={'text-xs font-medium text-white'}>사업자 인증</span>
           </button>
         ) : (
           <Link
@@ -34,7 +34,7 @@ export default function AuthOptionGroup() {
             }
           >
             <PrivacyTipIcon fontSize={'inherit'} className="text-white" />
-            <span className={'text-xs font-medium text-white'}>중개인 인증</span>
+            <span className={'text-xs font-medium text-white'}>사업자 인증</span>
           </Link>
         )}
 

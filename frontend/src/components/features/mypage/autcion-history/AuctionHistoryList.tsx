@@ -84,7 +84,7 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
       {hasMore && (
         <Link
           href={ROUTES.MY_AUCTIONS_HISTORY}
-          className="mt-2 w-full rounded-md border-2 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="mt-2 w-full rounded-md border-1 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 shadow-md transition-colors hover:bg-gray-50"
         >
           더보기
         </Link>
