@@ -19,7 +19,7 @@ spring:
       max-request-size: 20MB
 
 ai:
-  base-url: http://fastapi:8000
+  base-url: http://localhost:8000
 
 cloud:
   aws:
@@ -41,3 +41,6 @@ logging:
 #    org.springframework.web.servlet.DispatcherServlet: DEBUG
 #    org.apache.coyote.http11: DEBUG
 
+# Elasticsearch 설정
+elasticsearch:
+  uris: http://localhost:9200

@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.client;
+package ssafy.a303.backend.property.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -21,7 +21,7 @@ public class AiClient {
         this.client = builder.baseUrl(baseUrl).build(); // 항상 초기화
     }
 
-    public boolean verifySync(String pdfCode, MultipartFile pdf, String regiNm, String regiBirth, String address) {
+    public VerificationResultResponseDto verifySync(String pdfCode, MultipartFile pdf, String regiNm, String regiBirth, String address) {
 
         MultipartBodyBuilder mb = new MultipartBodyBuilder();
         mb.part("pdfCode", pdfCode);
@@ -44,7 +44,7 @@ public class AiClient {
         if(res == null) {
             throw new CustomException(ErrorCode.AI_NO_RESPONSE);
         }
-        return res.isCertificated();
+        return res;
     }
 
 }
