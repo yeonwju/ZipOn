@@ -7,17 +7,19 @@ pipeline {
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    SPRING_DATASOURCE_URL = credentials('SPRING_DATASOURCE_URL')
+    SPRING_DATASOURCE_URL      = credentials('SPRING_DATASOURCE_URL')
     SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
     SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
-    GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
-    GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
-    SSAFY_API_KEY = credentials('SSAFY_API_KEY')
-    SSAFY_API_URL = credentials('SSAFY_API_URL')
-    GOV_API_KEY = credentials('GOV_API_KEY')
-    BIZNO_API_KEY = credentials('BIZNO_API_KEY')
-    BIZNO_API_URL = credentials('BIZNO_API_URL')
-    REDIS_PASSWORD = credentials('REDIS_PASSWORD')
+    GOOGLE_CLIENT_ID           = credentials('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET       = credentials('GOOGLE_CLIENT_SECRET')
+    SSAFY_API_KEY              = credentials('SSAFY_API_KEY')
+    SSAFY_API_URL              = credentials('SSAFY_API_URL')
+    GOV_API_KEY                = credentials('GOV_API_KEY')
+    BIZNO_API_KEY              = credentials('BIZNO_API_KEY')
+    BIZNO_API_URL              = credentials('BIZNO_API_URL')
+    REDIS_PASSWORD             = credentials('REDIS_PASSWORD')
+    NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
+    NEXT_PUBLIC_PWA_ENABLE = '1'
   }
 
   options {
@@ -37,8 +39,7 @@ pipeline {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
 
-          // Jenkins 멀티브랜치 기본 변수 (환경파일 아님)
-          def FRONT_API_BASE_URL = (env.BRANCH_NAME == 'dev') 
+          def FRONT_API_BASE_URL = (env.BRANCH_NAME == 'dev')
             ? 'https://dev-zipon.duckdns.org/api'
             : 'https://zipon.duckdns.org/api'
 
@@ -50,6 +51,8 @@ pipeline {
             sh """
               docker build ${env.DOCKER_OPTS} \
                 --build-arg NEXT_PUBLIC_API_BASE_URL='${FRONT_API_BASE_URL}' \
+                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
+                --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
                 -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
             """
           },
@@ -109,14 +112,8 @@ pipeline {
   }
 
   post {
-    success {
-      echo "✅ Pipeline success"
-    }
-    failure {
-      echo "❌ Pipeline failed. Check above logs."
-    }
-    always {
-      sh 'docker image prune -f || true'
-    }
+    success { echo "✅ Pipeline success" }
+    failure { echo "❌ Pipeline failed. Check above logs." }
+    always  { sh 'docker image prune -f || true' }
   }
 }
