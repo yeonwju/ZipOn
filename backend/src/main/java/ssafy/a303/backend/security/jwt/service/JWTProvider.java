@@ -57,9 +57,6 @@ public class JWTProvider {
                 .claim("role", tokenData.getRole())
                 .claim("tokenType", TokenType.ACCESS.name())
                 .claim("jti", tokenData.getJti())
-                .claim("name", tokenData.getName())
-                .claim("tel", tokenData.getTel())
-                .claim("birth", tokenData.getBirth())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
