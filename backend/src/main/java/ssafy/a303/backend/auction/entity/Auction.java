@@ -6,7 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.user.entity.User;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
