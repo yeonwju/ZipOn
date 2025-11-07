@@ -29,13 +29,13 @@ public class Auction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_seq")
     private Property property;
-    @Column
+    @Column(nullable = false)
     private LocalDate strmDate;
-    @Column
+    @Column(nullable = false)
     private LocalTime strmStartTm;
-    @Column
+    @Column(nullable = false)
     private LocalTime strmEndTm;
-    @Column
+    @Column(nullable = false)
     private LocalDateTime auctionEndAt;
 
     // 상태

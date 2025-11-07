@@ -23,14 +23,14 @@ public class Attendance {
     @ManyToOne
     @JoinColumn(name = "auction_seq", nullable = false)
     private Auction auction;
-    @Column
+    @Column(nullable = false)
     private LocalDateTime bidAt;
-    @Column
+    @Column(nullable = false)
     private int bidAmount;
     @Column
     private int rank;
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false)
     @Builder.Default
     private AttendanceStatus status = AttendanceStatus.WAITING;
     @Column
