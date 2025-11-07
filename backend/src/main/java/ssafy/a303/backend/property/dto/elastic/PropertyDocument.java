@@ -22,17 +22,17 @@ public class PropertyDocument {
     private String si;
     private String gu;
     private String dong;
+    private String facing;
+    private String lessorNm;
+    private String buildingType; // ES keyword (예: "APT","VILLA"...)
 
     private Long deposit;
-    private Integer mn_rent;
+    private Integer mnRent;
     private Integer fee;
-
-    private String building_type; // ES keyword (예: "APT","VILLA"...)
-    private String facing;
     private Double area;
-    private Integer area_p;
-    private Short room_count;
+    private Integer areaP;
+    private Short roomCnt;
     private Short floor;
 
-    private Instant created_at;
+    private Instant createdAt;
 }

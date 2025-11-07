@@ -20,12 +20,18 @@ public class EsConfig {
     @Value("${elasticsearch.port:9200}")
     private int port;
 
+    /** Low-Level REST Client (http 커넥션 관리)*/
     @Bean
     public RestClient restClient() {
         // low-level REST client (기본 http 통신)
         return RestClient.builder(new HttpHost(host, port, "http")).build();
     }
 
+    /** High-Level ES Java API Client
+     * JSON 직렬화/역직렬화
+     * @param restClient
+     * @return
+     */
     @Bean
     public ElasticsearchClient elasticsearchClient(RestClient restClient) {
         // Transport 계층 설정
