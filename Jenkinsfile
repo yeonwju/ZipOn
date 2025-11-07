@@ -1,11 +1,10 @@
-// Jenkinsfile
 pipeline {
   agent any
 
   environment {
     // --- Common Paths ---
-    DOCKER_OPTS = "--pull"
-    HEALTH = "/usr/local/bin/zipon-health.sh"
+    DOCKER_OPTS  = "--pull"
+    HEALTH       = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
@@ -15,14 +14,14 @@ pipeline {
     SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
 
     // --- OAuth / API Keys ---
-    GOOGLE_CLIENT_ID           = credentials('GOOGLE_CLIENT_ID')
-    GOOGLE_CLIENT_SECRET       = credentials('GOOGLE_CLIENT_SECRET')
+    GOOGLE_CLIENT_ID     = credentials('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
 
-    SSAFY_API_KEY              = credentials('SSAFY_API_KEY')
-    SSAFY_API_URL              = credentials('SSAFY_API_URL')
-    GOV_API_KEY                = credentials('GOV_API_KEY')
-    BIZNO_API_KEY              = credentials('BIZNO_API_KEY')
-    BIZNO_API_URL              = credentials('BIZNO_API_URL')
+    SSAFY_API_KEY = credentials('SSAFY_API_KEY')
+    SSAFY_API_URL = credentials('SSAFY_API_URL')
+    GOV_API_KEY   = credentials('GOV_API_KEY')
+    BIZNO_API_KEY = credentials('BIZNO_API_KEY')
+    BIZNO_API_URL = credentials('BIZNO_API_URL')
 
     // --- Redis (no password) ---
     REDIS_HOST = 'zipondev-redis'
@@ -116,22 +115,34 @@ pipeline {
         script {
           sh '''
             set -e
+
+            # --- (Best-effort) Jenkins 컨테이너를 zipon-net에 연결 ---
+            # 이름이 'jenkins-container'일 때만 성공. 아니면 무시.
+            docker network connect zipon-net jenkins-container 2>/dev/null || true
+
             echo "[DEV] Deploying with ${DEV_COMPOSE}"
             docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
-            echo "[DEV] Health check via /v3/api-docs (up to 120s)..."
-            for i in $(seq 1 120); do
-              if curl -sf http://127.0.0.1:28080/v3/api-docs; then
-                echo "[DEV] ✅ OK on attempt $i"
-                exit 0
+            echo "[DEV] Health check via service DNS (zipondev-backend:8080/v3/api-docs) up to 120s..."
+            OK=""
+            for i in $(seq 1 60); do   # 60 * sleep 2s = 120s
+              if curl -sfm 2 http://zipondev-backend:8080/v3/api-docs >/dev/null; then
+                echo "[DEV] ✅ OK on attempt $i (service DNS reachable)"
+                OK=1
+                break
               fi
-              echo "[DEV] Waiting for backend... ($i/120)"
+              echo "[DEV] Waiting for backend... ($i/60)"
               sleep 2
             done
 
-            echo "[DEV] ❌ Health check failed after 120s."
-            docker compose -f ${DEV_COMPOSE} logs --tail=200 zipondev-backend || true
-            exit 1
+            if [ -z "$OK" ]; then
+              echo "[DEV] ❌ Health check failed after 120s."
+              echo "------ docker compose ps ------"
+              docker compose -f ${DEV_COMPOSE} ps || true
+              echo "------ backend logs (last 200) ------"
+              docker compose -f ${DEV_COMPOSE} logs --tail=200 zipondev-backend || true
+              exit 1
+            fi
           '''
         }
       }
@@ -143,14 +154,19 @@ pipeline {
         sh '''
           set -e
           mkdir -p build
-          for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:28080/v3/api-docs; then
-              curl -fsS http://127.0.0.1:28080/v3/api-docs > build/swagger.json
+          echo "[DEV] Fetching OpenAPI from service DNS (zipondev-backend:8080/v3/api-docs)..."
+          READY=""
+          for i in $(seq 1 30); do
+            if curl -sfm 2 http://zipondev-backend:8080/v3/api-docs >/dev/null; then
+              curl -sf http://zipondev-backend:8080/v3/api-docs > build/swagger.json
+              READY=1
               break
             fi
             echo "[DEV] swagger not ready, retrying ($i/30)..."
             sleep 2
           done
+          [ -n "$READY" ] || { echo "[DEV] ❌ OpenAPI not ready."; exit 1; }
+
           test -s build/swagger.json
           echo "[DEV] ✅ OpenAPI saved (size: $(wc -c < build/swagger.json))"
           # aws s3 cp build/swagger.json $S3_SWAGGER --region $AWS_REGION --cache-control max-age=60 || true
@@ -167,21 +183,24 @@ pipeline {
           docker compose -f ${PROD_COMPOSE} up -d --force-recreate --remove-orphans
 
           echo "[PROD] Warm-up & health check via /v3/api-docs (up to 120s)..."
-          for i in \$(seq 1 120); do
-            if curl -sf http://127.0.0.1:8080/v3/api-docs; then
+          OK=""
+          for i in \$(seq 1 60); do   # 60 * 2s = 120s
+            if curl -sfm 2 http://127.0.0.1:8080/v3/api-docs >/dev/null; then
               echo "[PROD] ✅ OK on attempt \$i"
+              OK=1
               break
             fi
-            echo "[PROD] Waiting for backend... (\$i/120)"
+            echo "[PROD] Waiting for backend... (\$i/60)"
             sleep 2
           done
+          [ -n "\$OK" ] || { echo "[PROD] ❌ Health check failed after 120s."; exit 1; }
 
           if [ -x ${HEALTH} ]; then
             ${HEALTH} || echo "[WARN] Health script failed (ignored)"
           fi
 
           curl -s -o /dev/null -w "FRONT / -> %{http_code}\\n" https://zipon.duckdns.org/ || true
-          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n" https://zipon.duckdns.org/api/ || true
+          curl -s -o /dev/null -w "BACK /api/ -> %{http_code}\\n"  https://zipon.duckdns.org/api/ || true
         """
       }
     }
