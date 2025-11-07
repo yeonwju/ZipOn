@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int attendanceSeq;
+    private Integer attendanceSeq;
     @ManyToOne
     @JoinColumn(name = "user_seq", nullable = false)
     private User user;

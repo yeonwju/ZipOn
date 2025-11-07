@@ -22,7 +22,7 @@ public class Auction {
     // 신청
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int auctionSeq;
+    private Integer auctionSeq;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_seq")
     private User user; // 경매를 방송할 중개인 또는 임대인 user
