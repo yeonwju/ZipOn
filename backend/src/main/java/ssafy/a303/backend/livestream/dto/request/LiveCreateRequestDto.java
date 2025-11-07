@@ -3,10 +3,7 @@ package ssafy.a303.backend.livestream.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * 라이브 방송 생성 요청 DTO
@@ -15,6 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LiveCreateRequestDto {
 
     @Schema(description = "경매 식별자", example = "1")

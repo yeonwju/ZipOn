@@ -87,6 +87,7 @@ dependencies {
     implementation 'io.openvidu:openvidu-java-client:2.29.0'
 }
 
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

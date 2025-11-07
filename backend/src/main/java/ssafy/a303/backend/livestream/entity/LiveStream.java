@@ -2,6 +2,7 @@ package ssafy.a303.backend.livestream.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.common.entity.BaseTimeEntity;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.user.entity.User;
@@ -28,7 +29,6 @@ public class LiveStream extends BaseTimeEntity {
     @Column(name = "live_seq")
     private Integer id;
 
-    //todo: 경매 테이블 생기면 연결하기
     /** auc_seq FK → auction.auction_seq (경매와의 연결) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auc_seq", nullable = false)

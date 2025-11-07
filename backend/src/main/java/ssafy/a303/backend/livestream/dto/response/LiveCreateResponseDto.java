@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +28,7 @@ public class LiveCreateResponseDto {
     private String title;
 
     @Schema(description = "방송 상태", example = "LIVE")
-    private String status;
+    private LiveStreamStatus status;
 
     @Schema(description = "방장 정보")
     private HostDto host;
@@ -43,6 +44,9 @@ public class LiveCreateResponseDto {
 
         @Schema(description = "이름", example = "홍길동")
         private String name;
+
+        @Schema(description = "프로필 이미지 URL", example = "https://s3.../profile.png")
+        private String profileImg;
     }
 
 }
