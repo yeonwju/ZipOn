@@ -3,10 +3,10 @@ package ssafy.a303.backend.property.dto.elastic;
 import java.util.List;
 
 public record SearchRequestDto(
-        String q,                 // 검색어(없으면 match_all)
-        String si,                // 선택: 시/도
-        String gu,                // 선택: 구/군
-        String dong,              // 선택: 동
+        String q,                 // 검색어
+        String si,                // 시
+        String gu,                // 구
+        String dong,              // 동
 
         Long depositMin,          // 보증금 최소
         Long depositMax,          // 보증금 최대
@@ -22,8 +22,8 @@ public record SearchRequestDto(
         Short floorMin,           // 층 최소
         Short floorMax,           // 층 최대
 
-        List<String> facings,     // 해방향(예: ["S","SE"]) - keyword
-        List<String> buildingTypes,// 빌딩타입(예: ["OFFICE","APT"]) - keyword (매핑: building_type)
+        List<String> facings,     // 해방향(["S","SE"]) - keyword
+        List<String> buildingTypes,// 빌딩타입(["OFFICE","APT"]) - keyword
 
         Integer page,             // 0-base
         Integer size,             // 페이지 크기
