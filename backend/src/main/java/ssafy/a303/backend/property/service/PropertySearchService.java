@@ -6,9 +6,16 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQueryBuilders;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.JsonData;
+import co.elastic.clients.json.JsonpMapper;
+import co.elastic.clients.json.JsonpUtils;
+import co.elastic.clients.transport.ElasticsearchTransport;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +57,10 @@ public class PropertySearchService {
         int size = (r.size() == null || r.size() <= 0) ? 10 : r.size();
         int from = page * size;
 
+        /** 정렬 */
+        String sortField = (r.sortField() == null || r.sortField().isBlank()) ? "createdAt" : r.sortField();
+        SortOrder sortOrder = ("asc".equalsIgnoreCase(r.sortOrder())) ? SortOrder.Asc : SortOrder.Desc;
+
         // must / filter 세팅
         List<Query> must = new ArrayList<>();
         List<Query> filters = new ArrayList<>();
@@ -65,9 +76,9 @@ public class PropertySearchService {
 
         /** 필터 조건 */
         // 지역 필터
-        if (notBlank(r.si()))   filters.add(term("si",   r.si()));  //시
-        if (notBlank(r.gu()))   filters.add(term("gu",   r.gu()));  // 구
-        if (notBlank(r.dong())) filters.add(term("dong", r.dong()));  // 동
+        if (notBlank(r.si()))   filters.add(termKeyword("si",   r.si().toLowerCase()));
+        if (notBlank(r.gu()))   filters.add(termKeyword("gu",   r.gu().toLowerCase()));
+        if (notBlank(r.dong())) filters.add(termKeyword("dong", r.dong().toLowerCase()));
 
         // 가격 범위 필터
         addRange(filters, "deposit",   r.depositMin(), r.depositMax());
@@ -84,46 +95,60 @@ public class PropertySearchService {
         if (nonEmpty(r.buildingTypes())) filters.add(terms("buildingType", r.buildingTypes()));
 
         /** 최종 bool 조립*/
-        Query finalQuery;
-        if (must.isEmpty() && filters.isEmpty()) {
-            finalQuery = Query.of(q -> q.matchAll(m -> m));
-        } else {
-            finalQuery = Query.of(q -> q.bool(b -> {
-                if (!must.isEmpty())    b.must(must);
-                if (!filters.isEmpty()) b.filter(filters);
-                return b;
-            }));
-        }
+        Query finalQuery = (must.isEmpty() && filters.isEmpty())
+                ? Query.of(q -> q.matchAll(m -> m))
+                : Query.of(q -> q.bool(b -> {
+            if (!must.isEmpty())    b.must(must);
+            if (!filters.isEmpty()) b.filter(filters);
+            return b;
+        }));
 
-        /** 정렬 */
-        String sortField = (r.sortField() == null || r.sortField().isBlank()) ? "createdAt" : r.sortField();
-        SortOrder sortOrder = ("asc".equalsIgnoreCase(r.sortOrder())) ? SortOrder.Asc : SortOrder.Desc;
+//        /** 쿼리 확인 */
+//        var resp = es.search(s -> s
+//                        .index(index)
+//                        .query(finalQuery),
+//                JsonNode.class
+//        );
 
-        /** 쿼리 확인 */
-        var resp = es.search(s -> s
-                        .index(index)
-                        .query(finalQuery),
-                JsonNode.class
-        );
-
-        resp.hits().hits().forEach(h -> {
-            log.info("ID={}", h.id());
-            log.info("SRC={}", h.source().toPrettyString()); // _source JSON 확인
-        });
+        SearchRequest req = new SearchRequest.Builder()
+                .index(index)
+                .query(finalQuery)
+                .from(from)
+                .size(size)
+                .sort(so -> so.field(f -> f.field(sortField).order(sortOrder)))
+                .trackTotalHits(t -> t.enabled(true))
+                .highlight(h -> h.fields("title", f -> f).fields("description", f -> f))
+                .build();
 
 
-        /** ES 검색 실행 */
-        // highlight: title, description 하이라이트 필요시 사용
-        return es.search(s -> s
-                        .index(index)
-                        .query(finalQuery)
-                        .from(from)
-                        .size(size)
-                        .sort(so -> so.field(f -> f.field(sortField).order(sortOrder)))
-                        .trackTotalHits(t -> t.enabled(true))
-                        .highlight(h -> h.fields("title", f -> f).fields("description", f -> f)),
-                PropertyDocument.class
-        );
+
+        return es.search(req, PropertyDocument.class);
+
+
+//        try{
+//            resp.hits().hits().forEach(h -> {
+//                log.info("ID={}", h.id());
+//                log.info("SRC={}", h.source().toPrettyString()); // _source JSON 확인
+//            });
+//        } catch (Exception e) {
+//            log.error("ES search failed. Built DSL={}",  // DSL 문자열 찍고 싶으면 아래 4) 참고
+//                    "(빌더로 동일 쿼리를 curl로도 재현)");
+//            log.error("CAUSE=", e);
+//            throw e;
+//        }
+//
+//        /** ES 검색 실행 */
+//        // highlight: title, description 하이라이트 필요시 사용
+//        return es.search(s -> s
+//                        .index(index)
+//                        .query(finalQuery)
+//                        .from(from)
+//                        .size(size)
+//                        .sort(so -> so.field(f -> f.field(sortField).order(sortOrder)))
+//                        .trackTotalHits(t -> t.enabled(true))
+//                        .highlight(h -> h.fields("title", f -> f).fields("description", f -> f)),
+//                PropertyDocument.class
+//        );
 
     }
 
@@ -139,11 +164,8 @@ public class PropertySearchService {
     }
 
     // keyword
-    private static Query term(String field, String value) {
-        return Query.of(q -> q.term(t -> t
-                .field(field)
-                .value(v -> v.stringValue(value))
-        ));
+    private Query termKeyword(String field, String exact) {
+        return Query.of(q -> q.term(t -> t.field(field).value(exact)));
     }
 
     // keyword 리스트
