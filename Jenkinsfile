@@ -164,15 +164,12 @@ pipeline {
 
   post {
     always {
-      node {
-        echo "✅ Build finished. Cleaning workspace..."
-        sh 'docker system prune -af || true'
-      }
+      echo "✅ Build finished. Cleaning workspace..."
+      sh 'docker system prune -af || true'
     }
     failure {
-      node {
-        echo "❌ Pipeline failed. Check logs."
-      }
+      echo "❌ Pipeline failed. Check logs."
     }
   }
+
 }
