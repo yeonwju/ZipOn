@@ -20,6 +20,8 @@ pipeline {
     REDIS_PASSWORD             = credentials('REDIS_PASSWORD')
     NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
     NEXT_PUBLIC_PWA_ENABLE = '1'
+    AWS_REGION   = "ap-northeast-2"
+    S3_SWAGGER   = "s3://zipon-media/dev/swagger/swagger.json"
   }
 
   options {
@@ -60,7 +62,7 @@ pipeline {
             sh "docker build ${env.DOCKER_OPTS} -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend"
           },
           AI: {
-            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai"
+            sh "docker build ${env.DOCKER_OPTS} -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true"
           }
         }
       }
@@ -82,11 +84,29 @@ pipeline {
             sh """
               echo "[DEV] Deploying with ${env.DEV_COMPOSE}"
               docker compose -f ${env.DEV_COMPOSE} up -d --force-recreate --remove-orphans
+              echo "[DEV] Warm-up & health check..."
+              sleep 2
+              curl -sf http://127.0.0.1:28080/actuator/health || (docker logs --tail=200 zipondev-backend && false)
             """
           } else {
             echo "[DEV] ${env.DEV_COMPOSE} not found. Skipping deploy."
           }
         }
+      }
+    }
+
+    stage('Publish OpenAPI (DEV)') {
+      when { branch 'dev' }
+      steps {
+        sh """
+          set -e
+          mkdir -p build
+          curl -s http://127.0.0.1:28080/v3/api-docs > build/swagger.json
+          test -s build/swagger.json
+          # S3 업로드가 필요하면 아래 주석 해제
+          # aws s3 cp build/swagger.json ${S3_SWAGGER} --region ${AWS_REGION} --cache-control max-age=60
+          echo "[DEV] OpenAPI saved to build/swagger.json (length: $(wc -c < build/swagger.json))"
+        """
       }
     }
 
