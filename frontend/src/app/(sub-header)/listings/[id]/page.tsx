@@ -1,4 +1,4 @@
-import ListingDetail from '@/components/listing/ListingDetail'
+import { ListingDetail } from '@/components/features/listings'
 
 interface ListingPageProps {
   params: Promise<{ id: string }>

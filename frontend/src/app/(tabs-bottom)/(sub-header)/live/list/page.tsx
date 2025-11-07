@@ -3,9 +3,11 @@
 import { Video } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import LiveItems from '@/components/live/LiveItems'
+import { LiveItems } from '@/components/features/live'
 import FabDial from '@/components/ui/FabDial'
+import { ROUTES } from '@/constants'
 import { liveItems } from '@/data/LiveItem'
+import { useUserStore } from '@/store/user'
 const metadata = liveItems
 /**
  * 라이브 방송 페이지 (Server Component)
@@ -16,17 +18,18 @@ const metadata = liveItems
 
 export default function LivePage() {
   const router = useRouter()
+  const { user } = useUserStore()
   const actions = [
     {
       icon: <Video className="h-5 w-5" />,
       name: '라이브 생성',
-      onClick: () => router.push('/live/create'),
+      onClick: () => router.push(ROUTES.LIVE_CREATE),
     },
   ]
   return (
-    <section>
+    <section className={'pb-13.5'}>
       <LiveItems items={metadata} />
-      <FabDial actions={actions} />
+      {user?.isVerified && user?.isBroker && <FabDial actions={actions} />}
     </section>
   )
 }

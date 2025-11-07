@@ -31,6 +31,8 @@
     --breakpoint-xl: 1280px;
     --breakpoint-2xl: 1536px;
 
+    --accent: 240 5% 96%;
+
     /* 커스텀 폰트 패밀리 */
     --font-family-sans: 'Pretendard', system-ui, sans-serif;
 

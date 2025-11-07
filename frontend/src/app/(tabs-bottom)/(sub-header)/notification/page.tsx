@@ -1,17 +1,17 @@
-import NotificationCard from '@/components/notification/NotificationItem'
+import { NotificationItem } from '@/components/features/notification'
 
 export default function NotificationPage() {
   return (
     <section className="p-4">
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
-      <NotificationCard />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
+      <NotificationItem />
     </section>
   )
 }

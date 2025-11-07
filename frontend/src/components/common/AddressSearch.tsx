@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import DaumPostcode from 'react-daum-postcode'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DaumPostcodeData } from '@/types/daum'
 
 interface AddressSearchProps {
   /** 주소 선택 완료 시 호출되는 콜백 */
@@ -14,13 +15,7 @@ interface AddressSearchProps {
   error?: string | null
   /** 로딩 상태 */
   isLoading?: boolean
-}
-
-interface DaumPostcodeData {
-  address: string
-  roadAddress: string
-  jibunAddress: string
-  zonecode: string
+  title?: string
 }
 
 /**
@@ -37,6 +32,7 @@ export default function AddressSearch({
   defaultValue = '',
   error,
   isLoading = false,
+  title,
 }: AddressSearchProps) {
   const [address, setAddress] = useState(defaultValue)
   const [searchedAddress, setSearchedAddress] = useState<string | null>(null)
@@ -65,15 +61,45 @@ export default function AddressSearch({
   }
 
   /**
+   * 카카오맵 API 로드 대기 함수
+   */
+  const waitForKakaoMaps = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // 이미 로드되어 있으면 바로 resolve
+      if (window.kakao?.maps?.services) {
+        resolve()
+        return
+      }
+
+      // 최대 5초 동안 대기
+      let attempts = 0
+      const maxAttempts = 50 // 50 * 100ms = 5초
+
+      const checkKakao = setInterval(() => {
+        attempts++
+
+        if (window.kakao?.maps?.services) {
+          clearInterval(checkKakao)
+          resolve()
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkKakao)
+          reject(new Error('카카오맵 API 로드 시간 초과'))
+        }
+      }, 100) // 100ms마다 체크
+    })
+  }
+
+  /**
    * 카카오 주소 검색 API를 사용하여 주소를 좌표로 변환
    */
-  const convertAddressToCoords = (addressText: string) => {
-    if (!window.kakao?.maps?.services) {
-      setLocalError('카카오맵 API가 로드되지 않았습니다.')
-      return
-    }
-
+  const convertAddressToCoords = async (addressText: string) => {
     setIsConverting(true)
+    setLocalError(null)
+
+    try {
+      // 카카오맵 API가 로드될 때까지 대기
+      await waitForKakaoMaps()
+
     const geocoder = new window.kakao.maps.services.Geocoder()
 
     geocoder.addressSearch(addressText, (result, status) => {
@@ -101,6 +127,11 @@ export default function AddressSearch({
         setLocalError('주소 검색 중 오류가 발생했습니다.')
       }
     })
+    } catch (error) {
+      setIsConverting(false)
+      setLocalError('카카오맵 API를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침해주세요.')
+      console.error('카카오맵 로드 에러:', error)
+    }
   }
 
   // 외부에서 전달된 defaultValue가 변경되면 반영
@@ -113,10 +144,16 @@ export default function AddressSearch({
 
   return (
     <>
-      <div className="bg-white px-4 pb-4">
-        <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
-          매물 주소 <span className="text-red-500">*</span>
-        </label>
+      <div>
+        {title ? (
+          <label className="mb-3 block text-sm font-medium text-gray-900">
+            {title} <span className="text-red-500">*</span>
+          </label>
+        ) : (
+          <label className="mb-3 block text-sm font-medium text-gray-900">
+            매물 주소 <span className="text-red-500">*</span>
+          </label>
+        )}
 
         <div className="flex gap-2">
           <input
@@ -125,21 +162,22 @@ export default function AddressSearch({
             readOnly
             onClick={() => setIsDialogOpen(true)}
             placeholder="클릭하여 주소를 검색하세요"
-            className="flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm transition-colors outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm transition-colors outline-none placeholder:text-gray-400 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </div>
 
         {/* 에러 메시지 */}
         {displayError && (
-          <div className="mt-3 rounded-md bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
             {displayError}
           </div>
         )}
 
         {/* 검색 중 표시 */}
         {displayLoading && (
-          <div className="mt-3 rounded-md bg-gray-50 px-4 py-3 text-sm text-gray-600">
-            주소를 좌표로 변환하는 중...
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-600">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+            <span>주소를 좌표로 변환하는 중...</span>
           </div>
         )}
       </div>

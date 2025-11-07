@@ -4,20 +4,21 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
+import { ListingList } from '@/components/features/listings'
 import AllFiltersBottomSheet from '@/components/layout/modal/bottom/AllFiltersBottomSheet'
 import BuildingTypeBottomSheet from '@/components/layout/modal/bottom/BuildingTypeBottomSheet'
 import ListingBottomSheet from '@/components/layout/modal/bottom/ListingBottomSheet'
 import PriceFilterBottomSheet from '@/components/layout/modal/bottom/PriceFilterBottomSheet'
 import RoomCountFilterBottomSheet from '@/components/layout/modal/bottom/RoomCountFilterBottomSheet'
-import ListingList from '@/components/map/ListingList'
-import useKakaoLoader from '@/hook/map/useKakaoLoader'
-import useListingMarkers from '@/hook/map/useListingMarkers'
-import { useListingModal } from '@/hook/map/useListingModal'
-import { useMapControls } from '@/hook/map/useMapControls'
-import { useMapFilter } from '@/hook/map/useMapFilter'
-import useMapInteraction from '@/hook/map/useMapInteraction'
-import useUserLocation from '@/hook/map/useUserLocation'
-import useUserMarker from '@/hook/map/useUserMarker'
+import { ROUTES } from '@/constants/routes'
+import useKakaoLoader from '@/hooks/map/useKakaoLoader'
+import useListingMarkers from '@/hooks/map/useListingMarkers'
+import { useListingModal } from '@/hooks/map/useListingModal'
+import { useMapControls } from '@/hooks/map/useMapControls'
+import { useMapFilter } from '@/hooks/map/useMapFilter'
+import useMapInteraction from '@/hooks/map/useMapInteraction'
+import useUserLocation from '@/hooks/map/useUserLocation'
+import useUserMarker from '@/hooks/map/useUserMarker'
 import type {
   AreaFilter,
   DirectionFilter,
@@ -25,8 +26,8 @@ import type {
   PriceFilter,
   RoomCountFilter,
 } from '@/types/filter'
-import type { ListingData } from '@/types/listing'
 import { DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '@/types/map'
+import type { ListingData } from '@/types/models/listing'
 
 import MapOverlay from './MapOverlay'
 
@@ -146,7 +147,7 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 매물 카드 클릭 핸들러
   const handleListingClick = (listing: ListingData) => {
     // 매물 상세 페이지로 이동
-    router.push(`/listings/${listing.id}`)
+    router.push(ROUTES.LISTING_DETAIL(listing.id))
   }
 
   return (

@@ -21,7 +21,7 @@
  */
 
 import { BuildingData } from '@/data/Building'
-import type { ListingData } from '@/types/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 매물 목록 가져오기
