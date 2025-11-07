@@ -73,7 +73,15 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/public/**",
                                 "/oauth2/**", // google OAuth 시작점
-                                "/login/oauth2/**" // google OAuth 콜백
+                                "/login/oauth2/**", // google OAuth 콜백
+                                // Swagger & Health Check
+                                "/swagger-ui/**",
+                                "/api-docs/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/actuator/health",
+                                "/api/actuator/health",
+                                "/error"
                         ).permitAll()
                         .anyRequest().permitAll()
                 )
