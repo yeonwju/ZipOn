@@ -4,6 +4,19 @@
 /*  다크 모드 variant 정의 */
 @custom-variant dark (&:is(.dark *));
 
+@layer utilities {
+    .input-underline {
+        @apply border-0 border-b border-gray-300 rounded-none shadow-none outline-none px-0 bg-transparent;
+        @apply focus:border-b-blue-400 focus:ring-0 focus:outline-none;
+        @apply active:border-b-blue-400 transition-colors;
+    }
+
+    .input-underline-none {
+        @apply border-0 border-b border-gray-300 rounded-none px-0 bg-transparent shadow-none outline-none;
+        @apply focus:border-b-gray-300 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0;
+        @apply active:border-b-gray-300 transition-colors;
+    }
+}
 /*  기본 테마 정의 */
 @theme inline {
     /* 반경 (radius) */
