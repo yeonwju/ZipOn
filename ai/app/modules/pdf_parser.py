@@ -19,7 +19,7 @@ def extract_text_from_bytes(pdf_bytes: bytes) -> str:
         all_text += f"\n\n--- Page {i} ---\n{text}"
 
     doc.close()
-    print("[INFO] PDF 텍스트 추출 완료 ✅")
+    print("[INFO] PDF 텍스트 추출 완료")
     return all_text
 
 #백엔드 연결 전 테스트 용
