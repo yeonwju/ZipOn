@@ -95,18 +95,25 @@ pipeline {
       }
     }
 
-    stage('Publish OpenAPI (DEV)') {
-      when { branch 'dev' }
+     stage('Publish OpenAPI (DEV)') {
+      when { anyOf { branch 'dev'; branch 'develop' } }
       steps {
-        sh """
+        sh '''
           set -e
           mkdir -p build
-          curl -s http://127.0.0.1:28080/v3/api-docs > build/swagger.json
+          # 배포 직후 API Docs가 늦게 뜰 수 있어 재시도
+          for i in 1 2 3 4 5; do
+            curl -fsS http://127.0.0.1:28080/v3/api-docs > build/swagger.json && break
+            echo "[DEV] swagger not ready, retrying ($i/5)..."
+            sleep 2
+          done
           test -s build/swagger.json
-          # S3 업로드가 필요하면 아래 주석 해제
-          # aws s3 cp build/swagger.json ${S3_SWAGGER} --region ${AWS_REGION} --cache-control max-age=60
+
+          # S3 업로드가 필요하면 아래 주석 해제 (주석이어도 안전)
+          # aws s3 cp build/swagger.json $S3_SWAGGER --region $AWS_REGION --cache-control max-age=60
+
           echo "[DEV] OpenAPI saved to build/swagger.json (length: $(wc -c < build/swagger.json))"
-        """
+        '''
       }
     }
 
