@@ -22,7 +22,7 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String nickname;
-    @Column(nullable = false, length = 50)
+    @Column(nullable = true, length = 50) // 본인 인증시 null -> 실명
     private String name;
     @Column(length = 13)
     private String tel;

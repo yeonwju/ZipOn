@@ -2,7 +2,6 @@ package ssafy.a303.backend.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -18,10 +17,10 @@ public enum ErrorCode {
     EXPIRED_TOKEN(401, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     INVALID_CREDENTIALS(401, HttpStatus.UNAUTHORIZED, "잘못된 인증 정보입니다."),
     TOKEN_TYPE_MISMATCH(401, HttpStatus.UNAUTHORIZED, "토큰 타입이 잘못되었습니다."),
-    ACCESS_REFRESH_MISMATCH(401,HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
+    ACCESS_REFRESH_MISMATCH(401, HttpStatus.UNAUTHORIZED, "사용자 정보가 일치하지 않습니다."),
 
     // 사업장
-    INVALID_TAX_SEQ(404,HttpStatus.NOT_FOUND,"해당 사업자 등록 번호는 운영 중이지 않습니다."),
+    INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
 
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST

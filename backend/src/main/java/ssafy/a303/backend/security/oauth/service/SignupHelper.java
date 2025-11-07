@@ -37,14 +37,14 @@ public class SignupHelper {
             // SSAFY OPENAPI 에서 계정 찾기 - 검색
             Map<String, Object> search = ssafyapi.post("/member/search", null, body);
             String financeKey = null;
-            if (search.get("userKey") != null) {
+            if (search.containsKey("userKey")) {
                 // ----------검색 성공 ---------
                 financeKey = search.get("userKey").toString();
             } else {
                 // SSAFY OPENAPI 에서 계정 찾기 - 등록
                 // ----------검색 실패 ---------
                 Map<String, Object> signup = ssafyapi.post("/member", null, body);
-                if(signup.get("userKey") != null){
+                if(search.containsKey("userKey")){
                     // ----------싸피 금융 api 등록 성공 ---------
                     financeKey = signup.get("userKey").toString();
                 }
@@ -55,7 +55,7 @@ public class SignupHelper {
             // DB에 저장
             user = User.builder()
                     .email(email)
-                    .name(name)
+                    .name(null)
                     .nickname(name)
                     .financeKey(financeKey)
                     .role(Role.USER)

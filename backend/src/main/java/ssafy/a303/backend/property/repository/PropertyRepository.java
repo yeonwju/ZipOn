@@ -21,6 +21,7 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
     // (삭제되지 않은) 매물 조회
     Optional<Property> findByPropertySeqAndDeletedAtIsNull(Integer propertySeq);
 
+    // 매물 개별 조회
     // 지도 좌표 전체 조회
     // 지도 좌표 바운딩 박스 리밋 조회
     @Query("""

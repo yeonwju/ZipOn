@@ -18,8 +18,6 @@ public class Broker {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_seq", nullable = false)
     private User user;
-    @Column(name = "license", nullable = false) // 라이선스 pdf 저장 위치
-    private String license;
     @Column
     private Integer cncldCnt;
     @Column
