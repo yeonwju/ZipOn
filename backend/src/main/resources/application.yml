@@ -61,7 +61,8 @@ bizno:
   url: https://bizno.net
   key: ${BIZNO_API_KEY}
 
-solapi:
-  key: ${SOLAPI_API_KEY}
-  secret-key: ${SOLAPI_API_SECRET_KEY}
-  tel: ${SOLAPI_API_TEL}
+elasticsearch:
+  host: ${ES_URL}
+  port: 9200
+  index:
+    property: my_index
