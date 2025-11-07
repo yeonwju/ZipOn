@@ -1,22 +1,32 @@
 import os
 import json
 import re
-import requests
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
+# 환경변수 로드
 GMS_KEY = os.getenv("GMS_KEY")
-GMS_API_URL = os.getenv("GMS_API_URL")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
-def extract_owner_info_llm(pdf_text: str) -> dict:
-    print("[INFO] 🧠 GMS LLM 리스크 평가 통합 호출 중...")
+# ✅ LangChain용 GMS 호환 LLM 설정
+llm = ChatOpenAI(
+    model=MODEL_NAME,
+    openai_api_base="https://gms.ssafy.io/gmsapi/api.openai.com/v1",  # GMS 서버를 OpenAI처럼 사용
+    openai_api_key=GMS_KEY,
+    temperature=0,
+    streaming=False,      # 스트리밍 비활성화
+    max_retries=2,  
+)
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {GMS_KEY}",
-    }
+def extract_owner_info_llm(pdf_text: str) -> dict:
+    """
+    등기부등본 OCR 텍스트를 받아서
+    LLM을 통해 소유자, 근저당권, 권리제한, 위험도 등을 추출합니다.
+    (LangChain ChatOpenAI 기반)
+    """
+    print("[INFO] 🧠 GMS LLM (LangChain 기반) 리스크 평가 호출 중...")
 
     prompt = f"""
 다음은 등기부등본의 OCR 원문입니다.
@@ -70,41 +80,29 @@ def extract_owner_info_llm(pdf_text: str) -> dict:
   "risk_reason": "근저당권 1건, 권리제한 없음 "
 }}
 
-
 문서 원문:
 {pdf_text[:12000]}
 """
 
-    body = {"model": MODEL_NAME, "input": prompt}
-    res = requests.post(GMS_API_URL, headers=headers, json=body)
-
-    print(f"[DEBUG] HTTP Status: {res.status_code}")
-    if res.status_code != 200:
-        return {"error": res.text}
-
-    result_data = res.json()
-    if "output" in result_data:
-        content = result_data["output"][0]["content"][0].get("text", "")
-    elif "choices" in result_data:
-        content = result_data["choices"][0]["message"]["content"]
-    else:
-        content = ""
-
-    
-    clean_text = re.sub(r"^```[a-zA-Z]*|```$", "", content.strip(), flags=re.MULTILINE)
-
-    
-    json_match = re.search(r"\{[\s\S]*\}", clean_text)
-    if json_match:
-        clean_text = json_match.group(0)
-
-   
     try:
+        # 🧠 LangChain으로 GMS LLM 호출
+        response = llm.invoke(prompt)
+        content = response.content.strip()
+
+        # ✅ JSON 정제
+        clean_text = re.sub(r"^```[a-zA-Z]*|```$", "", content.strip(), flags=re.MULTILINE)
+        json_match = re.search(r"\{[\s\S]*\}", clean_text)
+        if json_match:
+            clean_text = json_match.group(0)
+
         parsed = json.loads(clean_text)
+        print("\n[INFO] ✅ LLM 리스크 평가 완료")
+        print(json.dumps(parsed, ensure_ascii=False, indent=2))
+        return parsed
+
     except json.JSONDecodeError:
         print("[ERROR] ⚠️ JSONDecodeError 발생 — 원문에 코드블록 포함된 가능성 있음.")
-        parsed = {"error": "JSONDecodeError", "raw": content}
-
-    print("\n[INFO] ✅ LLM 리스크 평가 완료")
-    print(json.dumps(parsed, ensure_ascii=False, indent=2))
-    return parsed
+        return {"error": "JSONDecodeError", "raw": content}
+    except Exception as e:
+        print(f"[ERROR] 요청 실패: {e}")
+        return {"error": str(e)}
