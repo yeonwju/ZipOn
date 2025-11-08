@@ -30,7 +30,9 @@ cloud:
     credentials:
       access-key: ${AWS_ACCESS_KEY_ID}
       secret-key: ${AWS_SECRET_ACCESS_KEY}
-
+app:
+  s3:
+    expose: presigned #pbulic
 
 logging:
   level:

@@ -28,7 +28,7 @@ public record DetailResponseDto(
         Integer fee,
 
         //사진 리스트로 s3 주소 보내줘야 함.
-        List<String> images,
+        List<ImageDto> images,
 
         // 상세 스펙
         Byte period,

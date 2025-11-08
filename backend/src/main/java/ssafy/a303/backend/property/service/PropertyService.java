@@ -2,6 +2,7 @@ package ssafy.a303.backend.property.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -34,6 +35,9 @@ public class PropertyService {
     private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final PropertyImageRepository propertyImageRepository;
     private final S3Uploader s3Uploader;
+
+    @Value("${app.s3.expose:presigned}")
+    private String exposeMode;
 
     /**
      * 매물 등록 단계 중 첫단계,
@@ -198,16 +202,23 @@ public class PropertyService {
      */
     @Transactional
     public DetailResponseDto getPropertyDetail(Integer propertySeq) {
+        /** 매물 존재 확인 */
         Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
+        /** 경매 정보 확인 */
         PropertyAucInfo aucInfo = propertyAucInfoRepository.findByPropertySeq(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
 
-        // 이미지 리스트
-        List<String> images = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq)
-                .stream()
-                .map(img -> img.getS3Key())
+        /** 이미지 정보 매핑 */
+        List<PropertyImage> propertyImages = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq);
+
+        List<ImageDto> images = propertyImages.stream()
+                .map(img -> new ImageDto(
+                        img.getS3Key(),
+                        toUrl(img.getS3Key()),
+                        img.getImgOrder()
+                ))
                 .toList();
 
         DetailResponseDto detail = new DetailResponseDto(
@@ -223,6 +234,14 @@ public class PropertyService {
                 aucInfo.getAucAt(), aucInfo.getAucAvailable()
         );
         return detail;
+    }
+
+    private String toUrl(String key) {
+        if ("public".equalsIgnoreCase(exposeMode)) {
+            return s3Uploader.publicUrl(key);
+        }
+        // default = presigned 12h
+        return s3Uploader.presignedGetUrl(key, java.time.Duration.ofHours(12));
     }
 
     /**
