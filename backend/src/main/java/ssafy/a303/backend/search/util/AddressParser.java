@@ -30,7 +30,7 @@ public class AddressParser {
             // 시
             if(si == null && endsWithSuffix(t, "시") && !endsWithSuffix(t, "시청")) {
                 si = t;
-                continue;;
+                continue;
             }
 
             // 구
