@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { MyListing } from '@/types'
-import { mockMyListings } from '@/data/MyListings'
+import { mockMyListings } from '@/data/MyListingsDummy'
 import MyListingListSkeleton from '@/components/features/mypage/skeleton/MyListingListSkeleton'
 import { SearchX } from 'lucide-react'
 import Link from 'next/link'

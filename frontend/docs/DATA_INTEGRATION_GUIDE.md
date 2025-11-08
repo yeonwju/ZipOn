@@ -15,7 +15,7 @@
 
 ### 현재 구조
 
-현재 애플리케이션은 `Building.ts`의 샘플 데이터를 사용합니다.
+현재 애플리케이션은 `BuildingDummy.ts`의 샘플 데이터를 사용합니다.
 데이터 소스는 `src/services/listingService.ts`에서 중앙 관리됩니다.
 
 ### 변경 방법

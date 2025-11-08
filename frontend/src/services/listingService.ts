@@ -20,7 +20,7 @@
  * ```
  */
 
-import { BuildingData } from '@/data/Building'
+import { BuildingData } from '@/data/BuildingDummy'
 import type { ListingData } from '@/types/models/listing'
 
 /**
