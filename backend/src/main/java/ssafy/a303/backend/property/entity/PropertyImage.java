@@ -21,8 +21,7 @@ public class PropertyImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer propertyImageSeq;
 
-    @ManyToOne
-    @JoinColumn(name = "property_seq")
+    @Column(name = "property_seq")
     private Integer propertySeq;
 
     @Column(name = "s3_key")
