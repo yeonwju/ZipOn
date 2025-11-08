@@ -122,6 +122,7 @@ public class Property {
     @Column(name = "traded_at", length = 50)
     private String tradedAt;
 
+    //중개인 매칭 완료 되었는지
     @Column(name = "is_linked")
     @ColumnDefault("false")
     private Boolean isLinked;
