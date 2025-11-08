@@ -18,6 +18,7 @@ import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.property.util.S3Uploader;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -126,62 +127,70 @@ public class PropertyService {
         List<String> s3keys = new ArrayList<>();
         List<String> imageUrls = new ArrayList<>();
 
-        if(images != null && !images.isEmpty()) {
-            if(images.size() >= 20) {
+        if (images != null && !images.isEmpty()) {
+            if (images.size() >= 20) {
                 throw new CustomException(ErrorCode.IMAGE_LIMIT_EXCEEDS);
             }
 
             int sortOrder = 1;
-            for(MultipartFile file : images) {
-                if (file.isEmpty()) continue;
+            try {
+                for (MultipartFile file : images) {
+                    if (file.isEmpty()) continue;
 
-                String key = s3Uploader.uploadImage(p.getPropertySeq(), file);
+                    String key = s3Uploader.uploadImage(p.getPropertySeq(), file);
+                    s3keys.add(key);
 
-                PropertyImage img = PropertyImage.builder()
-                        .propertySeq(p.getPropertySeq())
-                        .s3Key(key)
-                        .imgOrder(sortOrder++)
-                        .build();
-                propertyImageRepository.save(img);
+                    PropertyImage img = PropertyImage.builder()
+                            .propertySeq(p.getPropertySeq())
+                            .s3Key(key)
+                            .imgOrder(sortOrder++)
+                            .build();
+                    propertyImageRepository.save(img);
 
-                //s3 리스트에도 추가
-                s3keys.add(key);
-
-                imageUrls.add(s3Uploader.publicUrl(key));
+                    // 외부 노출 URL 방식
+                    imageUrls.add(s3Uploader.presignedGetUrl(key, Duration.ofHours(12)));
+                }
+            } catch (Exception e) {
+                for (String k : s3keys) {
+                    try {
+                        s3Uploader.delete(k);
+                    } catch (Exception ignore) {
+                    }
+                    throw e;
+                }
             }
         }
-            return new PropertyRegiResponseDto(
-                        p.getPropertySeq(),
-                        p.getLessorNm(),
-                        p.getPropertyNm(),
-                        p.getContent(),
-                        p.getAddress(),
-                        p.getLatitude(),
-                        p.getLongitude(),
-                        p.getBuildingType(),
-                        p.getArea(),
-                        p.getAreaP(),
-                        p.getDeposit(),
-                        p.getMnRent(),
-                        p.getFee(),
-                        s3keys,
-                        p.getPeriod(),
-                        p.getFloor(),
-                        p.getFacing(),
-                        p.getRoomCnt(),
-                        p.getBathroomCnt(),
-                        p.getConstructionDate(),
-                        p.getParkingCnt(),
-                        p.getHasElevator(),
-                        p.getPetAvailable(),
-                        aucInfo.getIsAucPref(),
-                        aucInfo.getIsBrkPref(),
-                        p.getIsLinked(),
-                        aucInfo.getAucAt(),
-                        aucInfo.getAucAvailable()
-            );
+        return new PropertyRegiResponseDto(
+                p.getPropertySeq(),
+                p.getLessorNm(),
+                p.getPropertyNm(),
+                p.getContent(),
+                p.getAddress(),
+                p.getLatitude(),
+                p.getLongitude(),
+                p.getBuildingType(),
+                p.getArea(),
+                p.getAreaP(),
+                p.getDeposit(),
+                p.getMnRent(),
+                p.getFee(),
+                s3keys,
+                p.getPeriod(),
+                p.getFloor(),
+                p.getFacing(),
+                p.getRoomCnt(),
+                p.getBathroomCnt(),
+                p.getConstructionDate(),
+                p.getParkingCnt(),
+                p.getHasElevator(),
+                p.getPetAvailable(),
+                aucInfo.getIsAucPref(),
+                aucInfo.getIsBrkPref(),
+                p.getIsLinked(),
+                aucInfo.getAucAt(),
+                aucInfo.getAucAvailable()
+        );
     }
-
     /**
      * 매물 상세 정보 조회
      * @param propertySeq

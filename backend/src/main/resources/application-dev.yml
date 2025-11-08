@@ -24,12 +24,12 @@ ai:
 cloud:
   aws:
     s3:
-      bucket: dfsfsf
+      bucket: zipon-media
     region:
-      static: ap-east-1
+      static: ap-northeast-2
     credentials:
-      access-key: sdfsdf
-      secret-key: sdfsdfsd
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 
 logging:
