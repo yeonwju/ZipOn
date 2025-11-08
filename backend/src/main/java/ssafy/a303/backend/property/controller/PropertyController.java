@@ -51,7 +51,7 @@ public class PropertyController {
      * 5) 매물 최종 등록
      */
     @PostMapping(value = "/detail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO<PropertyRegiResponseDto>> createProperty(@RequestPart PropertyDetailRequestDto req,
+    public ResponseEntity<ResponseDTO<PropertyRegiResponseDto>> createProperty(@RequestBody PropertyDetailRequestDto req,
                                                                                @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                                                                @AuthenticationPrincipal Integer userSeq)
     {
