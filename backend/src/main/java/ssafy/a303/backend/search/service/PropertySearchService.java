@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.service;
+package ssafy.a303.backend.search.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
@@ -8,20 +8,12 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQueryBuilders;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.json.JsonData;
-import co.elastic.clients.json.JsonpMapper;
-import co.elastic.clients.json.JsonpUtils;
-import co.elastic.clients.transport.ElasticsearchTransport;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ssafy.a303.backend.property.dto.elastic.PropertyDocument;
-import ssafy.a303.backend.property.dto.elastic.SearchRequestDto;
+import ssafy.a303.backend.search.dto.PropertyDocument;
+import ssafy.a303.backend.search.dto.SearchRequestDto;
 
 import java.io.IOException;
 import java.util.ArrayList;

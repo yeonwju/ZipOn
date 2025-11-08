@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.controller;
+package ssafy.a303.backend.search.controller;
 
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.a303.backend.common.response.ResponseDTO;
-import ssafy.a303.backend.property.dto.elastic.PageResponseDto;
-import ssafy.a303.backend.property.dto.elastic.PropertyDocument;
-import ssafy.a303.backend.property.dto.elastic.SearchRequestDto;
-import ssafy.a303.backend.property.dto.elastic.SearchResponseDto;
+import ssafy.a303.backend.search.dto.PageResponseDto;
+import ssafy.a303.backend.search.dto.PropertyDocument;
+import ssafy.a303.backend.search.dto.SearchRequestDto;
+import ssafy.a303.backend.search.dto.SearchResponseDto;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.repository.PropertyRepository;
-import ssafy.a303.backend.property.service.PropertySearchService;
+import ssafy.a303.backend.search.service.PropertySearchService;
 
 import java.io.IOException;
 import java.util.List;

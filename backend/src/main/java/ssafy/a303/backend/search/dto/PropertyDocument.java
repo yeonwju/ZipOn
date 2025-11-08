@@ -1,9 +1,6 @@
-package ssafy.a303.backend.property.dto.elastic;
+package ssafy.a303.backend.search.dto;
 
 import lombok.*;
-import ssafy.a303.backend.property.enums.Building;
-
-import java.time.Instant;
 
 /**
  * DB에서 가져온 엔티티를 ES가 이해할 구조로 변환해서 전달.

@@ -1,8 +1,4 @@
-package ssafy.a303.backend.property.dto.elastic;
-
-import ssafy.a303.backend.property.enums.Building;
-
-import java.time.Instant;
+package ssafy.a303.backend.search.dto;
 
 public record SearchResponseDto(
         // search 결과 id

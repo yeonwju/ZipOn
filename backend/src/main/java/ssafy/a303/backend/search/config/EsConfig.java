@@ -1,7 +1,6 @@
-package ssafy.a303.backend.property.config;
+package ssafy.a303.backend.search.config;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.transform.ElasticsearchTransformAsyncClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;

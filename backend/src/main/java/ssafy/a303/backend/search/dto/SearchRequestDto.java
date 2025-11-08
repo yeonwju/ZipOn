@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.dto.elastic;
+package ssafy.a303.backend.search.dto;
 
 import java.util.List;
 
