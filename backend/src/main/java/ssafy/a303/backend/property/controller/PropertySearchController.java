@@ -2,6 +2,12 @@ package ssafy.a303.backend.property.controller;
 
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-
+@Tag(name="검색")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/properties/search")
@@ -57,6 +63,20 @@ public class PropertySearchController {
      * @return
      * @throws IOException
      */
+    @Operation(
+            summary = "검색 조회",
+            description = "키워드와 필터링으로 검색한 정보를 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "매물 검색 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseDTO.class)
+                    )
+            )
+    })
     @GetMapping("")
     public ResponseEntity<ResponseDTO<PageResponseDto<SearchResponseDto>>> search(
             @RequestParam(required = false) String q,

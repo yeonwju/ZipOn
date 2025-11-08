@@ -195,6 +195,7 @@ public class PropertyService {
                 aucInfo.getAucAvailable()
         );
     }
+
     /**
      * 매물 상세 정보 조회
      * @param propertySeq
