@@ -2,7 +2,7 @@
 
 import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
-import { BellRing, Search } from 'lucide-react'
+import {BellRing, MessageCircle, Search} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -38,7 +38,7 @@ export default function MainHeader() {
   return (
     <nav
       className={clsx(
-        'fixed top-0 left-0 z-50 flex w-full items-center justify-between px-3 py-3 transition-all duration-300',
+        'fixed top-0 left-0 z-50 flex w-full items-center justify-between px-3 py-1 transition-all duration-300',
         'bg-white/70 shadow-[0_1px_0_rgba(0,0,0,0.05)] backdrop-blur-md',
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       )}
@@ -54,7 +54,12 @@ export default function MainHeader() {
         <Link href="/notification" className="flex flex-col items-center transition-colors">
           <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
             <BellRing size={17} />
-          </Badge>{' '}
+          </Badge>
+        </Link>
+        <Link href="/chat" className="flex flex-col items-center transition-colors">
+          <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+            <MessageCircle size={17} />
+          </Badge>
         </Link>
       </div>
     </nav>

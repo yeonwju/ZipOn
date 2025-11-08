@@ -3,7 +3,7 @@
 import { Eye, MessageCircle } from 'lucide-react'
 import Image from 'next/image'
 
-import { LiveItemProps } from '@/data/LiveItem'
+import { LiveItemProps } from '@/data/LiveItemDummy'
 
 export default function LiveItem({
   imgSrc,

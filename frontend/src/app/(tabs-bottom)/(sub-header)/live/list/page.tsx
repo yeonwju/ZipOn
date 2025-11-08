@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { LiveItems } from '@/components/features/live'
 import FabDial from '@/components/ui/FabDial'
 import { ROUTES } from '@/constants'
-import { liveItems } from '@/data/LiveItem'
+import { liveItems } from '@/data/LiveItemDummy'
 import { useUserStore } from '@/store/user'
 const metadata = liveItems
 /**

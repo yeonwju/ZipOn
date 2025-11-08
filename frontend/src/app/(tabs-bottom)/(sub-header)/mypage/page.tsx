@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
-import { fetchCurrentUser } from '@/services/authService'
+
 import MyPageClient from '@/components/features/mypage/page/MyPageClient'
+import { fetchCurrentUser } from '@/services/authService'
 
 /**
  * 마이페이지 (Server Component)

@@ -50,6 +50,7 @@ const ICONS = {
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
+  '/chat' : [ICONS.search, ICONS.notification],
   '/verify/phone': [],
   '/verify/business': [],
   '/mypage/my-listings': [ICONS.notification, ICONS.chat],
@@ -85,6 +86,7 @@ const pageTitleMap: Record<string, string> = {
   '/listing': '',
   '/calendar': '라이브 일정',
   '/live/create': '라이브 생성',
+  '/chat' : '채팅',
 }
 
 /* ---------------------------------------------------
@@ -125,7 +127,7 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
   return (
     <nav
       className={clsx(
-        'fixed top-0 left-0 z-50 flex w-full items-center justify-between py-0.5 pl-3 transition-all duration-300',
+        'fixed top-0 left-0 z-50 flex w-full items-center justify-between py-1 pl-3 transition-all duration-300',
         'bg-white/70 shadow-[0_1px_0_rgba(0,0,0,0.05)] backdrop-blur-md',
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       )}

@@ -7,7 +7,7 @@ import AuctionHistoryListSkeleton from '../skeleton/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
 import { SearchX } from 'lucide-react'
 import { AuctionHistory } from '@/types/models/auction'
-import { mockAuctionHistories } from '@/data/AuctionHistory'
+import { mockAuctionHistories } from '@/data/AuctionHistoryDummy'
 import { ROUTES } from '@/constants'
 
 interface AuctionHistoryListProps {
