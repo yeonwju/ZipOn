@@ -6,20 +6,28 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQueryBuilders;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ssafy.a303.backend.property.entity.Property;
+import ssafy.a303.backend.search.dto.AddressParts;
 import ssafy.a303.backend.search.dto.PropertyDocument;
 import ssafy.a303.backend.search.dto.SearchRequestDto;
+import ssafy.a303.backend.search.util.AddressParser;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import static java.time.temporal.WeekFields.ISO;
 
 @Slf4j
 @Service
@@ -95,13 +103,6 @@ public class PropertySearchService {
             return b;
         }));
 
-//        /** 쿼리 확인 */
-//        var resp = es.search(s -> s
-//                        .index(index)
-//                        .query(finalQuery),
-//                JsonNode.class
-//        );
-
         SearchRequest req = new SearchRequest.Builder()
                 .index(index)
                 .query(finalQuery)
@@ -112,36 +113,54 @@ public class PropertySearchService {
                 .highlight(h -> h.fields("title", f -> f).fields("description", f -> f))
                 .build();
 
-
-
         return es.search(req, PropertyDocument.class);
+    }
 
+    public void setIndex(Property p) {
+        PropertyDocument doc = toDoc(p);
 
-//        try{
-//            resp.hits().hits().forEach(h -> {
-//                log.info("ID={}", h.id());
-//                log.info("SRC={}", h.source().toPrettyString()); // _source JSON 확인
-//            });
-//        } catch (Exception e) {
-//            log.error("ES search failed. Built DSL={}",  // DSL 문자열 찍고 싶으면 아래 4) 참고
-//                    "(빌더로 동일 쿼리를 curl로도 재현)");
-//            log.error("CAUSE=", e);
-//            throw e;
-//        }
-//
-//        /** ES 검색 실행 */
-//        // highlight: title, description 하이라이트 필요시 사용
-//        return es.search(s -> s
-//                        .index(index)
-//                        .query(finalQuery)
-//                        .from(from)
-//                        .size(size)
-//                        .sort(so -> so.field(f -> f.field(sortField).order(sortOrder)))
-//                        .trackTotalHits(t -> t.enabled(true))
-//                        .highlight(h -> h.fields("title", f -> f).fields("description", f -> f)),
-//                PropertyDocument.class
-//        );
+        try {
+            es.index(IndexRequest.of(ir -> ir
+                    .index(index)
+                    .id(String.valueOf(p.getPropertySeq())) //propertySeq로 es 색인
+                    .document(doc)
+            ));
+            log.info("[ES] indexed property {}", p.getPropertySeq());
+        } catch (Exception e) {
+            log.error("[ES] index failed for property {}", p.getPropertySeq(), e);
+        }
+    }
 
+    private PropertyDocument toDoc(Property p) {
+        // 주소 파싱(도로명 기준)
+        AddressParts parts = AddressParser.parse(p.getAddress());
+
+        String createdAtStr = null;
+        if (p.getCreatedAt() != null) {
+            createdAtStr = p.getCreatedAt()
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        }
+
+        return PropertyDocument.builder()
+                .title(p.getPropertyNm())
+                .description(p.getContent())
+                .si(parts.getSi() != null ? parts.getSi() : null)
+                .gu(parts.getGu() != null ? parts.getGu() : null)
+                .dong(parts.getDong() != null ? parts.getDong() : null)
+                .facing(p.getFacing() == null ? null : p.getFacing().name())
+                .lessorNm(p.getLessorNm())
+                .buildingType(p.getBuildingType() == null ? null : p.getBuildingType().name())
+                .deposit(p.getDeposit() == null ? null : p.getDeposit().longValue())
+                .mnRent(p.getMnRent())
+                .fee(p.getFee())
+                .area(p.getArea() == null ? null : p.getArea().doubleValue())
+                .areaP(p.getAreaP())
+                .roomCnt(p.getRoomCnt() == null ? null : p.getRoomCnt().shortValue())
+                .floor(p.getFloor() == null ? null : p.getFloor().shortValue())
+                .createdAt(createdAtStr)
+                .build();
     }
 
     // ---------- utils ----------

@@ -2,6 +2,7 @@ package ssafy.a303.backend.property.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.property.util.S3Uploader;
+import ssafy.a303.backend.search.service.PropertySearchService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -35,6 +38,7 @@ public class PropertyService {
     private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final PropertyImageRepository propertyImageRepository;
     private final S3Uploader s3Uploader;
+    private final PropertySearchService propertySearchService;
 
     @Value("${app.s3.expose:presigned}")
     private String exposeMode;
@@ -164,6 +168,14 @@ public class PropertyService {
                 }
             }
         }
+
+        /** ES 색인 */
+        try {
+            propertySearchService.setIndex(p);
+        } catch (Exception e) {
+            log.error("[ES] 매물 최종 등록 이후, 색인 실패, propertySeq = {}", p.getPropertySeq(), e);
+        }
+
         return new PropertyRegiResponseDto(
                 p.getPropertySeq(),
                 p.getLessorNm(),
@@ -203,6 +215,7 @@ public class PropertyService {
      */
     @Transactional
     public DetailResponseDto getPropertyDetail(Integer propertySeq) {
+
         /** 매물 존재 확인 */
         Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
