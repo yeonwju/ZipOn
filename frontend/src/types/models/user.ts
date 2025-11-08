@@ -1,4 +1,5 @@
 export interface User {
+  seq: number // 사용자 시퀀스
   email: string
   nickname: string | null
   name: string | null

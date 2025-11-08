@@ -1,5 +1,7 @@
+import ChatListClientPage from "@/components/features/chat/ChatListClientPage";
+
+export const dynamic = 'force-dynamic'
+
 export default function ChatPage() {
-  return <div>
-    채팅 페이지 입니다.
-  </div>
+  return <ChatListClientPage />
 }
