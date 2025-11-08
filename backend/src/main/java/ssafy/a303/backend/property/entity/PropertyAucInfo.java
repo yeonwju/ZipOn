@@ -21,7 +21,8 @@ public class PropertyAucInfo {
     @Column(name = "property_auc_seq")
     private Integer propertyAucSeq;
 
-    @Column(name = "property_seq", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "property_seq", nullable = false)
     private Integer propertySeq;
 
     @Column(name = "is_auc_pref")

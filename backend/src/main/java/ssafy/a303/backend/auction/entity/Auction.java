@@ -22,18 +22,24 @@ public class Auction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer auctionSeq;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_seq")
     private User user; // 경매를 방송할 중개인 또는 임대인 user
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_seq")
     private Property property;
+
     @Column(nullable = false)
     private LocalDate strmDate;
+
     @Column(nullable = false)
     private LocalTime strmStartTm;
+
     @Column(nullable = false)
     private LocalTime strmEndTm;
+
     @Column(nullable = false)
     private LocalDateTime auctionEndAt;
 
@@ -46,9 +52,11 @@ public class Auction {
     // 취소
     @Column
     private LocalDateTime cancelAt;
+
     @Enumerated(EnumType.STRING)
     @Column
     private Canceler cancelBy;
+
     @Column
     private String cancelReason;
 
