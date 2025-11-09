@@ -242,7 +242,7 @@ public class LiveService {
                 .chatCount(finalChatCount)
                 .likeCount(finalLikeCount)
                 .host(LiveEndResponseDto.HostDto.builder()
-                        .userSeq(user.getUserSeq())          // 종료 요청 유저 (방장) 정보
+                        .userSeq(user.getUserSeq())          // 종료 요청 유저(방장) 정보
                         .name(user.getName())
                         .profileImg(user.getProfileImg())
                         .build())
