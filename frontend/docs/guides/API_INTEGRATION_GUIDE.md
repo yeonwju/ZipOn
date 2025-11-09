@@ -118,7 +118,7 @@ type GetListingDetailResponse = ApiResponse<ListingDetailData>
     "buildingType": "ROOM",
     "area": 111,
     "areaP": 33.6,
-    "deposit": 43707,
+    "pending": 43707,
     "mnRent": 1790,
     "fee": 5,
     "images": ["/listing.svg"],

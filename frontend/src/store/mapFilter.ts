@@ -67,7 +67,7 @@ const initialFilterState = {
  *
  * // 필터 변경하기
  * const setPriceFilter = useMapFilterStore(state => state.setPriceFilter)
- * setPriceFilter({ deposit: { min: 1000, max: 5000 }, ... })
+ * setPriceFilter({ pending: { min: 1000, max: 5000 }, ... })
  *
  * // 모든 필터 초기화
  * const resetAllFilters = useMapFilterStore(state => state.resetAllFilters)
@@ -125,4 +125,3 @@ export const useMapFilterStore = create<MapFilterState>()(
     }
   )
 )
-

@@ -12,7 +12,7 @@ import {
   Settings,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
 
 type IconAction = {
@@ -56,17 +56,11 @@ const rightIconsMap: Record<string, IconAction[]> = {
   '/verify/phone': [],
   '/verify/business': [],
   '/mypage/my-listings': [ICONS.notification, ICONS.chat],
-
   '/mypage/my-auction': [ICONS.notification, ICONS.chat],
-
   '/mypage': [ICONS.notification, ICONS.chat, ICONS.settings],
-
   '/listing': [ICONS.like],
-
   '/live/list': [ICONS.calendar, ICONS.notification, ICONS.chat],
-
   '/calendar': [ICONS.notification, ICONS.chat],
-
   '/live/create': [],
 }
 
@@ -97,13 +91,15 @@ const pageTitleMap: Record<string, string> = {
  *  5. SubHeader 컴포넌트
  * --------------------------------------------------- */
 interface SubHeaderProps {
-  pathname: string
+  pathname?: string
   title?: string
   customRightIcons?: IconAction[]
 }
 
-export default function SubHeader({ pathname, title, customRightIcons }: SubHeaderProps) {
+export default function SubHeader({ pathname: propPath, title, customRightIcons }: SubHeaderProps) {
   const router = useRouter()
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const pathname = propPath || usePathname()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
@@ -119,14 +115,30 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
-  // 긴 경로부터 매칭 (예: /mypage/my-listings가 /mypage보다 먼저 체크되도록)
+  /* ---------------------------------------------------
+   *  6. 동적 경로 매칭 처리
+   * --------------------------------------------------- */
+  let dynamicTitle = ''
+  let dynamicIcons: IconAction[] = rightIconsMap.default
+
+  if (pathname.startsWith('/listings/') && pathname.endsWith('/brokers')) {
+    dynamicTitle = '중개 신청'
+    dynamicIcons = [ICONS.notification, ICONS.chat]
+  }
+
+  /* ---------------------------------------------------
+   * 7. 정적 매칭 (기존 로직)
+   * --------------------------------------------------- */
   const titleKey = Object.keys(pageTitleMap)
-    .sort((a, b) => b.length - a.length) // 길이 내림차순 정렬
+    .sort((a, b) => b.length - a.length)
     .find(key => pathname.startsWith(key))
 
-  const displayTitle = title || (titleKey ? pageTitleMap[titleKey] : '')
+  const displayTitle = title || dynamicTitle || (titleKey ? pageTitleMap[titleKey] : '')
   const rightIcons =
-    customRightIcons || (titleKey && rightIconsMap[titleKey]) || rightIconsMap.default
+    customRightIcons ||
+    dynamicIcons ||
+    (titleKey && rightIconsMap[titleKey]) ||
+    rightIconsMap.default
 
   return (
     <nav
@@ -151,10 +163,7 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
       </h1>
 
       {/* 오른쪽: 페이지별 아이콘 */}
-      {/* 오른쪽: 페이지별 아이콘 */}
       <div className="flex flex-row items-center">
-        {' '}
-        {/* gap 조금 줄임 */}
         {rightIcons.map((action, i) =>
           action.onClick ? (
             <button
