@@ -59,6 +59,7 @@ public class LiveChatService {
      * @return 채팅 메시지 리스트 (최신 순)
      */
     public List<LiveChatMessageResponseDto> getChatHistory(Integer liveSeq, int limit) {
+
         String key = "live:chat:" + liveSeq;
 
         // 전체 메시지 개수 확인
