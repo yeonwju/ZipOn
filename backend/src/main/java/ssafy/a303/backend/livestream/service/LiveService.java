@@ -251,6 +251,7 @@ public class LiveService {
                 .build();
     }
 
+    /*라이브 방송 정보 조회*/
     public LiveInfoResponseDto getLiveInfo(Integer liveSeq, Integer userSeq) {
 
         // 1. 라이브 방송 조회

@@ -182,7 +182,7 @@ public class LiveController {
      * 라이브 방송 정보 조회
      */
     @Operation(
-            summary = "라이브 방송 정보 조회",
+            summary = "특정 라이브 방송 정보 조회",
             description = "현재 진행 중이거나 종료된 라이브 방송 정보를 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
