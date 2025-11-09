@@ -15,8 +15,8 @@ export default function AuctionPaymentPage() {
 
   const handlePayment = () => {
     // TODO: 실제 결제 API 호출
-    showSuccess('결제가 완료되었습니다!', () => {
-      router.push('/mypage')
+    showSuccess('가상계좌가 발급되었습니다!', () => {
+      router.replace('/auction/payment/complete')
     })
   }
 
