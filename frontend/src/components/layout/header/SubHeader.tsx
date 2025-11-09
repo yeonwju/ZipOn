@@ -50,6 +50,7 @@ const ICONS = {
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
+  '/auction/payment': [],
   '/auction/bid': [ICONS.notification, ICONS.chat],
   '/chat': [ICONS.search, ICONS.notification],
   '/verify/phone': [],
@@ -73,6 +74,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
  * 🏷 4. 페이지 타이틀 맵
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
+  '/auction/payment': '결제',
   '/auction/bid': '경매 입찰',
   '/verify/phone': '휴대폰 인증',
   '/verify/business': '사업자 인증',

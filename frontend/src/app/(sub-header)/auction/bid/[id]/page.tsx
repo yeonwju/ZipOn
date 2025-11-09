@@ -7,8 +7,8 @@ export default function AuctionDetailPage() {
   const auctionDummyData = generateListingDetail(1)
   const auctionEndTime = new Date('2025-11-20T24:00:00')
 
-  const handleBid = (amount: number) => {
-    alert(`${amount.toLocaleString()}원으로 입찰 완료되었습니다.`)
+  const handleBid = (_amount: number) => {
+    // 결제 페이지로 이동 로직은 AuctionBidSection에서 처리됨
     // TODO: 실제 입찰 API 호출
   }
 
