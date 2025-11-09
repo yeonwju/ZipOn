@@ -22,7 +22,7 @@ type IconAction = {
 }
 
 /* ---------------------------------------------------
- *  1. 헬퍼 함수: 공통 Badge 아이콘 생성
+ * 1️⃣ 헬퍼: Badge 아이콘 생성기
  * --------------------------------------------------- */
 const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string): IconAction => ({
   href,
@@ -34,7 +34,7 @@ const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string)
 })
 
 /* ---------------------------------------------------
- *  2. 공통 아이콘 세트 정의
+ * 2️⃣ 공통 ICON 세트
  * --------------------------------------------------- */
 const ICONS = {
   search: { href: '/search', icon: <Search size={17} /> },
@@ -46,7 +46,7 @@ const ICONS = {
 }
 
 /* ---------------------------------------------------
- * 🗂 3. 페이지별 아이콘 구성 맵
+ * 3️⃣ 기본 아이콘 매핑
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
@@ -65,7 +65,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
 }
 
 /* ---------------------------------------------------
- * 🏷 4. 페이지 타이틀 맵
+ * 4️⃣ 기본 타이틀 매핑
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
   '/auction/payment': '결제',
@@ -88,7 +88,7 @@ const pageTitleMap: Record<string, string> = {
 }
 
 /* ---------------------------------------------------
- *  5. SubHeader 컴포넌트
+ * 5️⃣ SubHeader 컴포넌트
  * --------------------------------------------------- */
 interface SubHeaderProps {
   pathname?: string
@@ -103,6 +103,7 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
+  /* 스크롤 시 헤더 숨김 처리 */
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -116,18 +117,30 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   }, [lastScrollY])
 
   /* ---------------------------------------------------
-   *  6. 동적 경로 매칭 처리
+   * 6️⃣ 동적 경로 처리 (정규식 기반)
    * --------------------------------------------------- */
   let dynamicTitle = ''
   let dynamicIcons: IconAction[] = rightIconsMap.default
 
-  if (pathname.startsWith('/listings/') && pathname.endsWith('/brokers')) {
+  if (/^\/listings\/\d+\/brokers$/.test(pathname)) {
     dynamicTitle = '중개 신청'
     dynamicIcons = [ICONS.notification, ICONS.chat]
+  } else if (/^\/listings\/\d+\/brokers\/apply$/.test(pathname)) {
+    dynamicTitle = '중개인 선택'
+    dynamicIcons = [ICONS.notification, ICONS.chat]
+  } else if (/^\/auction\/\d+$/.test(pathname)) {
+    dynamicTitle = '경매 입찰'
+    dynamicIcons = [ICONS.notification, ICONS.chat]
+  } else if (/^\/auction\/\d+\/payment\/pending$/.test(pathname)) {
+    dynamicTitle = '결제 대기'
+    dynamicIcons = []
+  } else if (/^\/auction\/\d+\/payment\/complete$/.test(pathname)) {
+    dynamicTitle = '결제 완료'
+    dynamicIcons = []
   }
 
   /* ---------------------------------------------------
-   * 7. 정적 매칭 (기존 로직)
+   * 7️⃣ 기존 정적 매칭 + 동적 매칭 통합
    * --------------------------------------------------- */
   const titleKey = Object.keys(pageTitleMap)
     .sort((a, b) => b.length - a.length)

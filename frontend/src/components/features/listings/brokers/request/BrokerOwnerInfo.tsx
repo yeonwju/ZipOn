@@ -1,4 +1,4 @@
-import ListingDetailProfile from '../detail/ListingDetailProfile'
+import ListingDetailProfile from '../../detail/ListingDetailProfile'
 
 interface BrokerOwnerInfoProps {
   ownerName: string

@@ -2,7 +2,7 @@
 
 import type { ListingDetailData } from '@/types/models/listing'
 
-import ListingImageGallery from '../detail/ListingImageGallery'
+import ListingImageGallery from '../../detail/ListingImageGallery'
 import BrokerApplicationForm from './BrokerApplicationForm'
 import BrokerOwnerInfo from './BrokerOwnerInfo'
 import BrokerPropertyInfo from './BrokerPropertyInfo'

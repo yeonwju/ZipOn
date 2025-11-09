@@ -52,7 +52,7 @@ export default function AuctionBidSection({
 
   return (
     <>
-      <div className={className || 'rounded-2xl border border-gray-100 bg-gray-50 p-4'}>
+      <div className={className || 'rounded-2xl border border-gray-300 bg-gray-50 p-4'}>
         <h3 className="mb-3 text-base font-semibold text-gray-900">입찰하기</h3>
         <div className="flex flex-col divide-y divide-gray-200">
           <div className="flex justify-between py-2 text-sm">
