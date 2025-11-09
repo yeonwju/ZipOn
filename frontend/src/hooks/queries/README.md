@@ -20,6 +20,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/react-query'
 import * as listingsApi from '@/services/api/listings'
 import type { FilterState } from '@/types/filter'
+import type { ListingFormInfo, ListingAdditionalInfo } from '@/types/models/listing'
+
+type ListingFormData = ListingFormInfo & ListingAdditionalInfo
 
 // 매물 목록 조회
 export function useListings(filters?: FilterState) {
@@ -56,7 +59,7 @@ export function useUpdateListing() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => 
+    mutationFn: ({ id, data }: { id: number; data: Partial<ListingFormData> }) => 
       listingsApi.updateListing(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 

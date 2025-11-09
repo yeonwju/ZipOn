@@ -1,6 +1,8 @@
 import { ClientMapView } from '@/components/layout/map/ClientMapView'
 import { getListings } from '@/services/listingService'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * 지도 페이지 메인 컴포넌트 (Server Component)
  *

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+
 import type { ChatHistory } from '@/types'
 
 import ChatMessageMy from './ChatMessageMy'

@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import MyPageClient from '@/components/features/mypage/page/MyPageClient'
 import { fetchCurrentUser } from '@/services/authService'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * 마이페이지 (Server Component)
  *

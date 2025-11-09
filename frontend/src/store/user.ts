@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+
 import { User } from '@/types/models/user'
 
 // 💡 테스트용: 기본값 변경 가능

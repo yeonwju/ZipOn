@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: '실시간 인기 방송과 추천 매물을 확인하세요',
 }
 
+export const dynamic = 'force-dynamic'
+
 /**
  * 홈 페이지 (Server Component)
  *

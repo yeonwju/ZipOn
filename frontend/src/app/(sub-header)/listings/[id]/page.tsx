@@ -1,5 +1,7 @@
 import { ListingDetail } from '@/components/features/listings'
 
+export const dynamic = 'force-dynamic'
+
 interface ListingPageProps {
   params: Promise<{ id: string }>
 }

@@ -1,14 +1,15 @@
 'use client'
 
+import { SearchX } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { ROUTES } from '@/constants'
+import { mockAuctionHistories } from '@/data/AuctionHistoryDummy'
+import { AuctionHistory } from '@/types/models/auction'
+
 import AuctionHistoryListSkeleton from '../skeleton/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
-import { SearchX } from 'lucide-react'
-import { AuctionHistory } from '@/types/models/auction'
-import { mockAuctionHistories } from '@/data/AuctionHistoryDummy'
-import { ROUTES } from '@/constants'
 
 interface AuctionHistoryListProps {
   className?: string

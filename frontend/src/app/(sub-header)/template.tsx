@@ -1,5 +1,6 @@
-import PageTransition from '@/components/common/PageTransition'
 import React from 'react'
+
+import PageTransition from '@/components/common/PageTransition'
 
 /**
  * Sub Header Template
