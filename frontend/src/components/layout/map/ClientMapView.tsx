@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
@@ -21,7 +21,7 @@ import useUserLocation from '@/hooks/map/useUserLocation'
 import useUserMarker from '@/hooks/map/useUserMarker'
 import { useMapFilterStore } from '@/store/mapFilter'
 import { DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '@/types/map'
-import type { ListingData } from '@/types/models/listing'
+import type { BuildingType, ListingData } from '@/types/models/listing'
 
 import MapOverlay from './MapOverlay'
 
@@ -52,8 +52,21 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 카카오맵 SDK 로드
   useKakaoLoader()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
   // 사용자 위치 정보
   const { location } = useUserLocation()
+  
+  // Zustand 스토어에서 필터 가져오기
+  const setBuildingType = useMapFilterStore(state => state.setBuildingType)
+
+  // URL 파라미터에서 필터 적용
+  useEffect(() => {
+    const buildingTypeParam = searchParams.get('buildingType')
+    if (buildingTypeParam) {
+      setBuildingType(buildingTypeParam as BuildingType | 'all')
+    }
+  }, [searchParams, setBuildingType])
 
   // 지도 초기 중심점 및 줌 레벨 (sessionStorage에서 복원)
   const [initialCenter, setInitialCenter] = useState<{ lat: number; lng: number } | null>(() => {

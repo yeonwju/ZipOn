@@ -38,7 +38,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" suppressHydrationWarning className="h-full">
+    <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
         
@@ -56,7 +56,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body
         suppressHydrationWarning
-        className="h-full"
         style={{ fontFamily: 'Pretendard, system-ui, -apple-system, sans-serif' }}
       >
         <PwaProvider />
