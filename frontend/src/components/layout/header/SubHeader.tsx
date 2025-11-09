@@ -22,7 +22,7 @@ type IconAction = {
 }
 
 /* ---------------------------------------------------
- * 1️⃣ 헬퍼: Badge 아이콘 생성기
+ * 1 Badge 아이콘 생성 헬퍼
  * --------------------------------------------------- */
 const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string): IconAction => ({
   href,
@@ -34,7 +34,7 @@ const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string)
 })
 
 /* ---------------------------------------------------
- * 2️⃣ 공통 ICON 세트
+ *  2 공통 아이콘 세트
  * --------------------------------------------------- */
 const ICONS = {
   search: { href: '/search', icon: <Search size={17} /> },
@@ -46,7 +46,7 @@ const ICONS = {
 }
 
 /* ---------------------------------------------------
- * 3️⃣ 기본 아이콘 매핑
+ * 3 기본 아이콘 매핑
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
@@ -65,7 +65,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
 }
 
 /* ---------------------------------------------------
- * 4️⃣ 기본 타이틀 매핑
+ * 4 기본 타이틀 매핑
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
   '/auction/payment': '결제',
@@ -88,7 +88,7 @@ const pageTitleMap: Record<string, string> = {
 }
 
 /* ---------------------------------------------------
- * 5️⃣ SubHeader 컴포넌트
+ * 5 SubHeader 컴포넌트
  * --------------------------------------------------- */
 interface SubHeaderProps {
   pathname?: string
@@ -117,10 +117,10 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   }, [lastScrollY])
 
   /* ---------------------------------------------------
-   * 6️⃣ 동적 경로 처리 (정규식 기반)
+   * 6 동적 경로 처리 (정규식 기반)
    * --------------------------------------------------- */
   let dynamicTitle = ''
-  let dynamicIcons: IconAction[] = rightIconsMap.default
+  let dynamicIcons: IconAction[] | null = null // ✅ 초기값을 null로 변경 (중복 방지)
 
   if (/^\/listings\/\d+\/brokers$/.test(pathname)) {
     dynamicTitle = '중개 신청'
@@ -140,7 +140,7 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   }
 
   /* ---------------------------------------------------
-   * 7️⃣ 기존 정적 매칭 + 동적 매칭 통합
+   * 7 기존 정적 매칭 + 동적 매칭 통합
    * --------------------------------------------------- */
   const titleKey = Object.keys(pageTitleMap)
     .sort((a, b) => b.length - a.length)
@@ -149,10 +149,13 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   const displayTitle = title || dynamicTitle || (titleKey ? pageTitleMap[titleKey] : '')
   const rightIcons =
     customRightIcons ||
-    dynamicIcons ||
+    dynamicIcons || // ✅ null이 아닐 때만 덮어씀
     (titleKey && rightIconsMap[titleKey]) ||
     rightIconsMap.default
 
+  /* ---------------------------------------------------
+   * 8 렌더링
+   * --------------------------------------------------- */
   return (
     <nav
       className={clsx(
