@@ -39,6 +39,7 @@ public class LiveChatService {
      * @param message 저장할 채팅 메시지
      */
     public void saveChatMessage(Integer liveSeq, LiveChatMessageResponseDto message) {
+
         String key = "live:chat:" + liveSeq;
 
         // 채팅 메시지 리스트 끝에 추가 (FIFO 채팅 스트림 유지)
