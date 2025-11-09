@@ -306,7 +306,7 @@ public class LiveService {
     /*상태별 라이브 목록 조회*/
     public List<LiveInfoResponseDto> getLiveListByStatus(LiveStreamStatus status, Integer userSeq) {
 
-        // 상태별 방송 조회 (시작 시간 기준 최신 순)
+        // 상태별 방송 조회 (시작 시간 기준 최신순)
         List<LiveStream> liveStreams = liveStreamRepository
                 .findByStatusOrderByStartAtDesc(status);
 
