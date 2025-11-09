@@ -1,4 +1,7 @@
+import { notFound } from 'next/navigation'
+
 import { ListingDetail } from '@/components/features/listings'
+import { getListingDetail } from '@/services/listingService'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,27 +19,19 @@ interface ListingPageProps {
  */
 export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params
+  const seq = Number(id)
 
-  // TODO: API에서 매물 데이터 가져오기
-  // const listing = await fetchListingById(id)
-  // if (!listing) notFound()
+  // 유효하지 않은 ID인 경우
+  if (isNaN(seq) || seq < 1 || seq > 100) {
+    notFound()
+  }
 
-  // 임시 데이터
-  const listing = {
-    id,
-    name: `매물 ${id}`,
-    address: '서울특별시 강남구 테헤란로 123',
-    deposit: 5000,
-    rent: 50,
-    type: '원룸',
-    area: 33,
-    floor: 5,
-    totalFloor: 12,
-    description:
-      '깔끔하고 넓은 원룸입니다. 역세권이며 주변 편의시설이 많습니다. 채광이 좋고 관리가 잘 되어 있습니다.',
-    images: ['/listing.svg', '/listing.svg', '/listing.svg', '/listing.svg'],
-    features: ['주차 가능', '엘리베이터', '반려동물 가능', '풀옵션'],
-    availableDate: '2024-12-01',
+  // 매물 상세 정보 가져오기
+  const listing = await getListingDetail(seq)
+
+  // 매물이 없는 경우
+  if (!listing) {
+    notFound()
   }
 
   return <ListingDetail listing={listing} />

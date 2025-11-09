@@ -82,7 +82,7 @@ function SwipeableItem({ children, onDelete }: SwipeableItemProps) {
   return (
     <div className="relative overflow-hidden">
       {/* 삭제 버튼 (뒤에 숨어있음) */}
-      <div className="absolute top-0 right-0 bottom-0 flex w-20 items-center justify-center bg-red-500">
+      <div className="absolute top-0.5 right-0 bottom-0.5 flex w-20 items-center justify-center bg-red-500">
         <button
           onClick={handleDelete}
           className="flex h-full w-full items-center justify-center p-3 text-white hover:bg-red-600"

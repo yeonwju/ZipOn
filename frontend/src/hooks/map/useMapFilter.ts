@@ -5,6 +5,7 @@ import type { AuctionType, BuildingType, ListingData } from '@/types/models/list
 
 interface UseMapFilterParams {
   listings: ListingData[]
+  buildingType?: BuildingType | 'all'
   priceFilter?: PriceFilter
   roomCountFilter?: RoomCountFilter
   areaFilter?: AreaFilter
@@ -34,6 +35,7 @@ interface UseMapFilterParams {
  */
 export function useMapFilter({
   listings,
+  buildingType = 'all',
   priceFilter,
   roomCountFilter,
   areaFilter,
@@ -41,7 +43,6 @@ export function useMapFilter({
   directionFilter,
 }: UseMapFilterParams) {
   const [auctionFilter, setAuctionFilter] = useState<AuctionType>('all')
-  const [buildingType, setBuildingType] = useState<BuildingType>('room')
 
   // 필터링된 매물 목록
   const filteredListings = useMemo(() => {
@@ -49,13 +50,15 @@ export function useMapFilter({
 
     // 경매 필터 적용
     if (auctionFilter === 'auction') {
-      result = result.filter(listing => listing.isAuction)
+      result = result.filter(listing => listing.isAucPref)
     } else if (auctionFilter === 'normal') {
-      result = result.filter(listing => !listing.isAuction)
+      result = result.filter(listing => !listing.isAucPref)
     }
 
-    // 건물 타입 필터 적용
-    result = result.filter(listing => listing.buildingType === buildingType)
+    // 건물 타입 필터 적용 (all이 아닐 때만)
+    if (buildingType !== 'all') {
+      result = result.filter(listing => listing.buildingType === buildingType)
+    }
 
     // 금액 필터 적용
     if (priceFilter) {
@@ -66,12 +69,13 @@ export function useMapFilter({
           return false
 
         // 월세 필터
-        if (listing.rent < priceFilter.rent.min) return false
-        if (priceFilter.rent.max !== null && listing.rent > priceFilter.rent.max) return false
+        if (listing.mnRent < priceFilter.rent.min) return false
+        if (priceFilter.rent.max !== null && listing.mnRent > priceFilter.rent.max) return false
 
-        // 관리비 필터 (BuildingData에 maintenance가 없으면 이 부분은 나중에 추가)
-        // if (listing.maintenance && listing.maintenance < priceFilter.maintenance.min) return false
-        // if (priceFilter.maintenance.max !== null && listing.maintenance && listing.maintenance > priceFilter.maintenance.max) return false
+        // 관리비 필터
+        if (listing.fee < priceFilter.maintenance.min) return false
+        if (priceFilter.maintenance.max !== null && listing.fee > priceFilter.maintenance.max)
+          return false
 
         return true
       })
@@ -80,10 +84,11 @@ export function useMapFilter({
     // 방수 필터 적용 ('all'일 때는 필터 적용 안 함)
     if (roomCountFilter && roomCountFilter !== 'all') {
       result = result.filter(listing => {
+        const roomCount = Number(listing.roomCnt) || 0
         if (roomCountFilter === '3+') {
-          return listing.roomCount >= 3
+          return roomCount >= 3
         }
-        return listing.roomCount === roomCountFilter
+        return roomCount === roomCountFilter
       })
     }
 
@@ -92,7 +97,7 @@ export function useMapFilter({
       // 면적이 무제한인 경우 (max가 MAX_AREA + 1 이상이면 무제한)
       const maxArea = areaFilter.max >= 100 ? Infinity : areaFilter.max
       result = result.filter(listing => {
-        const listingPyeong = listing.area.pyeong
+        const listingPyeong = listing.areaP
         return listingPyeong >= areaFilter.min && listingPyeong <= maxArea
       })
     }
@@ -100,19 +105,29 @@ export function useMapFilter({
     // 층수 필터 적용 ('all'일 때는 필터 적용 안 함)
     if (floorFilter && floorFilter !== 'all') {
       result = result.filter(listing => {
+        const floor = Number(listing.floor) || 0
         if (floorFilter === 'B1') {
-          return listing.floor < 0
+          return floor < 0
         } else if (floorFilter === '2+') {
-          return listing.floor >= 2
+          return floor >= 2
         } else {
-          return listing.floor === floorFilter
+          return floor === floorFilter
         }
       })
     }
 
     // 해방향 필터 적용 ('all'일 때는 필터 적용 안 함)
     if (directionFilter && directionFilter !== 'all') {
-      result = result.filter(listing => listing.direction === directionFilter)
+      // directionFilter: 'east', 'west', 'south', 'north'
+      // facing: 'N', 'S', 'E', 'W'
+      const directionMap: Record<string, string> = {
+        east: 'E',
+        west: 'W',
+        south: 'S',
+        north: 'N',
+      }
+      const facingValue = directionMap[directionFilter]
+      result = result.filter(listing => listing.facing === facingValue)
     }
 
     return result
@@ -137,8 +152,6 @@ export function useMapFilter({
   return {
     auctionFilter,
     setAuctionFilter,
-    buildingType,
-    setBuildingType,
     filteredListings,
     isAuctionFilter,
   }

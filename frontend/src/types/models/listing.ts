@@ -7,12 +7,12 @@
 /**
  * 해방향 타입
  */
-export type Direction = 'east' | 'west' | 'south' | 'north'
+export type Direction = 'N' | 'S' | 'E' | 'W' | 'NE' | 'NW' | 'SE' | 'SW'
 
 /**
  * 건물 타입
  */
-export type BuildingType = 'room' | 'apartment' | 'house' | 'officetel'
+export type BuildingType = 'ROOM' | 'APARTMENT' | 'HOUSE' | 'OFFICETEL'
 
 /**
  * 경매 타입
@@ -20,44 +20,69 @@ export type BuildingType = 'room' | 'apartment' | 'house' | 'officetel'
 export type AuctionType = 'all' | 'auction' | 'normal'
 
 /**
- * 매물 데이터 타입
+ * API 응답 wrapper 타입
+ */
+export interface ApiResponse<T> {
+  data: T
+  message: string
+  status: number
+  timestamp: number
+}
+
+/**
+ * 매물 리스트 아이템 타입 (지도, 목록용)
  */
 export interface ListingData {
-  id: number
-  name: string
+  propertySeq: number
   address: string
-  lat: number
-  lng: number
+  propertyNm: string
+  latitude: number
+  longitude: number
+  area: number
+  areaP: number
   deposit: number
-  rent: number
-  isAuction: boolean
-  buildingType: string
-  roomCount: number
-  floor: number
-  direction: Direction
-  area: {
-    squareMeter: number
-    pyeong: number
-  }
+  mnRent: number
+  fee: number
+  // 필터링을 위한 추가 필드
+  buildingType?: BuildingType
+  roomCnt?: string
+  floor?: string
+  facing?: Direction
+  isAucPref?: boolean
 }
 
 /**
  * 매물 상세 데이터 타입 (상세 페이지용)
  */
 export interface ListingDetailData {
-  id: string
-  name: string
+  propertySeq: number
+  lessorNm: string
+  propertyNm: string
+  content: string
   address: string
-  deposit: number
-  rent: number
-  type: string
+  latitude: number
+  longitude: number
+  buildingType: BuildingType
   area: number
-  floor: number
-  totalFloor: number
-  description: string
+  areaP: number
+  deposit: number
+  mnRent: number
+  fee: number
   images: string[]
-  features: string[]
-  availableDate: string
+  period: string
+  floor: string
+  facing: Direction
+  roomCnt: string
+  bathroomCnt: string
+  constructionDate: string
+  parkingCnt: string
+  hasElevator: boolean
+  petAvailable: boolean
+  isAucPref: boolean
+  isBrkPref: boolean
+  isLinked: boolean
+  aucAt: string
+  aucAvailable: string
 }
 
 /**
@@ -96,16 +121,16 @@ export interface ListingAdditionalInfo {
 }
 
 /**
- * 내 매물 찾기
+ * 내 매물 (My Listings)
  */
 export interface MyListing {
-  id: number
+  propertySeq: number
   address: string
   detailAddress: string | null
   deposit: number
-  rent: number
-  isAuction: boolean
-  buildingType: string // 원투룸, 오피스텔. 아파트. 주택빌라
-  roomCount: number
+  mnRent: number
+  isAucPref: boolean
+  buildingType: BuildingType
+  roomCnt: number
   connectBroker: string | null // 중개 성사여부 (pending, success, fail)
 }

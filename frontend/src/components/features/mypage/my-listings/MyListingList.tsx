@@ -67,7 +67,7 @@ export default function MyListingList({ className }: MyListingListProps) {
     <div className="flex flex-col">
       <div className={className}>
         {displayedItems.map(myListings => (
-          <MyListingCard key={myListings.id} myListing={myListings} />
+          <MyListingCard key={myListings.propertySeq} myListing={myListings} />
         ))}
       </div>
 

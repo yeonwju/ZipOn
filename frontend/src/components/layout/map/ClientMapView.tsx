@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Map } from 'react-kakao-maps-sdk'
 
 import { ListingList } from '@/components/features/listings'
@@ -27,7 +27,7 @@ import type {
   RoomCountFilter,
 } from '@/types/filter'
 import { DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '@/types/map'
-import type { ListingData } from '@/types/models/listing'
+import type {BuildingType, ListingData} from '@/types/models/listing'
 
 import MapOverlay from './MapOverlay'
 
@@ -61,8 +61,52 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 사용자 위치 정보
   const { location } = useUserLocation()
 
+  // 지도 초기 중심점 및 줌 레벨 (sessionStorage에서 복원)
+  const [initialCenter, setInitialCenter] = useState<{ lat: number; lng: number } | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mapCenter')
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    }
+    return null
+  })
+
+  const [initialZoom, setInitialZoom] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mapZoom')
+      if (saved) {
+        return Number(saved)
+      }
+    }
+    return DEFAULT_ZOOM_LEVEL
+  })
+
   // 지도 제어 (지도 인스턴스, 위치 이동)
   const { map, setMap, moveToCurrentLocation, canMoveToLocation } = useMapControls(location)
+
+  // 지도 이동 시 위치 및 줌 레벨 저장
+  useEffect(() => {
+    if (!map) return
+
+    const saveMapState = () => {
+      const center = map.getCenter()
+      const level = map.getLevel()
+      const centerData = {
+        lat: center.getLat(),
+        lng: center.getLng(),
+      }
+      sessionStorage.setItem('mapCenter', JSON.stringify(centerData))
+      sessionStorage.setItem('mapZoom', String(level))
+    }
+
+    // 지도 이동 종료 시 위치 저장
+    window.kakao?.maps.event.addListener(map, 'idle', saveMapState)
+
+    return () => {
+      window.kakao?.maps.event.removeListener(map, 'idle', saveMapState)
+    }
+  }, [map])
 
   // 필터 상태
   const [priceFilter, setPriceFilter] = useState<PriceFilter>({
@@ -75,16 +119,18 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   const [floorFilter, setFloorFilter] = useState<FloorFilter | undefined>(undefined)
   const [directionFilter, setDirectionFilter] = useState<DirectionFilter | undefined>(undefined)
 
+  // 건물 타입 상태
+  const [buildingType, setBuildingType] = useState<BuildingType | 'all'>('all')
+
   // 매물 필터링 (필터 상태, 필터링된 매물)
   const {
     auctionFilter,
     setAuctionFilter,
-    buildingType,
-    setBuildingType,
     filteredListings,
     isAuctionFilter,
   } = useMapFilter({
     listings: initialListings,
+    buildingType,
     priceFilter,
     roomCountFilter,
     areaFilter,
@@ -147,7 +193,7 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
   // 매물 카드 클릭 핸들러
   const handleListingClick = (listing: ListingData) => {
     // 매물 상세 페이지로 이동
-    router.push(ROUTES.LISTING_DETAIL(listing.id))
+    router.push(ROUTES.LISTING_DETAIL(listing.propertySeq))
   }
 
   return (
@@ -156,9 +202,9 @@ export function ClientMapView({ initialListings }: ClientMapViewProps) {
       <div className="absolute inset-0 z-0">
         <Map
           id="map"
-          center={location || DEFAULT_MAP_CENTER}
+          center={initialCenter || DEFAULT_MAP_CENTER}
           style={{ width: '100%', height: '100%' }}
-          level={DEFAULT_ZOOM_LEVEL}
+          level={initialZoom}
           onCreate={setMap}
         />
       </div>

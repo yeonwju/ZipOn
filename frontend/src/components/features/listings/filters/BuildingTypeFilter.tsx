@@ -6,30 +6,33 @@ import React from 'react'
 import type { BuildingType } from '@/types/models/listing'
 
 interface BuildingTypeFilterProps {
-  selectedFilter: BuildingType
+  selectedFilter: BuildingType | 'all'
   onClick: () => void
 }
 
 const BUILDING_TYPE_INFO: Record<
-  BuildingType,
+  BuildingType | 'all',
   {
     label: string
-    icon: string
+    icon?: string
   }
 > = {
-  room: {
+  all: {
+    label: '전체',
+  },
+  ROOM: {
     label: '원투룸',
     icon: '/icons/room-white.svg',
   },
-  apartment: {
+  APARTMENT: {
     label: '아파트',
     icon: '/icons/apartment-white.svg',
   },
-  house: {
+  HOUSE: {
     label: '주택/빌라',
-    icon: '/icons/house-white.svg',
+    icon: '/icons/House-white.svg',
   },
-  officetel: {
+  OFFICETEL: {
     label: '오피스텔',
     icon: '/icons/officetel-white.svg',
   },
@@ -49,7 +52,7 @@ export default function BuildingTypeFilter({ selectedFilter, onClick }: Building
       className="flex h-full w-[65px] flex-col items-center justify-center rounded-sm bg-blue-500 px-2 py-0.5 shadow-lg transition-all hover:bg-gray-50 active:scale-95"
       aria-label="건물 유형 선택"
     >
-      <Image src={selectedType.icon} width={20} height={20} alt={selectedType.label} />
+      {selectedType.icon && <Image src={selectedType.icon} width={20} height={20} alt={selectedType.label} />}
       <span className="text-xs font-medium whitespace-nowrap text-white">{selectedType.label}</span>
     </button>
   )

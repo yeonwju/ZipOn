@@ -12,16 +12,15 @@
  * **사용 예시:**
  * ```tsx
  * // Server Component에서
- * import { getListings } from '@/services/listingService'
+ * import { getListings, getListingDetail } from '@/services/listingService'
  * const listings = await getListings()
- *
- * // Client Component에서는 React Query 사용 권장
- * const { data: listings } = useQuery('listings', getListings)
+ * const detail = await getListingDetail(1)
  * ```
  */
 
 import { BuildingData } from '@/data/BuildingDummy'
-import type { ListingData } from '@/types/models/listing'
+import { getListingDetailBySeq } from '@/data/ListingDetailDummy'
+import type { ListingData, ListingDetailData } from '@/types/models/listing'
 
 /**
  * 매물 목록 가져오기
@@ -38,7 +37,7 @@ export async function getListings(): Promise<ListingData[]> {
   //     throw new Error('Failed to fetch listings')
   //   }
   //   const data = await response.json()
-  //   return data.listings
+  //   return data.data // API 응답에서 data 필드 추출
   // } catch (error) {
   //   console.error('Failed to fetch listings:', error)
   //   // 에러 발생 시 샘플 데이터를 fallback으로 반환
@@ -64,7 +63,7 @@ export async function getFilteredListings(filters?: {
   area?: { min?: number; max?: number }
   floor?: number | 'B1' | '2+'
   direction?: 'east' | 'west' | 'south' | 'north' | 'northwest'
-  buildingType?: 'room' | 'apartment' | 'house' | 'officetel'
+  buildingType?: 'ROOM' | 'APARTMENT' | 'HOUSE' | 'OFFICETEL'
   isAuction?: boolean
 }): Promise<ListingData[]> {
   // TODO: 실제 API 연동 시 아래 코드로 교체
@@ -91,25 +90,24 @@ export async function getFilteredListings(filters?: {
 /**
  * 특정 매물 상세 정보 가져오기
  *
- * @param id - 매물 ID
+ * @param seq - 매물 Seq (1-100)
  * @returns 매물 상세 정보 (없으면 null)
  */
-export async function getListingById(id: number): Promise<ListingData | null> {
+export async function getListingDetail(seq: number): Promise<ListingDetailData | null> {
   // TODO: 실제 API 연동 시 아래 코드로 교체
   // try {
-  //   const response = await fetch(`/api/listings/${id}`)
+  //   const response = await fetch(`/api/listings/${seq}`)
   //   if (!response.ok) {
   //     return null
   //   }
   //   const data = await response.json()
-  //   return data.listing
+  //   return data.data // API 응답에서 data 필드 추출
   // } catch (error) {
   //   console.error('Failed to fetch listing:', error)
   //   return null
   // }
 
-  // 현재는 샘플 데이터에서 찾기
-  const listing = BuildingData.find(item => item.id === id)
-  return Promise.resolve(listing || null)
+  // 현재는 더미 데이터 반환
+  return Promise.resolve(getListingDetailBySeq(seq))
 }
 

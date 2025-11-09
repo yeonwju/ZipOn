@@ -34,7 +34,7 @@ export const chatRoomListDummy: ChatRoomList[] = [
     partnerName: '정우진',
     lastMessage: '내일 오전 11시에 뵐게요 :)',
     lastSentAt: '2025-11-07T17:32:18',
-    unreadCount: null,
+    unreadCount: 0,
     profileImgSrc : '/profile.svg',
   },
   {

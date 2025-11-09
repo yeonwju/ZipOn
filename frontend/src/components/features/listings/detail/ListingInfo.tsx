@@ -8,8 +8,8 @@ interface ListingInfoProps {
   rent: number
   type: string
   area: number
-  floor: number
-  totalFloor: number
+  floor: string
+  totalFloor: string
   availableDate: string
   address: string
 }

@@ -44,7 +44,7 @@ export default function useDetailedMarkers(
       const markerElement = createListingMarkerElement(listing, onMarkerClick)
 
       const overlay = new window.kakao.maps.CustomOverlay({
-        position: new window.kakao.maps.LatLng(listing.lat, listing.lng),
+        position: new window.kakao.maps.LatLng(listing.latitude, listing.longitude),
         content: markerElement,
         xAnchor: 0.5,
         yAnchor: 1,

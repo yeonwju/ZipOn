@@ -69,17 +69,14 @@ export default function useClusteredMarkers(
     const markers = listings.map(listing => {
       const marker = new window.kakao.maps.Marker({
         buildingType: '',
-        position: new window.kakao.maps.LatLng(listing.lat, listing.lng),
+        position: new window.kakao.maps.LatLng(listing.latitude, listing.longitude),
         clickable: true,
         image: markerImage, // 투명 이미지 적용
-        isAuction: listing.isAuction,
+        isAuction: listing.isAucPref,
       })
 
       // 마커-매물 데이터 매핑
-      markerToListingMap.current.set(
-        marker,
-        listing.isAuction ? listing : { ...listing, isAuction: false }
-      )
+      markerToListingMap.current.set(marker, listing)
 
       // 마커 클릭 이벤트
       if (onMarkerClick) {

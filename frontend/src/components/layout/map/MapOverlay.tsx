@@ -11,7 +11,7 @@ interface MapOverlayProps {
    * 현재 선택된 필터
    */
   selectedAuctionFilter: AuctionType
-  selectedBuildingType: BuildingType
+  selectedBuildingType: BuildingType | 'all'
 
   /**
    * 필터 변경 핸들러
