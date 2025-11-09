@@ -10,13 +10,13 @@ import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import java.time.LocalDateTime;
 
 /**
- * 라이브 방송 시작 응답 DTO
+ * 라이브 방송 종료 응답 DTO
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LiveCreateResponseDto {
+public class LiveEndResponseDto {
 
     @Schema(description = "방송 식별자", example = "1")
     private Integer liveSeq;
@@ -30,14 +30,26 @@ public class LiveCreateResponseDto {
     @Schema(description = "방송 제목")
     private String title;
 
-    @Schema(description = "방송 상태", example = "LIVE")
+    @Schema(description = "방송 상태", example = "ENDED")
     private LiveStreamStatus status;
+
+    @Schema(description = "누적 시청자 수", example = "124")
+    private Integer viewerCount;
+
+    @Schema(description = "누적 채팅 메시지 수", example = "58")
+    private Integer chatCount;
+
+    @Schema(description = "받은 좋아요 수", example = "31")
+    private Integer likeCount;
 
     @Schema(description = "방장 정보")
     private HostDto host;
 
     @Schema(description = "시작 시간")
     private LocalDateTime startAt;
+
+    @Schema(description = "종료 시간")
+    private LocalDateTime endAt;
 
     @Getter
     @Builder

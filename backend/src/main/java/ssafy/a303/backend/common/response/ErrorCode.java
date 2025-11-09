@@ -115,6 +115,7 @@ public enum ErrorCode {
     LIVE_STREAM_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 라이브 방송을 찾을 수 없습니다."),
     LIVE_STREAM_ALREADY_ENDED(400, HttpStatus.BAD_REQUEST, "이미 종료된 라이브 방송입니다."),
     LIVE_STREAM_NOT_OWNER(403, HttpStatus.FORBIDDEN, "방송을 종료할 권한이 없습니다."),
+    OPENVIDU_SESSION_CLOSE_FAILED(500, HttpStatus.INTERNAL_SERVER_ERROR, "라이브 방송 종료 중 오류가 발생했습니다."),
 
     ;
     // ────────────────────────────────────────────────────

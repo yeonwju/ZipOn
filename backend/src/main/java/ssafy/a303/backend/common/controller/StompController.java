@@ -1,6 +1,7 @@
 package ssafy.a303.backend.common.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,13 @@ import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
+import ssafy.a303.backend.livestream.service.LiveChatService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
-import ssafy.a303.backend.livestream.service.LiveService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.Base64;
 
 /**
  * StompController (WebSocket 메시지 처리 컨트롤러)
@@ -51,7 +55,7 @@ public class StompController {
 
     private final ChatService chatService;
     private final ChatRedisPubSubService chatRedisPubSubService;
-    private final LiveService liveService;
+    private final LiveChatService liveChatService;
     private final LiveRedisPubSubService liveRedisPubSubService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
@@ -59,12 +63,12 @@ public class StompController {
     // 생성자 주입
     public StompController(ChatService chatService, 
                           ChatRedisPubSubService chatRedisPubSubService,
-                          LiveService liveService,
+                          LiveChatService liveChatService,
                           LiveRedisPubSubService liveRedisPubSubService,
                           UserRepository userRepository) {
         this.chatService = chatService;
         this.chatRedisPubSubService = chatRedisPubSubService;
-        this.liveService = liveService;
+        this.liveChatService = liveChatService;
         this.liveRedisPubSubService = liveRedisPubSubService;
         this.userRepository = userRepository;
         
@@ -101,8 +105,8 @@ public class StompController {
             }
             
             // Payload 디코딩
-            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
-            com.fasterxml.jackson.databind.JsonNode node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(payload);
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            JsonNode node = new ObjectMapper().readTree(payload);
             userSeq = node.get("sub").asInt();
             
             log.info("[CHAT] 토큰에서 userSeq 추출: {}", userSeq);
@@ -133,26 +137,32 @@ public class StompController {
     @MessageMapping("/live/{liveSeq}")
     public void sendLiveMessage(
             @DestinationVariable Integer liveSeq,
-            LiveChatMessageRequestDto requestDto
+            LiveChatMessageRequestDto requestDto,
+            @Header("Authorization") String authHeader
     ) throws JsonProcessingException {
 
-        log.info("[LIVE] liveSeq={}, content={}", liveSeq, requestDto.getContent());
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            throw new CustomException(ErrorCode.INVALID_AUTH_HEADER);
 
-        // 사용자 조회 방식 동일하게 변경
-        String userSeqString = SecurityContextHolder.getContext().getAuthentication().getName();
-        Integer userSeq = Integer.valueOf(userSeqString);
+        String token = authHeader.substring(7);
+        String payload = new String(Base64.getUrlDecoder().decode(token.split("\\.")[1]));
+        JsonNode node = new ObjectMapper().readTree(payload);
+        Integer userSeq = node.get("sub").asInt();
 
         User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        LiveChatMessageResponseDto response =
-                liveService.buildResponse(requestDto, sender.getUserSeq(), sender.getNickname());
+        LiveChatMessageResponseDto response = LiveChatMessageResponseDto.builder()
+                .liveSeq(liveSeq)
+                .senderSeq(userSeq)
+                .senderName(sender.getName())
+                .content(requestDto.getContent())
+                .sentAt(LocalDateTime.now())
+                .build();
 
-        String payload = objectMapper.writeValueAsString(response);
+        liveChatService.saveChatMessage(liveSeq, response);
 
-        liveRedisPubSubService.publish("live:" + liveSeq, payload);
-
-        log.info("[REDIS][LIVE] liveSeq={}, sender={}, message={}",
-                liveSeq, sender.getNickname(), response.getContent());
+        String messageJson = objectMapper.writeValueAsString(response);
+        liveRedisPubSubService.publish("live:" + liveSeq, messageJson);
     }
 }

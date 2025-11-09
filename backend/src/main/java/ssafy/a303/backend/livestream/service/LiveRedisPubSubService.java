@@ -3,7 +3,6 @@ package ssafy.a303.backend.livestream.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.Message;
@@ -13,13 +12,26 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
 
+/**
+ * LiveRedisPubSubService
+ * ----------------------------------------------------------------------------------
+ * Redis Pub/Sub 기반 라이브 방송 실시간 채팅 메시지 중계 서비스
+ *
+ * [동작 구조]
+ * 1. 서버 → Redis 로 메시지 Publish (publish 메서드)
+ * 2. Redis → onMessage() 콜백 실행
+ * 3. 메시지를 WebSocket(STOMP) /sub/live/{liveSeq} 로 브로드캐스트
+ *
+ * 채팅 저장은 LiveChatService (Redis List) 에서 담당하고,
+ * 본 클래스는 "실시간 메시지 전송" 역할만 담당한다.
+ */
 @Service
 @Log4j2
 public class LiveRedisPubSubService implements MessageListener {
 
-    private final StringRedisTemplate redisTemplate;
-    private final SimpMessageSendingOperations messagingTemplate;
-    private final ObjectMapper objectMapper;
+    private final StringRedisTemplate redisTemplate;                // Redis Pub/Sub 발행용
+    private final SimpMessageSendingOperations messagingTemplate;   // STOMP 메시지 전송
+    private final ObjectMapper objectMapper;                        // JSON ↔ DTO 변환기
 
     public LiveRedisPubSubService(
             @Qualifier("liveRedisTemplate") StringRedisTemplate redisTemplate,
@@ -27,24 +39,32 @@ public class LiveRedisPubSubService implements MessageListener {
     ) {
         this.redisTemplate = redisTemplate;
         this.messagingTemplate = messagingTemplate;
-        
-        // ObjectMapper에 JavaTimeModule 등록
+
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
+    /**
+     * Redis Pub/Sub 채널에 메시지를 발행
+     */
     public void publish(String channel, String message) {
         redisTemplate.convertAndSend(channel, message);
     }
 
+    /**
+     * Redis → 메시지 수신 → Front로 Broadcast
+     */
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
             String payload = new String(message.getBody());
             LiveChatMessageResponseDto dto = objectMapper.readValue(payload, LiveChatMessageResponseDto.class);
+
             messagingTemplate.convertAndSend("/sub/live/" + dto.getLiveSeq(), dto);
+
+            log.debug("[LIVE CHAT] SEND /sub/live/{}  → {}", dto.getLiveSeq(), dto.getContent());
         } catch (JsonProcessingException e) {
-            log.error("[REDIS][LIVE] JSON 파싱 실패: {}", e.getMessage());
+            log.error("[REDIS][LIVE] 메시지 역직렬화 실패: {}", e.getMessage());
         }
     }
 }
