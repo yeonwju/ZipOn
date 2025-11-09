@@ -1,13 +1,13 @@
 'use client'
 
+import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { ListingDetailData } from '@/types'
 
 import ListingDescription from './ListingDescription'
 import ListingFeatures from './ListingFeatures'
 import ListingImageGallery from './ListingImageGallery'
 import ListingInfo from './ListingInfo'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
 
 interface ListingDetailProps {
   listing: ListingDetailData
