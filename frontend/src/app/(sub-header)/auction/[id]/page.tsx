@@ -1,26 +1,12 @@
-'use client'
+import { Suspense } from 'react'
 
-import { AuctionDetail } from '@/components/features/auction'
-import { generateListingDetail } from '@/data/ListingDetailDummy'
+import AuctionDetailContent from '@/components/features/auction/bid/AuctionDetailContent'
+import { AuctionDetailSkeleton } from '@/components/skeleton/auction'
 
 export default function AuctionDetailPage() {
-  const auctionDummyData = generateListingDetail(1)
-  const auctionEndTime = new Date('2025-11-20T24:00:00')
-
-  const handleBid = (_amount: number) => {
-    // 결제 페이지로 이동 로직은 AuctionBidSection에서 처리됨
-    // TODO: 실제 입찰 API 호출
-  }
-
   return (
-    <AuctionDetail
-      data={auctionDummyData}
-      auctionEndTime={auctionEndTime}
-      minimumBid={50000}
-      deposit={20000000}
-      lessorName="변가원"
-      lessorImage="/profile.svg"
-      onBid={handleBid}
-    />
+    <Suspense fallback={<AuctionDetailSkeleton />}>
+      <AuctionDetailContent />
+    </Suspense>
   )
 }

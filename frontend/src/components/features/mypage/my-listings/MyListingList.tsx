@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import MyListingCard from '@/components/features/mypage/my-listings/MyListingCard'
-import MyListingListSkeleton from '@/components/features/mypage/skeleton/MyListingListSkeleton'
+import MyListingListSkeleton from '@/components/skeleton/mypage/MyListingListSkeleton'
 import { ROUTES } from '@/constants'
 import { mockMyListings } from '@/data/MyListingsDummy'
 import { MyListing } from '@/types'

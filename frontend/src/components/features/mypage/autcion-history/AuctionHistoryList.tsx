@@ -8,7 +8,7 @@ import { ROUTES } from '@/constants'
 import { mockAuctionHistories } from '@/data/AuctionHistoryDummy'
 import { AuctionHistory } from '@/types/models/auction'
 
-import AuctionHistoryListSkeleton from '../skeleton/AuctionHistoryListSkeleton'
+import AuctionHistoryListSkeleton from '../../../skeleton/mypage/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
 
 interface AuctionHistoryListProps {

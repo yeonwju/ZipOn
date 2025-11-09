@@ -1,4 +1,4 @@
-import AuctionHistoryCardSkeleton from '@/components/features/mypage/skeleton/AuctionHistoryCardSkeleton'
+import AuctionHistoryCardSkeleton from '@/components/skeleton/mypage/AuctionHistoryCardSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 interface AuctionHistoryListSkeletonProps {
   className?: string

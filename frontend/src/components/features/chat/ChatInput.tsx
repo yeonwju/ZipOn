@@ -34,7 +34,7 @@ export default function ChatInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-end gap-2 border-t bg-white px-4 py-3 shadow-sm"
+      className="flex items-end gap-2 border-t border-gray-200 bg-white px-4 py-3 shadow-sm"
     >
       {/* 입력창 */}
       <textarea
@@ -42,7 +42,7 @@ export default function ChatInput({
         onChange={e => setMessage(e.target.value)}
         onKeyDown={handleKeyPress}
         placeholder={placeholder}
-        className="max-h-24 min-h-[40px] flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400"
+        className="max-h-24 min-h-[40px] flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 focus:outline-none"
         rows={1}
       />
 
@@ -58,4 +58,3 @@ export default function ChatInput({
     </form>
   )
 }
-

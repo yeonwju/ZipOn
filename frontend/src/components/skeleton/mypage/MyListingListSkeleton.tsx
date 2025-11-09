@@ -1,4 +1,4 @@
-import MyListingCardSkeleton from '@/components/features/mypage/skeleton/MyListingCardSkeleton'
+import MyListingCardSkeleton from '@/components/skeleton/mypage/MyListingCardSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface MyListingListSkeletonProps {
