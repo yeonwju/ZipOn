@@ -1,6 +1,6 @@
 import './globals.css'
 
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import PwaProvider from '@/components/common/PwaProvider'
@@ -21,7 +21,6 @@ export const metadata: Metadata = {
     locale: 'ko_KR',
   },
   manifest: '/manifest.webmanifest',
-  themeColor: '#0ea5e9',
   icons: {
     icon: [
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -31,13 +30,18 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#0ea5e9',
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko" suppressHydrationWarning className="h-full">
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#0ea5e9" />
-
+        
         <link
           rel="stylesheet"
           as="style"

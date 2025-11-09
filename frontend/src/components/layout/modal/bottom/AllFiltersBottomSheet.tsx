@@ -9,6 +9,7 @@ import {
   PriceFilter as PriceFilterComponent,
   RoomCountFilter as RoomCountFilterComponent,
 } from '@/components/features/listings'
+import { useMapFilterStore } from '@/store/mapFilter'
 import type {
   AreaFilter,
   DirectionFilter,
@@ -22,18 +23,6 @@ import BottomSheet from './BottomSheet'
 interface AllFiltersBottomSheetProps {
   isOpen: boolean
   onClose: () => void
-  priceFilter: PriceFilter
-  roomCountFilter: RoomCountFilter
-  areaFilter: AreaFilter
-  floorFilter: FloorFilter
-  directionFilter: DirectionFilter
-  onPriceChange: (price: PriceFilter) => void
-  onRoomCountChange: (count: RoomCountFilter | undefined) => void
-  onAreaChange: (area: AreaFilter) => void
-  onFloorChange: (floor: FloorFilter | undefined) => void
-  onDirectionChange: (direction: DirectionFilter | undefined) => void
-  onResetFilters: () => void
-  onApplyFilters: () => void
 }
 
 // console.log용 DIRECTION_OPTIONS
@@ -48,37 +37,42 @@ const DIRECTION_OPTIONS: { value: DirectionFilter; label: string }[] = [
 const MAX_AREA = 100 // 면적 최대값: 100평
 const MIN_AREA = 1 // 면적 최소값: 1평
 
-export default function AllFiltersBottomSheet({
-  isOpen,
-  onClose,
-  priceFilter,
-  roomCountFilter,
-  areaFilter,
-  floorFilter,
-  directionFilter,
-  onPriceChange,
-  onRoomCountChange,
-  onAreaChange,
-  onFloorChange,
-  onDirectionChange,
-  onResetFilters,
-  onApplyFilters,
-}: AllFiltersBottomSheetProps) {
+export default function AllFiltersBottomSheet({ isOpen, onClose }: AllFiltersBottomSheetProps) {
+  // Store에서 필터 상태 및 액션 가져오기
+  const priceFilter = useMapFilterStore(state  => state.priceFilter)
+  const roomCountFilter = useMapFilterStore(state => state.roomCountFilter)
+  const areaFilter = useMapFilterStore(state => state.areaFilter)
+  const floorFilter = useMapFilterStore(state => state.floorFilter)
+  const directionFilter = useMapFilterStore(state => state.directionFilter)
+
+  const setPriceFilter = useMapFilterStore(state => state.setPriceFilter)
+  const setRoomCountFilter = useMapFilterStore(state => state.setRoomCountFilter)
+  const setAreaFilter = useMapFilterStore(state => state.setAreaFilter)
+  const setFloorFilter = useMapFilterStore(state => state.setFloorFilter)
+  const setDirectionFilter = useMapFilterStore(state => state.setDirectionFilter)
+  const resetAllFilters = useMapFilterStore(state => state.resetAllFilters)
+
   // 임시 상태 관리 (모달이 열릴 때마다 초기화)
   const [tempPriceFilter, setTempPriceFilter] = useState(priceFilter)
-  const [tempRoomCountFilter, setTempRoomCountFilter] = useState(roomCountFilter)
-  const [tempAreaFilter, setTempAreaFilter] = useState(areaFilter)
-  const [tempFloorFilter, setTempFloorFilter] = useState(floorFilter)
-  const [tempDirectionFilter, setTempDirectionFilter] = useState(directionFilter)
+  const [tempRoomCountFilter, setTempRoomCountFilter] = useState<RoomCountFilter>(
+    roomCountFilter ?? 'all'
+  )
+  const [tempAreaFilter, setTempAreaFilter] = useState<AreaFilter>(
+    areaFilter ?? { min: MIN_AREA, max: MAX_AREA }
+  )
+  const [tempFloorFilter, setTempFloorFilter] = useState<FloorFilter>(floorFilter ?? 'all')
+  const [tempDirectionFilter, setTempDirectionFilter] = useState<DirectionFilter>(
+    directionFilter ?? 'all'
+  )
 
   // isOpen이 변경될 때마다 상태 초기화 (key prop과 함께 사용하여 리마운트)
   React.useEffect(() => {
     if (isOpen) {
       setTempPriceFilter(priceFilter)
-      setTempRoomCountFilter(roomCountFilter)
-      setTempAreaFilter(areaFilter)
-      setTempFloorFilter(floorFilter)
-      setTempDirectionFilter(directionFilter)
+      setTempRoomCountFilter(roomCountFilter ?? 'all')
+      setTempAreaFilter(areaFilter ?? { min: MIN_AREA, max: MAX_AREA })
+      setTempFloorFilter(floorFilter ?? 'all')
+      setTempDirectionFilter(directionFilter ?? 'all')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
@@ -136,15 +130,16 @@ export default function AllFiltersBottomSheet({
     })
     console.log('===================')
 
-    onPriceChange(tempPriceFilter)
+    // Store에 필터 적용
+    setPriceFilter(tempPriceFilter)
     // 방 개수: 'all'은 필터 없음을 의미하므로 undefined로 전달
-    onRoomCountChange(tempRoomCountFilter === 'all' ? undefined : tempRoomCountFilter)
-    onAreaChange(tempAreaFilter)
+    setRoomCountFilter(tempRoomCountFilter === 'all' ? undefined : tempRoomCountFilter)
+    setAreaFilter(tempAreaFilter)
     // 층수: 'all'은 필터 없음을 의미하므로 undefined로 전달
-    onFloorChange(tempFloorFilter === 'all' ? undefined : tempFloorFilter)
+    setFloorFilter(tempFloorFilter === 'all' ? undefined : tempFloorFilter)
     // 해방향: 'all'은 필터 없음을 의미하므로 undefined로 전달
-    onDirectionChange(tempDirectionFilter === 'all' ? undefined : tempDirectionFilter)
-    onApplyFilters()
+    setDirectionFilter(tempDirectionFilter === 'all' ? undefined : tempDirectionFilter)
+    onClose()
   }
 
   const handleReset = () => {
@@ -159,7 +154,8 @@ export default function AllFiltersBottomSheet({
     setTempAreaFilter({ min: MIN_AREA, max: MAX_AREA })
     setTempFloorFilter('all')
     setTempDirectionFilter('all')
-    onResetFilters()
+    // Store 초기화
+    resetAllFilters()
   }
 
   return (

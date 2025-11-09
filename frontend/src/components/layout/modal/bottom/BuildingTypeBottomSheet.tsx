@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import React from 'react'
 
+import { useMapFilterStore } from '@/store/mapFilter'
 import type { BuildingType } from '@/types/models/listing'
 
 import BottomSheet from './BottomSheet'
@@ -10,8 +11,6 @@ import BottomSheet from './BottomSheet'
 interface BuildingTypeBottomSheetProps {
   isOpen: boolean
   onClose: () => void
-  selectedType: BuildingType | 'all'
-  onSelectType: (type: BuildingType | 'all') => void
 }
 
 interface BuildingTypeOption {
@@ -41,14 +40,13 @@ const buildingTypesWhiteIcons: BuildingTypeOption[] = [
  * - 선택 전: 컬러 아이콘
  * - 선택 후: 화이트 아이콘
  */
-export default function BuildingTypeBottomSheet({
-                                                  isOpen,
-                                                  onClose,
-                                                  selectedType,
-                                                  onSelectType,
-                                                }: BuildingTypeBottomSheetProps) {
+export default function BuildingTypeBottomSheet({ isOpen, onClose }: BuildingTypeBottomSheetProps) {
+  // Store에서 필터 상태 및 액션 가져오기
+  const buildingType = useMapFilterStore(state => state.buildingType)
+  const setBuildingType = useMapFilterStore(state  => state.setBuildingType)
+
   const handleSelect = (type: BuildingType | 'all') => {
-    onSelectType(type)
+    setBuildingType(type)
     onClose()
   }
 
@@ -64,14 +62,14 @@ export default function BuildingTypeBottomSheet({
         <h3 className="mb-3 text-sm font-semibold text-gray-900 px-2">건물 유형</h3>
 
         <div className="flex flex-wrap gap-2">
-          {buildingTypesIcons.map((buildingType) => {
-            const isSelected = selectedType === buildingType.type
-            const iconSrc = getIcon(buildingType.type, isSelected)
+          {buildingTypesIcons.map((buildingTypeOption) => {
+            const isSelected = buildingType === buildingTypeOption.type
+            const iconSrc = getIcon(buildingTypeOption.type, isSelected)
 
             return (
               <button
-                key={buildingType.type}
-                onClick={() => handleSelect(buildingType.type)}
+                key={buildingTypeOption.type}
+                onClick={() => handleSelect(buildingTypeOption.type)}
                 className={`flex items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-medium transition-all duration-150 ${
                   isSelected
                     ? 'border-blue-500 bg-blue-500 text-white'
@@ -83,11 +81,11 @@ export default function BuildingTypeBottomSheet({
                     src={iconSrc}
                     width={16}
                     height={16}
-                    alt={buildingType.label}
+                    alt={buildingTypeOption.label}
                     className="transition-opacity duration-150"
                   />
                 )}
-                <span>{buildingType.label}</span>
+                <span>{buildingTypeOption.label}</span>
               </button>
             )
           })}

@@ -24,13 +24,13 @@ export const useUserStore = create<UserState>()(
        * - isBroker, isVerified가 null/undefined면 기본값 적용
        * - 💡 테스트용: 강제로 기본값 적용하려면 아래 주석 해제
        */
-      setUser: user => {
+      setUser: (user: User | null) => {
         if (!user) {
           set({ user: null })
           return
         }
 
-        const normalizedUser = {
+        const normalizedUser: User = {
           ...user,
           // 💡 테스트용: 강제로 기본값 적용 (백엔드 값 무시)
           isBroker: DEFAULT_IS_BROKER,
@@ -51,7 +51,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'user-storage',
-      partialize: state => ({ user: state.user }),
+      partialize: (state: UserState) => ({ user: state.user }),
     }
   )
 )

@@ -19,8 +19,8 @@ import { CURRENT_LOCATION_ZOOM_LEVEL } from '@/types/map'
 export function useMapControls(userLocation: Coordinates | null) {
   const [map, setMap] = useState<KakaoMap | null>(null)
 
-  const handleSetMap = (mapInstance: unknown) => {
-    // react-kakao-maps-sdk가 전달하는 Map 인스턴스는 kakao.maps.Map과 호환 가능
+  const handleSetMap = (mapInstance: KakaoMap | kakao.maps.Map) => {
+    // react-kakao-maps-sdk가 전달하는 Map 인스턴스를 KakaoMap으로 설정
     setMap(mapInstance as KakaoMap)
   }
 

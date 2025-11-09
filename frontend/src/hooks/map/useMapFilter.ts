@@ -1,48 +1,36 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import type { AreaFilter, DirectionFilter, FloorFilter, PriceFilter, RoomCountFilter } from '@/types/filter'
-import type { AuctionType, BuildingType, ListingData } from '@/types/models/listing'
+import { useMapFilterStore } from '@/store/mapFilter'
+import type { ListingData } from '@/types/models/listing'
 
 interface UseMapFilterParams {
   listings: ListingData[]
-  buildingType?: BuildingType | 'all'
-  priceFilter?: PriceFilter
-  roomCountFilter?: RoomCountFilter
-  areaFilter?: AreaFilter
-  floorFilter?: FloorFilter
-  directionFilter?: DirectionFilter
 }
 
 /**
  * 지도 매물 필터링 훅
  *
- * 필터 상태와 필터링된 매물 목록을 관리합니다.
+ * zustand store에서 필터 상태를 가져와 매물 목록을 필터링합니다.
  *
- * @param params - 전체 매물 목록 및 필터 옵션
- * @returns 필터 상태와 필터링된 매물 목록
+ * @param params - 전체 매물 목록
+ * @returns 필터링된 매물 목록과 필터 상태
  *
  * @example
  * ```tsx
- * const { auctionFilter, setAuctionFilter, buildingType, setBuildingType, filteredListings, isAuctionFilter } = useMapFilter({
- *   listings,
- *   priceFilter,
- *   roomCountFilter,
- *   areaFilter,
- *   floorFilter,
- *   directionFilter
+ * const { filteredListings, isAuctionFilter } = useMapFilter({
+ *   listings
  * })
  * ```
  */
-export function useMapFilter({
-  listings,
-  buildingType = 'all',
-  priceFilter,
-  roomCountFilter,
-  areaFilter,
-  floorFilter,
-  directionFilter,
-}: UseMapFilterParams) {
-  const [auctionFilter, setAuctionFilter] = useState<AuctionType>('all')
+export function useMapFilter({ listings }: UseMapFilterParams) {
+  // Store에서 필터 상태 가져오기
+  const buildingType = useMapFilterStore(state => state.buildingType)
+  const auctionFilter = useMapFilterStore(state => state.auctionFilter)
+  const priceFilter = useMapFilterStore(state => state.priceFilter)
+  const roomCountFilter = useMapFilterStore(state => state.roomCountFilter)
+  const areaFilter = useMapFilterStore(state => state.areaFilter)
+  const floorFilter = useMapFilterStore(state => state.floorFilter)
+  const directionFilter = useMapFilterStore(state => state.directionFilter)
 
   // 필터링된 매물 목록
   const filteredListings = useMemo(() => {
@@ -150,8 +138,6 @@ export function useMapFilter({
   }, [auctionFilter])
 
   return {
-    auctionFilter,
-    setAuctionFilter,
     filteredListings,
     isAuctionFilter,
   }
