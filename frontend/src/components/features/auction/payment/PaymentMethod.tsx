@@ -13,7 +13,7 @@ export default function PaymentMethod({ onPayment, className }: PaymentMethodPro
   }
 
   return (
-    <div className={className || 'rounded-2xl border border-gray-100 bg-gray-50 p-4'}>
+    <div className={className || 'rounded-2xl border border-gray-300 bg-gray-50 p-4'}>
       <h3 className="mb-3 text-base font-semibold text-gray-900">결제 수단</h3>
       <div className="flex flex-col gap-3">
         <div className="rounded-lg border border-gray-200 bg-white p-3">
@@ -33,4 +33,3 @@ export default function PaymentMethod({ onPayment, className }: PaymentMethodPro
     </div>
   )
 }
-

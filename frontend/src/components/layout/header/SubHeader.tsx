@@ -12,7 +12,7 @@ import {
   Settings,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
 
 type IconAction = {
@@ -22,7 +22,7 @@ type IconAction = {
 }
 
 /* ---------------------------------------------------
- *  1. 헬퍼 함수: 공통 Badge 아이콘 생성
+ * 1️⃣ 헬퍼: Badge 아이콘 생성기
  * --------------------------------------------------- */
 const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string): IconAction => ({
   href,
@@ -34,7 +34,7 @@ const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string)
 })
 
 /* ---------------------------------------------------
- *  2. 공통 아이콘 세트 정의
+ * 2️⃣ 공통 ICON 세트
  * --------------------------------------------------- */
 const ICONS = {
   search: { href: '/search', icon: <Search size={17} /> },
@@ -46,7 +46,7 @@ const ICONS = {
 }
 
 /* ---------------------------------------------------
- * 🗂 3. 페이지별 아이콘 구성 맵
+ * 3️⃣ 기본 아이콘 매핑
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
@@ -56,22 +56,16 @@ const rightIconsMap: Record<string, IconAction[]> = {
   '/verify/phone': [],
   '/verify/business': [],
   '/mypage/my-listings': [ICONS.notification, ICONS.chat],
-
   '/mypage/my-auction': [ICONS.notification, ICONS.chat],
-
   '/mypage': [ICONS.notification, ICONS.chat, ICONS.settings],
-
   '/listing': [ICONS.like],
-
   '/live/list': [ICONS.calendar, ICONS.notification, ICONS.chat],
-
   '/calendar': [ICONS.notification, ICONS.chat],
-
   '/live/create': [],
 }
 
 /* ---------------------------------------------------
- * 🏷 4. 페이지 타이틀 맵
+ * 4️⃣ 기본 타이틀 매핑
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
   '/auction/payment': '결제',
@@ -94,19 +88,22 @@ const pageTitleMap: Record<string, string> = {
 }
 
 /* ---------------------------------------------------
- *  5. SubHeader 컴포넌트
+ * 5️⃣ SubHeader 컴포넌트
  * --------------------------------------------------- */
 interface SubHeaderProps {
-  pathname: string
+  pathname?: string
   title?: string
   customRightIcons?: IconAction[]
 }
 
-export default function SubHeader({ pathname, title, customRightIcons }: SubHeaderProps) {
+export default function SubHeader({ pathname: propPath, title, customRightIcons }: SubHeaderProps) {
   const router = useRouter()
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const pathname = propPath || usePathname()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
+  /* 스크롤 시 헤더 숨김 처리 */
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -119,14 +116,42 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
-  // 긴 경로부터 매칭 (예: /mypage/my-listings가 /mypage보다 먼저 체크되도록)
+  /* ---------------------------------------------------
+   * 6️⃣ 동적 경로 처리 (정규식 기반)
+   * --------------------------------------------------- */
+  let dynamicTitle = ''
+  let dynamicIcons: IconAction[] = rightIconsMap.default
+
+  if (/^\/listings\/\d+\/brokers$/.test(pathname)) {
+    dynamicTitle = '중개 신청'
+    dynamicIcons = [ICONS.notification, ICONS.chat]
+  } else if (/^\/listings\/\d+\/brokers\/apply$/.test(pathname)) {
+    dynamicTitle = '중개인 선택'
+    dynamicIcons = [ICONS.notification, ICONS.chat]
+  } else if (/^\/auction\/\d+$/.test(pathname)) {
+    dynamicTitle = '경매 입찰'
+    dynamicIcons = [ICONS.notification, ICONS.chat]
+  } else if (/^\/auction\/\d+\/payment\/pending$/.test(pathname)) {
+    dynamicTitle = '결제 대기'
+    dynamicIcons = []
+  } else if (/^\/auction\/\d+\/payment\/complete$/.test(pathname)) {
+    dynamicTitle = '결제 완료'
+    dynamicIcons = []
+  }
+
+  /* ---------------------------------------------------
+   * 7️⃣ 기존 정적 매칭 + 동적 매칭 통합
+   * --------------------------------------------------- */
   const titleKey = Object.keys(pageTitleMap)
-    .sort((a, b) => b.length - a.length) // 길이 내림차순 정렬
+    .sort((a, b) => b.length - a.length)
     .find(key => pathname.startsWith(key))
 
-  const displayTitle = title || (titleKey ? pageTitleMap[titleKey] : '')
+  const displayTitle = title || dynamicTitle || (titleKey ? pageTitleMap[titleKey] : '')
   const rightIcons =
-    customRightIcons || (titleKey && rightIconsMap[titleKey]) || rightIconsMap.default
+    customRightIcons ||
+    dynamicIcons ||
+    (titleKey && rightIconsMap[titleKey]) ||
+    rightIconsMap.default
 
   return (
     <nav
@@ -151,10 +176,7 @@ export default function SubHeader({ pathname, title, customRightIcons }: SubHead
       </h1>
 
       {/* 오른쪽: 페이지별 아이콘 */}
-      {/* 오른쪽: 페이지별 아이콘 */}
       <div className="flex flex-row items-center">
-        {' '}
-        {/* gap 조금 줄임 */}
         {rightIcons.map((action, i) =>
           action.onClick ? (
             <button

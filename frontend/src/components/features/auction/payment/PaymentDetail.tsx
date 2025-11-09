@@ -28,7 +28,7 @@ export default function PaymentDetail({
 }: PaymentDetailProps) {
   return (
     <div className="flex flex-col bg-gray-50 px-5 pt-2">
-      <div className="rounded-3xl bg-white px-5 py-6 shadow-sm">
+      <div className="rounded-3xl border border-gray-300 bg-white px-5 py-6 shadow-sm">
         {/* 헤더: 주소 및 매물명 */}
         <PaymentHeader address={data.address} propertyName={data.propertyNm} />
 

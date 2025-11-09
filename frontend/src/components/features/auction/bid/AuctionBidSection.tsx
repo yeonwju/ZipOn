@@ -43,7 +43,7 @@ export default function AuctionBidSection({
         if (onBid) {
           onBid(amount)
         }
-        router.push(`/auction/payment/1`)
+        router.push(`/auction/1/payment/pending`)
       },
       undefined,
       { confirmText: '결제하기', cancelText: '취소' }
@@ -52,7 +52,7 @@ export default function AuctionBidSection({
 
   return (
     <>
-      <div className={className || 'rounded-2xl border border-gray-100 bg-gray-50 p-4'}>
+      <div className={className || 'rounded-2xl border border-gray-300 bg-gray-50 p-4'}>
         <h3 className="mb-3 text-base font-semibold text-gray-900">입찰하기</h3>
         <div className="flex flex-col divide-y divide-gray-200">
           <div className="flex justify-between py-2 text-sm">
@@ -75,13 +75,22 @@ export default function AuctionBidSection({
             />
           </div>
         </div>
-
-        <button
-          onClick={handleBid}
-          className="mt-4 w-full rounded-full bg-blue-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 active:bg-blue-700"
-        >
-          입찰하기
-        </button>
+        {bidAmount ? (
+          <button
+            onClick={handleBid}
+            className="mt-4 w-full rounded-full bg-blue-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 active:bg-blue-700"
+          >
+            입찰하기
+          </button>
+        ) : (
+          <button
+            onClick={handleBid}
+            className="mt-4 w-full rounded-full bg-blue-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-300"
+            disabled
+          >
+            입찰하기
+          </button>
+        )}
       </div>
 
       <AlertDialog />

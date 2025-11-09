@@ -14,7 +14,7 @@ export default function CompletePaymentInfo({
   const totalAmount = deposit + bidAmount
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+    <div className="rounded-2xl border border-gray-300 bg-gray-50 p-4">
       <h3 className="mb-3 text-base font-semibold text-gray-900">신청 내역</h3>
       <div className="flex flex-col divide-y divide-gray-200">
         <div className="flex justify-between py-2 text-sm">
@@ -41,4 +41,3 @@ export default function CompletePaymentInfo({
     </div>
   )
 }
-
