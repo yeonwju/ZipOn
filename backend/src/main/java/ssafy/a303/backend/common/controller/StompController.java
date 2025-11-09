@@ -160,6 +160,7 @@ public class StompController {
                 .sentAt(LocalDateTime.now())
                 .build();
 
+        // 메시지 redis 저장
         liveChatService.saveChatMessage(liveSeq, response);
 
         String messageJson = objectMapper.writeValueAsString(response);
