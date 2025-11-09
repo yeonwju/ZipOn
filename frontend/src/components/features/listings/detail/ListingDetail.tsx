@@ -1,5 +1,7 @@
 'use client'
 
+import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { ListingDetailData } from '@/types'
 
 import ListingDescription from './ListingDescription'
@@ -28,17 +30,17 @@ export default function ListingDetail({ listing }: ListingDetailProps) {
   const features: string[] = []
   if (listing.hasElevator) features.push('엘리베이터')
   if (listing.petAvailable) features.push('반려동물 가능')
-  if (listing.parkingCnt && Number(listing.parkingCnt) > 0) features.push(`주차 ${listing.parkingCnt}대`)
+  if (listing.parkingCnt && Number(listing.parkingCnt) > 0)
+    features.push(`주차 ${listing.parkingCnt}대`)
   if (listing.isAucPref) features.push('경매 선호')
   if (listing.isBrkPref) features.push('중개 선호')
-  
+
   return (
     <div className="h-full">
       {/* 컨텐츠 */}
       <main>
         {/* 이미지 갤러리 */}
         <ListingImageGallery images={listing.images} />
-
         {/* 기본 정보 */}
         <ListingInfo
           name={listing.propertyNm}
