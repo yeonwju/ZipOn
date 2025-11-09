@@ -50,7 +50,8 @@ const ICONS = {
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
-  '/chat' : [ICONS.search, ICONS.notification],
+  '/auction/bid': [ICONS.notification, ICONS.chat],
+  '/chat': [ICONS.search, ICONS.notification],
   '/verify/phone': [],
   '/verify/business': [],
   '/mypage/my-listings': [ICONS.notification, ICONS.chat],
@@ -72,6 +73,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
  * 🏷 4. 페이지 타이틀 맵
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
+  '/auction/bid': '경매 입찰',
   '/verify/phone': '휴대폰 인증',
   '/verify/business': '사업자 인증',
   '/mypage/my-listings': '내 매물',
@@ -86,7 +88,7 @@ const pageTitleMap: Record<string, string> = {
   '/listing': '',
   '/calendar': '라이브 일정',
   '/live/create': '라이브 생성',
-  '/chat' : '채팅',
+  '/chat': '채팅',
 }
 
 /* ---------------------------------------------------
