@@ -57,7 +57,8 @@ public class ChatController {
                         "opponent": {
                           "userSeq": 2,
                           "name": "홍길동",
-                          "nickname": "집주인"
+                          "nickname": "집주인",
+                          "profileImg": "https://s3.amazonaws.com/bucket/profile.jpg"
                         }
                       }
                     }
@@ -124,10 +125,16 @@ public class ChatController {
                       "data": [
                         {
                           "roomSeq": 1,
-                          "partnerSeq": 2,
-                          "partnerName": "홍길동",
-                          "lastMessage": "안녕하세요",
-                          "lastSentAt": "2025-11-06T10:30:00",
+                          "partner": {
+                            "userSeq": 2,
+                            "name": "홍길동",
+                            "nickname": "집주인",
+                            "profileImg": "https://s3.amazonaws.com/bucket/profile.jpg"
+                          },
+                          "lastMessage": {
+                            "content": "안녕하세요",
+                            "sentAt": "2025-11-06T10:30:00"
+                          },
                           "unreadCount": 3
                         }
                       ]
@@ -161,21 +168,25 @@ public class ChatController {
                             examples = @ExampleObject(
                                     name = "채팅 내역 조회 성공",
                                     value = """
-                    {
-                      "status": 200,
-                      "message": "채팅 내역을 불러왔습니다.",
-                      "data": [
-                        {
-                          "messageSeq": 1,
-                          "roomSeq": 1,
-                          "senderSeq": 2,
-                          "senderName": "홍길동",
-                          "content": "안녕하세요",
-                          "sentAt": "2025-11-06T10:30:00"
-                        }
-                      ]
-                    }
-                    """
+                                {
+                                  "status": 200,
+                                  "message": "채팅 내역을 불러왔습니다.",
+                                  "data": [
+                                    {
+                                      "messageSeq": 1,
+                                      "roomSeq": 1,
+                                      "sender": {
+                                        "userSeq": 2,
+                                        "name": "홍길동",
+                                        "nickname": "집주인",
+                                        "profileImg": "https://s3.amazonaws.com/bucket/profile.jpg"
+                                      },
+                                      "content": "안녕하세요",
+                                      "sentAt": "2025-11-06T10:30:00"
+                                    }
+                                  ]
+                                }
+                                """
                             )
                     )
             ),
