@@ -8,11 +8,6 @@ pipeline {
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    // --- Database (직접 사용; 중간 매핑 제거) ----
-    SPRING_DATASOURCE_URL      = credentials('DB_URL')
-    SPRING_DATASOURCE_USERNAME = credentials('DB_USER')
-    SPRING_DATASOURCE_PASSWORD = credentials('DB_PW')
-
     // --- OAuth / API Keys ---
     GOOGLE_CLIENT_ID     = credentials('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
@@ -46,7 +41,7 @@ pipeline {
     AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     S3_SWAGGER = "s3://zipon-media/dev/swagger/swagger.json"
 
-    // --- Elasticsearch ---
+    // --- Elasticsearch (host만; 포트는 yml에서 9200) ---
     ES_URL            = 'zipondev-elasticsearch'
     ELASTICSEARCH_URL = 'zipondev-elasticsearch'
 
@@ -128,42 +123,52 @@ pipeline {
       }
     }
 
+    // ✅ 수정된 Deploy DEV (DB env 100% 전달)
     stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
         script {
-          sh '''
-            set -e
-            docker network connect zipon-net jenkins-container 2>/dev/null || true
+          withCredentials([
+            string(credentialsId: 'DB_URL',  variable: 'SPRING_DATASOURCE_URL'),
+            string(credentialsId: 'DB_USER', variable: 'SPRING_DATASOURCE_USERNAME'),
+            string(credentialsId: 'DB_PW',   variable: 'SPRING_DATASOURCE_PASSWORD')
+          ]) {
+            sh """
+              set -e
+              docker network connect zipon-net jenkins-container 2>/dev/null || true
 
-            echo "[DEV] Deploying with ${DEV_COMPOSE}"
-            docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
+              echo "[DEV] Deploying with ${DEV_COMPOSE}"
 
-            # 초기화 대기 (DB 마이그/빈 캐시 등 감안)
-            echo "[DEV] Warm-up 30s..."
-            sleep 30
+              # ✅ .env 파일 생성 (Compose가 직접 읽게 함)
+              echo SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} > .env
+              echo SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} >> .env
+              echo SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} >> .env
 
-            # 내부 백엔드 직접 헬스체크 (Nginx 우회)
-            echo "[DEV] Health check zipondev-backend (127.0.0.1:28080)..."
-            OK=""
-            for i in $(seq 1 60); do
-              # 보안 설정에 따라 200 또는 (Nginx 경유 시) 302가 올 수 있음
-              CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
-              if [ "$CODE" = "200" ] || [ "$CODE" = "302" ]; then
-                echo "[DEV] ✅ OK (HTTP $CODE) on attempt $i"
-                OK=1
-                break
-              fi
-              echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/60) HTTP=$CODE"
-              sleep 2
-            done
-            [ -n "$OK" ] || {
-              echo "[DEV] ❌ Health check failed"
-              echo "--- Backend Logs (last 50 lines) ---"
-              docker logs zipondev-backend --tail 50 || true
-              exit 1
-            }
-          '''
+              docker compose --env-file .env -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
+
+              echo "[DEV] Warm-up 30s..."
+              sleep 30
+
+              echo "[DEV] Health check zipondev-backend..."
+              OK=""
+              for i in $(seq 1 60); do
+                CODE=\$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
+                if [ "\$CODE" = "200" ] || [ "\$CODE" = "302" ]; then
+                  echo "[DEV] ✅ OK (HTTP \$CODE) on attempt \$i"
+                  OK=1
+                  break
+                fi
+                echo "[DEV] \$(date '+%H:%M:%S') Waiting for backend... (\$i/60) HTTP=\$CODE"
+                sleep 2
+              done
+              [ -n "\$OK" ] || {
+                echo "[DEV] ❌ Health check failed"
+                echo "--- Backend Logs (last 50 lines) ---"
+                docker logs zipondev-backend --tail 50 || true
+                exit 1
+              }
+            """
+          }
         }
       }
     }
