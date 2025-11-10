@@ -123,8 +123,7 @@ pipeline {
       }
     }
 
-    // ✅ 수정된 Deploy DEV (DB env 100% 전달)
-    stage('Deploy DEV') {
+   stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
         script {
@@ -139,12 +138,13 @@ pipeline {
 
               echo "[DEV] Deploying with ${DEV_COMPOSE}"
 
-              # ✅ .env 파일 생성 (Compose가 직접 읽게 함)
+              # ✅ .env 파일 생성
               echo SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} > .env
               echo SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} >> .env
               echo SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} >> .env
 
-              docker compose --env-file .env -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
+              # ✅ Groovy 파싱 에러 방지: 따옴표로 묶음
+              docker compose --env-file .env -f "${DEV_COMPOSE}" up -d --force-recreate --remove-orphans
 
               echo "[DEV] Warm-up 30s..."
               sleep 30
@@ -172,6 +172,7 @@ pipeline {
         }
       }
     }
+
 
     stage('Publish OpenAPI (DEV)') {
       when { anyOf { branch 'dev'; branch 'develop' } }
