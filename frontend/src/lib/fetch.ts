@@ -4,8 +4,9 @@
  * - authFetch: 쿠키 포함 (인증 필요한 요청)
  * - publicFetch: 쿠키 미포함 (공개 요청)
  */
-import { API_BASE_URL } from '@/constants'
 import { cookies } from 'next/headers'
+
+import { API_BASE_URL } from '@/constants'
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean>

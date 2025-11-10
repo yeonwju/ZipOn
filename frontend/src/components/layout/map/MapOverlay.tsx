@@ -1,24 +1,14 @@
+'use client'
+
 import { ChevronDown, SlidersHorizontal } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { AuctionTypeFilter, BuildingTypeFilter } from '@/components/features/listings'
 import { MapControls } from '@/components/features/map'
 import SearchBar from '@/components/layout/SearchBar'
-import type { AuctionType, BuildingType } from '@/types/models/listing'
+import { useMapFilterStore } from '@/store/mapFilter'
 
 interface MapOverlayProps {
-  /**
-   * 현재 선택된 필터
-   */
-  selectedAuctionFilter: AuctionType
-  selectedBuildingType: BuildingType
-
-  /**
-   * 필터 변경 핸들러
-   */
-  onAuctionFilterChange: (filter: AuctionType) => void
-  onBuildingTypeChange: (filter: BuildingType) => void
-
   /**
    * 건물 타입 선택 모달 열기
    */
@@ -65,10 +55,6 @@ interface MapOverlayProps {
  * 중요: 컨테이너는 pointer-events-none으로 설정하여 여백 클릭 시 지도 인터랙션 가능
  */
 export default function MapOverlay({
-  selectedAuctionFilter,
-  selectedBuildingType,
-  onAuctionFilterChange,
-  onBuildingTypeChange,
   onOpenBuildingTypeModal,
   onOpenAllFiltersModal,
   onOpenPriceModal,
@@ -77,16 +63,17 @@ export default function MapOverlay({
   canMoveToLocation = false,
   children,
 }: MapOverlayProps) {
+  // Store에서 필터 상태 및 액션 가져오기
+  const auctionFilter = useMapFilterStore(state => state.auctionFilter)
+  const buildingType = useMapFilterStore(state => state.buildingType)
+  const setAuctionFilter = useMapFilterStore(state => state.setAuctionFilter)
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
       {/* 상단 영역: 건물 타입 필터 + 검색바 */}
       <div className="pointer-events-none flex h-15 items-start gap-1 p-1">
         {/* 건물 타입 필터 버튼 */}
         <div className="pointer-events-auto flex h-full shrink-0 items-center justify-center">
-          <BuildingTypeFilter
-            selectedFilter={selectedBuildingType}
-            onClick={onOpenBuildingTypeModal}
-          />
+          <BuildingTypeFilter selectedFilter={buildingType} onClick={onOpenBuildingTypeModal} />
         </div>
 
         {/* 검색바 - flex-1로 남은 공간 모두 차지 */}
@@ -129,10 +116,7 @@ export default function MapOverlay({
         </div>
         {/* 오른쪽: 경매 타입 필터 */}
         <div className="pointer-events-auto shrink-0">
-          <AuctionTypeFilter
-            selectedFilter={selectedAuctionFilter}
-            onFilterChange={onAuctionFilterChange}
-          />
+          <AuctionTypeFilter selectedFilter={auctionFilter} onFilterChange={setAuctionFilter} />
         </div>
       </div>
 

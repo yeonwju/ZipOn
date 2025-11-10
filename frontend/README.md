@@ -13,12 +13,29 @@ pnpm dev
 # or
 bun dev
 ```
-
+ 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## 📚 Documentation
+
+모든 가이드 문서는 `docs/guides/` 폴더에서 확인할 수 있습니다.
+
+### 🔍 Map Filter System
+
+- **[📖 Complete Filter Guide](./docs/guides/FILTERS.md)** - 필터 시스템 완벽 가이드 (Quick Reference + 상세 가이드 + 아키텍처)
+  - ⚡ Quick Reference - 바로 사용하기
+  - 📖 상세 가이드 - 단계별 설명 & 예시
+  - 🏗️ 아키텍처 - 시스템 이해하기
+
+### Other Guides
+
+- 📋 **[API Integration Guide](./docs/guides/API_INTEGRATION_GUIDE.md)** - API 연동 가이드
+- 🔧 **[Architecture Guide](./docs/guides/ARCHITECTURE_GUIDE.md)** - 프로젝트 아키텍처
+- 📊 **[Data Integration Guide](./docs/guides/DATA_INTEGRATION_GUIDE.md)** - 데이터 통합 가이드
 
 ## Learn More
 
@@ -34,3 +51,10 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## 주소
+- 중개 신청화면 : /listings/[id]/brokers
+- 중개인 선택화면 : /listings/[id]/brokers/apply
+- 경매 입찰 화면 : /auction/[id]
+- 경매 가상계좌 발급화면 : /auction/[id]/payment/pending
+- 경매 입금,결제 완료화면 : /auction/[id]/payment/complete

@@ -1,10 +1,10 @@
 import { Tabs, TabsList } from '@radix-ui/react-tabs'
+import { LockKeyhole } from 'lucide-react'
 
 import AuctionHistoryList from '@/components/features/mypage/autcion-history/AuctionHistoryList'
+import MyListingList from '@/components/features/mypage/my-listings/MyListingList'
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
 import { useUserStore } from '@/store/user'
-import { LockKeyhole } from 'lucide-react'
-import MyListingList from '@/components/features/mypage/my-listings/MyListingList'
 
 interface ListingTapsProps {
   className?: string
@@ -40,7 +40,7 @@ export default function ListingTaps({ className }: ListingTapsProps) {
               <LockKeyhole size={40} className="text-gray-400" />
               <p className="text-base font-medium">접근 권한이 없습니다</p>
               <p className="text-sm text-gray-400">
-                중개인 인증, 휴대폰 인증을 완료하시면 매물 등록 및 관리 기능을 이용하실 수 있습니다.
+                사업자 인증, 휴대폰 인증을 완료하시면 매물 등록 및 관리 기능을 이용하실 수 있습니다.
               </p>
             </div>
           )}

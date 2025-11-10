@@ -2,6 +2,7 @@
 
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
+import Link from 'next/link'
 
 import { useUserStore } from '@/store/user'
 
@@ -23,17 +24,18 @@ export default function AuthOptionGroup() {
             disabled
           >
             <VerifiedUserIcon fontSize={'inherit'} className={'text-white'} />
-            <span className={'text-xs font-medium text-white'}>중개인 인증</span>
+            <span className={'text-xs font-medium text-white'}>사업자 인증</span>
           </button>
         ) : (
-          <button
+          <Link
+            href={'/verify/business'}
             className={
               'inline-flex cursor-pointer items-center gap-1 rounded-full border border-red-400 bg-red-300 px-2 py-1'
             }
           >
             <PrivacyTipIcon fontSize={'inherit'} className="text-white" />
-            <span className={'text-xs font-medium text-white'}>중개인 인증</span>
-          </button>
+            <span className={'text-xs font-medium text-white'}>사업자 인증</span>
+          </Link>
         )}
 
         {isPhoneAuthEnabled ? (
@@ -47,14 +49,15 @@ export default function AuthOptionGroup() {
             <span className={'text-xs font-medium text-white'}>휴대폰 인증</span>
           </button>
         ) : (
-          <button
+          <Link
+            href={'/verify/phone'}
             className={
               'inline-flex cursor-pointer items-center gap-1 rounded-full border border-red-400 bg-red-300 px-2 py-1'
             }
           >
             <PrivacyTipIcon fontSize={'inherit'} className="text-white" />
             <span className={'text-xs font-medium text-white'}>휴대폰 인증</span>
-          </button>
+          </Link>
         )}
       </div>
     </div>

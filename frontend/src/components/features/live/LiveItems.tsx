@@ -1,5 +1,5 @@
 import { LiveItem } from '@/components/features/live'
-import { LiveItemProps } from '@/data/LiveItem'
+import { LiveItemProps } from '@/data/LiveItemDummy'
 
 export interface LiveItemsProps {
   items: LiveItemProps[]

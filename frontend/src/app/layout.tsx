@@ -32,18 +32,23 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#0ea5e9',
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" suppressHydrationWarning className="h-full">
+    <html lang="ko" suppressHydrationWarning>
       <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        
         <link
           rel="stylesheet"
           as="style"
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
+
         <link rel="apple-touch-icon" href="/icons/zipon-180.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -51,7 +56,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body
         suppressHydrationWarning
-        className="h-full"
         style={{ fontFamily: 'Pretendard, system-ui, -apple-system, sans-serif' }}
       >
         <PwaProvider />

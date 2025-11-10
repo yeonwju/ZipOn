@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { MyListing } from '@/types'
-import { mockMyListings } from '@/data/MyListings'
-import MyListingListSkeleton from '@/components/features/mypage/skeleton/MyListingListSkeleton'
 import { SearchX } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
 import MyListingCard from '@/components/features/mypage/my-listings/MyListingCard'
+import MyListingListSkeleton from '@/components/skeleton/mypage/MyListingListSkeleton'
 import { ROUTES } from '@/constants'
+import { mockMyListings } from '@/data/MyListingsDummy'
+import { MyListing } from '@/types'
 
 interface MyListingListProps {
   className?: string
@@ -66,14 +67,14 @@ export default function MyListingList({ className }: MyListingListProps) {
     <div className="flex flex-col">
       <div className={className}>
         {displayedItems.map(myListings => (
-          <MyListingCard key={myListings.id} myListing={myListings} />
+          <MyListingCard key={myListings.propertySeq} myListing={myListings} />
         ))}
       </div>
 
       {hasMore && (
         <Link
           href={ROUTES.MY_LISTINGS}
-          className="mt-2 w-full rounded-md border-2 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="mt-2 w-full rounded-md border-1 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 shadow-md transition-colors hover:bg-gray-50"
         >
           더보기
         </Link>

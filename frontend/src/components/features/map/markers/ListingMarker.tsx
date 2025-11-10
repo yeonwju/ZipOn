@@ -18,7 +18,7 @@ export function createListingMarkerElement(
   container.className = `relative cursor-pointer transform transition-transform hover:scale-110 pb-[6px]`
 
   // 경매/일반에 따른 색상 설정
-  const isAuction = listing.isAuction
+  const isAuction = listing.isAucPref
   const primaryColor = isAuction ? 'bg-red-500' : 'bg-blue-500'
   const textColor = isAuction ? 'text-red-500' : 'text-blue-500'
   const borderColor = isAuction ? 'border-red-500' : 'border-blue-500'
@@ -43,7 +43,7 @@ export function createListingMarkerElement(
   //  월세 박스 (말풍선 하단, 있는 경우에만)
   const rentBox = document.createElement('div')
   rentBox.className = `bg-white ${textColor} border ${borderColor} px-3 py-1 rounded-b-md`
-  rentBox.textContent = listing.rent > 0 ? `${listing.rent}만` : '매매'
+  rentBox.textContent = listing.mnRent > 0 ? `${listing.mnRent}만` : '매매'
 
   // ️ DOM 구조 조립
   priceLabel.appendChild(depositBox)

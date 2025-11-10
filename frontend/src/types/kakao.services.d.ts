@@ -25,8 +25,16 @@ declare global {
         MarkerImage: new (src: string, size: KakaoSize, options?: KakaoMarkerImageOptions) => KakaoMarkerImage
         MarkerClusterer: new (options: KakaoMarkerClustererOptions) => KakaoMarkerClusterer
         event: {
-          addListener: (target: KakaoMap | KakaoMarker | KakaoMarkerClusterer, type: string, handler: (...args: unknown[]) => void) => void
-          removeListener: (target: KakaoMap | KakaoMarker | KakaoMarkerClusterer, type: string, handler: (...args: unknown[]) => void) => void
+          addListener: (
+            target: KakaoMap | KakaoMarker | KakaoMarkerClusterer,
+            type: string,
+            handler: (event?: KakaoMouseEvent | KakaoCluster) => void
+          ) => void
+          removeListener: (
+            target: KakaoMap | KakaoMarker | KakaoMarkerClusterer,
+            type: string,
+            handler: (event?: KakaoMouseEvent | KakaoCluster) => void
+          ) => void
         }
       }
     }
@@ -175,6 +183,15 @@ declare global {
     getMarkers(): KakaoMarker[]
     getCenter(): KakaoLatLng
     getBounds(): KakaoLatLngBounds
+  }
+
+  // MouseEvent 타입 (지도/마커 클릭 이벤트에서 사용)
+  interface KakaoMouseEvent {
+    latLng: KakaoLatLng
+    point: {
+      x: number
+      y: number
+    }
   }
 
   interface KakaoGeocoder {

@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { NotificationItem } from '@/components/features/notification'
 
+export const dynamic = 'force-dynamic'
+
 export default function NotificationPage() {
   return (
     <section className="p-4">

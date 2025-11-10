@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { Profile } from '@/components/features'
 import ListingTaps from '@/components/features/mypage/ListingTaps'
 import { useUserStore } from '@/store/user'

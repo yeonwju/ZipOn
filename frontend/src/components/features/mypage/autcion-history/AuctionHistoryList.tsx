@@ -1,14 +1,15 @@
 'use client'
 
+import { SearchX } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import AuctionHistoryListSkeleton from '../skeleton/AuctionHistoryListSkeleton'
-import AuctionHistoryCard from './AuctionHistoryCard'
-import { SearchX } from 'lucide-react'
-import { AuctionHistory } from '@/types/models/auction'
-import { mockAuctionHistories } from '@/data/AuctionHistory'
 import { ROUTES } from '@/constants'
+import { mockAuctionHistories } from '@/data/AuctionHistoryDummy'
+import { AuctionHistory } from '@/types/models/auction'
+
+import AuctionHistoryListSkeleton from '../../../skeleton/mypage/AuctionHistoryListSkeleton'
+import AuctionHistoryCard from './AuctionHistoryCard'
 
 interface AuctionHistoryListProps {
   className?: string
@@ -84,7 +85,7 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
       {hasMore && (
         <Link
           href={ROUTES.MY_AUCTIONS_HISTORY}
-          className="mt-2 w-full rounded-md border-2 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="mt-2 w-full rounded-md border-1 border-gray-300 bg-white py-3 text-center text-sm font-medium text-gray-700 shadow-md transition-colors hover:bg-gray-50"
         >
           더보기
         </Link>

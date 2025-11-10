@@ -1,4 +1,5 @@
 import Image from 'next/image'
+
 import { MyListing } from '@/types'
 
 interface MyListingCardProps {
@@ -28,8 +29,8 @@ function getBrokerStatusBadge(status: string | null) {
 
 export default function MyListingCard({ className, myListing }: MyListingCardProps) {
   const priceText =
-    myListing.rent > 0
-      ? `${myListing.deposit.toLocaleString()} / ${myListing.rent.toLocaleString()}`
+    myListing.mnRent > 0
+      ? `${myListing.deposit.toLocaleString()} / ${myListing.mnRent.toLocaleString()}`
       : `${myListing.deposit.toLocaleString()}`
 
   return (
@@ -51,7 +52,7 @@ export default function MyListingCard({ className, myListing }: MyListingCardPro
           {/* 상단: 건물 타입 + 뱃지들 */}
           <div className="flex items-center gap-1">
             <span className="text-xs font-medium text-gray-500">{myListing.buildingType}</span>
-            {myListing.isAuction && (
+            {myListing.isAucPref && (
               <div className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5">
                 <span className="text-[10px] font-medium text-red-700">경매</span>
               </div>
@@ -69,7 +70,7 @@ export default function MyListingCard({ className, myListing }: MyListingCardPro
 
           {/* 가격 */}
           <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-xs text-gray-500">{myListing.rent > 0 ? '월세' : '전세'}</span>
+            <span className="text-xs text-gray-500">{myListing.mnRent > 0 ? '월세' : '전세'}</span>
             <span className="text-base font-bold text-blue-600">{priceText}</span>
             <span className="text-xs text-gray-500">만원</span>
           </div>

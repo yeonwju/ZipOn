@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 
-import { ListingItem, RecommendLiveItem } from '@/components/features/home'
+import { BuildingTypeQuickFilter, ListingItem, RecommendLiveItem } from '@/components/features/home'
 import SideScrollCardSection from '@/components/layout/SideScrollCardSection'
 
 export const metadata: Metadata = {
   title: 'HomeOn - 홈',
   description: '실시간 인기 방송과 추천 매물을 확인하세요',
 }
+
+export const dynamic = 'force-dynamic'
 
 /**
  * 홈 페이지 (Server Component)
@@ -16,7 +18,9 @@ export const metadata: Metadata = {
  */
 export default function HomePage() {
   return (
-    <section className="flex flex-col gap-10 p-2">
+    <section className="flex flex-col gap-5 p-2">
+      {/* 매물 유형별 바로보기 */}
+      <BuildingTypeQuickFilter />
       <SideScrollCardSection title="실시간 인기 방송" cardMinWidth="220px">
         <RecommendLiveItem />
         <RecommendLiveItem />

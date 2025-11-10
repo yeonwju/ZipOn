@@ -31,8 +31,8 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
       />
       <div className="flex-1">
         <div className="mb-1 flex items-center gap-2">
-          <h4 className="font-semibold text-gray-900">{listing.name}</h4>
-          {listing.isAuction ? (
+          <h4 className="font-semibold text-gray-900">{listing.propertyNm}</h4>
+          {listing.isAucPref ? (
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
               경매
             </span>
@@ -49,7 +49,7 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
           </span>
           <span className="text-gray-400">|</span>
           <span className="font-medium text-blue-600">
-            월세 {listing.rent.toLocaleString()}만원
+            월세 {listing.mnRent.toLocaleString()}만원
           </span>
         </div>
       </div>
