@@ -54,7 +54,8 @@ pipeline {
     ES_URL            = 'http://zipondev-elasticsearch:9200'
     ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
 
-    FRONT_URL = ''
+    // --- Placeholder for dynamic URL ---
+    FRONT_URL = 'https://dev-zipon.duckdns.org' // 기본값 (dev 기준)
   }
 
   options {
@@ -76,15 +77,17 @@ pipeline {
       steps {
         script {
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          env.FRONT_URL = (currentBranch.contains('dev')) ?
-            "https://dev-zipon.duckdns.org/" :
-            "https://zipon.duckdns.org/"
+          if (currentBranch.contains('dev')) {
+            env.FRONT_URL = "https://dev-zipon.duckdns.org"
+          } else {
+            env.FRONT_URL = "https://zipon.duckdns.org"
+          }
           echo "🌐 FRONT_URL set to: ${env.FRONT_URL} (branch=${currentBranch})"
         }
       }
     }
 
-    // 3️⃣ Build Images
+    // 3️⃣ Build Images (Frontend / Backend / AI)
     stage('Build Images (parallel)') {
       steps {
         script {
@@ -99,6 +102,7 @@ pipeline {
           echo "🌐 Using FRONT_API_BASE_URL: ${FRONT_API_BASE_URL}"
 
           parallel failFast: false,
+
           FRONTEND: {
             sh """
               set -e
@@ -109,16 +113,17 @@ pipeline {
                 -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
             """
           },
+
           BACKEND: {
             sh """
               set -e
               echo "[DEBUG] FRONT_URL=${env.FRONT_URL}"
-              export FRONT_URL="${env.FRONT_URL}"
               docker build ${env.DOCKER_OPTS} \
-                --build-arg FRONT_URL="${FRONT_URL}" \
+                --build-arg FRONT_URL="${env.FRONT_URL}" \
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
             """
           },
+
           AI: {
             sh """
               set -e
