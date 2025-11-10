@@ -4,8 +4,8 @@ import { persist } from 'zustand/middleware'
 import { User } from '@/types/models/user'
 
 // 💡 테스트용: 기본값 변경 가능
-const DEFAULT_IS_BROKER = false
-const DEFAULT_IS_VERIFIED = false
+const DEFAULT_IS_BROKER = true
+const DEFAULT_IS_VERIFIED = true
 
 interface UserState {
   user: User | null

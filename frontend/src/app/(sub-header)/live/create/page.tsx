@@ -3,7 +3,7 @@
 import { Suspense } from 'react'
 
 import LiveCreateContent from '@/components/features/live/LiveCreateContent'
-import { LiveCreateSkeleton } from '@/components/skeleton/live'
+import { LiveCreateSkeleton, LiveListSkeleton } from '@/components/skeleton/live'
 import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 
 /**

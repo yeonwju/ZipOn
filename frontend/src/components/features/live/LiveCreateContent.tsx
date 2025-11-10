@@ -3,9 +3,15 @@
 import React, { useMemo, useState } from 'react'
 
 import AddressSearch from '@/components/common/AddressSearch'
-import { LiveCreateButton, LiveMapPreview, LiveTitleInput, SelectPicker } from '@/components/features/live'
+import {
+  LiveCreateButton,
+  LiveMapPreview,
+  LiveTitleInput,
+  SelectPicker,
+} from '@/components/features/live'
 import useUserLocation from '@/hooks/map/useUserLocation'
 import { calculateDistance } from '@/utils/distance'
+import { LiveListSkeleton } from '@/components/skeleton/live'
 
 export default function LiveCreateContent() {
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -88,4 +94,3 @@ export default function LiveCreateContent() {
     </>
   )
 }
-

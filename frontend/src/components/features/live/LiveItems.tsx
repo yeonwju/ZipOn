@@ -7,9 +7,9 @@ export interface LiveItemsProps {
 
 export default function LiveItems({ items }: LiveItemsProps) {
   return (
-    <div>
+    <div className={'grid w-full grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}>
       {items.map(item => (
-        <div key={item.id}>
+        <div key={item.id} className="w-full">
           <LiveItem
             id={item.id}
             imgSrc={item.imgSrc}
