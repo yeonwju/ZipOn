@@ -8,7 +8,7 @@ pipeline {
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    // --- Database (직접 사용; 중간 매핑 제거) ---
+    // --- Database (직접 사용; 중간 매핑 제거) ----
     SPRING_DATASOURCE_URL      = credentials('DB_URL')
     SPRING_DATASOURCE_USERNAME = credentials('DB_USER')
     SPRING_DATASOURCE_PASSWORD = credentials('DB_PW')
