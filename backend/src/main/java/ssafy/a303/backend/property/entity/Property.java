@@ -129,6 +129,7 @@ public class Property {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+
     public void updateIsCertificated(Boolean isCertificated){
         this.isCertificated = isCertificated;
     }
