@@ -31,6 +31,11 @@ public record SearchResponseDto(
         Short roomCnt,
         // 층
         Short floor,
+
+        //매물 필터 구분
+        Boolean isAuc,
+        Boolean isBrk,
+
         // 생성일
         String createdAt
 ) {

@@ -25,6 +25,9 @@ public record SearchRequestDto(
         List<String> facings,     // 해방향(["S","SE"]) - keyword
         List<String> buildingTypes,// 빌딩타입(["OFFICE","APT"]) - keyword
 
+        Boolean isAuc,
+        Boolean isBrk,
+
         Integer page,             // 0-base
         Integer size,             // 페이지 크기
         String sortField,         // 정렬 필드 (기본: created_at)

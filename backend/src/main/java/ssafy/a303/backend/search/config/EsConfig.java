@@ -4,6 +4,8 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,9 +35,12 @@ public class EsConfig {
      */
     @Bean
     public ElasticsearchClient elasticsearchClient(RestClient restClient) {
-        // Transport 계층 설정
-        ElasticsearchTransport transport =
-                new RestClientTransport(restClient, new JacksonJsonpMapper());
+        // camel case, snake case 자동매칭
+        ObjectMapper om = new ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
+        JacksonJsonpMapper mapper = new JacksonJsonpMapper(om);
+        ElasticsearchTransport transport = new RestClientTransport(restClient, mapper);
 
         // Elasticsearch 고수준 Java API Client 생성
         return new ElasticsearchClient(transport);

@@ -3,6 +3,8 @@ package ssafy.a303.backend.property.dto.response;
 import ssafy.a303.backend.property.enums.Facing;
 
 public record PropertyMapDto(
+
+        Integer proprtySeq,
         String address,
         String propertyNm,
         Double latitude,

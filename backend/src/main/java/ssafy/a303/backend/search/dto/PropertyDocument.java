@@ -19,6 +19,7 @@ public class PropertyDocument {
     private String si;
     private String gu;
     private String dong;
+
     private String facing;
     private String lessorNm;
     private String buildingType; // ES keyword (예: "APT","VILLA"...)
@@ -30,6 +31,9 @@ public class PropertyDocument {
     private Integer areaP;
     private Short roomCnt;
     private Short floor;
+
+    private Boolean isBrk;
+    private Boolean isAuc;
 
     private String createdAt;
 }

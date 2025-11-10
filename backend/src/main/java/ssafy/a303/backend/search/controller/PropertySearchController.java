@@ -64,7 +64,7 @@ public class PropertySearchController {
      * @throws IOException
      */
     @Operation(
-            summary = "검색 조회",
+            summary = "검색 조회 및 조건 조회",
             description = "키워드와 필터링으로 검색한 정보를 조회합니다."
     )
     @ApiResponses({
@@ -99,7 +99,10 @@ public class PropertySearchController {
             @RequestParam(required = false) Short floorMax,
 
             @RequestParam(required = false) List<String> facings,
-            @RequestParam(required = false, name="buildingType") List<String> buildingTypes,
+            @RequestParam(required = false, name="building_type") List<String> buildingTypes,
+
+            @RequestParam(required = false) Boolean isAuc,
+            @RequestParam(required = false) Boolean isBrk,
 
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
@@ -116,6 +119,7 @@ public class PropertySearchController {
                 roomCountMin, roomCountMax,
                 floorMin, floorMax,
                 facings, buildingTypes,
+                isAuc, isBrk,
                 page, size,
                 sortField, sortOrder
         );
@@ -178,6 +182,9 @@ public class PropertySearchController {
                 src.getAreaP(), // areaP
                 src.getRoomCnt(), // room_count
                 src.getFloor(), // floor
+                src.getIsAuc(),
+                src.getIsBrk(),
+
                 src.getCreatedAt() // created_at
         );
     }

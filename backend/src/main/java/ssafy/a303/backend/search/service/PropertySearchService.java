@@ -9,23 +9,26 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQueryBuilders;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.entity.Property;
+import ssafy.a303.backend.property.entity.PropertyAucInfo;
+import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.search.dto.AddressParts;
 import ssafy.a303.backend.search.dto.PropertyDocument;
 import ssafy.a303.backend.search.dto.SearchRequestDto;
+import ssafy.a303.backend.search.dto.SearchResponseDto;
 import ssafy.a303.backend.search.util.AddressParser;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.time.temporal.WeekFields.ISO;
 
@@ -36,6 +39,7 @@ public class PropertySearchService {
 
     /** ES Java API Client)*/
     private final ElasticsearchClient es;
+    private final PropertyAucInfoRepository aucInfoRepository;
 
     // 검색 대상 인덱스명
     @Value("${elasticsearch.index.property}")
@@ -82,17 +86,21 @@ public class PropertySearchService {
 
         // 가격 범위 필터
         addRange(filters, "deposit",   r.depositMin(), r.depositMax());
-        addRange(filters, "mnRent",   r.mnRentMin(),  r.mnRentMax());
+        addRange(filters, "mn_rent",   r.mnRentMin(),  r.mnRentMax());
         addRange(filters, "fee",       r.feeMin(),     r.feeMax());
 
         // 조건 범위 필터
         addRange(filters, "area",      r.areaMin(),    r.areaMax());
-        addRange(filters, "roomCnt",r.roomCountMin(), r.roomCountMax());
+        addRange(filters, "room_cnt",r.roomCountMin(), r.roomCountMax());
         addRange(filters, "floor",     r.floorMin(),   r.floorMax());
 
         // 다중 값 필터
         if (nonEmpty(r.facings()))       filters.add(terms("facing", r.facings()));
-        if (nonEmpty(r.buildingTypes())) filters.add(terms("buildingType", r.buildingTypes()));
+        if (nonEmpty(r.buildingTypes())) filters.add(terms("building_type", r.buildingTypes()));
+
+        // 매물 조건
+        if (r.isAuc() != null) filters.add(Query.of(q -> q.term(t -> t.field("is_auc").value(r.isAuc()))));
+        if (r.isBrk() != null) filters.add(Query.of(q -> q.term(t -> t.field("is_brk").value(r.isBrk()))));
 
         /** 최종 bool 조립*/
         Query finalQuery = (must.isEmpty() && filters.isEmpty())
@@ -102,6 +110,16 @@ public class PropertySearchService {
             if (!filters.isEmpty()) b.filter(filters);
             return b;
         }));
+
+        /** 디버깅 */
+        SearchResponse<JsonData> raw = es.search(s -> s
+                        .index(index)
+                        .query(finalQuery)
+                        .from(from)
+                        .size(1),
+                JsonData.class
+        );
+        log.info("RAW SOURCE = " + raw.hits().hits().get(0).source().toJson().toString());
 
         SearchRequest req = new SearchRequest.Builder()
                 .index(index)
@@ -143,6 +161,9 @@ public class PropertySearchService {
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
 
+        PropertyAucInfo aucInfo = aucInfoRepository.findByPropertySeq(p.getPropertySeq())
+                .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
+
         return PropertyDocument.builder()
                 .title(p.getPropertyNm())
                 .description(p.getContent())
@@ -159,6 +180,8 @@ public class PropertySearchService {
                 .areaP(p.getAreaP())
                 .roomCnt(p.getRoomCnt() == null ? null : p.getRoomCnt().shortValue())
                 .floor(p.getFloor() == null ? null : p.getFloor().shortValue())
+                .isAuc(aucInfo.getIsAucPref())
+                .isBrk(aucInfo.getIsBrkPref())
                 .createdAt(createdAtStr)
                 .build();
     }
