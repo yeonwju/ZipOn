@@ -1,14 +1,11 @@
-package ssafy.a303.backend.property.dto.elastic;
-
-import ssafy.a303.backend.property.enums.Building;
-
-import java.time.Instant;
+package ssafy.a303.backend.search.dto;
 
 public record SearchResponseDto(
-        // search 결과 id
-        String id,
         //매물 seq
         Integer propertySeq,
+        //위경도
+        Double latitdue,
+        Double longitude,
         //임대인 이름
         String lessorNm,
         // 매물 썸네일
@@ -35,6 +32,12 @@ public record SearchResponseDto(
         Short roomCnt,
         // 층
         Short floor,
+
+        //매물 필터 구분
+        Boolean isAuc,
+        Boolean isBrk,
+        Boolean hasBrk,
+
         // 생성일
         String createdAt
 ) {

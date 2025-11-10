@@ -24,13 +24,15 @@ ai:
 cloud:
   aws:
     s3:
-      bucket: dfsfsf
+      bucket: zipon-media
     region:
-      static: ap-east-1
+      static: ap-northeast-2
     credentials:
-      access-key: sdfsdf
-      secret-key: sdfsdfsd
-
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+app:
+  s3:
+    expose: presigned #pbulic
 
 logging:
   level:
@@ -40,10 +42,3 @@ logging:
 #    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
 #    org.springframework.web.servlet.DispatcherServlet: DEBUG
 #    org.apache.coyote.http11: DEBUG
-
-# Elasticsearch 설정
-elasticsearch:
-  host: localhost
-  port: 9200
-  index:
-    property: my_index

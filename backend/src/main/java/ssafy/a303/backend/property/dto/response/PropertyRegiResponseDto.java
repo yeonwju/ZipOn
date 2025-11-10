@@ -19,7 +19,7 @@ public record PropertyRegiResponseDto(
         Long deposit,
         Integer mnRent,
         Integer fee,
-        List images,
+        List<String> images,
         Byte period,
         Byte floor,
         Facing facing,
@@ -31,8 +31,13 @@ public record PropertyRegiResponseDto(
         Boolean petAvailable,
         Boolean isAucPref,
         Boolean isBrkPref,
-        Boolean isLinked,
+        Boolean hasBrk,
         String aucAt,
-        String aucAvailable
+        String aucAvailable,
+
+        //ai 관련
+        boolean isCertificated,
+        Integer riskScore,
+        String riskReason
 ) {
 }
