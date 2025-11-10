@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.sms.service.SmsService;
+import ssafy.a303.backend.user.dto.request.CodeRequest;
 import ssafy.a303.backend.user.dto.request.VerifyUserRequest;
 import ssafy.a303.backend.user.dto.response.MeResponseDTO;
 import ssafy.a303.backend.user.service.UserService;
@@ -31,8 +32,8 @@ public class UserController {
     }
 
     @PostMapping("/verify/code")
-    public ResponseEntity<ResponseDTO<MeResponseDTO>> smsVerify(@AuthenticationPrincipal Integer userSeq, @RequestPart String code){
-        return ResponseDTO.ok(smsService.verify(userSeq, code), "인증되었습니다.");
+    public ResponseEntity<ResponseDTO<MeResponseDTO>> smsVerify(@AuthenticationPrincipal Integer userSeq, @RequestBody CodeRequest request){
+        return ResponseDTO.ok(smsService.verify(userSeq, request.code()), "인증되었습니다.");
     }
 
 }
