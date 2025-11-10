@@ -1,10 +1,7 @@
 package ssafy.a303.backend.property.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ssafy.a303.backend.property.enums.VerificationStatus;
 
@@ -13,19 +10,19 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "certification")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Certification {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "certification_seq")
+    private Integer certificationSeq;
+
     @Column(name = "property_seq")
     private Integer propertySeq;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "property_seq")
-    private Property property;
 
     @Column(name = "pdf_code")
     private String pdfCode;

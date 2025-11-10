@@ -86,6 +86,7 @@ public class PropertyService {
                 .hasElevator(req.hasElevator())
                 .petAvailable(req.petAvailable())
                 .hasBrk(false)
+                .isCertificated(req.isCertificated())
                 .build();
         propertyRepository.save(p);
 
@@ -102,11 +103,10 @@ public class PropertyService {
         Certification c = Certification.builder()
                 .propertySeq(p.getPropertySeq())
                 .pdfCode(req.pdfCode())
-                .verificationStatus(VerificationStatus.PASSED)
                 .riskScore(req.riskScore())
                 .riskReason(req.riskReason())
+                .verificationStatus(VerificationStatus.PASSED)
                 .build();
-        certificationRepository.save(c);
 
         // 이미지 S3 업로드
         List<String> s3keys = new ArrayList<>();

@@ -89,7 +89,8 @@ public enum ErrorCode {
     // 매물 관련
     ADDRESS_DUPLICATE(400, HttpStatus.BAD_REQUEST, "이미 동일 주소의 매물이 등록되어 있습니다."),
     PROPERTY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물이 삭제되었거나 존재하지 않습니다."),
-    AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "래당 매물의 경매 정보가 존재하지 않습니다."),
+    AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물의 경매 정보가 존재하지 않습니다."),
+    CERTIFICATION_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "매물이 아직 생성되지 않아 검증 정보를 저장할 수 없습니다."),
 
     NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 

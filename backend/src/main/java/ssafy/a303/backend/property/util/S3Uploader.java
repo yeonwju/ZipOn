@@ -47,7 +47,7 @@ public class S3Uploader {
 
         log.info("등록된 이미지 파일 형식 = {}", ext);
 
-        String key = "properties/%d/%s.%s".formatted(
+        String key = "dev/uploads/properties/%d/%s.%s".formatted(
                 propertySeq, UUID.randomUUID(), ext.toLowerCase()
         );
 
