@@ -8,11 +8,16 @@ ARG NEXT_PUBLIC_KAKAO_MAP_API_KEY
 ARG NEXT_PUBLIC_PWA_ENABLE=1
 
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-ENV NODE_ENV=production
 
 # --- Install dependencies ---
 COPY package*.json ./
-RUN npm ci
+RUN rm -rf node_modules package-lock.json \
+  && npm cache clean --force \
+  && npm install \
+  && npm rebuild --verbose
+
+# Set NODE_ENV after installing dependencies to include devDependencies
+ENV NODE_ENV=production
 
 # --- Copy source ---
 COPY . .
