@@ -155,17 +155,18 @@ pipeline {
             echo "[DEV] Deploying with ${DEV_COMPOSE}"
             docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
+            echo "[DEV] Waiting 40s for backend initialization..."
+            sleep 40
+
             echo "[DEV] Health check zipondev-backend..."
             OK=""
             for i in $(seq 1 240); do
-              curl -sfm 3 http://zipondev-backend:8080/v3/api-docs >/dev/null || \
-              curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null
-              if [ $? -eq 0 ]; then
+              curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null && {
                 echo "[DEV] ✅ OK on attempt $i"
                 OK=1
                 break
-              fi
-              echo "[DEV] Waiting for backend... ($i/240)"
+              }
+              echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/240)"
               sleep 2
             done
             [ -n "$OK" ] || {
