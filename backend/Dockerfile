@@ -9,6 +9,11 @@ RUN gradle clean bootJar --no-daemon
 FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
+
+ARG FRONT_URL
+
+ENV frontUrl=${FRONT_URL}
+
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 8080포트로 서비스

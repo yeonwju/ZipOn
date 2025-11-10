@@ -49,6 +49,8 @@ pipeline {
     // --- Elasticsearch ---
     ES_URL            = 'http://zipondev-elasticsearch:9200'
     ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
+
+    FRONT_URL = ''
   }
 
   options {
@@ -61,6 +63,18 @@ pipeline {
       steps {
         checkout scm
         sh 'git rev-parse --short HEAD > .gitsha'
+      }
+    }
+
+    stage('Set Environment') {
+      steps {
+        script {
+          env.FRONT_URL = (env.BRANCH_NAME == 'dev')
+            ? "https://dev-zipon.duckdns.org"
+            : "https://zipon.duckdns.org"
+
+          echo "🌐 FRONT_URL set to: ${env.FRONT_URL}"
+        }
       }
     }
 
@@ -90,6 +104,7 @@ pipeline {
             sh """
               set -e
               docker build ${env.DOCKER_OPTS} \
+                --build-arg FRONT_URL='${env.FRONT_URL}' \  # ✅ Spring에서 @Value("${frontUrl}")로 사용
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
             """
           },
