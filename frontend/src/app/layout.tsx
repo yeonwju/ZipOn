@@ -4,7 +4,9 @@ import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import PwaProvider from '@/components/common/PwaProvider'
+import MiniPlayer from '@/components/features/live/on-air/MiniPlayer'
 import InstallPrompt from '@/components/ui/InstallPrompt'
+import { ReactQueryProvider } from '@/providers/ReactQueryProvider'
 
 export const metadata: Metadata = {
   title: {
@@ -41,7 +43,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
-        
+
         <link
           rel="stylesheet"
           as="style"
@@ -58,9 +60,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         suppressHydrationWarning
         style={{ fontFamily: 'Pretendard, system-ui, -apple-system, sans-serif' }}
       >
-        <PwaProvider />
-        {children}
-        <InstallPrompt />
+        <ReactQueryProvider>
+          <PwaProvider />
+          {children}
+          <InstallPrompt />
+          <MiniPlayer />
+        </ReactQueryProvider>
       </body>
     </html>
   )

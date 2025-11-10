@@ -6,8 +6,8 @@ import { useState } from 'react'
 import SubHeader from '@/components/layout/header/SubHeader'
 import type { ChatHistory } from '@/types'
 
-import ChatInput from './ChatInput'
-import ChatMessageList from './ChatMessageList'
+import ChatInput from '../message/ChatInput'
+import ChatMessageList from '../message/ChatMessageList'
 
 interface ChatRoomProps {
   roomSeq: number

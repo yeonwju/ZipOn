@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 
-import ChatRoom from '@/components/features/chat/ChatRoom'
+import ChatRoom from '@/components/features/chat/room/ChatRoom'
 import { chatHistoryDummy, chatHistoryDummy2 } from '@/data/ChatHistoryDummy'
 import { chatRoomListDummy } from '@/data/ChatRoomListDummy'
 import { useUserStore } from '@/store/user'
@@ -36,4 +36,3 @@ export default function ChatRoomContent() {
     />
   )
 }
-
