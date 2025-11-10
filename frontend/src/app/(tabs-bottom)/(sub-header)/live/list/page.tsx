@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import LiveListContent from '@/components/features/live/LiveListContent'
+import LiveListContent from '@/components/features/live/list/LiveListContent'
 import { LiveListSkeleton } from '@/components/skeleton/live'
 
 /**

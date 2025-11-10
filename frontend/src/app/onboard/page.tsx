@@ -12,7 +12,7 @@ function OnboardContent() {
 
   // URL 수동 조합 (인코딩 처리)
   const loginUrl = new URL(
-    `http://localhost:8080/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
+    `https://dev-zipon.duckdns.org/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
   )
 
   return (
