@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     // --- Common Paths ---
-    DOCKER_OPTS  = ""  // 캐시 사용 위해 --no-cache 제거
+    DOCKER_OPTS  = "--pull"  // 캐시 사용 위해 --no-cache 제거
     HEALTH       = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
