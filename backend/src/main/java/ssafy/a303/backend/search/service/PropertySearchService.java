@@ -183,6 +183,7 @@ public class PropertySearchService {
                 .floor(p.getFloor() == null ? null : p.getFloor().shortValue())
                 .isAuc(aucInfo.getIsAucPref())
                 .isBrk(aucInfo.getIsBrkPref())
+                .hasBrk(p.getHasBrk())
                 .createdAt(createdAtStr)
                 .build();
     }

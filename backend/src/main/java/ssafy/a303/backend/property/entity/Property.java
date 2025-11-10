@@ -123,9 +123,9 @@ public class Property {
     private String tradedAt;
 
     //중개인 매칭 완료 되었는지
-    @Column(name = "is_linked")
+    @Column(name = "has_brk")
     @ColumnDefault("false")
-    private Boolean isLinked;
+    private Boolean hasBrk;
 
     @CreationTimestamp
     @Column(name = "created_at")

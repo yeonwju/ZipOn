@@ -1,6 +1,7 @@
 package ssafy.a303.backend.property.util;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class S3Uploader {
@@ -43,9 +45,13 @@ public class S3Uploader {
         String ext = (original != null && original.contains(".")) ?
                 original.substring(original.lastIndexOf('.') + 1) : "bin";
 
+        log.info("등록된 이미지 파일 형식 = {}", ext);
+
         String key = "properties/%d/%s.%s".formatted(
                 propertySeq, UUID.randomUUID(), ext.toLowerCase()
         );
+
+        log.info("s3 저장 키 = {}", key);
 
         try {
             PutObjectRequest req = PutObjectRequest.builder()

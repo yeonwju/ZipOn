@@ -166,10 +166,14 @@ public class PropertySearchController {
 
         String thumbnail = (p != null) ? p.getThumbnail() : null;
         String address = (p != null) ? p.getAddress() : null;
+        Double latitude = (p != null) ? p.getLatitude() : null;
+        Double longitude  = (p != null) ? p.getLongitude() : null;
 
         return new SearchResponseDto(
-                hit.id(), // id
+
                 toIntOrNull(hit.id()), // propertySeq
+                latitude,
+                longitude,
                 src.getLessorNm(), // lessorNm
                 thumbnail, // thumbnail
                 src.getTitle(), // title

@@ -118,6 +118,7 @@ public class PropertyService {
                 .parkingCnt(req.parkingCnt())
                 .hasElevator(req.hasElevator())
                 .petAvailable(req.petAvailable())
+                .hasBrk(false)
                 .build();
         propertyRepository.save(p);
 
@@ -164,14 +165,16 @@ public class PropertyService {
                     p.updateThumbnail(s3keys.get(0));
                 }
 
+                log.info("[PropertyService] 저장된 썸네일 sw key = {}", s3keys.get(0));
+
             } catch (Exception e) {
                 for (String k : s3keys) {
                     try {
                         s3Uploader.delete(k);
                     } catch (Exception ignore) {
                     }
-                    throw e;
                 }
+                throw e;
             }
 
             String thumbnailUrl = (p.getThumbnail() != null)
@@ -212,7 +215,7 @@ public class PropertyService {
                 p.getPetAvailable(),
                 aucInfo.getIsAucPref(),
                 aucInfo.getIsBrkPref(),
-                p.getIsLinked(),
+                p.getHasBrk(),
                 aucInfo.getAucAt(),
                 aucInfo.getAucAvailable()
         );
@@ -254,7 +257,7 @@ public class PropertyService {
                 p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(), p.getConstructionDate(),
                 p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
                 aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
-                p.getIsLinked(),
+                p.getHasBrk(),
                 aucInfo.getAucAt(), aucInfo.getAucAvailable()
         );
         return detail;

@@ -46,7 +46,7 @@ public record DetailResponseDto(
         Boolean isBrkPref,
 
         // 중개 성사 여부
-        Boolean isLinked,
+        Boolean hasBrk,
 
         // 경매 관련
         String aucAt,
