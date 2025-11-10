@@ -1,6 +1,6 @@
 'use client'
 
-import ChatRoomList from '@/components/features/chat/ChatRoomList'
+import ChatRoomList from '@/components/features/chat/room/ChatRoomList'
 import { chatRoomListDummy } from '@/data/ChatRoomListDummy'
 
 export default function ChatListContent() {
@@ -9,4 +9,3 @@ export default function ChatListContent() {
 
   return <ChatRoomList chatRooms={dummyData} />
 }
-

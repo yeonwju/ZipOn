@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import PwaProvider from '@/components/common/PwaProvider'
-import MiniPlayer from '@/components/features/live/MiniPlayer'
+import MiniPlayer from '@/components/features/live/on-air/MiniPlayer'
 import InstallPrompt from '@/components/ui/InstallPrompt'
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider'
 

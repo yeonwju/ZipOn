@@ -2,6 +2,7 @@
 
 import { Eye, Heart, MessageCircle } from 'lucide-react'
 import Image from 'next/image'
+import React from 'react'
 
 import { LiveItemProps } from '@/data/LiveItemDummy'
 
