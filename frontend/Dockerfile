@@ -10,13 +10,19 @@ ARG NEXT_PUBLIC_PWA_ENABLE=1
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV NODE_ENV=production
 
+# --- Install dependencies ---
 COPY package*.json ./
-RUN npm ci && npm rebuild --verbose
+RUN rm -rf node_modules package-lock.json \
+  && npm cache clean --force \
+  && npm install \
+  && npm rebuild --verbose
 
+# --- Copy source ---
 COPY . .
 RUN printf "NEXT_PUBLIC_API_BASE_URL=%s\nNEXT_PUBLIC_KAKAO_MAP_API_KEY=%s\nNEXT_PUBLIC_PWA_ENABLE=%s\n" \
   "$NEXT_PUBLIC_API_BASE_URL" "$NEXT_PUBLIC_KAKAO_MAP_API_KEY" "$NEXT_PUBLIC_PWA_ENABLE" > .env.production
 
+# --- Build Next.js ---
 RUN npm run build
 
 # --- 2) Run Stage ---
