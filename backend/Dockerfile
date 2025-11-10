@@ -13,6 +13,7 @@ WORKDIR /app
 # --- Front URL 전달 ---
 ARG FRONT_URL
 ENV frontUrl=${FRONT_URL}
+ENV SPRING_PROFILES_ACTIVE=dev
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 

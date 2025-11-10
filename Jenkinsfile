@@ -157,7 +157,7 @@ pipeline {
 
             echo "[DEV] Health check zipondev-backend..."
             OK=""
-            for i in $(seq 1 120); do
+            for i in $(seq 1 240); do
               curl -sfm 3 http://zipondev-backend:8080/v3/api-docs >/dev/null || \
               curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null
               if [ $? -eq 0 ]; then
@@ -165,7 +165,7 @@ pipeline {
                 OK=1
                 break
               fi
-              echo "[DEV] Waiting for backend... ($i/120)"
+              echo "[DEV] Waiting for backend... ($i/240)"
               sleep 2
             done
             [ -n "$OK" ] || {
