@@ -50,6 +50,7 @@ pipeline {
     ES_URL            = 'http://zipondev-elasticsearch:9200'
     ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
 
+    // --- Placeholder for dynamic FRONT_URL ---
     FRONT_URL = ''
   }
 
@@ -138,18 +139,25 @@ pipeline {
             echo "[DEV] Deploying with ${DEV_COMPOSE}"
             docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
-            echo "[DEV] Health check zipondev-backend:8080/v3/api-docs ..."
+            echo "[DEV] Health check zipondev-backend..."
             OK=""
-            for i in $(seq 1 60); do
-              if curl -sfm 2 http://zipondev-backend:8080/v3/api-docs >/dev/null; then
+            for i in $(seq 1 120); do   # ⏱ 최대 4분까지 대기
+              curl -sfm 3 http://zipondev-backend:8080/v3/api-docs >/dev/null || \
+              curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null
+              if [ $? -eq 0 ]; then
                 echo "[DEV] ✅ OK on attempt $i"
                 OK=1
                 break
               fi
-              echo "[DEV] Waiting for backend... ($i/60)"
+              echo "[DEV] Waiting for backend... ($i/120)"
               sleep 2
             done
-            [ -n "$OK" ] || { echo "[DEV] ❌ Health check failed"; exit 1; }
+            [ -n "$OK" ] || {
+              echo "[DEV] ❌ Health check failed"
+              echo "--- Backend Logs (last 30 lines) ---"
+              docker logs zipondev-backend --tail 30
+              exit 1
+            }
           '''
         }
       }
@@ -164,8 +172,8 @@ pipeline {
           echo "[DEV] Fetching OpenAPI..."
           READY=""
           for i in $(seq 1 30); do
-            if curl -sfm 2 http://zipondev-backend:8080/v3/api-docs >/dev/null; then
-              curl -sf http://zipondev-backend:8080/v3/api-docs > build/swagger.json
+            if curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null; then
+              curl -sf http://127.0.0.1:28080/v3/api-docs > build/swagger.json
               READY=1
               break
             fi
