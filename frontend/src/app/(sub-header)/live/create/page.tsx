@@ -1,3 +1,5 @@
+'use client'
+
 import { Suspense } from 'react'
 
 import LiveCreateContent from '@/components/features/live/LiveCreateContent'

@@ -1,3 +1,5 @@
+'use client'
+
 import { Suspense } from 'react'
 
 import NewListingContent from '@/components/features/listings/form/NewListingContent'
