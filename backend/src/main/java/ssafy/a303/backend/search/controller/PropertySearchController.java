@@ -64,7 +64,7 @@ public class PropertySearchController {
      * @throws IOException
      */
     @Operation(
-            summary = "검색 조회 및 조건 조회",
+            summary = "검색 조회 및 매물 3분류 조회",
             description = "키워드와 필터링으로 검색한 정보를 조회합니다."
     )
     @ApiResponses({
