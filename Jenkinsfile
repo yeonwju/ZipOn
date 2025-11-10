@@ -132,19 +132,20 @@ pipeline {
             string(credentialsId: 'DB_USER', variable: 'SPRING_DATASOURCE_USERNAME'),
             string(credentialsId: 'DB_PW',   variable: 'SPRING_DATASOURCE_PASSWORD')
           ]) {
-            sh """
+            // ✅ 작은따옴표 블록 사용하여 Groovy 변수 해석 비활성화
+            sh '''
               set -e
               docker network connect zipon-net jenkins-container 2>/dev/null || true
 
-              echo "[DEV] Deploying with ${DEV_COMPOSE}"
+              echo "[DEV] Deploying with $DEV_COMPOSE"
 
               # ✅ .env 파일 생성
-              echo SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} > .env
-              echo SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} >> .env
-              echo SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} >> .env
+              echo SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL > .env
+              echo SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME >> .env
+              echo SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD >> .env
 
-              # ✅ Groovy 파싱 에러 방지: 따옴표로 묶음
-              docker compose --env-file .env -f "${DEV_COMPOSE}" up -d --force-recreate --remove-orphans
+              # ✅ 더 이상 Groovy가 $나 -를 해석하지 않음
+              docker compose --env-file .env -f "$DEV_COMPOSE" up -d --force-recreate --remove-orphans
 
               echo "[DEV] Warm-up 30s..."
               sleep 30
@@ -152,26 +153,27 @@ pipeline {
               echo "[DEV] Health check zipondev-backend..."
               OK=""
               for i in $(seq 1 60); do
-                CODE=\$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
-                if [ "\$CODE" = "200" ] || [ "\$CODE" = "302" ]; then
-                  echo "[DEV] ✅ OK (HTTP \$CODE) on attempt \$i"
+                CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
+                if [ "$CODE" = "200" ] || [ "$CODE" = "302" ]; then
+                  echo "[DEV] ✅ OK (HTTP $CODE) on attempt $i"
                   OK=1
                   break
                 fi
-                echo "[DEV] \$(date '+%H:%M:%S') Waiting for backend... (\$i/60) HTTP=\$CODE"
+                echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/60) HTTP=$CODE"
                 sleep 2
               done
-              [ -n "\$OK" ] || {
+              [ -n "$OK" ] || {
                 echo "[DEV] ❌ Health check failed"
                 echo "--- Backend Logs (last 50 lines) ---"
                 docker logs zipondev-backend --tail 50 || true
                 exit 1
               }
-            """
+            '''
           }
         }
       }
     }
+
 
 
     stage('Publish OpenAPI (DEV)') {
