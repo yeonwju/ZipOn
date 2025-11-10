@@ -12,10 +12,7 @@ ENV NODE_ENV=production
 
 # --- Install dependencies ---
 COPY package*.json ./
-RUN rm -rf node_modules package-lock.json \
-  && npm cache clean --force \
-  && npm install \
-  && npm rebuild --verbose
+RUN npm ci
 
 # --- Copy source ---
 COPY . .
