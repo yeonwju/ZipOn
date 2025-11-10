@@ -141,13 +141,19 @@ public class StompController {
             @Header("Authorization") String authHeader
     ) throws JsonProcessingException {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
+        log.info("[STOMP][LIVE] 📨 Message received: liveSeq={}, content={}", liveSeq, requestDto.getContent());
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.error("[STOMP][LIVE] ❌ Invalid Authorization header");
             throw new CustomException(ErrorCode.INVALID_AUTH_HEADER);
+        }
 
         String token = authHeader.substring(7);
         String payload = new String(Base64.getUrlDecoder().decode(token.split("\\.")[1]));
         JsonNode node = new ObjectMapper().readTree(payload);
         Integer userSeq = node.get("sub").asInt();
+
+        log.info("[STOMP][LIVE] 👤 Sender userSeq: {}", userSeq);
 
         User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -160,10 +166,16 @@ public class StompController {
                 .sentAt(LocalDateTime.now())
                 .build();
 
+        log.info("[STOMP][LIVE] 💾 Saving to Redis...");
+        
         // 메시지 redis 저장
         liveChatService.saveChatMessage(liveSeq, response);
 
         String messageJson = objectMapper.writeValueAsString(response);
+        
+        log.info("[STOMP][LIVE] 📡 Publishing to Redis channel: live:{}", liveSeq);
         liveRedisPubSubService.publish("live:" + liveSeq, messageJson);
+        
+        log.info("[STOMP][LIVE] ✅ Message processing complete");
     }
 }

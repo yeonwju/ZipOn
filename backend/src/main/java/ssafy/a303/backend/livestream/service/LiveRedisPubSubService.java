@@ -48,7 +48,9 @@ public class LiveRedisPubSubService implements MessageListener {
      * Redis Pub/Sub 채널에 메시지를 발행
      */
     public void publish(String channel, String message) {
+        log.info("[REDIS][LIVE] 📤 Publishing to channel: {}, message: {}", channel, message);
         redisTemplate.convertAndSend(channel, message);
+        log.info("[REDIS][LIVE] ✅ Published successfully");
     }
 
     /**
@@ -58,13 +60,21 @@ public class LiveRedisPubSubService implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         try {
             String payload = new String(message.getBody());
+            log.info("[REDIS][LIVE] 📨 Received message from Redis: {}", payload);
+            
             LiveChatMessageResponseDto dto = objectMapper.readValue(payload, LiveChatMessageResponseDto.class);
-
-            messagingTemplate.convertAndSend("/sub/live/" + dto.getLiveSeq(), dto);
-
-            log.debug("[LIVE CHAT] SEND /sub/live/{}  → {}", dto.getLiveSeq(), dto.getContent());
+            
+            String destination = "/sub/live/" + dto.getLiveSeq();
+            log.info("[REDIS][LIVE] 📡 Broadcasting to STOMP: {} → {}", destination, dto.getContent());
+            
+            messagingTemplate.convertAndSend(destination, dto);
+            
+            log.info("[REDIS][LIVE] ✅ Broadcast complete: liveSeq={}, sender={}, content={}", 
+                    dto.getLiveSeq(), dto.getSenderName(), dto.getContent());
         } catch (JsonProcessingException e) {
-            log.error("[REDIS][LIVE] 메시지 역직렬화 실패: {}", e.getMessage());
+            log.error("[REDIS][LIVE] ❌ 메시지 역직렬화 실패: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("[REDIS][LIVE] ❌ 메시지 브로드캐스트 실패: {}", e.getMessage(), e);
         }
     }
 }
