@@ -2,6 +2,8 @@ package ssafy.a303.backend.property.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -10,20 +12,26 @@ import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.response.*;
+import ssafy.a303.backend.property.entity.Certification;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.entity.PropertyImage;
+import ssafy.a303.backend.property.enums.VerificationStatus;
+import ssafy.a303.backend.property.repository.CertificationRepository;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.property.util.S3Uploader;
+import ssafy.a303.backend.search.service.PropertySearchService;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,44 +40,12 @@ public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final PropertyImageRepository propertyImageRepository;
+    private final CertificationRepository certificationRepository;
     private final S3Uploader s3Uploader;
+    private final PropertySearchService propertySearchService;
 
-    /**
-     * 매물 등록 단계 중 첫단계,
-     * 매물의 주인과 주소 및 위경도 등록하기.
-     * 이후 등기부등본 검증.
-     * @param req
-     * @param lessorSeqFromAuth
-     * @return
-     */
-    @Transactional
-    public PropertyAddressResponseDto submitAddress(PropertyAddressRequestDto req,
-                                                    Integer lessorSeqFromAuth) {
-        // 이미 등록된 매물인지 검증
-        if(propertyRepository.existsByAddressAndLessorSeq(req.address(), lessorSeqFromAuth)){
-            throw new CustomException(ErrorCode.ADDRESS_DUPLICATE);
-        }
-
-        // 임대인 id, 이름, 매물 주소, 위도, 경도 db에 저장
-        Property entity = Property.builder()
-                .lessorSeq(lessorSeqFromAuth)
-                .lessorNm(req.lessorNm())
-                .propertyNm(req.propertyNm())
-                .address(req.address())
-                .latitude(req.latitude())
-                .longitude(req.longitude())
-                .build();
-
-        Property saved = propertyRepository.save(entity);
-
-        return new PropertyAddressResponseDto(
-                saved.getPropertySeq(),
-                saved.getLessorNm(),
-                saved.getAddress(),
-                saved.getLatitude(),
-                saved.getLongitude()
-        );
-    }
+    @Value("${app.s3.expose:presigned}")
+    private String exposeMode;
 
     /**
      * 매물 상세 정보 등록
@@ -109,6 +85,8 @@ public class PropertyService {
                 .parkingCnt(req.parkingCnt())
                 .hasElevator(req.hasElevator())
                 .petAvailable(req.petAvailable())
+                .hasBrk(false)
+                .isCertificated(req.isCertificated())
                 .build();
         propertyRepository.save(p);
 
@@ -122,64 +100,104 @@ public class PropertyService {
                 .build();
         propertyAucInfoRepository.save(aucInfo);
 
+        Certification c = Certification.builder()
+                .propertySeq(p.getPropertySeq())
+                .pdfCode(req.pdfCode())
+                .riskScore(req.riskScore())
+                .riskReason(req.riskReason())
+                .verificationStatus(VerificationStatus.PASSED)
+                .build();
+
         // 이미지 S3 업로드
         List<String> s3keys = new ArrayList<>();
         List<String> imageUrls = new ArrayList<>();
 
-        if(images != null && !images.isEmpty()) {
-            if(images.size() >= 20) {
+        if (images != null && !images.isEmpty()) {
+            if (images.size() >= 20) {
                 throw new CustomException(ErrorCode.IMAGE_LIMIT_EXCEEDS);
             }
 
             int sortOrder = 1;
-            for(MultipartFile file : images) {
-                if (file.isEmpty()) continue;
+            try {
+                for (MultipartFile file : images) {
+                    if (file.isEmpty()) continue;
 
-                String key = s3Uploader.uploadImage(p.getPropertySeq(), file);
+                    String key = s3Uploader.uploadImage(p.getPropertySeq(), file);
+                    s3keys.add(key);
 
-                PropertyImage img = PropertyImage.builder()
-                        .propertySeq(p.getPropertySeq())
-                        .s3Key(key)
-                        .imgOrder(sortOrder++)
-                        .build();
-                propertyImageRepository.save(img);
+                    PropertyImage img = PropertyImage.builder()
+                            .propertySeq(p.getPropertySeq())
+                            .s3Key(key)
+                            .imgOrder(sortOrder++)
+                            .build();
+                    propertyImageRepository.save(img);
 
-                //s3 리스트에도 추가
-                s3keys.add(key);
+                    // 외부 노출 임시 URL 방식
+                    imageUrls.add(s3Uploader.presignedGetUrl(key, Duration.ofHours(12)));
+                }
 
-                imageUrls.add(s3Uploader.publicUrl(key));
+                /** 첫번째 사진을 썸네일로 설정 */
+                if(!s3keys.isEmpty()) {
+                    p.updateThumbnail(s3keys.get(0));
+                }
+
+                log.info("[PropertyService] 저장된 썸네일 sw key = {}", s3keys.get(0));
+
+            } catch (Exception e) {
+                for (String k : s3keys) {
+                    try {
+                        s3Uploader.delete(k);
+                    } catch (Exception ignore) {
+                    }
+                }
+                throw e;
             }
+
+            String thumbnailUrl = (p.getThumbnail() != null)
+                    ? s3Uploader.presignedGetUrl(p.getThumbnail(), Duration.ofHours(12))
+                    : null;
         }
-            return new PropertyRegiResponseDto(
-                        p.getPropertySeq(),
-                        p.getLessorNm(),
-                        p.getPropertyNm(),
-                        p.getContent(),
-                        p.getAddress(),
-                        p.getLatitude(),
-                        p.getLongitude(),
-                        p.getBuildingType(),
-                        p.getArea(),
-                        p.getAreaP(),
-                        p.getDeposit(),
-                        p.getMnRent(),
-                        p.getFee(),
-                        s3keys,
-                        p.getPeriod(),
-                        p.getFloor(),
-                        p.getFacing(),
-                        p.getRoomCnt(),
-                        p.getBathroomCnt(),
-                        p.getConstructionDate(),
-                        p.getParkingCnt(),
-                        p.getHasElevator(),
-                        p.getPetAvailable(),
-                        aucInfo.getIsAucPref(),
-                        aucInfo.getIsBrkPref(),
-                        p.getIsLinked(),
-                        aucInfo.getAucAt(),
-                        aucInfo.getAucAvailable()
-            );
+
+        /** ES 색인 */
+        try {
+            propertySearchService.setIndex(p);
+        } catch (Exception e) {
+            log.error("[ES] 매물 최종 등록 이후, 색인 실패, propertySeq = {}", p.getPropertySeq(), e);
+        }
+
+        return new PropertyRegiResponseDto(
+                p.getPropertySeq(),
+                p.getLessorNm(),
+                p.getPropertyNm(),
+                p.getContent(),
+                p.getAddress(),
+                p.getLatitude(),
+                p.getLongitude(),
+                p.getBuildingType(),
+                p.getArea(),
+                p.getAreaP(),
+                p.getDeposit(),
+                p.getMnRent(),
+                p.getFee(),
+                imageUrls,
+                p.getPeriod(),
+                p.getFloor(),
+                p.getFacing(),
+                p.getRoomCnt(),
+                p.getBathroomCnt(),
+                p.getConstructionDate(),
+                p.getParkingCnt(),
+                p.getHasElevator(),
+                p.getPetAvailable(),
+                aucInfo.getIsAucPref(),
+                aucInfo.getIsBrkPref(),
+                p.getHasBrk(),
+                aucInfo.getAucAt(),
+                aucInfo.getAucAvailable(),
+                p.getIsCertificated(),
+                c.getRiskScore(),
+                c.getRiskReason()
+        );
     }
 
     /**
@@ -189,16 +207,24 @@ public class PropertyService {
      */
     @Transactional
     public DetailResponseDto getPropertyDetail(Integer propertySeq) {
+
+        /** 매물 존재 확인 */
         Property p = propertyRepository.findByPropertySeqAndDeletedAtIsNull(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
+        /** 경매 정보 확인 */
         PropertyAucInfo aucInfo = propertyAucInfoRepository.findByPropertySeq(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
 
-        // 이미지 리스트
-        List<String> images = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq)
-                .stream()
-                .map(img -> img.getS3Key())
+        /** 이미지 정보 매핑 */
+        List<PropertyImage> propertyImages = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq);
+
+        List<ImageDto> images = propertyImages.stream()
+                .map(img -> new ImageDto(
+                        img.getS3Key(),
+                        toUrl(img.getS3Key()),
+                        img.getImgOrder()
+                ))
                 .toList();
 
         DetailResponseDto detail = new DetailResponseDto(
@@ -210,10 +236,18 @@ public class PropertyService {
                 p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(), p.getConstructionDate(),
                 p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
                 aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
-                p.getIsLinked(),
+                p.getHasBrk(),
                 aucInfo.getAucAt(), aucInfo.getAucAvailable()
         );
         return detail;
+    }
+
+    private String toUrl(String key) {
+        if ("public".equalsIgnoreCase(exposeMode)) {
+            return s3Uploader.publicUrl(key);
+        }
+        // default = presigned 12h
+        return s3Uploader.presignedGetUrl(key, java.time.Duration.ofHours(12));
     }
 
     /**

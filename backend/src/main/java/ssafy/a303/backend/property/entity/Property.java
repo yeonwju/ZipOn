@@ -62,12 +62,6 @@ public class Property {
     @Column(name = "is_certificated")
     private Boolean isCertificated; // 등기부등본 확인 여부
 
-    @Column(name = "pdf_code")
-    private String pdfCode; // pdf 고유 코드
-
-    @Enumerated(EnumType.STRING)
-    private VerificationStatus verificationStatus;
-
     @Column(name = "area")
     private Double area;
 
@@ -122,9 +116,10 @@ public class Property {
     @Column(name = "traded_at", length = 50)
     private String tradedAt;
 
-    @Column(name = "is_linked")
+    //중개인 매칭 완료 되었는지
+    @Column(name = "has_brk")
     @ColumnDefault("false")
-    private Boolean isLinked;
+    private Boolean hasBrk;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -134,8 +129,13 @@ public class Property {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+
     public void updateIsCertificated(Boolean isCertificated){
         this.isCertificated = isCertificated;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public void delete(String deletedAt){

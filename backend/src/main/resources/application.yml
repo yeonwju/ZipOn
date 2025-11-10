@@ -62,7 +62,7 @@ bizno:
   key: ${BIZNO_API_KEY}
 
 elasticsearch:
-  host: ${ES_URL}
+  host: ${ELASTICSEARCH_URL}
   port: 9200
   index:
     property: my_index

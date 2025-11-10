@@ -1,6 +1,10 @@
 package ssafy.a303.backend.property.dto.response;
 
+import ssafy.a303.backend.property.enums.Facing;
+
 public record PropertyMapDto(
+
+        Integer proprtySeq,
         String address,
         String propertyNm,
         Double latitude,
@@ -9,6 +13,9 @@ public record PropertyMapDto(
         Integer areaP,
         Long deposit,
         Integer mnRent,
-        Integer fee
+        Integer fee,
+        Facing facing,
+        Byte roomCnt,
+        Byte floor
 ) {
 }

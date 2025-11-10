@@ -26,8 +26,8 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
     // 지도 좌표 바운딩 박스 리밋 조회
     @Query("""
     select new ssafy.a303.backend.property.dto.response.PropertyMapDto(
-        p.address, p.propertyNm, p.latitude, p.longitude,
-        p.area, p.areaP, p.deposit, p.mnRent, p.fee
+        p.propertySeq, p.address, p.propertyNm, p.latitude, p.longitude,
+        p.area, p.areaP, p.deposit, p.mnRent, p.fee, p.facing, p.roomCnt, p.floor
       )
       from Property p
       where (p.deletedAt is null or p.deletedAt = '')

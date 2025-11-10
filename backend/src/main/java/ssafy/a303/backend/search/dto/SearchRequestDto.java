@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.dto.elastic;
+package ssafy.a303.backend.search.dto;
 
 import java.util.List;
 
@@ -24,6 +24,10 @@ public record SearchRequestDto(
 
         List<String> facings,     // 해방향(["S","SE"]) - keyword
         List<String> buildingTypes,// 빌딩타입(["OFFICE","APT"]) - keyword
+
+        Boolean isAuc,
+        Boolean isBrk,
+        Boolean hasBrk,
 
         Integer page,             // 0-base
         Integer size,             // 페이지 크기
