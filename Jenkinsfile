@@ -174,12 +174,12 @@ pipeline {
         sh '''
           set -e
           mkdir -p build
-          echo "[DEV] Fetching OpenAPI from 127.0.0.1:28080..."
+          echo "[DEV] Fetching OpenAPI from zipondev-backend:8080..."
           READY=""
           for i in $(seq 1 30); do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:28080/v3/api-docs || true)
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
             if [ "$CODE" = "200" ]; then
-              curl -sf http://127.0.0.1:28080/v3/api-docs > build/swagger.json
+              curl -sf http://zipondev-backend:8080/v3/api-docs > build/swagger.json
               READY=1
               break
             fi
