@@ -1,5 +1,6 @@
 package ssafy.a303.backend.livestream.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LiveChatMessageResponseDto {
     @Schema(description = "라이브 방송 식별자", example = "12")
     private Integer liveSeq;
