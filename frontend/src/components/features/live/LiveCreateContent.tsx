@@ -9,10 +9,13 @@ import {
   LiveTitleInput,
   SelectPicker,
 } from '@/components/features/live'
+import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 import useUserLocation from '@/hooks/map/useUserLocation'
 import { calculateDistance } from '@/utils/distance'
 
 export default function LiveCreateContent() {
+  // 카카오맵 API 로드
+  useKakaoLoader()
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [title, setTitle] = useState('')
 

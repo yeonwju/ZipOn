@@ -1,5 +1,3 @@
-'use client'
-
 import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react'
 
 import MiniMap from '@/components/common/map/MiniMap'
@@ -65,7 +63,7 @@ export default function LiveMapPreview({
   const isWithinDistance = distance !== null && distance <= 100
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
+    <div className="mx-4 mb-4 rounded-xl border border-gray-200 bg-white p-5">
       {/* 헤더 (범례 + 새로고침) */}
       <div className="mb-4 flex items-center justify-between">
         {/* 범례 */}
