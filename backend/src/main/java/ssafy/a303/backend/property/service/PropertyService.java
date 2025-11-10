@@ -193,7 +193,10 @@ public class PropertyService {
                 aucInfo.getIsBrkPref(),
                 p.getHasBrk(),
                 aucInfo.getAucAt(),
-                aucInfo.getAucAvailable()
+                aucInfo.getAucAvailable(),
+                p.getIsCertificated(),
+                c.getRiskScore(),
+                c.getRiskReason()
         );
     }
 

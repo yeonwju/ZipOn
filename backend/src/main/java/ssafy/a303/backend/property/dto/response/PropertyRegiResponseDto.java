@@ -33,6 +33,11 @@ public record PropertyRegiResponseDto(
         Boolean isBrkPref,
         Boolean hasBrk,
         String aucAt,
-        String aucAvailable
+        String aucAvailable,
+
+        //ai 관련
+        boolean isCertificated,
+        Integer riskScore,
+        String riskReason
 ) {
 }
