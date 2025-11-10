@@ -103,6 +103,7 @@ public class PropertySearchController {
 
             @RequestParam(required = false) Boolean isAuc,
             @RequestParam(required = false) Boolean isBrk,
+            @RequestParam(required = false) Boolean hasBrk,
 
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
@@ -119,7 +120,7 @@ public class PropertySearchController {
                 roomCountMin, roomCountMax,
                 floorMin, floorMax,
                 facings, buildingTypes,
-                isAuc, isBrk,
+                isAuc, isBrk, hasBrk,
                 page, size,
                 sortField, sortOrder
         );
@@ -184,6 +185,7 @@ public class PropertySearchController {
                 src.getFloor(), // floor
                 src.getIsAuc(),
                 src.getIsBrk(),
+                src.getHasBrk(),
 
                 src.getCreatedAt() // created_at
         );

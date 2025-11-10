@@ -27,6 +27,7 @@ public record SearchRequestDto(
 
         Boolean isAuc,
         Boolean isBrk,
+        Boolean hasBrk,
 
         Integer page,             // 0-base
         Integer size,             // 페이지 크기

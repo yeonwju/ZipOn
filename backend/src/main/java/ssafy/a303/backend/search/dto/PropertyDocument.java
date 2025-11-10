@@ -34,6 +34,7 @@ public class PropertyDocument {
 
     private Boolean isBrk;
     private Boolean isAuc;
+    private Boolean hasBrk;
 
     private String createdAt;
 }

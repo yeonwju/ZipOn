@@ -101,6 +101,7 @@ public class PropertySearchService {
         // 매물 조건
         if (r.isAuc() != null) filters.add(Query.of(q -> q.term(t -> t.field("is_auc").value(r.isAuc()))));
         if (r.isBrk() != null) filters.add(Query.of(q -> q.term(t -> t.field("is_brk").value(r.isBrk()))));
+        if (r.hasBrk() != null) filters.add(Query.of(q -> q.term(t -> t.field("has_brk").value(r.hasBrk()))));
 
         /** 최종 bool 조립*/
         Query finalQuery = (must.isEmpty() && filters.isEmpty())

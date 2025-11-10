@@ -35,6 +35,7 @@ public record SearchResponseDto(
         //매물 필터 구분
         Boolean isAuc,
         Boolean isBrk,
+        Boolean hasBrk,
 
         // 생성일
         String createdAt
