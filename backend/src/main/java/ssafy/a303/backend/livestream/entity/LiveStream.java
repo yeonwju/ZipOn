@@ -30,12 +30,12 @@ public class LiveStream extends BaseTimeEntity {
     private Integer id;
 
     /** auc_seq FK → auction.auction_seq (경매와의 연결) */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "auc_seq", nullable = false)
     private Auction auction;
 
     /** user_seq FK → user.user_seq (방장/호스트) */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_seq", nullable = false)
     private User host;
 
