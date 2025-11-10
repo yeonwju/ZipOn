@@ -198,9 +198,9 @@ public class RedisConfig {
         return new MessageListenerAdapter(liveRedisPubSubService, "onMessage");
     }
 
-    // ============================================
+    // ================================================================
     // [3] SMS 전용 Redis DB3
-    // ============================================
+    // ================================================================
     @Bean
     @Qualifier("smsRedisTemplate")
     public StringRedisTemplate smsRedisTempate(
