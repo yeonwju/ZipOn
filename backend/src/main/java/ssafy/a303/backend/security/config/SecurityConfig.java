@@ -83,7 +83,7 @@ public class SecurityConfig {
                                 "/api/actuator/health",
                                 "/error"
                         ).permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(
                         oauth -> oauth

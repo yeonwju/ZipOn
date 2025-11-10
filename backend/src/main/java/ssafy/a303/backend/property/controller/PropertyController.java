@@ -144,7 +144,7 @@ public class PropertyController {
             )
     })
     @PostMapping(value = "/detail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO<PropertyRegiResponseDto>> createProperty(@RequestBody PropertyDetailRequestDto req,
+    public ResponseEntity<ResponseDTO<PropertyRegiResponseDto>> createProperty(@RequestPart PropertyDetailRequestDto req,
                                                                                @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                                                                @AuthenticationPrincipal Integer userSeq)
     {

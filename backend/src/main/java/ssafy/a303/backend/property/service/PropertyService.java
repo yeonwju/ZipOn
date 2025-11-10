@@ -155,9 +155,15 @@ public class PropertyService {
                             .build();
                     propertyImageRepository.save(img);
 
-                    // 외부 노출 URL 방식
+                    // 외부 노출 임시 URL 방식
                     imageUrls.add(s3Uploader.presignedGetUrl(key, Duration.ofHours(12)));
                 }
+
+                /** 첫번째 사진을 썸네일로 설정 */
+                if(!s3keys.isEmpty()) {
+                    p.updateThumbnail(s3keys.get(0));
+                }
+
             } catch (Exception e) {
                 for (String k : s3keys) {
                     try {
@@ -167,6 +173,10 @@ public class PropertyService {
                     throw e;
                 }
             }
+
+            String thumbnailUrl = (p.getThumbnail() != null)
+                    ? s3Uploader.presignedGetUrl(p.getThumbnail(), Duration.ofHours(12))
+                    : null;
         }
 
         /** ES 색인 */
@@ -190,7 +200,7 @@ public class PropertyService {
                 p.getDeposit(),
                 p.getMnRent(),
                 p.getFee(),
-                s3keys,
+                imageUrls,
                 p.getPeriod(),
                 p.getFloor(),
                 p.getFacing(),

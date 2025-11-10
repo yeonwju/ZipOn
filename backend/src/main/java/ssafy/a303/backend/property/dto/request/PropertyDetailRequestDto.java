@@ -18,7 +18,6 @@ public record PropertyDetailRequestDto(
         Long deposit,
         Integer mnRent,
         Integer fee,
-        List images,
         Byte period,
         Byte floor,
         Facing facing,

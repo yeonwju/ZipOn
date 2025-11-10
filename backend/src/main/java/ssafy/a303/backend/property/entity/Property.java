@@ -139,6 +139,10 @@ public class Property {
         this.isCertificated = isCertificated;
     }
 
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
     public void delete(String deletedAt){
         this.deletedAt = deletedAt;
     }
