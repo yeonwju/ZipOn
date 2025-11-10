@@ -1,5 +1,8 @@
 package ssafy.a303.backend.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +16,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
 
@@ -154,13 +159,21 @@ public class RedisConfig {
     public RedisTemplate<String, Object> liveRedisObjectTemplate(
             @Qualifier("liveRedisFactory") RedisConnectionFactory factory) {
 
+        // ObjectMapper 설정 (LocalDateTime 직렬화 지원)
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule()); // Java 8 날짜/시간 지원
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // ISO-8601 형식으로 저장
+
+        // JSON Serializer 생성
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 
-        template.setKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
-        template.setValueSerializer(new org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer());
-        template.setHashKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
-        template.setHashValueSerializer(new org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(jsonSerializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(jsonSerializer);
 
         template.afterPropertiesSet();
         return template;
