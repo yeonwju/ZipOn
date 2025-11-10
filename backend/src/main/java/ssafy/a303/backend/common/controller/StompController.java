@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import ssafy.a303.backend.chat.dto.request.ChatMessageRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
+import ssafy.a303.backend.chat.dto.response.ChatNotificationDto;
+import ssafy.a303.backend.chat.repository.MessageReadStatusRepository;
 import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
 import ssafy.a303.backend.chat.service.ChatService;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -58,6 +60,7 @@ public class StompController {
     private final LiveChatService liveChatService;
     private final LiveRedisPubSubService liveRedisPubSubService;
     private final UserRepository userRepository;
+    private final MessageReadStatusRepository messageReadStatusRepository;
     private final ObjectMapper objectMapper;
     
     // 생성자 주입
@@ -65,12 +68,14 @@ public class StompController {
                           ChatRedisPubSubService chatRedisPubSubService,
                           LiveChatService liveChatService,
                           LiveRedisPubSubService liveRedisPubSubService,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          MessageReadStatusRepository messageReadStatusRepository) {
         this.chatService = chatService;
         this.chatRedisPubSubService = chatRedisPubSubService;
         this.liveChatService = liveChatService;
         this.liveRedisPubSubService = liveRedisPubSubService;
         this.userRepository = userRepository;
+        this.messageReadStatusRepository = messageReadStatusRepository;
         
         // ObjectMapper에 JavaTimeModule 등록
         this.objectMapper = new ObjectMapper();
@@ -124,11 +129,45 @@ public class StompController {
         // 3. DTO → JSON 문자열 변환
         String payload = objectMapper.writeValueAsString(response);
 
-        // 4. Redis Pub/Sub 채널로 메시지 발행
+        // 4. Redis Pub/Sub 채널로 메시지 발행 (채팅방 내부 구독자용)
         chatRedisPubSubService.publish("chat:" + roomSeq, payload);
 
         log.info("[REDIS][CHAT] roomSeq={}, sender={}, message={}",
                 roomSeq, sender.getNickname(), response.getContent());
+
+        // 5. 수신자의 알림 채널로도 발행 (채팅방 목록 구독자용)
+        try {
+            User recipient = chatService.getRecipient(roomSeq, sender.getUserSeq());
+            
+            // 수신자 기준 읽지 않은 메시지 개수 조회
+            long unreadCount = messageReadStatusRepository.countByChatRoomIdAndUserUserSeqAndIsReadFalse(
+                    roomSeq, recipient.getUserSeq());
+            
+            // 알림 DTO 생성
+            ChatNotificationDto notification = ChatNotificationDto.builder()
+                    .roomSeq(roomSeq)
+                    .sender(ChatNotificationDto.SenderDto.builder()
+                            .userSeq(sender.getUserSeq())
+                            .name(sender.getName())
+                            .nickname(sender.getNickname())
+                            .profileImg(sender.getProfileImg())
+                            .build())
+                    .content(response.getContent())
+                    .sentAt(response.getSentAt())
+                    .unreadCount((int) unreadCount)
+                    .build();
+            
+            String notificationPayload = objectMapper.writeValueAsString(notification);
+            
+            // 수신자의 개인 알림 채널로 발행
+            chatRedisPubSubService.publish("user:notifications:" + recipient.getUserSeq(), notificationPayload);
+            
+            log.info("[REDIS][NOTIFICATION] 수신자 알림 발행 → userSeq={}, roomSeq={}, unreadCount={}",
+                    recipient.getUserSeq(), roomSeq, unreadCount);
+        } catch (Exception e) {
+            log.error("[REDIS][NOTIFICATION] 알림 발행 실패: {}", e.getMessage(), e);
+            // 알림 실패해도 메시지는 정상 전송되었으므로 예외 무시
+        }
     }
 
     // =================================================================================================

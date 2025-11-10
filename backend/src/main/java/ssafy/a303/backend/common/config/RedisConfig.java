@@ -19,6 +19,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
+import ssafy.a303.backend.chat.service.ChatNotificationPubSubService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
 
 /**
@@ -103,6 +104,27 @@ public class RedisConfig {
     @Bean
     @Qualifier("chatMessageListenerAdapter")
     public MessageListenerAdapter chatMessageListenerAdapter(ChatRedisPubSubService service) {
+        return new MessageListenerAdapter(service, "onMessage");
+    }
+
+    // 사용자별 알림 채널 구독 (user:notifications:* 패턴)
+    @Bean
+    @Qualifier("chatNotificationListenerContainer")
+    public RedisMessageListenerContainer chatNotificationListenerContainer(
+            @Qualifier("chatRedisFactory") RedisConnectionFactory factory,
+            @Qualifier("chatNotificationListenerAdapter") MessageListenerAdapter adapter) {
+
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(factory);
+        // user:notifications:* 패턴으로 모든 사용자의 알림 채널 구독
+        container.addMessageListener(adapter, new PatternTopic("user:notifications:*"));
+        return container;
+    }
+
+    // Redis → ChatNotificationPubSubService.onMessage() 로 연결
+    @Bean
+    @Qualifier("chatNotificationListenerAdapter")
+    public MessageListenerAdapter chatNotificationListenerAdapter(ChatNotificationPubSubService service) {
         return new MessageListenerAdapter(service, "onMessage");
     }
 

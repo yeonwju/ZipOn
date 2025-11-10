@@ -257,6 +257,7 @@ public class ChatService {
 
     /**
      * 메시지 저장 + 읽음 상태 생성 + 응답 DTO 반환
+     * @return 저장된 메시지의 응답 DTO
      */
     public ChatMessageResponseDto saveMessage(Integer roomSeq, ChatMessageRequestDto requestDto, User sender) {
 
@@ -300,6 +301,24 @@ public class ChatService {
                 .content(message.getContent())
                 .sentAt(message.getSentAt())
                 .build();
+    }
+
+    /**
+     * 채팅방의 상대방(수신자) 찾기
+     * @param roomSeq 채팅방 ID
+     * @param senderSeq 발신자 ID
+     * @return 수신자 User 엔티티
+     */
+    public User getRecipient(Integer roomSeq, Integer senderSeq) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 채팅방 참여자 중 발신자가 아닌 사람 = 수신자
+        return chatRoom.getParticipants().stream()
+                .map(ChatParticipant::getUser)
+                .filter(user -> !user.getUserSeq().equals(senderSeq))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     /**
