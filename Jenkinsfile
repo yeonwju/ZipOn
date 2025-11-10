@@ -146,15 +146,15 @@ pipeline {
             # 내부 백엔드 직접 헬스체크 (Nginx 우회)
             echo "[DEV] Health check zipondev-backend (127.0.0.1:28080)..."
             OK=""
-            for i in $(seq 1 120); do
+            for i in $(seq 1 60); do
               # 보안 설정에 따라 200 또는 (Nginx 경유 시) 302가 올 수 있음
-              CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:28080/v3/api-docs || true)
+              CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
               if [ "$CODE" = "200" ] || [ "$CODE" = "302" ]; then
                 echo "[DEV] ✅ OK (HTTP $CODE) on attempt $i"
                 OK=1
                 break
               fi
-              echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/120) HTTP=$CODE"
+              echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/60) HTTP=$CODE"
               sleep 2
             done
             [ -n "$OK" ] || {
