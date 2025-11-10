@@ -54,7 +54,6 @@ pipeline {
     ES_URL            = 'http://zipondev-elasticsearch:9200'
     ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
 
-    // --- Placeholder for dynamic FRONT_URL ---
     FRONT_URL = ''
   }
 
@@ -77,11 +76,9 @@ pipeline {
       steps {
         script {
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-
-          env.FRONT_URL = (currentBranch.contains('dev'))
-            ? "https://dev-zipon.duckdns.org"
-            : "https://zipon.duckdns.org"
-
+          env.FRONT_URL = (currentBranch.contains('dev')) ?
+            "https://dev-zipon.duckdns.org/" :
+            "https://zipon.duckdns.org/"
           echo "🌐 FRONT_URL set to: ${env.FRONT_URL} (branch=${currentBranch})"
         }
       }
@@ -94,9 +91,9 @@ pipeline {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
 
-          def FRONT_API_BASE_URL = (currentBranch.contains('dev'))
-            ? 'https://dev-zipon.duckdns.org/api'
-            : 'https://zipon.duckdns.org/api'
+          def FRONT_API_BASE_URL = (currentBranch.contains('dev')) ?
+            'https://dev-zipon.duckdns.org/api' :
+            'https://zipon.duckdns.org/api'
 
           echo "🧱 Building images for commit: ${gitsha} (branch=${currentBranch})"
           echo "🌐 Using FRONT_API_BASE_URL: ${FRONT_API_BASE_URL}"
@@ -106,17 +103,19 @@ pipeline {
             sh """
               set -e
               docker build --no-cache ${env.DOCKER_OPTS} \
-                --build-arg NEXT_PUBLIC_API_BASE_URL='${FRONT_API_BASE_URL}' \
-                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY=\$NEXT_PUBLIC_KAKAO_MAP_API_KEY \
-                --build-arg NEXT_PUBLIC_PWA_ENABLE=\$NEXT_PUBLIC_PWA_ENABLE \
+                --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
+                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
+                --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
                 -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
             """
           },
           BACKEND: {
             sh """
               set -e
+              echo "[DEBUG] FRONT_URL=${env.FRONT_URL}"
+              export FRONT_URL="${env.FRONT_URL}"
               docker build ${env.DOCKER_OPTS} \
-                --build-arg FRONT_URL='${env.FRONT_URL}' \
+                --build-arg FRONT_URL="${FRONT_URL}" \
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
             """
           },
@@ -213,7 +212,6 @@ pipeline {
     }
   }
 
-  // 🔚 Post Actions
   post {
     always {
       echo "✅ Pipeline complete. Cleaning workspace..."
