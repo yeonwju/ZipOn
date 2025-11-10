@@ -48,10 +48,11 @@ public class SecurityConfig {
         // ┌─── 설정 ───┐
         List<String> methods = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
         List<String> headers = List.of("*");
+        List<String> origins = List.of(frontUrl, "http://localhost:3000");
         // └─── 설정 ───┘
         // 어떤 config인지 설정
         CorsConfiguration ccf = new CorsConfiguration();
-        ccf.addAllowedOrigin(frontUrl);
+        ccf.setAllowedOrigins(origins);
         ccf.setAllowedMethods(methods);
         ccf.setAllowedHeaders(headers);
         ccf.setAllowCredentials(true);
