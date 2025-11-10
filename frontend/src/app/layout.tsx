@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import PwaProvider from '@/components/common/PwaProvider'
+import MiniPlayer from '@/components/features/live/MiniPlayer'
 import InstallPrompt from '@/components/ui/InstallPrompt'
 
 export const metadata: Metadata = {
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
-        
+
         <link
           rel="stylesheet"
           as="style"
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <PwaProvider />
         {children}
         <InstallPrompt />
+        <MiniPlayer />
       </body>
     </html>
   )
