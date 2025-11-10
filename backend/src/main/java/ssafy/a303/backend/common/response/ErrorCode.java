@@ -12,6 +12,7 @@ public enum ErrorCode {
     EXTERNAL_API_LIMIT(429, HttpStatus.TOO_MANY_REQUESTS, "내일 오세요"),
     USER_NOT_FOUND(404, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     SMS_NOT_SENDED(404, HttpStatus.NOT_FOUND, "해당 번호로 전송한 코드가 없습니다."),
+    CODE_NOT_VALID(400, HttpStatus.BAD_REQUEST, "번호가 틀렸습니다."),
 
     // JWT 관련 에러 코드,
     INVALID_TOKEN(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -22,6 +23,9 @@ public enum ErrorCode {
 
     // 사업장
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
+
+    // JSON
+    JSON_ERROR(400,HttpStatus.BAD_REQUEST, "직렬화 또는 역직렬화를 실패하였습니다."),
 
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST

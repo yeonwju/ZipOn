@@ -16,7 +16,7 @@ import ssafy.a303.backend.user.service.UserService;
 public class UserController {
 
     private final UserService userService;
-    private final SmsService service;
+    private final SmsService smsService;
 
     @GetMapping("/me")
     public ResponseEntity<ResponseDTO<MeResponseDTO>> getUser(@AuthenticationPrincipal Integer userSeq) {
@@ -25,9 +25,14 @@ public class UserController {
     }
 
     @PostMapping("/verify/sms")
-    public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestBody VerifyUserRequest verifyUserRequest) {
-        service.send(userSeq, verifyUserRequest.tel());
+    public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestBody VerifyUserRequest request) {
+        smsService.sendAndSave(userSeq, request);
         return ResponseDTO.ok(null, "문자를 발송하였습니다.");
+    }
+
+    @PostMapping("/verify/code")
+    public ResponseEntity<ResponseDTO<MeResponseDTO>> smsVerify(@AuthenticationPrincipal Integer userSeq, @RequestPart String code){
+        return ResponseDTO.ok(smsService.verify(userSeq, code), "인증되었습니다.");
     }
 
 }
