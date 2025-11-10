@@ -60,6 +60,7 @@ pipeline {
 
   stages {
 
+    // 1️⃣ Checkout
     stage('Checkout') {
       steps {
         checkout scm
@@ -67,27 +68,33 @@ pipeline {
       }
     }
 
+    // 2️⃣ Set Environment
     stage('Set Environment') {
       steps {
         script {
-          env.FRONT_URL = (env.BRANCH_NAME == 'dev')
+          def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
+
+          env.FRONT_URL = (currentBranch.contains('dev'))
             ? "https://dev-zipon.duckdns.org"
             : "https://zipon.duckdns.org"
 
-          echo "🌐 FRONT_URL set to: ${env.FRONT_URL}"
+          echo "🌐 FRONT_URL set to: ${env.FRONT_URL} (branch=${currentBranch})"
         }
       }
     }
 
+    // 3️⃣ Build Images
     stage('Build Images (parallel)') {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
-          def FRONT_API_BASE_URL = (env.BRANCH_NAME == 'dev')
+          def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
+
+          def FRONT_API_BASE_URL = (currentBranch.contains('dev'))
             ? 'https://dev-zipon.duckdns.org/api'
             : 'https://zipon.duckdns.org/api'
 
-          echo "🧱 Building images for commit: ${gitsha} (branch=${env.BRANCH_NAME})"
+          echo "🧱 Building images for commit: ${gitsha} (branch=${currentBranch})"
           echo "🌐 Using FRONT_API_BASE_URL: ${FRONT_API_BASE_URL}"
 
           parallel failFast: false,
@@ -104,7 +111,6 @@ pipeline {
           BACKEND: {
             sh """
               set -e
-              # FRONT_URL은 Jenkins 환경변수에서 전달되어 Spring @Value로 사용됨
               docker build ${env.DOCKER_OPTS} \
                 --build-arg FRONT_URL='${env.FRONT_URL}' \
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
@@ -121,6 +127,7 @@ pipeline {
       }
     }
 
+    // 4️⃣ Unit Tests (dev only)
     stage('Unit Tests (dev only)') {
       when { branch 'dev' }
       steps {
@@ -128,6 +135,7 @@ pipeline {
       }
     }
 
+    // 5️⃣ Deploy DEV
     stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
@@ -141,7 +149,7 @@ pipeline {
 
             echo "[DEV] Health check zipondev-backend..."
             OK=""
-            for i in $(seq 1 120); do   # ⏱ 최대 4분까지 대기
+            for i in $(seq 1 120); do
               curl -sfm 3 http://zipondev-backend:8080/v3/api-docs >/dev/null || \
               curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null
               if [ $? -eq 0 ]; then
@@ -163,6 +171,7 @@ pipeline {
       }
     }
 
+    // 6️⃣ Publish OpenAPI (DEV)
     stage('Publish OpenAPI (DEV)') {
       when { anyOf { branch 'dev'; branch 'develop' } }
       steps {
@@ -187,6 +196,7 @@ pipeline {
       }
     }
 
+    // 7️⃣ Deploy PROD
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
@@ -199,6 +209,7 @@ pipeline {
     }
   }
 
+  // 🔚 Post Actions
   post {
     always {
       echo "✅ Pipeline complete. Cleaning workspace..."
