@@ -62,12 +62,6 @@ public class Property {
     @Column(name = "is_certificated")
     private Boolean isCertificated; // 등기부등본 확인 여부
 
-    @Column(name = "pdf_code")
-    private String pdfCode; // pdf 고유 코드
-
-    @Enumerated(EnumType.STRING)
-    private VerificationStatus verificationStatus;
-
     @Column(name = "area")
     private Double area;
 

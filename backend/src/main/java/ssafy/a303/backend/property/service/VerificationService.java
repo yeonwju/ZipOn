@@ -1,5 +1,6 @@
 package ssafy.a303.backend.property.service;
 
+import ssafy.a303.backend.property.repository.CertificationRepository;
 import ssafy.a303.backend.property.util.PdfCodeGenerator;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import ssafy.a303.backend.property.dto.response.VerificationResultResponseDto;
 public class VerificationService {
 
     private final AiClient aiClient;
+    private final CertificationRepository certificationRepository;
 
     public VerificationResultResponseDto verifyPdf(MultipartFile pdf, String regiNm, String regiBirth, String address) {
 

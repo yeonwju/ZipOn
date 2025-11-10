@@ -12,9 +12,12 @@ import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.response.*;
+import ssafy.a303.backend.property.entity.Certification;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.entity.PropertyImage;
+import ssafy.a303.backend.property.enums.VerificationStatus;
+import ssafy.a303.backend.property.repository.CertificationRepository;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
@@ -37,48 +40,12 @@ public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final PropertyAucInfoRepository propertyAucInfoRepository;
     private final PropertyImageRepository propertyImageRepository;
+    private final CertificationRepository certificationRepository;
     private final S3Uploader s3Uploader;
     private final PropertySearchService propertySearchService;
 
     @Value("${app.s3.expose:presigned}")
     private String exposeMode;
-
-    /**
-     * 매물 등록 단계 중 첫단계,
-     * 매물의 주인과 주소 및 위경도 등록하기.
-     * 이후 등기부등본 검증.
-     * @param req
-     * @param lessorSeqFromAuth
-     * @return
-     */
-    @Transactional
-    public PropertyAddressResponseDto submitAddress(PropertyAddressRequestDto req,
-                                                    Integer lessorSeqFromAuth) {
-        // 이미 등록된 매물인지 검증
-        if(propertyRepository.existsByAddressAndLessorSeq(req.address(), lessorSeqFromAuth)){
-            throw new CustomException(ErrorCode.ADDRESS_DUPLICATE);
-        }
-
-        // 임대인 id, 이름, 매물 주소, 위도, 경도 db에 저장
-        Property entity = Property.builder()
-                .lessorSeq(lessorSeqFromAuth)
-                .lessorNm(req.lessorNm())
-                .propertyNm(req.propertyNm())
-                .address(req.address())
-                .latitude(req.latitude())
-                .longitude(req.longitude())
-                .build();
-
-        Property saved = propertyRepository.save(entity);
-
-        return new PropertyAddressResponseDto(
-                saved.getPropertySeq(),
-                saved.getLessorNm(),
-                saved.getAddress(),
-                saved.getLatitude(),
-                saved.getLongitude()
-        );
-    }
 
     /**
      * 매물 상세 정보 등록
@@ -131,6 +98,15 @@ public class PropertyService {
                 .aucAvailable(req.aucAvailable())
                 .build();
         propertyAucInfoRepository.save(aucInfo);
+
+        Certification c = Certification.builder()
+                .propertySeq(p.getPropertySeq())
+                .pdfCode(req.pdfCode())
+                .verificationStatus(VerificationStatus.PASSED)
+                .riskScore(req.riskScore())
+                .riskReason(req.riskReason())
+                .build();
+        certificationRepository.save(c);
 
         // 이미지 S3 업로드
         List<String> s3keys = new ArrayList<>();

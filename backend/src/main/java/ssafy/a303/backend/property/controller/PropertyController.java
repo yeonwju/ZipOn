@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
+import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
 import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.service.PropertyService;
 import ssafy.a303.backend.property.service.VerificationService;
@@ -41,9 +42,7 @@ public class PropertyController {
      * 2) 등기부등본 업로드
      * 3) 이름, 생일, 주소 적합성 AI 판단
      * @param file
-     * @param regiNm
-     * @param regiBirth
-     * @param address
+     * @param req
      * @return
      */
     @Operation(
@@ -78,12 +77,10 @@ public class PropertyController {
             )
     })
     @PostMapping(value = "/verifications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO<VerificationResultResponseDto>> verifyPdf(@RequestParam("file")MultipartFile file,
-                                                                                @RequestParam String regiNm,
-                                                                                @RequestParam String regiBirth,
-                                                                                @RequestParam String address)
+    public ResponseEntity<ResponseDTO<VerificationResultResponseDto>> verifyPdf(@RequestPart("file")MultipartFile file,
+                                                                                @RequestPart VerifyRequestDto req)
     {
-        VerificationResultResponseDto res = verificationService.verifyPdf(file, regiNm, regiBirth, address);
+        VerificationResultResponseDto res = verificationService.verifyPdf(file, req.regiNm(), req.regiBirth(), req.address());
         return ResponseDTO.ok(res, "등기부등본이 인증되었습니다.");
     }
 

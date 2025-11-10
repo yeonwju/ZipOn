@@ -30,6 +30,12 @@ public record PropertyDetailRequestDto(
         Boolean isAucPref,
         Boolean isBrkPref,
         String aucAt,
-        String aucAvailable
+        String aucAvailable,
+
+        //AI 관련
+        String pdfCode,
+        boolean isCertificated,
+        Integer riskScore,
+        String riskReason
 ) {
 }
