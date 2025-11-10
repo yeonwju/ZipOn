@@ -103,8 +103,9 @@ pipeline {
           BACKEND: {
             sh """
               set -e
+              # FRONT_URL은 Jenkins 환경변수에서 전달되어 Spring @Value로 사용됨
               docker build ${env.DOCKER_OPTS} \
-                --build-arg FRONT_URL='${env.FRONT_URL}' \  # ✅ Spring에서 @Value("${frontUrl}")로 사용
+                --build-arg FRONT_URL='${env.FRONT_URL}' \
                 -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
             """
           },
