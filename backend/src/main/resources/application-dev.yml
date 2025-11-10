@@ -42,10 +42,3 @@ logging:
 #    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
 #    org.springframework.web.servlet.DispatcherServlet: DEBUG
 #    org.apache.coyote.http11: DEBUG
-
-# Elasticsearch 설정
-elasticsearch:
-  host: localhost
-  port: 9200
-  index:
-    property: my_index
