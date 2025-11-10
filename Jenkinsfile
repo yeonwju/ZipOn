@@ -47,8 +47,8 @@ pipeline {
     S3_SWAGGER = "s3://zipon-media/dev/swagger/swagger.json"
 
     // --- Elasticsearch ---
-    ES_URL            = 'http://zipondev-elasticsearch:9200'
-    ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
+    ES_URL            = 'zipondev-elasticsearch'
+    ELASTICSEARCH_URL = 'zipondev-elasticsearch'
 
     // --- Dynamic FRONT_URL (default) ---
     FRONT_URL = 'https://dev-zipon.duckdns.org'
