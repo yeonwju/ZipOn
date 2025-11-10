@@ -42,6 +42,8 @@ pipeline {
 
     // --- AWS / S3 ---
     AWS_REGION = "ap-northeast-2"
+    AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     S3_SWAGGER = "s3://zipon-media/dev/swagger/swagger.json"
 
     // --- Elasticsearch ---

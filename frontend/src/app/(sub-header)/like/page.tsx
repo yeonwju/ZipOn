@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic'
 
 import { ListingItem } from '@/components/features/home'
 
-export const dynamic = 'force-dynamic'
 
 /**
  * 찜한 매물 페이지 (Server Component)
