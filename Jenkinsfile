@@ -102,7 +102,6 @@ pipeline {
       }
     }
 
-
     stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
@@ -116,8 +115,8 @@ pipeline {
               set -e
               docker network connect zipon-net jenkins-container 2>/dev/null || true
 
-              echo "[DEV] Creating .env file..."
-              cat <<EOF > .env
+              echo "[DEV] Creating .env file at /home/ubuntu/zipon-app/.env..."
+              cat <<EOF2 > /home/ubuntu/zipon-app/.env
 SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
 SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
 SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
@@ -140,10 +139,13 @@ AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 FRONT_URL=$FRONT_URL
 FAST_API=http://zipondev-ai:8000
-EOF
+EOF2
+
+              echo "[DEV] ✅ .env generated:"
+              cat /home/ubuntu/zipon-app/.env
 
               echo "[DEV] 🚀 Starting docker compose..."
-              docker compose --env-file .env -f "$DEV_COMPOSE" up -d --force-recreate --remove-orphans
+              docker compose --env-file /home/ubuntu/zipon-app/.env -f "$DEV_COMPOSE" up -d --force-recreate --remove-orphans
 
               echo "[DEV] ⏳ Waiting for backend startup..."
               for i in $(seq 1 40); do
@@ -199,3 +201,4 @@ EOF
     }
   }
 }
+EOF
