@@ -171,14 +171,19 @@ EOF2
       when { branch 'dev' }
       steps {
         sh '''
-          set -e
+          set +e
           mkdir -p build
           echo "[SWAGGER] Fetching OpenAPI JSON..."
-          curl -sf http://zipondev-backend:8080/v3/api-docs > build/swagger.json
-          echo "[SWAGGER] ✅ Saved successfully (size: $(wc -c < build/swagger.json))"
+          curl -sf http://127.0.0.1:28080/v3/api-docs -o build/swagger.json || echo "[WARN] Swagger fetch failed, skipping"
+          if [ -f build/swagger.json ]; then
+            echo "[SWAGGER] ✅ Saved successfully (size: $(wc -c < build/swagger.json))"
+          else
+            echo "[SWAGGER] ⚠️ No swagger.json generated"
+          fi
         '''
       }
     }
+
 
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
