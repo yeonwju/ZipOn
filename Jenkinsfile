@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     // --- Common Paths ---
-    DOCKER_OPTS  = "--pull"
+    DOCKER_OPTS  = ""  // 캐시 사용 위해 --no-cache 제거
     HEALTH       = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
@@ -41,8 +41,7 @@ pipeline {
     AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     S3_SWAGGER = "s3://zipon-media/dev/swagger/swagger.json"
 
-    // --- Elasticsearch (host만; 포트는 yml에서 9200) ---
-    ES_URL            = 'zipondev-elasticsearch'
+    // --- Elasticsearch ---
     ELASTICSEARCH_URL = 'zipondev-elasticsearch'
 
     // --- Dynamic FRONT_URL (default) ---
@@ -72,7 +71,7 @@ pipeline {
       }
     }
 
-    stage('Build Images (parallel)') {
+    stage('Build Images (optimized)') {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
@@ -82,36 +81,26 @@ pipeline {
           echo "🧱 Building images for commit: ${gitsha} (branch=${currentBranch})"
           echo "🌐 Using FRONT_API_BASE_URL: ${FRONT_API_BASE_URL}"
 
-          parallel failFast: false,
+          // ✅ 순차 빌드 (자원 안정 + 캐시 재사용 최적화)
+          sh """
+            set -e
 
-          FRONTEND: {
-            sh """
-              set -e
-              docker build --no-cache ${env.DOCKER_OPTS} \
-                --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
-                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
-                --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
-                -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
-            """
-          },
+            echo "[1/3] 🧩 Building FRONTEND"
+            docker build ${env.DOCKER_OPTS} \
+              --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
+              --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
+              --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
+              -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
 
-          BACKEND: {
-            sh """
-              set -e
-              echo "[DEBUG] FRONT_URL=${env.FRONT_URL}"
-              docker build ${env.DOCKER_OPTS} \
-                --build-arg FRONT_URL="${env.FRONT_URL}" \
-                -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
-            """
-          },
+            echo "[2/3] ⚙️ Building BACKEND"
+            docker build ${env.DOCKER_OPTS} \
+              --build-arg FRONT_URL="${env.FRONT_URL}" \
+              -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
 
-          AI: {
-            sh """
-              set -e
-              docker build ${env.DOCKER_OPTS} \
-                -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
-            """
-          }
+            echo "[3/3] 🤖 Building AI"
+            docker build ${env.DOCKER_OPTS} \
+              -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
+          """
         }
       }
     }
@@ -119,11 +108,11 @@ pipeline {
     stage('Unit Tests (dev only)') {
       when { branch 'dev' }
       steps {
-        sh 'echo "[TEST] Running test scripts..."'
+        sh 'echo "[TEST] Running lightweight checks..."'
       }
     }
 
-   stage('Deploy DEV') {
+    stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
         script {
@@ -132,19 +121,37 @@ pipeline {
             string(credentialsId: 'DB_USER', variable: 'SPRING_DATASOURCE_USERNAME'),
             string(credentialsId: 'DB_PW',   variable: 'SPRING_DATASOURCE_PASSWORD')
           ]) {
-            // ✅ 작은따옴표 블록 사용하여 Groovy 변수 해석 비활성화
             sh '''
               set -e
               docker network connect zipon-net jenkins-container 2>/dev/null || true
+              echo "[DEV] Deploying with auto-generated .env"
 
-              echo "[DEV] Deploying with $DEV_COMPOSE"
-
-              # ✅ .env 파일 생성
+              # ✅ .env 파일 생성 (DB + 모든 키 자동 반영)
               echo SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL > .env
               echo SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME >> .env
               echo SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD >> .env
+              echo GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID >> .env
+              echo GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET >> .env
+              echo SSAFY_API_KEY=$SSAFY_API_KEY >> .env
+              echo SSAFY_API_URL=$SSAFY_API_URL >> .env
+              echo GOV_API_KEY=$GOV_API_KEY >> .env
+              echo BIZNO_API_KEY=$BIZNO_API_KEY >> .env
+              echo BIZNO_API_URL=$BIZNO_API_URL >> .env
+              echo SOLAPI_API_KEY=$SOLAPI_API_KEY >> .env
+              echo SOLAPI_API_SECRET_KEY=$SOLAPI_API_SECRET_KEY >> .env
+              echo SOLAPI_API_TEL=$SOLAPI_API_TEL >> .env
+              echo REDIS_HOST=$REDIS_HOST >> .env
+              echo REDIS_PORT=$REDIS_PORT >> .env
+              echo ELASTICSEARCH_URL=$ELASTICSEARCH_URL >> .env
+              echo OPENVIDU_URL=$OPENVIDU_URL >> .env
+              echo OPENVIDU_SECRET=$OPENVIDU_SECRET >> .env
+              echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
+              echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
+              echo FRONT_URL=$FRONT_URL >> .env
+              echo FAST_API=http://zipondev-ai:8000 >> .env
 
-              # ✅ 더 이상 Groovy가 $나 -를 해석하지 않음
+              cat .env
+
               docker compose --env-file .env -f "$DEV_COMPOSE" up -d --force-recreate --remove-orphans
 
               echo "[DEV] Warm-up 30s..."
@@ -173,8 +180,6 @@ pipeline {
         }
       }
     }
-
-
 
     stage('Publish OpenAPI (DEV)') {
       when { anyOf { branch 'dev'; branch 'develop' } }
