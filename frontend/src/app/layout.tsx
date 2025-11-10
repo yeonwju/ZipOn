@@ -6,6 +6,7 @@ import React from 'react'
 import PwaProvider from '@/components/common/PwaProvider'
 import MiniPlayer from '@/components/features/live/MiniPlayer'
 import InstallPrompt from '@/components/ui/InstallPrompt'
+import { ReactQueryProvider } from '@/providers/ReactQueryProvider'
 
 export const metadata: Metadata = {
   title: {
@@ -59,10 +60,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         suppressHydrationWarning
         style={{ fontFamily: 'Pretendard, system-ui, -apple-system, sans-serif' }}
       >
-        <PwaProvider />
-        {children}
-        <InstallPrompt />
-        <MiniPlayer />
+        <ReactQueryProvider>
+          <PwaProvider />
+          {children}
+          <InstallPrompt />
+          <MiniPlayer />
+        </ReactQueryProvider>
       </body>
     </html>
   )

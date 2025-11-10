@@ -6,11 +6,42 @@ React Query 커스텀 훅을 관리하는 폴더입니다.
 
 ```
 hooks/queries/
-├── useListings.ts     # 매물 목록 조회
-├── useListing.ts      # 매물 상세 조회
-├── useLive.ts         # 라이브 조회
-└── useUser.ts         # 사용자 정보
+├── useUser.ts         # ✅ 사용자 정보 (구현됨)
+├── useListings.ts     # 🔜 매물 목록 조회 (예정)
+├── useListing.ts      # 🔜 매물 상세 조회 (예정)
+└── useLive.ts         # 🔜 라이브 조회 (예정)
 ```
+
+## ✅ 구현된 Hook
+
+### useUser.ts
+
+사용자 정보 조회 및 인증 관리를 위한 Hook입니다.
+
+```typescript
+import { useUser, useUserData } from '@/hooks/queries/useUser'
+
+// 1. 전체 Query 객체 반환 (로딩 상태 포함)
+function MyPage() {
+  const { data: user, isLoading, isError } = useUser()
+  
+  if (isLoading) return <Loading />
+  if (isError) return <Error />
+  
+  return <div>안녕하세요 {user?.name}님</div>
+}
+
+// 2. Zustand에서 즉시 반환 (로딩 상태 없음, 더 빠름)
+function ProfileBadge() {
+  const user = useUserData()
+  
+  return <span>{user?.name}</span>
+}
+```
+
+**자세한 사용법은 [AUTH_GUARD_GUIDE.md](../../../docs/guides/AUTH_GUARD_GUIDE.md)를 참고하세요.**
+
+---
 
 ## 🔜 백엔드 연동 시 추가 예정
 
