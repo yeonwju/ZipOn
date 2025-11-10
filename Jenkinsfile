@@ -8,14 +8,10 @@ pipeline {
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    // --- Database Credentials ---
+    // --- Database (직접 사용; 중간 매핑 제거) ---
     DB_URL  = credentials('DB_URL')
     DB_USER = credentials('DB_USER')
     DB_PW   = credentials('DB_PW')
-
-    SPRING_DATASOURCE_URL      = "${DB_URL}"
-    SPRING_DATASOURCE_USERNAME = "${DB_USER}"
-    SPRING_DATASOURCE_PASSWORD = "${DB_PW}"
 
     // --- OAuth / API Keys ---
     GOOGLE_CLIENT_ID     = credentials('GOOGLE_CLIENT_ID')
@@ -46,7 +42,7 @@ pipeline {
 
     // --- AWS ---
     AWS_REGION = "ap-northeast-2"
-    AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+    AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     S3_SWAGGER = "s3://zipon-media/dev/swagger/swagger.json"
 
@@ -54,8 +50,8 @@ pipeline {
     ES_URL            = 'http://zipondev-elasticsearch:9200'
     ELASTICSEARCH_URL = 'http://zipondev-elasticsearch:9200'
 
-    // --- Placeholder for dynamic URL ---
-    FRONT_URL = 'https://dev-zipon.duckdns.org' // 기본값 (dev 기준)
+    // --- Dynamic FRONT_URL (default) ---
+    FRONT_URL = 'https://dev-zipon.duckdns.org'
   }
 
   options {
@@ -64,7 +60,6 @@ pipeline {
 
   stages {
 
-    // 1️⃣ Checkout
     stage('Checkout') {
       steps {
         checkout scm
@@ -72,31 +67,22 @@ pipeline {
       }
     }
 
-    // 2️⃣ Set Environment
     stage('Set Environment') {
       steps {
         script {
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          if (currentBranch.contains('dev')) {
-            env.FRONT_URL = "https://dev-zipon.duckdns.org"
-          } else {
-            env.FRONT_URL = "https://zipon.duckdns.org"
-          }
+          env.FRONT_URL = currentBranch.contains('dev') ? "https://dev-zipon.duckdns.org" : "https://zipon.duckdns.org"
           echo "🌐 FRONT_URL set to: ${env.FRONT_URL} (branch=${currentBranch})"
         }
       }
     }
 
-    // 3️⃣ Build Images (Frontend / Backend / AI)
     stage('Build Images (parallel)') {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-
-          def FRONT_API_BASE_URL = (currentBranch.contains('dev')) ?
-            'https://dev-zipon.duckdns.org/api' :
-            'https://zipon.duckdns.org/api'
+          def FRONT_API_BASE_URL = currentBranch.contains('dev') ? 'https://dev-zipon.duckdns.org/api' : 'https://zipon.duckdns.org/api'
 
           echo "🧱 Building images for commit: ${gitsha} (branch=${currentBranch})"
           echo "🌐 Using FRONT_API_BASE_URL: ${FRONT_API_BASE_URL}"
@@ -135,7 +121,6 @@ pipeline {
       }
     }
 
-    // 4️⃣ Unit Tests (dev only)
     stage('Unit Tests (dev only)') {
       when { branch 'dev' }
       steps {
@@ -143,7 +128,6 @@ pipeline {
       }
     }
 
-    // 5️⃣ Deploy DEV
     stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
@@ -155,24 +139,28 @@ pipeline {
             echo "[DEV] Deploying with ${DEV_COMPOSE}"
             docker compose -f ${DEV_COMPOSE} up -d --force-recreate --remove-orphans
 
-            echo "[DEV] Waiting 40s for backend initialization..."
-            sleep 40
+            # 초기화 대기 (DB 마이그/빈 캐시 등 감안)
+            echo "[DEV] Warm-up 30s..."
+            sleep 30
 
-            echo "[DEV] Health check zipondev-backend..."
+            # 내부 백엔드 직접 헬스체크 (Nginx 우회)
+            echo "[DEV] Health check zipondev-backend (127.0.0.1:28080)..."
             OK=""
-            for i in $(seq 1 240); do
-              curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null && {
-                echo "[DEV] ✅ OK on attempt $i"
+            for i in $(seq 1 120); do
+              # 보안 설정에 따라 200 또는 (Nginx 경유 시) 302가 올 수 있음
+              CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:28080/v3/api-docs || true)
+              if [ "$CODE" = "200" ] || [ "$CODE" = "302" ]; then
+                echo "[DEV] ✅ OK (HTTP $CODE) on attempt $i"
                 OK=1
                 break
-              }
-              echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/240)"
+              fi
+              echo "[DEV] $(date '+%H:%M:%S') Waiting for backend... ($i/120) HTTP=$CODE"
               sleep 2
             done
             [ -n "$OK" ] || {
               echo "[DEV] ❌ Health check failed"
-              echo "--- Backend Logs (last 30 lines) ---"
-              docker logs zipondev-backend --tail 30
+              echo "--- Backend Logs (last 50 lines) ---"
+              docker logs zipondev-backend --tail 50 || true
               exit 1
             }
           '''
@@ -180,22 +168,22 @@ pipeline {
       }
     }
 
-    // 6️⃣ Publish OpenAPI (DEV)
     stage('Publish OpenAPI (DEV)') {
       when { anyOf { branch 'dev'; branch 'develop' } }
       steps {
         sh '''
           set -e
           mkdir -p build
-          echo "[DEV] Fetching OpenAPI..."
+          echo "[DEV] Fetching OpenAPI from 127.0.0.1:28080..."
           READY=""
           for i in $(seq 1 30); do
-            if curl -sfm 3 http://127.0.0.1:28080/v3/api-docs >/dev/null; then
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:28080/v3/api-docs || true)
+            if [ "$CODE" = "200" ]; then
               curl -sf http://127.0.0.1:28080/v3/api-docs > build/swagger.json
               READY=1
               break
             fi
-            echo "[DEV] swagger not ready, retrying ($i/30)..."
+            echo "[DEV] swagger not ready (HTTP $CODE), retrying ($i/30)..."
             sleep 2
           done
           [ -n "$READY" ] || { echo "[DEV] ❌ OpenAPI not ready."; exit 1; }
@@ -205,7 +193,6 @@ pipeline {
       }
     }
 
-    // 7️⃣ Deploy PROD
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
