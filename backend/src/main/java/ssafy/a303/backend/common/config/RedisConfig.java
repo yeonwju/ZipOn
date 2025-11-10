@@ -48,8 +48,12 @@ public class RedisConfig {
     public RedisTemplate<Object, Object> redisTemplate() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         config.setDatabase(0); // DB0
+
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
+        factory.afterPropertiesSet(); // 초기화
+
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(new LettuceConnectionFactory(config));
+        template.setConnectionFactory(factory);
         return template;
     }
 
@@ -63,7 +67,10 @@ public class RedisConfig {
     public RedisConnectionFactory chatRedisFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         config.setDatabase(1); // DB1
-        return new LettuceConnectionFactory(config);
+
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
+        factory.afterPropertiesSet(); // 초기화
+        return factory;
     }
 
     // 문자열 기반 전송 템플릿 (Pub/Sub 메시지 용)
@@ -104,7 +111,10 @@ public class RedisConfig {
     public RedisConnectionFactory liveRedisFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         config.setDatabase(2); // DB2
-        return new LettuceConnectionFactory(config);
+
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
+        factory.afterPropertiesSet(); // 초기화
+        return factory;
     }
 
     // 문자열 기반 Pub/Sub 템플릿 (실시간 이벤트 송신)
