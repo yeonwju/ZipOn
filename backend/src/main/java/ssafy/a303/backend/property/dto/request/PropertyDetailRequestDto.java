@@ -1,10 +1,12 @@
 package ssafy.a303.backend.property.dto.request;
 
+import lombok.Data;
 import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
 
+@Data
 public record PropertyDetailRequestDto(
         String lessorNm,
         String address,

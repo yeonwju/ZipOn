@@ -1,10 +1,11 @@
 package ssafy.a303.backend.property.dto.response;
 
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
+import lombok.Data;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
 
+@Data
 public record DetailResponseDto(
         //기본 정보
 
