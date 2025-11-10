@@ -9,9 +9,13 @@ pipeline {
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
     // --- Database Credentials ---
-    SPRING_DATASOURCE_URL      = credentials('SPRING_DATASOURCE_URL')
-    SPRING_DATASOURCE_USERNAME = credentials('SPRING_DATASOURCE_USERNAME')
-    SPRING_DATASOURCE_PASSWORD = credentials('SPRING_DATASOURCE_PASSWORD')
+    DB_URL  = credentials('DB_URL')
+    DB_USER = credentials('DB_USER')
+    DB_PW   = credentials('DB_PW')
+
+    SPRING_DATASOURCE_URL      = "${DB_URL}"
+    SPRING_DATASOURCE_USERNAME = "${DB_USER}"
+    SPRING_DATASOURCE_PASSWORD = "${DB_PW}"
 
     // --- OAuth / API Keys ---
     GOOGLE_CLIENT_ID     = credentials('GOOGLE_CLIENT_ID')
