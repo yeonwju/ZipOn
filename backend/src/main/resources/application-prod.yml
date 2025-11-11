@@ -1,3 +1,5 @@
+frontUrl: https://dev-zipon.duckdns.org
+
 spring:
   config:
     activate:
