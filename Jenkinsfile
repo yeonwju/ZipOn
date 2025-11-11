@@ -31,7 +31,7 @@ pipeline {
     OPENVIDU_URL    = credentials('OPENVIDU_URL')
     OPENVIDU_SECRET = credentials('OPENVIDU_SECRET')
 
-    // --- Frontend ---
+    // --- Frontend (Next.js Build Args) ---
     NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
     NEXT_PUBLIC_PWA_ENABLE        = '1'
 
@@ -42,9 +42,6 @@ pipeline {
 
     // --- Elasticsearch ---
     ELASTICSEARCH_URL = 'zipondev-elasticsearch'
-
-    // --- Default FRONT_URL ---
-    FRONT_URL = 'https://dev-zipon.duckdns.org'
   }
 
   options {
@@ -54,6 +51,7 @@ pipeline {
 
   stages {
 
+    // ---------------------- 1️⃣ Git Checkout ----------------------
     stage('Checkout') {
       steps {
         checkout scm
@@ -61,32 +59,43 @@ pipeline {
       }
     }
 
+    // ---------------------- 2️⃣ Environment Setup ----------------------
     stage('Set Environment') {
       steps {
         script {
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          env.FRONT_URL = currentBranch.contains('dev') ? "https://dev-zipon.duckdns.org" : "https://zipon.duckdns.org"
+
+          // ✅ 브랜치에 따른 FRONT_URL 자동 세팅
+          if (currentBranch.contains('dev')) {
+            env.FRONT_URL = "http://localhost:3000"
+          } else {
+            env.FRONT_URL = "https://zipon.duckdns.org"
+          }
+
           echo "🌐 FRONT_URL = ${env.FRONT_URL}"
+
+          // ✅ API BASE URL도 동일하게 브랜치별 분기
+          env.FRONT_API_BASE_URL = currentBranch.contains('dev') ?
+              "https://dev-zipon.duckdns.org/api" :
+              "https://zipon.duckdns.org/api"
         }
       }
     }
 
+    // ---------------------- 3️⃣ Build All Images ----------------------
     stage('Build Images (Stable)') {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
-          def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          def FRONT_API_BASE_URL = currentBranch.contains('dev') ? 'https://dev-zipon.duckdns.org/api' : 'https://zipon.duckdns.org/api'
-
-          echo "🧱 Building images for commit ${gitsha} (branch=${currentBranch})"
+          echo "🧱 Building images for commit ${gitsha}"
 
           sh """
             set -e
             echo "[1/3] ⚡ FRONTEND build"
             docker build ${env.DOCKER_OPTS} \
-              --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
-              --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
-              --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
+              --build-arg NEXT_PUBLIC_API_BASE_URL="${env.FRONT_API_BASE_URL}" \
+              --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
+              --build-arg NEXT_PUBLIC_PWA_ENABLE="${env.NEXT_PUBLIC_PWA_ENABLE}" \
               -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
 
             echo "[2/3] ⚙️ BACKEND build"
@@ -94,7 +103,7 @@ pipeline {
               --build-arg FRONT_URL="${env.FRONT_URL}" \
               -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
 
-            echo "[3/3] 🤖 AI build (optional)"
+            echo "[3/3] 🤖 AI build"
             docker build ${env.DOCKER_OPTS} \
               -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
           """
@@ -102,6 +111,7 @@ pipeline {
       }
     }
 
+    // ---------------------- 4️⃣ Deploy DEV ----------------------
     stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
@@ -167,6 +177,7 @@ EOF2
       }
     }
 
+    // ---------------------- 5️⃣ Publish OpenAPI ----------------------
     stage('Publish OpenAPI') {
       when { branch 'dev' }
       steps {
@@ -184,7 +195,7 @@ EOF2
       }
     }
 
-
+    // ---------------------- 6️⃣ Deploy PROD ----------------------
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
@@ -196,6 +207,7 @@ EOF2
     }
   }
 
+  // ---------------------- 7️⃣ Post Actions ----------------------
   post {
     success {
       echo "✅ Pipeline complete."
