@@ -2,10 +2,23 @@ from fastapi import FastAPI, UploadFile, Form
 from app.schemas.verify_state import VerifyState
 from app.agent.verify_agent import create_pdf_verifier_graph
 from app.schemas.contract_state import ContractState
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 load_dotenv("/app/.env")
 
 app = FastAPI(title="Property Verification AI Server")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://dev-zipon.duckdns.org",
+        "https://zipon.duckdns.org",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/verify")
 async def verify_endpoint(
