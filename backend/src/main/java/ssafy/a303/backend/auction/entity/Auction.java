@@ -31,16 +31,16 @@ public class Auction {
     @JoinColumn(name = "property_seq")
     private Property property;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate strmDate;
 
-    @Column(nullable = false)
+    @Column
     private LocalTime strmStartTm;
 
-    @Column(nullable = false)
+    @Column
     private LocalTime strmEndTm;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime auctionEndAt;
 
     // 상태

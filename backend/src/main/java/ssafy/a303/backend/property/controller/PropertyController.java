@@ -54,8 +54,8 @@ public class PropertyController {
                     responseCode = "200",
                     description = "등기부등본이 정상적으로 인증됨",
                     content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = VerificationResultResponseDto.class),
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = VerifyRequestDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
@@ -78,9 +78,12 @@ public class PropertyController {
     })
     @PostMapping(value = "/verifications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDTO<VerificationResultResponseDto>> verifyPdf(@RequestPart("file")MultipartFile file,
-                                                                                @RequestPart VerifyRequestDto req)
+                                                                                @RequestPart("regiNm") String regiNm,
+                                                                                @RequestPart("regiBirth") String regiBirth,
+                                                                                @RequestPart("address") String address
+                                                                                )
     {
-        VerificationResultResponseDto res = verificationService.verifyPdf(file, req.regiNm(), req.regiBirth(), req.address());
+        VerificationResultResponseDto res = verificationService.verifyPdf(file, regiNm, regiBirth, address);
         return ResponseDTO.ok(res, "등기부등본이 인증되었습니다.");
     }
 
