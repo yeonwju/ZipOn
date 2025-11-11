@@ -1,4 +1,4 @@
-frontUrl: ${FRONT_URL:http://localhost:3000}
+frontUrl: https://dev-zipon.duckdns.org
 
 spring:
   config:
