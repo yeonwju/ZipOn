@@ -24,7 +24,6 @@ import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
 import ssafy.a303.backend.livestream.service.LiveStatsUpdatePubSubService;
 
 /**
- * RedisConfig
  * ======================================================================
  * Redis를 다음과 같이 분리하여 사용한다.
  *
@@ -80,7 +79,7 @@ public class RedisConfig {
         return factory;
     }
 
-    // 문자열 기반 전송 템플릿 (Pub/Sub 메시지 용)
+    // 채팅 메시지를 Publish 하는 RedisTemplate (문자열 기반)
     @Bean
     @Qualifier("chatRedisTemplate")
     public StringRedisTemplate chatRedisTemplate(
@@ -88,7 +87,7 @@ public class RedisConfig {
         return new StringRedisTemplate(factory);
     }
 
-    // chat:* 채널을 구독하여 메시지를 수신하는 Listener 컨테이너
+    // chat:* 채널을 구독하며 들어온 채팅 메시지를 듣는 Listener
     @Bean
     @Qualifier("chatMessageListenerContainer")
     public RedisMessageListenerContainer chatMessageListenerContainer(
@@ -101,14 +100,15 @@ public class RedisConfig {
         return container;
     }
 
-    // Redis → ChatRedisPubSubService.onMessage() 로 연결
+    // Redis 수신 메시지를 보기좋게 변환하며 → ChatRedisPubSubService.onMessage() 로 전달하는 어댑터
     @Bean
     @Qualifier("chatMessageListenerAdapter")
     public MessageListenerAdapter chatMessageListenerAdapter(ChatRedisPubSubService service) {
         return new MessageListenerAdapter(service, "onMessage");
     }
 
-    // 사용자별 알림 채널 구독 (user:notifications:* 패턴)
+    // user:notifications:* 채널 구독 (사용자별 알림 이벤트 수신)
+    // 1:1 채팅 메시지 목록 전체 구독
     @Bean
     @Qualifier("chatNotificationListenerContainer")
     public RedisMessageListenerContainer chatNotificationListenerContainer(
@@ -122,7 +122,7 @@ public class RedisConfig {
         return container;
     }
 
-    // Redis → ChatNotificationPubSubService.onMessage() 로 연결
+    // Redis 알림 메시지를 → ChatNotificationPubSubService.onMessage() 로 전달하는 어댑터
     @Bean
     @Qualifier("chatNotificationListenerAdapter")
     public MessageListenerAdapter chatNotificationListenerAdapter(ChatNotificationPubSubService service) {
@@ -145,7 +145,7 @@ public class RedisConfig {
         return factory;
     }
 
-    // 문자열 기반 Pub/Sub 템플릿 (실시간 이벤트 송신)
+    // 라이브 방송 실시간 이벤트 Publish 용 RedisTemplate (문자열 기반)
     @Bean
     @Qualifier("liveRedisTemplate")
     public StringRedisTemplate liveRedisTemplate(
@@ -153,7 +153,7 @@ public class RedisConfig {
         return new StringRedisTemplate(factory);
     }
 
-    // live:* 채널 구독 → onMessage() 실행 → STOMP 로 브로드캐스트
+    // live:* 채널 수신 → STOMP 로 시청자들 화면 갱신
     @Bean
     @Qualifier("liveMessageListenerContainer")
     public RedisMessageListenerContainer liveMessageListenerContainer(
@@ -166,13 +166,14 @@ public class RedisConfig {
         return container;
     }
 
+    // 라이브 실시간 메시지를 → LiveRedisPubSubService.onMessage() 로 전달하는 어댑터
     @Bean
     @Qualifier("liveMessageListenerAdapter")
     public MessageListenerAdapter liveMessageListenerAdapter(LiveRedisPubSubService service) {
         return new MessageListenerAdapter(service, "onMessage");
     }
 
-    // 라이브 통계 업데이트 채널 구독 (live:stats:updates)
+    // 실시간 방송 통계(시청자 수/좋아요 수/댓글 수) 업데이트 구독
     @Bean
     @Qualifier("liveStatsUpdateListenerContainer")
     public RedisMessageListenerContainer liveStatsUpdateListenerContainer(
@@ -186,18 +187,14 @@ public class RedisConfig {
         return container;
     }
 
-    // Redis → LiveStatsUpdatePubSubService.onMessage() 로 연결
+    // 방송 통계 메시지를 → LiveStatsUpdatePubSubService.onMessage() 로 전달하는 어댑터
     @Bean
     @Qualifier("liveStatsUpdateListenerAdapter")
     public MessageListenerAdapter liveStatsUpdateListenerAdapter(LiveStatsUpdatePubSubService service) {
         return new MessageListenerAdapter(service, "onMessage");
     }
 
-    /* =====================================================================
-       라이브 채팅 메시지 저장용 RedisTemplate (Object → JSON 직렬화 저장)
-       - Pub/Sub 은 문자열 템플릿(liveRedisTemplate)
-       - 채팅 기록 저장/조회는 JSON RedisTemplate(liveRedisObjectTemplate)
-     ===================================================================== */
+    // 라이브 채팅 로그/이벤트를 Redis에JSON 형식으로 저장하는 RedisTemplate
     @Bean
     @Qualifier("liveRedisObjectTemplate")
     public RedisTemplate<String, Object> liveRedisObjectTemplate(
@@ -205,7 +202,7 @@ public class RedisConfig {
 
         // ObjectMapper 설정 (LocalDateTime 직렬화 지원)
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // Java 8 날짜/시간 지원
+        objectMapper.registerModule(new JavaTimeModule()); // LocalDateTime 같은 날짜 필드도 JSON으로 변환 가능
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // ISO-8601 형식으로 저장
 
         // JSON Serializer 생성

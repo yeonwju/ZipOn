@@ -25,9 +25,16 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompHandler stompHandler;
 
     /**
-     * [1] WebSocket 엔드포인트 설정
-     * - 클라이언트가 최초로 접속할 엔드포인트 (Socket 연결 주소)
-     * - 예: ws://localhost:8080/chat 또는 ws://localhost:8080/live
+     * [1] WebSocket 엔드포인트 등록
+     * ---------------------------------------------------
+     * 클라이언트(프론트)가 최초로 WebSocket 연결을 시도하는 주소를 정의한다.
+     * 예:
+     *    ws://localhost:8080/chat
+     *    ws://localhost:8080/live
+     *
+     * SockJS:
+     *    WebSocket이 막혀있는 환경(회사 네트워크 등)에서도
+     *    Long-Polling 방식으로 연결 자동 대체
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -37,24 +44,35 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     /**
-     * [2] STOMP 메시지 라우팅 규칙
-     * - 클라이언트 → 서버 전송: /pub/**  (Controller @MessageMapping)
-     * - 서버 → 클라이언트 구독: /sub/** (브로커 자동 전송)
+     * [2] STOMP 메시지 라우팅 규칙 설정
+     * ---------------------------------------------------
+     * 경로 체계:
+     *
+     *  (1) 클라이언트 → 서버 (메시지 보낼 때)
+     *      /pub/**  로 전송
+     *      → @MessageMapping("...") 메서드로 라우팅됨
+     *
+     *  (2) 서버 → 클라이언트 (메시지 받을 때)
+     *      /sub/**  경로를 구독해야 메시지를 실시간으로 받을 수 있음
+     *      → SimpleBroker가 자동으로 브로드캐스트 처리
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // /pub/1 형태로 메시지 발행해야 함을 설정
+
+        // 클라이언트가 메시지를 보낼 때 prefix
+        // 예: client.send("/pub/chat.sendMessage", payload)
         registry.setApplicationDestinationPrefixes("/pub");
 
-        // /sub/1 형태로 메시지를 수신(subscribe)해야 함을 설정
-        registry.enableSimpleBroker("/sub"); // /sub/chat/1, /sub/live/2 등
+        // 서버가 메시지를 브로드캐스트 할 때 사용하는 prefix
+        // 예: client.subscribe("/sub/chat/방ID")
+        registry.enableSimpleBroker("/sub");
     }
 
     /**
-     * [3] 클라이언트 요청 가로채기
-     * - 소켓 요청(connect, subscribe, disconnect)등의 요청시에는 http header등 http 메시지를 넣어올 수 있고
-     * - 이를 interceptor를 통해 가로채 토큰등을 검증할 수 있음
-     * - JWT 검증 및 채팅방 접근권한 확인을 위해 StompHandler 인터셉터 등록
+     * [3] STOMP 인바운드 채널 인터셉터 설정
+     * ---------------------------------------------------
+     * WebSocket 요청 CONNECT / SUBSCRIBE / SEND 를 서버가 처리하기 전에
+     * StompHandler가 먼저 메시지를 가로채 JWT 검증 및 권한 검사를 진행한다.
      */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {

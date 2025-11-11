@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**OpenVidu 서버에 접속하기 위한 연결 객체(OpenVidu)를 Bean으로 등록하는 설정 클래스*/
 @Configuration
 public class OpenViduConfig {
 
