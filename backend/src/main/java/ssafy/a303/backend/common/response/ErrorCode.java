@@ -14,6 +14,9 @@ public enum ErrorCode {
     SMS_NOT_SENDED(404, HttpStatus.NOT_FOUND, "해당 번호로 전송한 코드가 없습니다."),
     CODE_NOT_VALID(400, HttpStatus.BAD_REQUEST, "번호가 틀렸습니다."),
 
+    // 401 UNAUTHORIZED
+    USER_NOT_AUTHENTICATED(401, HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
+
     // JWT 관련 에러 코드,
     INVALID_TOKEN(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(401, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
@@ -33,8 +36,7 @@ public enum ErrorCode {
     INVALID_PAGINATION(400, HttpStatus.BAD_REQUEST, "잘못된 페이지네이션 값입니다."),
     INVALID_REQUEST_PARAM(400, HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
 
-    // 401 UNAUTHORIZED
-    USER_NOT_AUTHENTICATED(401, HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
+
 
 
     // 403 FORBIDDEN

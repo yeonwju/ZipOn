@@ -37,13 +37,32 @@ public class UserController {
         MeResponseDTO meResponseDTO = userService.getUser(userSeq);
         return ResponseDTO.ok(meResponseDTO, "사용자를 조회하였습니다.");
     }
-
+    @Operation(
+            summary = "휴대폰 인증 문자 발송",
+            description = "사용자의 이름, 생년월일, 전화번호 정보를 받아 인증 문자를 발송합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "문자 발송 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 데이터 형식 또는 값이 올바르지 않음"),
+            @ApiResponse(responseCode = "401", description = "인증 실패: 토큰이 없거나 유효하지 않음"),
+            @ApiResponse(responseCode = "429", description = "요청 제한 초과: 내일 다시 시도 (EXTERNAL_API_LIMIT)"),
+            @ApiResponse(responseCode = "502", description = "외부 문자 서비스 연동 오류 (EXTERNAL_API_ERROR)")
+    })
     @PostMapping("/verify/sms")
     public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestBody VerifyUserRequest request) {
         smsService.sendAndSave(userSeq, request);
         return ResponseDTO.ok(null, "문자를 발송하였습니다.");
     }
-
+    @Operation(
+            summary = "휴대폰 인증번호 검증",
+            description = "발송된 인증번호를 검증하고, 성공 시 사용자 정보를 갱신하여 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "인증 성공 및 사용자 정보 반환"),
+            @ApiResponse(responseCode = "400", description = "잘못된 인증번호 (CODE_NOT_VALID)"),
+            @ApiResponse(responseCode = "401", description = "인증 실패: 토큰이 없거나 유효하지 않음"),
+            @ApiResponse(responseCode = "404", description = "인증 대상 정보 없음: 코드 미발송(SMS_NOT_SENDED) 또는 사용자 없음(USER_NOT_FOUND)")
+    })
     @PostMapping("/verify/code")
     public ResponseEntity<ResponseDTO<MeResponseDTO>> smsVerify(@AuthenticationPrincipal Integer userSeq, @RequestBody CodeRequest request){
         return ResponseDTO.ok(smsService.verify(userSeq, request.code()), "인증되었습니다.");
