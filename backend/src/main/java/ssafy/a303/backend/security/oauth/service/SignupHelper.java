@@ -1,5 +1,6 @@
 package ssafy.a303.backend.security.oauth.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ public class SignupHelper {
     @Value("${ssafy.api.key}")
     private String apiKey;
 
+    @Transactional
     public User Signup(String email, String name){
         // DB에서 계정 찾기
         Optional<User> optionalUser = userRepository.findUserByEmailAndDeletedAtIsNull(email);
