@@ -93,6 +93,7 @@ public class SmsService {
         smsCodeRepository.delete(userSeq);
 
         return new MeResponseDTO(
+                userSeq,
                 user.getEmail(),
                 user.getNickname(),
                 user.getName(),

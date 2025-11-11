@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "MeResponseDTO", description = "내 정보 응답 DTO")
 public record MeResponseDTO(
+        @Schema(description = "유저번호", example = "1")
+        int userSeq,
         @Schema(description = "이메일", example = "user@example.com")
         String email,
         @Schema(description = "닉네임", example = "문준호")
