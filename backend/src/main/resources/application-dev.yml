@@ -1,3 +1,5 @@
+frontUrl: ${http://localhost:3000}
+
 spring:
   config:
     activate:
@@ -20,7 +22,6 @@ spring:
 
 ai:
   base-url: http://localhost:8000
-
 cloud:
   aws:
     s3:
@@ -30,6 +31,7 @@ cloud:
     credentials:
       access-key: ${AWS_ACCESS_KEY_ID}
       secret-key: ${AWS_SECRET_ACCESS_KEY}
+
 app:
   s3:
     expose: presigned #pbulic

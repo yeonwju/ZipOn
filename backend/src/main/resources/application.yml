@@ -47,8 +47,6 @@ jwt:
 
 instant-minute: 15
 
-frontUrl: ${FRONT_URL:http://localhost:3000}
-
 ssafy:
   api:
     url: ${SSAFY_API_URL}
