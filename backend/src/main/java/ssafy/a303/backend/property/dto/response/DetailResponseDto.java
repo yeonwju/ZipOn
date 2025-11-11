@@ -3,6 +3,7 @@ package ssafy.a303.backend.property.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public record DetailResponseDto(
         Double latitude,
         @Schema(description = "경도", example = "78.658784")
         Double longitude,
+        @Schema(description = "빌딩 타입", example = "OFFICE")
+        Building buildingType,
 
         //면적
         @Schema(description = "면적 m^2", example = "109.7")
