@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.chat.dto.request.ChatRoomCreateRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
@@ -86,12 +87,13 @@ public class ChatController {
     })
     @PostMapping("/room")
     public ResponseEntity<ResponseDTO<ChatRoomResponseDto>> createOrGetRoom(
-            @RequestBody ChatRoomCreateRequestDto requestDto) {
+            @RequestBody ChatRoomCreateRequestDto requestDto,
+            @AuthenticationPrincipal Integer userSeq) {
 
-        log.info("[CHAT][CREATE] propertySeq={}, isAucPref={}",
-                requestDto.getPropertySeq(), requestDto.getAucPref());
+        log.info("[CHAT][CREATE] userSeq={}, propertySeq={}, isAucPref={}",
+                userSeq, requestDto.getPropertySeq(), requestDto.getAucPref());
 
-        ChatRoomResponseDto response = chatService.createOrGetRoom(requestDto);
+        ChatRoomResponseDto response = chatService.createOrGetRoom(requestDto, userSeq);
 
         // new 상태에 따라 메시지 변경
         String message = response.getNewRoom()
@@ -145,8 +147,9 @@ public class ChatController {
             )
     })
     @GetMapping("/my/rooms")
-    public ResponseEntity<ResponseDTO<List<MyChatListResponseDto>>> getMyChatRooms() {
-        List<MyChatListResponseDto> rooms = chatService.getMyChatRooms();
+    public ResponseEntity<ResponseDTO<List<MyChatListResponseDto>>> getMyChatRooms(
+            @AuthenticationPrincipal Integer userSeq) {
+        List<MyChatListResponseDto> rooms = chatService.getMyChatRooms(userSeq);
         return ResponseDTO.ok(rooms, "내 채팅 목록을 불러왔습니다.");
     }
 
@@ -261,8 +264,10 @@ public class ChatController {
             )
     })
     @PostMapping("/room/{roomSeq}/read")
-    public ResponseEntity<ResponseDTO<Void>> readMessages(@PathVariable Integer roomSeq) {
-        chatService.readMessages(roomSeq);
+    public ResponseEntity<ResponseDTO<Void>> readMessages(
+            @PathVariable Integer roomSeq,
+            @AuthenticationPrincipal Integer userSeq) {
+        chatService.readMessages(roomSeq, userSeq);
         return ResponseDTO.ok(null, "읽음 처리 완료되었습니다.");
     }
 
@@ -311,8 +316,10 @@ public class ChatController {
             )
     })
     @DeleteMapping("room/{roomId}/leave")
-    public ResponseEntity<ResponseDTO<Void>> leaveRoom(@PathVariable Integer roomId) {
-         chatService.leaveRoom(roomId);
+    public ResponseEntity<ResponseDTO<Void>> leaveRoom(
+            @PathVariable Integer roomId,
+            @AuthenticationPrincipal Integer userSeq) {
+         chatService.leaveRoom(roomId, userSeq);
          return ResponseDTO.ok(null, "채팅방에서 정상적으로 퇴장하였습니다.");
     }
 }

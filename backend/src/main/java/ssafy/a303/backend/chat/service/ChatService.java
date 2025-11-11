@@ -3,7 +3,6 @@ package ssafy.a303.backend.chat.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.chat.dto.request.ChatMessageRequestDto;
 import ssafy.a303.backend.chat.dto.request.ChatRoomCreateRequestDto;
@@ -40,12 +39,9 @@ public class ChatService {
      * isNew = true → 새로 만든 방
      * isNew = false → 기존 방 존재
      */
-    public ChatRoomResponseDto createOrGetRoom(ChatRoomCreateRequestDto requestDto) {
+    public ChatRoomResponseDto createOrGetRoom(ChatRoomCreateRequestDto requestDto, Integer userSeq) {
 
-        // 로그인 유저 ID
-        Integer requesterSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        User requester = userRepository.findById(requesterSeq)
+        User requester = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Property property = propertyRepository.findById(requestDto.getPropertySeq())
@@ -121,12 +117,9 @@ public class ChatService {
      *   마지막 메시지 내용 ...       (읽지 않은 메시지 뱃지)
      *   마지막 메시지 보낸 시간
      */
-    public List<MyChatListResponseDto> getMyChatRooms() {
+    public List<MyChatListResponseDto> getMyChatRooms(Integer userSeq) {
 
-        // 1) 현재 로그인된 사용자 식별 (JWT → SecurityContext)
-        Integer userSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        // 2) 실제 User 엔티티 조회
+        // 실제 User 엔티티 조회
         User me = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -324,9 +317,8 @@ public class ChatService {
     /**
      * 메시지 읽음 처리
      */
-    public void readMessages(Integer roomSeq) {
+    public void readMessages(Integer roomSeq, Integer userSeq) {
 
-        Integer userSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         User reader = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -341,14 +333,13 @@ public class ChatService {
     /**
      * 채팅방 나가기
      */
-    public void leaveRoom(Integer roomId) {
+    public void leaveRoom(Integer roomId, Integer userSeq) {
         // 1. 채팅방 조회
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        // 2. 현재 로그인 사용자 조회
-        Integer currentUserSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        User currentUser = userRepository.findById(currentUserSeq)
+        // 2. 사용자 조회
+        User currentUser = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 3. 참여자 엔티티 조회
