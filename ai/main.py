@@ -2,6 +2,9 @@ from fastapi import FastAPI, UploadFile, Form
 from app.schemas.verify_state import VerifyState
 from app.agent.verify_agent import create_pdf_verifier_graph
 from app.schemas.contract_state import ContractState
+from dotenv import load_dotenv
+load_dotenv("/app/.env")
+
 app = FastAPI(title="Property Verification AI Server")
 
 @app.post("/verify")
