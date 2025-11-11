@@ -4,11 +4,10 @@ import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import Link from 'next/link'
 
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function AuthOptionGroup() {
-  //  hook 사용 - store 변경 시 자동 리렌더링
-  const user = useUserStore(state => state.user)
+  const { data: user } = useUser()
 
   const isBrokerAuthEnabled = user?.isBroker && user?.isVerified
   const isPhoneAuthEnabled = user?.isVerified

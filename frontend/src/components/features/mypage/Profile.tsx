@@ -6,10 +6,10 @@ import Image from 'next/image'
 import AuthOptionGroup from '@/components/features/mypage/AuthOptionGroup'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function Profile() {
-  const user = useUserStore(state => state.user)
+  const { data: user } = useUser()
 
   const hasName = user?.name !== null && user?.name !== undefined
   const hasNickname = user?.nickname !== null && user?.nickname !== undefined

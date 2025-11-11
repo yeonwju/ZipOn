@@ -5,12 +5,13 @@ import { useParams } from 'next/navigation'
 import ChatRoom from '@/components/features/chat/room/ChatRoom'
 import { chatHistoryDummy, chatHistoryDummy2 } from '@/data/ChatHistoryDummy'
 import { chatRoomListDummy } from '@/data/ChatRoomListDummy'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function ChatRoomContent() {
   const params = useParams()
   const roomId = Number(params.id)
-  const currentUserSeq = useUserStore(state => state.user?.seq) ?? 1
+  const { data: user } = useUser()
+  const currentUserSeq = user?.seq ?? 1
 
   // TODO: React Query useSuspenseQuery로 교체
   const chatRoom = chatRoomListDummy.find(room => room.roomSeq === roomId)

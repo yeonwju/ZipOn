@@ -7,14 +7,12 @@ import { useState } from 'react'
 import ListingTopTabs from '@/components/layout/header/ListingsTopTabs'
 import FabDial from '@/components/ui/FabDial'
 import { ROUTES } from '@/constants'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function ListingsTabContent() {
   const [activeTab, setActiveTab] = useState<'auction' | 'general' | 'broker'>('auction')
   const router = useRouter()
-  const user = useUserStore(state => state.user)
-
-  // TODO: React Query useSuspenseQuery로 교체
+  const { data: user } = useUser()
 
   const tabs = [
     { key: 'auction' as const, label: '경매' },

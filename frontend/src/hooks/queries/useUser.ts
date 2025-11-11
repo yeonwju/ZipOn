@@ -1,19 +1,17 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
 
 import { queryKeys } from '@/constants/queryKeys'
 import { fetchCurrentUser } from '@/services/authService'
-import { useUserStore } from '@/store/user'
 import { User } from '@/types/models/user'
 
 /**
- * 사용자 정보를 가져오고 Zustand에 자동 동기화하는 Hook
+ * 사용자 정보를 가져오는 Hook
  *
- * - ReactQuery로 API 호출 및 캐싱
- * - Zustand store에 자동 동기화
+ * - React Query로 API 호출 및 캐싱
  * - 5분간 캐시 유지 (이후 백그라운드 재검증)
+ * - 로딩, 에러 상태 자동 관리
  *
  * @example
  * ```tsx
@@ -28,53 +26,12 @@ import { User } from '@/types/models/user'
  * ```
  */
 export function useUser() {
-  const { setUser } = useUserStore()
-
-  const query = useQuery({
+  return useQuery({
     queryKey: queryKeys.user.me(),
     queryFn: fetchCurrentUser,
     staleTime: 5 * 60 * 1000, // 5분
     gcTime: 10 * 60 * 1000, // 10분
   })
-
-  // ReactQuery 데이터를 Zustand에 자동 동기화
-  useEffect(() => {
-    if (query.data) {
-      setUser(query.data)
-    } else if (query.data === null && !query.isLoading) {
-      // API 응답이 null이면 로그아웃 상태
-      setUser(null)
-    }
-  }, [query.data, query.isLoading, setUser])
-
-  return query
-}
-
-/**
- * Zustand에서 사용자 정보만 빠르게 가져오기
- *
- * - 로딩 상태가 필요 없을 때 사용
- * - 이미 캐시된 데이터만 사용
- * - API 호출 없이 즉시 반환
- *
- * @example
- * ```tsx
- * function ProfileBadge() {
- *   const user = useUserData()
- *
- *   if (!user) return null
- *
- *   return (
- *     <div>
- *       <img src={user.profileImage} />
- *       <span>{user.name}</span>
- *     </div>
- *   )
- * }
- * ```
- */
-export function useUserData() {
-  return useUserStore(state => state.user)
 }
 
 /**
@@ -86,12 +43,10 @@ export function useUserData() {
  * ```tsx
  * function LogoutButton() {
  *   const queryClient = useQueryClient()
- *   const { clearUser } = useUserStore()
  *
  *   const handleLogout = async () => {
  *     await logoutApi()
  *     invalidateUser(queryClient)
- *     clearUser()
  *     router.push('/onboard')
  *   }
  *
