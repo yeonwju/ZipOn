@@ -30,7 +30,7 @@ import java.util.Objects;
 @Tag(name="검색")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/properties/search")
+@RequestMapping("/api/v1/properties/search")
 public class PropertySearchController {
 
     private final PropertySearchService propertySearchService;

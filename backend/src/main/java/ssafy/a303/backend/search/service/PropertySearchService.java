@@ -120,7 +120,7 @@ public class PropertySearchService {
                         .size(1),
                 JsonData.class
         );
-        log.info("RAW SOURCE = " + raw.hits().hits().get(0).source().toJson().toString());
+//        log.info("RAW SOURCE = " + raw.hits().hits().get(0).source().toJson().toString());
 
         SearchRequest req = new SearchRequest.Builder()
                 .index(index)
