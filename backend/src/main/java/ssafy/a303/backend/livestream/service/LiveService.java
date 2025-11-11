@@ -81,6 +81,7 @@ public class LiveService {
                 .build();
 
         liveStreamRepository.save(liveStream);
+
         log.info("[LIVE] LiveStream 생성 완료: liveSeq={}", liveStream.getId());
 
         // 5. 해당 라이브 방 Redis 초기화
