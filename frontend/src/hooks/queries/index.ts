@@ -2,4 +2,4 @@
  * React Query Hooks Barrel Export
  */
 
-export { invalidateUser, updateUserCache, useUser, useUserData } from './useUser'
+export { invalidateUser, updateUserCache, useUser } from './useUser'

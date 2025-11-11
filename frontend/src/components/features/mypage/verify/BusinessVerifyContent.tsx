@@ -3,13 +3,12 @@
 import { useRouter } from 'next/navigation'
 
 import { BusinessVerificationForm } from '@/components/features/mypage'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function BusinessVerifyContent() {
   const router = useRouter()
-  const user = useUserStore(state => state.user)
+  const { data: user } = useUser()
 
-  // TODO: React Query useSuspenseQuery로 교체
   const userName = user?.name
   const userBirthDate = user?.birth
 

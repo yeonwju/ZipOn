@@ -1,20 +1,11 @@
-export const dynamic = 'force-dynamic'
+import NotificationPageClient from './NotificationPageClient'
 
-import { NotificationItem } from '@/components/features/notification'
-
-
+/**
+ * 알림 페이지 (Server Component - Wrapper)
+ * 
+ * Server Component는 껍데기 역할만 수행
+ * 실제 인증은 NotificationPageClient의 AuthGuard에서 처리
+ */
 export default function NotificationPage() {
-  return (
-    <section className="p-4">
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-      <NotificationItem />
-    </section>
-  )
+  return <NotificationPageClient />
 }

@@ -7,11 +7,11 @@ import { LiveItems } from '@/components/features/live'
 import FabDial from '@/components/ui/FabDial'
 import { ROUTES } from '@/constants'
 import { liveItems } from '@/data/LiveItemDummy'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function LiveListContent() {
   const router = useRouter()
-  const { user } = useUserStore()
+  const { data: user } = useUser()
 
   // TODO: React Query useSuspenseQuery로 교체
   const metadata = liveItems
