@@ -63,7 +63,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "인증 성공 및 사용자 정보 반환", content = @Content(mediaType = "application/json", schema = @Schema(implementation = MeResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 인증번호", content = @Content()),
             @ApiResponse(responseCode = "401", description = "인증 실패: 토큰이 없거나 유효하지 않음", content = @Content()),
-            @ApiResponse(responseCode = "404", description = "인증 대상 정보 없음: 코드 미발송(SMS_NOT_SENDED) 또는 사용자 없음(USER_NOT_FOUND)", content = @Content())
+            @ApiResponse(responseCode = "404", description = "인증 대상 정보 없음: 코드 미발송 또는 사용자 없음", content = @Content())
     })
     @PostMapping("/verify/code")
     public ResponseEntity<ResponseDTO<MeResponseDTO>> smsVerify(@AuthenticationPrincipal Integer userSeq, @RequestBody CodeRequest request){

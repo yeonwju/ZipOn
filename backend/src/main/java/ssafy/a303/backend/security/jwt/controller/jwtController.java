@@ -41,7 +41,7 @@ public class jwtController {
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "토큰 없음, 만료 또는 유효하지 않음 (EXPIRED_TOKEN, INVALID_TOKEN)",
+                    description = "토큰 없음, 만료 또는 유효하지 않음",
                     content = @Content()
             )
     })
