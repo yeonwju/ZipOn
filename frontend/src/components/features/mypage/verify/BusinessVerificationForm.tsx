@@ -6,21 +6,12 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { API_ENDPOINTS } from '@/constants'
 import { useUser } from '@/hooks/queries'
-import { authFetch } from '@/lib/fetch'
+import { verifyBusiness } from '@/services/authService'
 
-interface BusinessVerificationFormProps {
-  userName?: string | null
-  userBirthDate?: string | null
-  onComplete?: () => void
-}
+export default function BusinessVerificationForm() {
+  const { data } = useUser()
 
-export default function BusinessVerificationForm({
-  userName = '',
-  userBirthDate = '',
-  onComplete,
-}: BusinessVerificationFormProps) {
   const [businessNumber, setBusinessNumber] = useState('')
   const [businessNumberDisplay, setBusinessNumberDisplay] = useState('')
 
@@ -52,42 +43,16 @@ export default function BusinessVerificationForm({
     try {
       setIsLoading(true)
 
-      // 페이로드 생성
-      const payload = {
+      await verifyBusiness({
         taxSeq: businessNumber,
-      }
+      })
 
-      console.log('=== 사업자 인증 요청 ===')
-      console.log('엔드포인트:', API_ENDPOINTS.BUSSINESS_REGISTER)
-      console.log('페이로드:', payload)
-      console.log('사업자번호:', businessNumber)
-      console.log('사업자번호 길이:', businessNumber.length)
-      console.log('사업자번호 타입:', typeof businessNumber)
-
-      const result = await authFetch.post<UserVerifyResponse>(
-        API_ENDPOINTS.BUSSINESS_REGISTER,
-        payload
-      )
-
-      console.log('=== 사업자 인증 응답 ===')
-      console.log('응답:', result)
-      console.log('응답 타입:', typeof result)
-
-      // authFetch는 성공 시 JSON body를 반환 (에러 시 throw)
-      // 따라서 여기 도달했다면 성공
       setIsVerified(true)
       refetch()
-    } catch (err) {
-      console.error('=== 사업자 인증 에러 ===')
-      console.error('에러 상세:', err)
-      console.error('에러 메시지:', err instanceof Error ? err.message : String(err))
-
-      // 사용자에게 에러 메시지 표시
-      alert(
-        err instanceof Error
-          ? `사업자 인증 중 오류가 발생했습니다.\n${err.message}`
-          : '사업자 인증 중 오류가 발생했습니다.'
-      )
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : '사업자 인증 중 오류가 발생했습니다.'
+      alert(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -113,7 +78,7 @@ export default function BusinessVerificationForm({
           <Input
             id="name"
             type="text"
-            value={userName || '홍길동'}
+            value={data?.name || '홍길동'}
             disabled
             className="input-underline bg-gray-200 text-gray-500/80"
           />
@@ -125,7 +90,7 @@ export default function BusinessVerificationForm({
           <Input
             id="birth-date"
             type="text"
-            value={userBirthDate || '1998-10-10'}
+            value={data?.birth || '1998-10-10'}
             disabled
             className="input-underline bg-gray-200 text-gray-500/80"
           />
@@ -164,7 +129,7 @@ export default function BusinessVerificationForm({
           <div className="rounded-lg border border-green-300 bg-green-50 p-4 shadow-sm">
             <p className="font-semibold text-green-900">사업자 인증이 완료되었습니다 ✅</p>
             <p className="mt-1 text-sm text-green-700">
-              {userName}님의 사업자번호 <span className="font-bold">{businessNumberDisplay}</span>{' '}
+              {data?.name}님의 사업자번호 <span className="font-bold">{businessNumberDisplay}</span>{' '}
               가 인증되었습니다.
             </p>
           </div>

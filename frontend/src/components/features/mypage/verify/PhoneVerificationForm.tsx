@@ -6,15 +6,10 @@ import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { API_ENDPOINTS } from '@/constants'
 import { useUser } from '@/hooks/queries'
-import { authFetch } from '@/lib/fetch'
+import { requestPhoneVerification, verifyPhoneCode } from '@/services/authService'
 
-interface PhoneVerificationFormProps {
-  onComplete?: () => void
-}
-
-export default function PhoneVerificationForm({ onComplete }: PhoneVerificationFormProps) {
+export default function PhoneVerificationForm() {
   const [name, setName] = useState('')
   const [birth, setBirth] = useState('')
   const [genderDigit, setGenderDigit] = useState('')
@@ -65,56 +60,46 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
     if (value.length <= 6) setVerificationCode(value)
   }
 
-  /**
-   * =====================================================
-   * 휴대폰 인증번호 받는 API
-   * =====================================================
-   */
-  const payload = {
-    name: name,
-    birth: birth,
-    tel: tel,
-  }
+  const { refetch } = useUser()
+
+  // 휴대폰 인증번호 요청
   const handleRequestCode = async () => {
-    const result = await authFetch.post<UserVerifyResponse>(
-      `${API_ENDPOINTS.PHONE_VERIFY}`,
-      payload
-    )
-    if (result.status === 200) {
-      console.log('휴대폰 인증 번호 요청 : ', result)
+    try {
+      setIsLoading(true)
+
+      await requestPhoneVerification({
+        name,
+        birth,
+        tel,
+      })
+
       setIsCodeSent(true)
-    } else {
-      alert('인증번호 발송에 실패했습니다.')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '인증번호 발송에 실패했습니다.'
+      alert(errorMessage)
+    } finally {
+      setIsLoading(false)
     }
   }
-  /**
-   * =====================================================
-   */
 
-  /**
-   * =====================================================
-   * 인증번호 확인하는 API
-   * =====================================================
-   */
-  const { refetch } = useUser()
-  const verifyCode = {
-    code: verificationCode,
-  }
+  // 인증번호 확인
   const handleVerifyCode = async () => {
-    const result = await authFetch.post<UserVerifyResponse>(
-      API_ENDPOINTS.PHONE_VERIFY_CHECK,
-      verifyCode
-    )
-    if (result.status === 200) {
+    try {
+      setIsLoading(true)
+
+      await verifyPhoneCode({
+        code: verificationCode,
+      })
+
       setIsVerified(true)
       refetch()
-    } else {
-      alert('인증번호 일치하지 않습니다.')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '인증번호가 일치하지 않습니다.'
+      alert(errorMessage)
+    } finally {
+      setIsLoading(false)
     }
   }
-  /**
-   * =====================================================
-   */
 
   const handleComplete = () => {
     router.replace('/mypage')
@@ -249,7 +234,7 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
               <Input
                 id="code"
                 type="text"
-                placeholder="123456"
+                placeholder="ABCDEF"
                 value={verificationCode}
                 onChange={e => handleVerificationCodeChange(e.target.value)}
                 className="input-underline flex-1"

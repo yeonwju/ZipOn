@@ -11,7 +11,7 @@ export default function ChatRoomContent() {
   const params = useParams()
   const roomId = Number(params.id)
   const { data: user } = useUser()
-  const currentUserSeq = user?.seq ?? 1
+  const currentUserSeq = user?.userSeq ?? 1
 
   // TODO: React Query useSuspenseQuery로 교체
   const chatRoom = chatRoomListDummy.find(room => room.roomSeq === roomId)
