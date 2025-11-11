@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 /**
  * Onboard Content (Client Component)
@@ -21,7 +21,7 @@ export default function OnboardContent() {
   // 뒤로가기로 돌아온 경우 처리
   useEffect(() => {
     const storedFromPath = sessionStorage.getItem('auth_from_path')
-    
+
     // 세션 스토리지에 auth_from_path가 있고, URL에 from/redirect 파라미터가 없으면
     // 이는 로그인 후 mypage에서 뒤로가기로 돌아온 것임
     if (storedFromPath && !fromPath && !searchParams.get('redirect')) {
@@ -61,4 +61,3 @@ export default function OnboardContent() {
     </div>
   )
 }
-
