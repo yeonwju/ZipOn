@@ -26,6 +26,9 @@ public class Property {
     @Column(name = "property_seq")
     private Integer propertySeq;
 
+    @OneToOne(mappedBy = "property", fetch = FetchType.LAZY)
+    private PropertyAucInfo aucInfo;
+
     // 임대인 이름
     @Column(name = "lessor_seq", nullable = false)
     private Integer lessorSeq;

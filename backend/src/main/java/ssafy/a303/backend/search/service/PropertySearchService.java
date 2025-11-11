@@ -162,7 +162,7 @@ public class PropertySearchService {
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
 
-        PropertyAucInfo aucInfo = aucInfoRepository.findByPropertySeq(p.getPropertySeq())
+        PropertyAucInfo aucInfo = aucInfoRepository.findByProperty(p)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
 
         return PropertyDocument.builder()
