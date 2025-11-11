@@ -1,4 +1,4 @@
-frontUrl: http://localhost:3000
+frontUrl: ${FRONT_URL:http://localhost:3000}
 
 spring:
   config:
