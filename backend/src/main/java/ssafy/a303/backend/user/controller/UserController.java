@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.sms.service.SmsService;
+import ssafy.a303.backend.user.dto.request.CodeRequest;
 import ssafy.a303.backend.user.dto.request.VerifyUserRequest;
 import ssafy.a303.backend.user.dto.response.MeResponseDTO;
 import ssafy.a303.backend.user.service.UserService;
@@ -16,7 +17,7 @@ import ssafy.a303.backend.user.service.UserService;
 public class UserController {
 
     private final UserService userService;
-    private final SmsService service;
+    private final SmsService smsService;
 
     @GetMapping("/me")
     public ResponseEntity<ResponseDTO<MeResponseDTO>> getUser(@AuthenticationPrincipal Integer userSeq) {
@@ -25,9 +26,14 @@ public class UserController {
     }
 
     @PostMapping("/verify/sms")
-    public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestBody VerifyUserRequest verifyUserRequest) {
-        service.send(userSeq, verifyUserRequest.tel());
+    public ResponseEntity<ResponseDTO<Void>> smsRegist(@AuthenticationPrincipal Integer userSeq, @RequestBody VerifyUserRequest request) {
+        smsService.sendAndSave(userSeq, request);
         return ResponseDTO.ok(null, "문자를 발송하였습니다.");
+    }
+
+    @PostMapping("/verify/code")
+    public ResponseEntity<ResponseDTO<MeResponseDTO>> smsVerify(@AuthenticationPrincipal Integer userSeq, @RequestBody CodeRequest request){
+        return ResponseDTO.ok(smsService.verify(userSeq, request.code()), "인증되었습니다.");
     }
 
 }

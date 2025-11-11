@@ -11,9 +11,7 @@ function OnboardContent() {
   const redirectPath = searchParams.get('redirect') || '/home'
 
   // URL 수동 조합 (인코딩 처리)
-  const loginUrl = new URL(
-    `https://dev-zipon.duckdns.org/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
-  )
+  const loginUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">

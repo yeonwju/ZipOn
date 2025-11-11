@@ -34,7 +34,7 @@ public class PropertyAucInfoController {
                     description = "매물 경매 및 중개 여부 수정 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class)
+                            schema = @Schema(implementation = PropertyAucInfoUpdateResponseDto.class)
                     )
             )
     })

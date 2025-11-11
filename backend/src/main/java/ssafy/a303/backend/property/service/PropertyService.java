@@ -92,7 +92,7 @@ public class PropertyService {
 
         // 경매, 중개인 희망 등록
         PropertyAucInfo aucInfo = PropertyAucInfo.builder()
-                .propertySeq(p.getPropertySeq())
+                .property(p)
                 .isAucPref(req.isAucPref())
                 .isBrkPref(req.isBrkPref())
                 .aucAt(req.aucAt())
@@ -213,8 +213,12 @@ public class PropertyService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
         /** 경매 정보 확인 */
-        PropertyAucInfo aucInfo = propertyAucInfoRepository.findByPropertySeq(propertySeq)
+        PropertyAucInfo aucInfo = propertyAucInfoRepository.findByProperty(p)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
+
+        /** AI 등기부등본 검증 확인 */
+        Certification cert = certificationRepository.findByPropertySeq(propertySeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.CERTIFICATION_INFO_NOT_FOUND));
 
         /** 이미지 정보 매핑 */
         List<PropertyImage> propertyImages = propertyImageRepository.findByPropertySeqOrderByImgOrderAsc(propertySeq);
@@ -229,7 +233,7 @@ public class PropertyService {
 
         DetailResponseDto detail = new DetailResponseDto(
                 propertySeq, p.getLessorNm(), p.getPropertyNm(), p.getContent(),
-                p.getAddress(), p.getLatitude(), p.getLongitude(),
+                p.getAddress(), p.getLatitude(), p.getLongitude(), p.getBuildingType(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),
                 images,
@@ -237,7 +241,8 @@ public class PropertyService {
                 p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
                 aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
                 p.getHasBrk(),
-                aucInfo.getAucAt(), aucInfo.getAucAvailable()
+                aucInfo.getAucAt(), aucInfo.getAucAvailable(),
+                cert.getPdfCode(), p.getIsCertificated(), cert.getRiskScore(), cert.getRiskReason()
         );
         return detail;
     }
