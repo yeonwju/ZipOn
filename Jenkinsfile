@@ -94,9 +94,9 @@ pipeline {
               --build-arg FRONT_URL="${env.FRONT_URL}" \
               -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
 
-            echo "[3/3] 🤖 AI build (optional)"
+            echo "[3/3] 🤖 AI build"
             docker build ${env.DOCKER_OPTS} \
-              -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai || true
+              -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai
           """
         }
       }
@@ -109,7 +109,10 @@ pipeline {
           withCredentials([
             string(credentialsId: 'DB_URL',  variable: 'SPRING_DATASOURCE_URL'),
             string(credentialsId: 'DB_USER', variable: 'SPRING_DATASOURCE_USERNAME'),
-            string(credentialsId: 'DB_PW',   variable: 'SPRING_DATASOURCE_PASSWORD')
+            string(credentialsId: 'DB_PW',   variable: 'SPRING_DATASOURCE_PASSWORD'),
+            string(credentialsId: 'GMS_KEY', variable: 'GMS_KEY'),
+            string(credentialsId: 'GMS_API_URL', variable: 'GMS_API_URL'),
+            string(credentialsId: 'MODEL_NAME', variable: 'MODEL_NAME')
           ]) {
             sh '''
               set -e
@@ -139,6 +142,11 @@ AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 FRONT_URL=$FRONT_URL
 FAST_API=http://zipondev-ai:8000
+
+# --- AI Environment ---
+GMS_KEY=$GMS_KEY
+GMS_API_URL=$GMS_API_URL
+MODEL_NAME=$MODEL_NAME
 EOF2
 
               echo "[DEV] ✅ .env generated:"
@@ -183,7 +191,6 @@ EOF2
         '''
       }
     }
-
 
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
