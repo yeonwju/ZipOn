@@ -44,7 +44,7 @@ public class ChatController {
                     description = "채팅방 생성/조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatRoomResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅방 생성 성공",
                                     value = """
@@ -71,7 +71,7 @@ public class ChatController {
                     description = "잘못된 요청",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatRoomResponseDto.class),
                             examples = @ExampleObject(
                                     name = "잘못된 요청",
                                     value = """
@@ -115,7 +115,7 @@ public class ChatController {
                     description = "조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = MyChatListResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅방 목록 조회 성공",
                                     value = """
@@ -164,7 +164,7 @@ public class ChatController {
                     description = "조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatMessageResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅 내역 조회 성공",
                                     value = """
@@ -195,7 +195,7 @@ public class ChatController {
                     description = "채팅방을 찾을 수 없음",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatMessageResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅방 없음",
                                     value = """

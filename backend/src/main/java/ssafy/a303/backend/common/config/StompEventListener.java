@@ -1,10 +1,9 @@
 package ssafy.a303.backend.common.config;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
@@ -25,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @Log4j2
-@RequiredArgsConstructor
 public class StompEventListener {
 
     private final Set<String> sessions = ConcurrentHashMap.newKeySet();
@@ -34,6 +32,13 @@ public class StompEventListener {
     
     private final LiveService liveService;
     private final RedisTemplate<Object, Object> redisTemplate;
+    
+    // 생성자 주입 (@Lazy로 순환 참조 해결)
+    public StompEventListener(@Lazy LiveService liveService, 
+                              RedisTemplate<Object, Object> redisTemplate) {
+        this.liveService = liveService;
+        this.redisTemplate = redisTemplate;
+    }
 
     @EventListener
     public void onConnect(SessionConnectEvent event) {
