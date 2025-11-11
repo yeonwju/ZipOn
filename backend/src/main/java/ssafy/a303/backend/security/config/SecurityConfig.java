@@ -1,15 +1,8 @@
 package ssafy.a303.backend.security.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.http.SessionCreationPolicy;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-//import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,10 +12,10 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import ssafy.a303.backend.security.oauth.service.CustomOidcUserService;
-import ssafy.a303.backend.security.handler.GoogleOAuthSuccessHandler;
 import ssafy.a303.backend.security.filter.JWTFilter;
+import ssafy.a303.backend.security.handler.GoogleOAuthSuccessHandler;
 import ssafy.a303.backend.security.oauth.service.CustomOauth2UserService;
+import ssafy.a303.backend.security.oauth.service.CustomOidcUserService;
 
 import java.util.List;
 
@@ -34,7 +27,6 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService; // KKAKO 등 비표준
     private final CustomOidcUserService customOidcUserService; // GOOGLE, NAVER 표준
     private final GoogleOAuthSuccessHandler googleOAuthSuccessHandler;
-    private @Value("${frontUrl}") String frontUrl;
 
     @Bean
     public RequestCache requestCache() {
@@ -48,7 +40,7 @@ public class SecurityConfig {
         // ┌─── 설정 ───┐
         List<String> methods = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
         List<String> headers = List.of("*");
-        List<String> origins = List.of(frontUrl, "http://localhost:3000");
+        List<String> origins = List.of("http://localhost:3000", "https://dev-zipon.duckdns.org", "https://zipon.duckdns.org/");
         // └─── 설정 ───┘
         // 어떤 config인지 설정
         CorsConfiguration ccf = new CorsConfiguration();
