@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, Form
 from app.schemas.verify_state import VerifyState
 from app.agent.verify_agent import create_pdf_verifier_graph
-
+from app.schemas.contract_state import ContractState
 app = FastAPI(title="Property Verification AI Server")
 
 @app.post("/verify")
@@ -19,7 +19,6 @@ async def verify_endpoint(
 
     pdf_bytes = await file.read()
 
-    # --- 초기 상태 구성 ---
     user_input = {
         "owner": regiNm,
         "birth": regiBirth,
@@ -32,15 +31,14 @@ async def verify_endpoint(
         "num_try": 0,
     }
 
-    # --- LangGraph 실행 ---
+    
     graph = create_pdf_verifier_graph()
     final_state = graph.invoke(state)
+
     risk_score = final_state.get("risk_score", None)
     risk_reason = final_state.get("risk_reason", None)
-
     verified = final_state.get("verified", False)
 
-    # ✅ Java의 DTO 구조에 맞춰 응답 반환
     result = {
         "pdfCode": pdfCode,
         "isCertificated": verified,
@@ -51,8 +49,24 @@ async def verify_endpoint(
     print(f"[RESULT] Verification complete → {result}")
     return result
 
+@app.post("/review")
+async def review_endpoint(
+   file: UploadFile = Form(...) 
+):
+   pdf_bytes = await file.read()
 
-
+   state: ContractState = {
+        "pdf_bytes": pdf_bytes,
+        "num_try": 0,  
+   }
+   graph = create_contract_analysis_graph()
+   final_state =graph.invoke(state)
+   reviews = final_state.get("unfair_clauses", None)
+   
+   result = {
+       "reviews": reviews,
+   }
+   return result
 
 # ## 로컬 테스트용 
 # from app.schemas.verify_state import VerifyState
@@ -105,33 +119,39 @@ async def verify_endpoint(
 
 
 from app.agent.contract_analysis_agent import create_contract_analysis_graph
+from pathlib import Path
 
-
-def run_contract_analysis(pdf_path: str):
-    """계약서 분석 메인 실행"""
+# def run_contract_analysis(pdf_path: str):
+#     """계약서 분석 메인 실행"""
     
 
-    with open(pdf_path, "rb") as f:
-        pdf_bytes = f.read()
+#     with open(pdf_path, "rb") as f:
+#         pdf_bytes = f.read()
 
-    print("계약서 PDF 로드 완료")
+#     print("계약서 PDF 로드 완료")
 
-    # 1️⃣ 그래프 생성
-    graph = create_contract_analysis_graph()
+#     # 1️⃣ 그래프 생성
+#     graph = create_contract_analysis_graph()
 
-    # 2️⃣ 실행 가능 객체로 컴파일
-    compiled_graph = graph.compile()  # 중요
 
-    # 3️⃣ 실행
-    result = compiled_graph.invoke({"pdf_bytes": pdf_bytes},config={"streaming": False})
+#     # 3️⃣ 실행
+#     result =graph.invoke({"pdf_bytes": pdf_bytes},config={"streaming": False})
 
-    print("\n=== 최종 결과 ===")
-    print(result.get('unfair_clauses'))
-    return result
+#     print("\n=== 최종 결과 ===")
+#     print(result.get('unfair_clauses'))
+#     return result
 
 
 if __name__ == "__main__":
-    pdf_path = r"C:\Users\SSAFY\Desktop\계약서3.pdf"
-    run_contract_analysis(pdf_path)
+    pdf_path = Path(r"C:\Users\SSAFY\Desktop\계약서2.pdf")
+    with open(pdf_path, "rb") as f:
+         pdf_bytes = f.read()
+
+    init_state: ContractState ={
+        "pdf_bytes":pdf_bytes,
+    }     
+    graph = create_contract_analysis_graph()
+    final_state = graph.invoke(init_state)
+    print(f" 평가: {final_state.get('unfair_clauses')}")
 
 
