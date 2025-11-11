@@ -1,23 +1,11 @@
-export const dynamic = 'force-dynamic'
-
-import { redirect } from 'next/navigation'
-
 import MyPageClient from '@/components/features/mypage/page/MyPageClient'
-import { fetchCurrentUser } from '@/services/authService'
-
 
 /**
- * 마이페이지 (Server Component)
+ * 마이페이지 (Server Component - Wrapper)
  *
- * 사용자의 프로필, 활동 내역, 설정 등을 표시합니다.
+ * Server Component는 껍데기 역할만 수행
+ * 실제 인증은 MyPageClient의 AuthGuard에서 처리
  */
-export default async function MyPage() {
-  const user = await fetchCurrentUser()
-
-  // 사용자 정보가 없으면 onboard로 리다이렉트
-  if (!user) {
-    redirect('/onboard')
-  }
-
-  return <MyPageClient user={user} />
+export default function MyPage() {
+  return <MyPageClient />
 }

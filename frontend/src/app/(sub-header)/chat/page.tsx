@@ -1,14 +1,11 @@
-import { Suspense } from 'react'
+import ChatPageClient from './ChatPageClient'
 
-import ChatListContent from '@/components/features/chat/room/ChatListContent'
-import { ChatListSkeleton } from '@/components/skeleton/chat'
-
-export const dynamic = 'force-dynamic'
-
+/**
+ * 채팅 목록 페이지 (Server Component - Wrapper)
+ * 
+ * Server Component는 껍데기 역할만 수행
+ * 실제 인증은 ChatPageClient의 AuthGuard에서 처리
+ */
 export default function ChatPage() {
-  return (
-    <Suspense fallback={<ChatListSkeleton />}>
-      <ChatListContent />
-    </Suspense>
-  )
+  return <ChatPageClient />
 }

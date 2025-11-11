@@ -3,6 +3,8 @@ import { Suspense } from 'react'
 import LiveListContent from '@/components/features/live/list/LiveListContent'
 import { LiveListSkeleton } from '@/components/skeleton/live'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * 라이브 방송 페이지
  *

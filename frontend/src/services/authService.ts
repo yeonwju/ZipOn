@@ -24,7 +24,13 @@ export async function fetchCurrentUser(): Promise<User | null> {
     const result = await authFetch.get<ApiResponse<User>>(API_ENDPOINTS.USER_INFO)
     return result.data
   } catch (error) {
-    console.error('[authService] 사용자 정보 가져오기 실패:', error)
+    // 개발 환경에서는 경고만 표시 (백엔드 서버 없을 수 있음)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ [개발 모드] 백엔드 API 서버 연결 실패 - 로그아웃 상태로 처리됨')
+    } else {
+      // 운영 환경에서는 에러 로그
+      console.error('[authService] 사용자 정보 가져오기 실패:', error)
+    }
     return null
   }
 }

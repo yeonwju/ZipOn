@@ -1,30 +1,29 @@
 'use client'
 
-import { useEffect } from 'react'
-
+import { AuthGuard } from '@/components/auth'
 import { Profile } from '@/components/features'
 import ListingTaps from '@/components/features/mypage/ListingTaps'
-import { useUserStore } from '@/store/user'
-import { User } from '@/types/models/user'
 
-interface MyPageClientProps {
-  user: User | null
-}
-
-export default function MyPageClient({ user }: MyPageClientProps) {
-  const { setUser } = useUserStore()
-
-  useEffect(() => {
-    console.log('user', user)
-    setUser(user)
-  }, [user, setUser])
-
+/**
+ * MyPage Client Component
+ *
+ * React Query로 사용자 정보를 관리합니다.
+ * 하위 컴포넌트들은 useUser Hook으로 사용자 정보를 가져옵니다.
+ * 
+ * 보호 레벨:
+ * 1차: Middleware (토큰 체크)
+ * 2차: AuthGuard (사용자 정보 확인, React Query 캐싱)
+ */
+export default function MyPageClient() {
   return (
-    <section className="flex w-full flex-col p-4 pb-16">
-      <section>
-        <Profile />
+    <AuthGuard>
+      <section className="flex w-full flex-col p-4 pb-16">
+        <section>
+          <Profile />
+        </section>
+        <ListingTaps className={'mt-4'} />
       </section>
-      <ListingTaps className={'mt-4'} />
-    </section>
+    </AuthGuard>
   )
 }
+

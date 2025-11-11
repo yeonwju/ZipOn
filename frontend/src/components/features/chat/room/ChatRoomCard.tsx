@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 import type { ChatRoomList } from '@/types'
 
 interface ChatRoomCardProps {
@@ -12,7 +12,8 @@ interface ChatRoomCardProps {
 }
 
 export default function ChatRoomCard({ className, chatRoom }: ChatRoomCardProps) {
-  const userName = useUserStore.getState().user?.name
+  const { data: user } = useUser()
+  const userName = user?.name
 
   /** 💬 날짜 포맷 함수 */
   const formatDate = (isoString: string) => {

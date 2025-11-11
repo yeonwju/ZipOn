@@ -3,9 +3,9 @@
  *
  * - authFetch: 쿠키 포함 (인증 필요한 요청)
  * - publicFetch: 쿠키 미포함 (공개 요청)
+ * 
+ * Note: cookies()는 동적 import로 Server Component에서만 사용
  */
-import { cookies } from 'next/headers'
-
 import { API_BASE_URL } from '@/constants'
 
 interface FetchOptions extends RequestInit {
@@ -48,6 +48,8 @@ async function baseFetch(
     if (typeof window === 'undefined') {
       // 서버 사이드: cookies()로 읽어서 헤더에 추가
       try {
+        // 동적 import로 Server Component에서만 사용
+        const { cookies } = await import('next/headers')
         const cookieStore = await cookies()
         const accessToken = cookieStore.get('AT')?.value
 
@@ -59,7 +61,12 @@ async function baseFetch(
           }
         }
       } catch (error) {
-        console.error('[authFetch] 쿠키 읽기 실패:', error)
+        // 개발 환경에서는 상세 에러 숨김
+        if (process.env.NODE_ENV === 'development') {
+          // cookies() 사용 실패는 정상적인 경우 (Client Component에서 호출)
+        } else {
+          console.error('[authFetch] 쿠키 읽기 실패:', error)
+        }
       }
     } else {
       // 클라이언트 사이드: credentials: 'include'

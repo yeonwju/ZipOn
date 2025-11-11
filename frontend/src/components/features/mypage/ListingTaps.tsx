@@ -1,17 +1,19 @@
+'use client'
+
 import { Tabs, TabsList } from '@radix-ui/react-tabs'
 import { LockKeyhole } from 'lucide-react'
 
 import AuctionHistoryList from '@/components/features/mypage/autcion-history/AuctionHistoryList'
 import MyListingList from '@/components/features/mypage/my-listings/MyListingList'
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
-import { useUserStore } from '@/store/user'
+import { useUser } from '@/hooks/queries/useUser'
 
 interface ListingTapsProps {
   className?: string
 }
 
 export default function ListingTaps({ className }: ListingTapsProps) {
-  const user = useUserStore(state => state.user)
+  const { data: user } = useUser()
   const isBrokerUser = user?.isBroker
   const isVerified = user?.isVerified
 
