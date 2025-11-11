@@ -27,7 +27,7 @@ public class BrokerController {
             description = "로그인한 사용자가 사업자등록번호를 통해 중개사 등록을 신청합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "중개사 등록 요청 접수 성공"),
+            @ApiResponse(responseCode = "200", description = "중개사 등록 성공"),
             @ApiResponse(responseCode = "400", description = "요청 데이터 형식 또는 값이 올바르지 않음"),
             @ApiResponse(responseCode = "401", description = "인증 실패: 토큰이 없거나 유효하지 않음"),
             @ApiResponse(responseCode = "404", description = "유효하지 않은 사업자등록번호"),
@@ -39,6 +39,6 @@ public class BrokerController {
             @RequestPart("taxSeq") String taxSeq
     ) {
         brokerService.regist(userSeq, taxSeq);
-        return ResponseDTO.ok(null, "중개사 등록 요청이 접수되었습니다.");
+        return ResponseDTO.ok(null, "중개사 등록 성공");
     }
 }
