@@ -1,14 +1,12 @@
 package ssafy.a303.backend.auction.dto.request;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public record BrkApplyRequest(
-        Integer propertySeq,
+public record BrkApplyRequestDto(
+
         LocalDate strmDate,
         LocalTime strmStartTm,
-        LocalTime strmEndTm,
-        LocalDateTime auctionEndAt
+        LocalTime strmEndTm
 ) {
 }
