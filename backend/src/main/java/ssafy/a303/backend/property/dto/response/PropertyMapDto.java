@@ -30,6 +30,13 @@ public record PropertyMapDto(
         @Schema(description = "방 갯수", example = "4")
         Byte roomCnt,
         @Schema(description = "층", example = "5")
-        Byte floor
+        Byte floor,
+
+        @Schema(description = "경매 여부", example = "true")
+        Boolean isAucPref,
+        @Schema(description = "중개인 여부", example = "true")
+        Boolean isBrkPref,
+        @Schema(description = "중개 성사 여부", example = "true")
+        Boolean hasBrk
 ) {
 }

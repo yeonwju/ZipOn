@@ -27,9 +27,11 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
     @Query("""
     select new ssafy.a303.backend.property.dto.response.PropertyMapDto(
         p.propertySeq, p.address, p.propertyNm, p.latitude, p.longitude,
-        p.area, p.areaP, p.deposit, p.mnRent, p.fee, p.facing, p.roomCnt, p.floor
+        p.area, p.areaP, p.deposit, p.mnRent, p.fee, p.facing, p.roomCnt, p.floor, p.hasBrk,
+        coalesce(ai.isAucPref, false), coalesce(ai.isBrkPref, false)
       )
       from Property p
+      left join PropertyAucInfo ai
       where (p.deletedAt is null or p.deletedAt = '')
         and p.latitude is not null and p.longitude is not null
         and (:minLat is null or p.latitude >= :minLat)

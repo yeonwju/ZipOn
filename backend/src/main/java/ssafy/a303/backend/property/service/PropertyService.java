@@ -92,7 +92,7 @@ public class PropertyService {
 
         // 경매, 중개인 희망 등록
         PropertyAucInfo aucInfo = PropertyAucInfo.builder()
-                .propertySeq(p.getPropertySeq())
+                .property(p)
                 .isAucPref(req.isAucPref())
                 .isBrkPref(req.isBrkPref())
                 .aucAt(req.aucAt())
