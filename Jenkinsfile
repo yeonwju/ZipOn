@@ -91,7 +91,6 @@ pipeline {
 
             echo "[2/3] ⚙️ BACKEND build"
             docker build ${env.DOCKER_OPTS} \
-              --build-arg FRONT_URL="${env.FRONT_URL}" \
               -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
 
             echo "[3/3] 🤖 AI build (optional)"
