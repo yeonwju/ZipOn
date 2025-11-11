@@ -1,10 +1,14 @@
 'use client'
 
-import { useRef,useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { API_ENDPOINTS } from '@/constants'
+import { useUser } from '@/hooks/queries'
+import { authFetch } from '@/lib/fetch'
 
 interface PhoneVerificationFormProps {
   onComplete?: () => void
@@ -12,27 +16,29 @@ interface PhoneVerificationFormProps {
 
 export default function PhoneVerificationForm({ onComplete }: PhoneVerificationFormProps) {
   const [name, setName] = useState('')
-  const [birthDate, setBirthDate] = useState('')
+  const [birth, setBirth] = useState('')
   const [genderDigit, setGenderDigit] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
+  const [tel, setTel] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
 
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  const router = useRouter()
+
   const [timer, setTimer] = useState(180)
 
   const genderInputRef = useRef<HTMLInputElement>(null)
 
-  const isPersonalInfoValid = name.length >= 2 && birthDate.length === 6 && genderDigit.length === 1
-  const isPhoneNumberValid = phoneNumber.replace(/-/g, '').length === 11
+  const isPersonalInfoValid = name.length >= 2 && birth.length === 6 && genderDigit.length === 1
+  const isPhoneNumberValid = tel.replace(/-/g, '').length === 11
   const canRequestCode = isPersonalInfoValid && isPhoneNumberValid
   const canVerify = verificationCode.length === 6
 
   const handleBirthDateChange = (value: string) => {
     const numbers = value.replace(/\D/g, '')
-    if (numbers.length <= 6) setBirthDate(numbers)
+    if (numbers.length <= 6) setBirth(numbers)
   }
 
   const handleGenderDigitChange = (value: string) => {
@@ -51,42 +57,68 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
       } else if (numbers.length > 7) {
         formatted = `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7)}`
       }
-      setPhoneNumber(formatted)
+      setTel(formatted)
     }
   }
 
   const handleVerificationCodeChange = (value: string) => {
-    const numbers = value.replace(/\D/g, '')
-    if (numbers.length <= 6) setVerificationCode(numbers)
+    if (value.length <= 6) setVerificationCode(value)
   }
 
+  /**
+   * =====================================================
+   * 휴대폰 인증번호 받는 API
+   * =====================================================
+   */
+  const payload = {
+    name: name,
+    birth: birth,
+    tel: tel,
+  }
   const handleRequestCode = async () => {
-    setIsLoading(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+    const result = await authFetch.post<UserPhoneVerifyResponse>(
+      `${API_ENDPOINTS.PHONE_VERIFY}`,
+      payload
+    )
+    if (result.status === 200) {
+      console.log('휴대폰 인증 번호 요청 : ', result)
       setIsCodeSent(true)
-      setTimer(180)
-    } catch {
-      alert('인증번호 요청 실패')
-    } finally {
-      setIsLoading(false)
+    } else {
+      alert('인증번호 발송에 실패했습니다.')
     }
   }
+  /**
+   * =====================================================
+   */
 
+  /**
+   * =====================================================
+   * 인증번호 확인하는 API
+   * =====================================================
+   */
+  const { refetch } = useUser()
+  const verifyCode = {
+    code: verificationCode,
+  }
   const handleVerifyCode = async () => {
-    setIsLoading(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+    const result = await authFetch.post<UserPhoneVerifyResponse>(
+      API_ENDPOINTS.PHONE_VERIFY_CHECK,
+      verifyCode
+    )
+    if (result.status === 200) {
       setIsVerified(true)
-    } catch {
-      alert('인증번호가 일치하지 않습니다.')
-    } finally {
-      setIsLoading(false)
+      refetch()
+    } else {
+      alert('인증번호 일치하지 않습니다.')
     }
   }
+  /**
+   * =====================================================
+   */
 
-  const handleComplete = () => onComplete?.()
-
+  const handleComplete = () => {
+    router.replace('/mypage')
+  }
   return (
     <div className="space-y-6 p-6">
       <div className="space-y-2">
@@ -112,13 +144,13 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
 
         {/* 주민등록번호 */}
         <div className="space-y-2">
-          <Label htmlFor="birth-date">주민등록번호</Label>
+          <Label htmlFor="birth">주민등록번호</Label>
           <div className="flex flex-row items-center justify-between">
             <Input
-              id="birth-date"
+              id="birth"
               type="text"
               placeholder="980919"
-              value={birthDate}
+              value={birth}
               onChange={e => handleBirthDateChange(e.target.value)}
               disabled={isVerified}
               className="input-underline w-35"
@@ -151,13 +183,13 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
 
         {/* 휴대폰 */}
         <div className="space-y-2">
-          <Label htmlFor="phone">휴대폰 번호</Label>
+          <Label htmlFor="tel">휴대폰 번호</Label>
           <div className="flex gap-2">
             <Input
-              id="phone"
+              id="tel"
               type="tel"
               placeholder="010-1234-5678"
-              value={phoneNumber}
+              value={tel}
               onChange={e => handlePhoneNumberChange(e.target.value)}
               disabled={isVerified}
               className="input-underline flex-1"
@@ -208,14 +240,14 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="verification-code">인증번호</Label>
+              <Label htmlFor="code">인증번호</Label>
               <span className="text-primary text-sm font-medium">
                 {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}
               </span>
             </div>
             <div className="flex gap-2">
               <Input
-                id="verification-code"
+                id="code"
                 type="text"
                 placeholder="123456"
                 value={verificationCode}
@@ -261,8 +293,8 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
                 <div className="flex-1 pt-0.5">
                   <p className="text-base font-bold text-green-900">휴대폰 인증이 완료되었습니다</p>
                   <p className="mt-1.5 text-sm text-green-700">
-                    <span className="font-semibold">{name}</span>님의 휴대폰 번호{' '}
-                    <span className="font-semibold">{phoneNumber}</span>가 인증되었습니다.
+                    <span className="font-semibold">{name}</span>님의 휴대폰 번호
+                    <span className="font-semibold">{tel}</span>가 인증되었습니다.
                   </p>
                 </div>
               </div>
