@@ -236,8 +236,7 @@ public class ChatController {
                                     value = """
                     {
                       "status": 200,
-                      "message": "읽음 처리 완료되었습니다.",
-                      "data": null
+                      "message": "읽음 처리 완료되었습니다."
                     }
                     """
                             )
@@ -287,8 +286,7 @@ public class ChatController {
                                     value = """
                     {
                       "status": 200,
-                      "message": "채팅방에서 정상적으로 퇴장하였습니다.",
-                      "data": null
+                      "message": "채팅방에서 정상적으로 퇴장하였습니다."
                     }
                     """
                             )

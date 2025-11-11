@@ -48,7 +48,7 @@ public class LiveController {
                     description = "방송 시작 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = LiveCreateResponseDto.class),
                             examples = @ExampleObject(
                                     name = "방송 시작 성공",
                                     value = """
@@ -98,7 +98,7 @@ public class LiveController {
                     description = "토큰 발급 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = LiveTokenResponseDto.class),
                             examples = @ExampleObject(
                                     name = "방송 입장 토큰 발급 성공",
                                     value = """
@@ -146,8 +146,7 @@ public class LiveController {
                                     value = """
                                 {
                                   "status": 200,
-                                  "message": "라이브 방송에서 퇴장했습니다.",
-                                  "data": null
+                                  "message": "라이브 방송에서 퇴장했습니다."
                                 }
                                 """
                             )
@@ -177,7 +176,7 @@ public class LiveController {
                     description = "방송 종료 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = LiveEndResponseDto.class),
                             examples = @ExampleObject(
                                     name = "방송 종료 성공",
                                     value = """
@@ -229,7 +228,7 @@ public class LiveController {
                     description = "라이브 방송 정보 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = LiveInfoResponseDto.class),
                             examples = @ExampleObject(
                                     name = "라이브 방송 정보 조회 성공",
                                     value = """
@@ -289,7 +288,7 @@ public class LiveController {
                     description = "라이브 방송 목록 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = LiveInfoResponseDto.class),
                             examples = @ExampleObject(
                                     name = "라이브 방송 목록 조회 성공",
                                     value = """
@@ -350,7 +349,7 @@ public class LiveController {
                     description = "좋아요 상태 변경 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = Boolean.class),
                             examples = {
                                     @ExampleObject(
                                             name = "좋아요 눌렀을 때",
@@ -405,7 +404,7 @@ public class LiveController {
                     description = "채팅 내역 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = LiveChatMessageResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅 내역 조회 성공",
                                     value = """
