@@ -22,7 +22,7 @@ public class jwtController {
     private final JWTProvider jwtProvider;
     private final CookieFactory cookieFactory;
 
-    @PostMapping("/refresh") // getMapping 맞나?
+    @PostMapping("/refresh")
     public ResponseEntity<ResponseDTO<Void>> getNewAccessToken(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = null;
         String refreshToken = null;
