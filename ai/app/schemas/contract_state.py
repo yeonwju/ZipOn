@@ -11,5 +11,5 @@ class ContractState(TypedDict,total=False):
     law_references: Optional[List[Dict[str, Any]]]
 
     unfair_clauses: Optional[List[str]]
-    num_try: int                       # 노드 실행 횟수
-    error: Optional[str]               # 에러 메시지
+    num_try: int                       
+    error: Optional[str]               

@@ -30,5 +30,5 @@ def create_contract_analysis_graph():
     graph.set_entry_point("extract_contract")
     graph.set_finish_point("reasoning")
 
-    print("계약서 분석 Agent 그래프 생성 완료")
-    return graph
+
+    return graph.compile()
