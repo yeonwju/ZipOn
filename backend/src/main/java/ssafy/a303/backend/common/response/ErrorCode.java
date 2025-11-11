@@ -90,6 +90,7 @@ public enum ErrorCode {
     EMPTY_PDF_FILE(400, HttpStatus.BAD_REQUEST, "파일이 비어 있습니다."),
     ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다."),
     VERIFICATION_FAILED(400, HttpStatus.BAD_REQUEST, "등기부등본이 매물 정보와 일치하지 않습니다."),
+    JSON_TYPE_ERROR(400, HttpStatus.BAD_REQUEST, "요청 JSON 형식이 올바르지 않습니다."),
 
     // 매물 관련
     ADDRESS_DUPLICATE(400, HttpStatus.BAD_REQUEST, "이미 동일 주소의 매물이 등록되어 있습니다."),

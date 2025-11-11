@@ -1,11 +1,10 @@
 package ssafy.a303.backend.property.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -17,7 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.common.response.ResponseDTO;
+import ssafy.a303.backend.property.dto.CreatePropertyMultipart;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
@@ -42,7 +44,6 @@ public class PropertyController {
      * 2) 등기부등본 업로드
      * 3) 이름, 생일, 주소 적합성 AI 판단
      * @param file
-     * @param req
      * @return
      */
     @Operation(
@@ -55,7 +56,7 @@ public class PropertyController {
                     description = "등기부등본이 정상적으로 인증됨",
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = VerifyRequestDto.class),
+                            schema = @Schema(implementation = VerificationResultResponseDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
@@ -97,12 +98,22 @@ public class PropertyController {
             description = "JSON 본문(req) + 이미지들(images)을 multipart/form-data 로 업로드하여 매물을 등록합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                    schema = @Schema(implementation = CreatePropertyMultipart.class),
+                    encoding = {
+                            @Encoding(name = "req", contentType = "application/json")
+                    }
+            )
+    )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "매물 최종 등록",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PropertyRegiResponseDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
@@ -147,14 +158,20 @@ public class PropertyController {
                     )
             )
     })
-    @PostMapping(value = "/detail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/detail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseDTO<PropertyRegiResponseDto>> createProperty(
-                                                                                @RequestPart("req") PropertyDetailRequestDto req,
+                                                                                @RequestPart(value = "req") String reqJson,
                                                                                 @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                                                                 @AuthenticationPrincipal Integer userSeq)
     {
-        PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
-        return ResponseDTO.created(res, "매물 등록 완료");
+        try {
+            PropertyDetailRequestDto req = new ObjectMapper().readValue(reqJson, PropertyDetailRequestDto.class);
+            PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
+            return ResponseDTO.created(res, "매물 등록 완료");
+        } catch (JsonProcessingException e) {
+            throw new CustomException(ErrorCode.JSON_TYPE_ERROR, e);
+        }
     }
 
 
