@@ -27,6 +27,8 @@ import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
 import ssafy.a303.backend.livestream.service.LiveService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -64,6 +66,8 @@ public class StompController {
     private final LiveService liveService;
     private final UserRepository userRepository;
     private final MessageReadStatusRepository messageReadStatusRepository;
+    private final RedisTemplate<Object, Object> redisTemplate;
+    private final org.springframework.data.redis.core.StringRedisTemplate liveRedisTemplate;
     private final ObjectMapper objectMapper;
     
     // 생성자 주입
@@ -73,7 +77,9 @@ public class StompController {
                           LiveRedisPubSubService liveRedisPubSubService,
                           LiveService liveService,
                           UserRepository userRepository,
-                          MessageReadStatusRepository messageReadStatusRepository) {
+                          MessageReadStatusRepository messageReadStatusRepository,
+                          RedisTemplate<Object, Object> redisTemplate,
+                          @Qualifier("liveRedisTemplate") org.springframework.data.redis.core.StringRedisTemplate liveRedisTemplate) {
         this.chatService = chatService;
         this.chatRedisPubSubService = chatRedisPubSubService;
         this.liveChatService = liveChatService;
@@ -81,6 +87,8 @@ public class StompController {
         this.liveService = liveService;
         this.userRepository = userRepository;
         this.messageReadStatusRepository = messageReadStatusRepository;
+        this.redisTemplate = redisTemplate;
+        this.liveRedisTemplate = liveRedisTemplate;
         
         // ObjectMapper에 JavaTimeModule 등록
         this.objectMapper = new ObjectMapper();
@@ -223,9 +231,24 @@ public class StompController {
         // 2) Redis Pub/Sub → 라이브룸 구독자에게 메시지 push
         liveRedisPubSubService.publish("live:" + liveSeq, messageJson);
         
+        // 3) 채팅 수 업데이트 전송 (라이브 방송 내부 시청자용)
+        try {
+            String chatKey = "live:chat:" + liveSeq;
+            int chatCount = java.util.Optional.ofNullable(redisTemplate.opsForList().size(chatKey))
+                    .map(Long::intValue).orElse(0);
+            
+            liveRedisTemplate.convertAndSend(
+                    "live:" + liveSeq,
+                    "{\"type\":\"CHAT_COUNT_UPDATE\",\"count\":" + chatCount + "}"
+            );
+            log.info("[STOMP][LIVE] 📊 Chat count update sent: {}", chatCount);
+        } catch (Exception e) {
+            log.error("[LIVE] 채팅 수 업데이트 전송 실패: {}", e.getMessage());
+        }
+        
         log.info("[STOMP][LIVE] ✅ Message processing complete");
         
-        // 3) 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
+        // 4) 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
         liveService.publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.CHAT);
     }
 }
