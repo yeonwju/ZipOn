@@ -37,6 +37,21 @@ export function middleware(req: NextRequest) {
   if (isProtectedPath && !token) {
     const loginUrl = new URL('/onboard', req.url)
     loginUrl.searchParams.set('redirect', pathname)
+    
+    // 이전 페이지 정보 저장 (뒤로가기 문제 해결용)
+    const referer = req.headers.get('referer')
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer)
+        // 같은 도메인이고, onboard가 아닌 경우만 저장
+        if (refererUrl.origin === req.nextUrl.origin && !refererUrl.pathname.startsWith('/onboard')) {
+          loginUrl.searchParams.set('from', refererUrl.pathname)
+        }
+      } catch {
+        // URL 파싱 실패 시 무시
+      }
+    }
+    
     return NextResponse.redirect(loginUrl)
   }
 

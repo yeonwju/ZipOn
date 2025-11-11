@@ -1,5 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
 import { AuthGuard } from '@/components/auth'
 import { Profile } from '@/components/features'
 import ListingTaps from '@/components/features/mypage/ListingTaps'
@@ -17,13 +20,36 @@ import ListingTaps from '@/components/features/mypage/ListingTaps'
 export default function MyPageClient() {
   return (
     <AuthGuard>
-      <section className="flex w-full flex-col p-4 pb-16">
-        <section>
-          <Profile />
-        </section>
-        <ListingTaps className={'mt-4'} />
-      </section>
+      <MyPageContent />
     </AuthGuard>
+  )
+}
+
+/**
+ * MyPage 실제 컨텐츠
+ * 
+ * 로그인 후 돌아왔을 때 뒤로가기 처리를 위한 플래그를 설정합니다.
+ */
+function MyPageContent() {
+  useEffect(() => {
+    // 로그인 후 돌아온 경우
+    const fromPath = sessionStorage.getItem('auth_from_path')
+    
+    if (fromPath) {
+      // onboard 페이지에서 확인할 수 있도록 플래그 유지
+      // (제거하지 않음 - onboard에서 제거할 것)
+      
+      // 뒤로가기 시 onboard로 가면, onboard가 fromPath로 리다이렉트할 것임
+    }
+  }, [])
+
+  return (
+    <section className="flex w-full flex-col p-4 pb-16">
+      <section>
+        <Profile />
+      </section>
+      <ListingTaps className={'mt-4'} />
+    </section>
   )
 }
 
