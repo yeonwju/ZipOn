@@ -57,9 +57,13 @@ public class StompHandler implements ChannelInterceptor {
 
     /** 채팅방 접근 권한 검증에 사용할 서비스 */
     private final ChatService chatService;
+    
+    /** 라이브 시청자 등록용 */
+    private final StompEventListener stompEventListener;
 
-    public StompHandler(ChatService chatService) {
+    public StompHandler(ChatService chatService, StompEventListener stompEventListener) {
         this.chatService = chatService;
+        this.stompEventListener = stompEventListener;
     }
     
     @PostConstruct
@@ -252,6 +256,17 @@ public class StompHandler implements ChannelInterceptor {
         } else if ("live".equals(category)) {
             // 라이브 방송은 공개 접근으로 가정 (정책에 따라 접근제어 추가 가능)
             log.info("[SUBSCRIBE] 라이브 구독 허용 - subject: {}, liveId: {}", subject, id);
+            
+            // ⭐ 라이브 방송 구독 시 세션 정보 등록 (자동 퇴장 처리를 위해)
+            try {
+                String sessionId = accessor.getSessionId();
+                Integer userSeq = Integer.valueOf(subject);
+                Integer liveSeq = Integer.valueOf(id);
+                
+                stompEventListener.registerLiveViewer(sessionId, userSeq, liveSeq);
+            } catch (Exception e) {
+                log.warn("[SUBSCRIBE] 라이브 시청자 등록 실패: {}", e.getMessage());
+            }
 
         } else {
             // 지원하지 않는 구독 카테고리

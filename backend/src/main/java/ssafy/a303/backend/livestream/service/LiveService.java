@@ -1,5 +1,6 @@
 package ssafy.a303.backend.livestream.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +36,7 @@ public class LiveService {
     private final UserRepository userRepository;
     private final OpenVidu openVidu;
     private final LiveRedisPubSubService liveRedisPubSubService;
+    private final LiveStatsUpdatePubSubService liveStatsUpdatePubSubService;
 
     @Qualifier("liveRedisTemplate")
     private final StringRedisTemplate liveRedisTemplate;
@@ -147,16 +149,19 @@ public class LiveService {
             String viewerKey = "live:viewers:" + liveSeq;
             redisTemplate.opsForSet().add(viewerKey, userSeq);
 
-            // 8. 현재 시청자 수를 Pub/Sub 로 전송
+            // 8. 현재 시청자 수를 Pub/Sub 로 전송 (라이브 방송 내부용)
             long viewerCount = redisTemplate.opsForSet().size(viewerKey);
             liveRedisTemplate.convertAndSend(
                     "live:" + liveSeq,
                     "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
             );
 
+            // 9. 라이브 목록 통계 업데이트 알림 발행
+            publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.VIEWER);
+
             log.info("[LIVE] Token 발급 성공: liveSeq={}, userSeq={}, role={}", liveSeq, userSeq, role);
 
-            // 9. 토큰 정보 DTO로 반환
+            // 10. 토큰 정보 DTO로 반환
             //Session  = 방송 방 자체
             //Token    = 그 방송 방에 "들어가기 위한 입장권"
             return LiveTokenResponseDto.builder()
@@ -169,6 +174,30 @@ public class LiveService {
             log.error("[LIVE] Token 생성 실패: {}", e.getMessage());
             throw new CustomException(ErrorCode.OPENVIDU_TOKEN_CREATE_FAILED);
         }
+    }
+
+    /* 라이브 방송 퇴장 */
+    public void leaveLive(Integer liveSeq, Integer userSeq) {
+        
+        // 1. 라이브 방송 존재 여부 확인
+        liveStreamRepository.findById(liveSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.LIVE_STREAM_NOT_FOUND));
+        
+        // 2. Redis에서 시청자 제거
+        String viewerKey = "live:viewers:" + liveSeq;
+        redisTemplate.opsForSet().remove(viewerKey, userSeq);
+        
+        // 3. 현재 시청자 수를 Pub/Sub 로 전송 (라이브 방송 내부용)
+        long viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
+        liveRedisTemplate.convertAndSend(
+                "live:" + liveSeq,
+                "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
+        );
+        
+        // 4. 라이브 목록 통계 업데이트 알림 발행
+        publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.VIEWER);
+        
+        log.info("[LIVE] 시청자 퇴장: liveSeq={}, userSeq={}, 남은 시청자={}", liveSeq, userSeq, viewerCount);
     }
 
     /* 라이브 방송 종료 */
@@ -381,16 +410,63 @@ public class LiveService {
         }
 
         // 변경 후 좋아요 수 조회
-        long likeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey)).orElse(0L);
+        int likeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
+                .map(Long::intValue).orElse(0);
 
-        // 실시간 좋아요 수 갱신 전송
+        // 실시간 좋아요 수 갱신 전송 (기존 라이브 방송 내부용)
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
                 "{\"type\":\"LIKE_COUNT_UPDATE\",\"count\":" + likeCount + "}"
         );
 
+        // 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
+        publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.LIKE);
+
         // true = 좋아요 상태 유지, false = 취소 상태 유지
         return !Boolean.TRUE.equals(alreadyLiked);
+    }
+
+    /**
+     * 라이브 통계 조회 및 업데이트 알림 발행 (공통 메서드)
+     * Redis에서 현재 통계를 조회하고 목록 화면으로 알림을 발행합니다.
+     * 
+     * @param liveSeq 라이브 방송 ID
+     * @param updateType 업데이트 타입 (VIEWER, CHAT, LIKE, ALL)
+     */
+    public void publishLiveStatsUpdate(Integer liveSeq, LiveStatsUpdateDto.UpdateType updateType) {
+        try {
+            // Redis Key 생성
+            String viewerKey = "live:viewers:" + liveSeq;
+            String chatKey = "live:chat:" + liveSeq;
+            String likeKey = "live:like:" + liveSeq;
+            
+            // Redis에서 현재 통계 조회
+            int viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey))
+                    .map(Long::intValue).orElse(0);
+            int chatCount = Optional.ofNullable(redisTemplate.opsForList().size(chatKey))
+                    .map(Long::intValue).orElse(0);
+            int likeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
+                    .map(Long::intValue).orElse(0);
+            
+            // 통계 업데이트 DTO 생성
+            LiveStatsUpdateDto statsUpdate = LiveStatsUpdateDto.builder()
+                    .liveSeq(liveSeq)
+                    .viewerCount(viewerCount)
+                    .chatCount(chatCount)
+                    .likeCount(likeCount)
+                    .updateType(updateType)
+                    .build();
+
+            // JSON 변환 및 발행
+            ObjectMapper objectMapper = new ObjectMapper();
+            String payload = objectMapper.writeValueAsString(statsUpdate);
+            liveStatsUpdatePubSubService.publish("live:stats:updates", payload);
+
+            log.info("[LIVE_STATS] 통계 업데이트 발행 → liveSeq={}, type={}, viewers={}, chats={}, likes={}",
+                    liveSeq, updateType, viewerCount, chatCount, likeCount);
+        } catch (Exception e) {
+            log.error("[LIVE_STATS] 통계 업데이트 발행 실패: {}", e.getMessage(), e);
+        }
     }
     }
 

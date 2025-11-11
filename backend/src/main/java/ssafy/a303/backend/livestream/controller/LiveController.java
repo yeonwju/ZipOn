@@ -127,6 +127,43 @@ public class LiveController {
     }
 
     /**
+     * 라이브 방송 퇴장
+     */
+    @Operation(
+            summary = "라이브 방송 퇴장",
+            description = "시청자가 라이브 방송에서 퇴장합니다. Redis에서 시청자를 제거하고 시청자 수를 업데이트합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "퇴장 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseDTO.class),
+                            examples = @ExampleObject(
+                                    name = "퇴장 성공",
+                                    value = """
+                                {
+                                  "status": 200,
+                                  "message": "라이브 방송에서 퇴장했습니다.",
+                                  "data": null
+                                }
+                                """
+                            )
+                    )
+            )
+    })
+    @PostMapping("/{liveSeq}/leave")
+    public ResponseEntity<ResponseDTO<Void>> leaveLive(
+            @PathVariable Integer liveSeq,
+            @AuthenticationPrincipal Integer userSeq) {
+        
+        liveService.leaveLive(liveSeq, userSeq);
+        return ResponseDTO.ok(null, "라이브 방송에서 퇴장했습니다.");
+    }
+
+    /**
      * 라이브 방송 종료
      */
     @Operation(

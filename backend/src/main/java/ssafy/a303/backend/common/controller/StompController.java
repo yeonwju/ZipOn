@@ -21,8 +21,10 @@ import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
+import ssafy.a303.backend.livestream.dto.response.LiveStatsUpdateDto;
 import ssafy.a303.backend.livestream.service.LiveChatService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
+import ssafy.a303.backend.livestream.service.LiveService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
@@ -59,6 +61,7 @@ public class StompController {
     private final ChatRedisPubSubService chatRedisPubSubService;
     private final LiveChatService liveChatService;
     private final LiveRedisPubSubService liveRedisPubSubService;
+    private final LiveService liveService;
     private final UserRepository userRepository;
     private final MessageReadStatusRepository messageReadStatusRepository;
     private final ObjectMapper objectMapper;
@@ -68,12 +71,14 @@ public class StompController {
                           ChatRedisPubSubService chatRedisPubSubService,
                           LiveChatService liveChatService,
                           LiveRedisPubSubService liveRedisPubSubService,
+                          LiveService liveService,
                           UserRepository userRepository,
                           MessageReadStatusRepository messageReadStatusRepository) {
         this.chatService = chatService;
         this.chatRedisPubSubService = chatRedisPubSubService;
         this.liveChatService = liveChatService;
         this.liveRedisPubSubService = liveRedisPubSubService;
+        this.liveService = liveService;
         this.userRepository = userRepository;
         this.messageReadStatusRepository = messageReadStatusRepository;
         
@@ -216,5 +221,8 @@ public class StompController {
         liveRedisPubSubService.publish("live:" + liveSeq, messageJson);
         
         log.info("[STOMP][LIVE] ✅ Message processing complete");
+        
+        // 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
+        liveService.publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.CHAT);
     }
 }
