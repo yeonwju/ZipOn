@@ -22,6 +22,7 @@ interface ApiResponse<T> {
 export async function fetchCurrentUser(): Promise<User | null> {
   try {
     const result = await authFetch.get<ApiResponse<User>>(API_ENDPOINTS.USER_INFO)
+    console.log('사용자 정보', result.data)
     return result.data
   } catch (error) {
     console.error('[authService] 사용자 정보 가져오기 실패:', error)
