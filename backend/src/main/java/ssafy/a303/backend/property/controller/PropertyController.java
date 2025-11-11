@@ -55,7 +55,7 @@ public class PropertyController {
                     description = "등기부등본이 정상적으로 인증됨",
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = VerifyRequestDto.class),
+                            schema = @Schema(implementation = VerificationResultResponseDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
