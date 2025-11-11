@@ -1,6 +1,7 @@
 package ssafy.a303.backend.livestream.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -15,6 +16,7 @@ import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.request.LiveCreateRequestDto;
 import ssafy.a303.backend.livestream.dto.response.*;
+import ssafy.a303.backend.livestream.dto.response.LiveStartNotificationDto;
 import ssafy.a303.backend.livestream.entity.LiveStream;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
@@ -37,6 +39,7 @@ public class LiveService {
     private final OpenVidu openVidu;
     private final LiveRedisPubSubService liveRedisPubSubService;
     private final LiveStatsUpdatePubSubService liveStatsUpdatePubSubService;
+    private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
 
     @Qualifier("liveRedisTemplate")
     private final StringRedisTemplate liveRedisTemplate;
@@ -93,7 +96,34 @@ public class LiveService {
         redisTemplate.delete(chatKey);
         redisTemplate.delete(likeKey);
 
-        //6. 방 생성 응답값 build
+        //6. 새 방송 시작 알림 발행 (라이브 목록에 실시간으로 추가)
+        try {
+            LiveStartNotificationDto notification = LiveStartNotificationDto.builder()
+                    .liveSeq(liveStream.getId())
+                    .auctionSeq(auction.getAuctionSeq())
+                    .sessionId(session.getSessionId())
+                    .title(liveStream.getTitle())
+                    .status(liveStream.getStatus())
+                    .host(LiveStartNotificationDto.HostDto.builder()
+                            .userSeq(host.getUserSeq())
+                            .name(host.getName())
+                            .profileImg(host.getProfileImg())
+                            .build())
+                    .startAt(liveStream.getStartAt())
+                    .build();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            String payload = objectMapper.writeValueAsString(notification);
+            
+            liveStartNotificationPubSubService.publish("live:new:broadcast", payload);
+            
+            log.info("[LIVE] 새 방송 시작 알림 발행: liveSeq={}, title={}", liveStream.getId(), liveStream.getTitle());
+        } catch (Exception e) {
+            log.error("[LIVE] 새 방송 알림 발행 실패: {}", e.getMessage(), e);
+        }
+
+        //7. 방 생성 응답값 build
         return LiveCreateResponseDto.builder()
                 .liveSeq(liveStream.getId())
                 .auctionSeq(auction.getAuctionSeq())
@@ -255,13 +285,18 @@ public class LiveService {
         log.info("[LIVE] 방송 종료 완료: liveSeq={}, viewer={}, chat={}, like={}",
                 liveSeq, finalViewerCount, finalChatCount, finalLikeCount);
 
-        // 8. 방송 종료 이벤트 전송 (프론트에서 방송 끝 화면으로 전환)
+        // 8. 방송 종료 이벤트 전송 (라이브 방송 내부 시청자용)
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
                 "{\"type\":\"LIVE_ENDED\"}"
         );
 
-        // 9. 종료 응답 반환
+        // 9. 라이브 목록 통계 업데이트 발행 (목록 화면에서 방송 종료 표시)
+        publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.ALL);
+        
+        log.info("[LIVE] 방송 종료 이벤트 발행: liveSeq={}", liveSeq);
+
+        // 10. 종료 응답 반환
         return LiveEndResponseDto.builder()
                 .liveSeq(liveStream.getId())
                 .auctionSeq(liveStream.getAuction().getAuctionSeq())

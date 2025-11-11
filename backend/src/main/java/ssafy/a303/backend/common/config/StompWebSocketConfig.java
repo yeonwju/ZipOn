@@ -65,6 +65,8 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // 서버가 메시지를 브로드캐스트 할 때 사용하는 prefix
         // 예: client.subscribe("/sub/chat/방ID")
+        // 서버가 /sub 경로 구독자에게 메시지를 자동으로 push
+        // 그래서 messagingTemplate.convertAndSend("/sub/...") 만 하면 실시간 전송이 되는 것
         registry.enableSimpleBroker("/sub");
     }
 

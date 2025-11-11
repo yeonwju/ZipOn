@@ -22,6 +22,7 @@ import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
 import ssafy.a303.backend.chat.service.ChatNotificationPubSubService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
 import ssafy.a303.backend.livestream.service.LiveStatsUpdatePubSubService;
+import ssafy.a303.backend.livestream.service.LiveStartNotificationPubSubService;
 
 /**
  * ======================================================================
@@ -191,6 +192,26 @@ public class RedisConfig {
     @Bean
     @Qualifier("liveStatsUpdateListenerAdapter")
     public MessageListenerAdapter liveStatsUpdateListenerAdapter(LiveStatsUpdatePubSubService service) {
+        return new MessageListenerAdapter(service, "onMessage");
+    }
+
+    // 새 방송 시작 알림 채널 구독 (live:new:broadcast)
+    @Bean
+    @Qualifier("liveStartNotificationListenerContainer")
+    public RedisMessageListenerContainer liveStartNotificationListenerContainer(
+            @Qualifier("liveRedisFactory") RedisConnectionFactory factory,
+            @Qualifier("liveStartNotificationListenerAdapter") MessageListenerAdapter adapter) {
+
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(factory);
+        container.addMessageListener(adapter, new PatternTopic("live:new:broadcast"));
+        return container;
+    }
+
+    // 새 방송 알림 메시지를 → LiveStartNotificationPubSubService.onMessage() 로 전달하는 어댑터
+    @Bean
+    @Qualifier("liveStartNotificationListenerAdapter")
+    public MessageListenerAdapter liveStartNotificationListenerAdapter(LiveStartNotificationPubSubService service) {
         return new MessageListenerAdapter(service, "onMessage");
     }
 

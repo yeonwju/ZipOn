@@ -202,6 +202,7 @@ public class StompController {
         User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        // 1) 라이브 메시지 DTO 생성 + Redis 저장
         LiveChatMessageResponseDto response = LiveChatMessageResponseDto.builder()
                 .liveSeq(liveSeq)
                 .senderSeq(userSeq)
@@ -218,11 +219,13 @@ public class StompController {
         String messageJson = objectMapper.writeValueAsString(response);
         
         log.info("[STOMP][LIVE] 📡 Publishing to Redis channel: live:{}", liveSeq);
+
+        // 2) Redis Pub/Sub → 라이브룸 구독자에게 메시지 push
         liveRedisPubSubService.publish("live:" + liveSeq, messageJson);
         
         log.info("[STOMP][LIVE] ✅ Message processing complete");
         
-        // 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
+        // 3) 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
         liveService.publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.CHAT);
     }
 }

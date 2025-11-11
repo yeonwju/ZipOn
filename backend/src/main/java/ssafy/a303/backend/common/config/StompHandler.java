@@ -158,8 +158,9 @@ public class StompHandler implements ChannelInterceptor {
      * 경로 패턴:
      *   - /sub/chat/12 → 1:1 채팅방 (권한 검증 필요)
      *   - /sub/live/5  → 라이브 방송 채팅 (공개, 세션 등록 필요)
-     *   - /sub/user/notifications/123 → 개인 알림 (권한 검증 불필요)
-     *   - /sub/live/stats/updates → 라이브 통계 (공개, 권한 불필요)
+     *   - /sub/user/notifications/123 → 개인 알림 (공개)
+     *   - /sub/live/stats/updates → 라이브 통계 업데이트 (공개)
+     *   - /sub/live/new/broadcast → 새 방송 시작 알림 (공개)
      */
     private void validateRoomPermission(StompHeaderAccessor accessor) {
 
@@ -173,6 +174,7 @@ public class StompHandler implements ChannelInterceptor {
 
         // B) 공개 채널은 바로 허용 (권한 검증 불필요)
         if (dest.startsWith("/sub/live/stats/updates") || 
+            dest.startsWith("/sub/live/new/broadcast") ||
             dest.startsWith("/sub/user/notifications/")) {
             log.info("[STOMP][SUBSCRIBE] 공개 채널 구독 허용: {}", dest);
             return;
