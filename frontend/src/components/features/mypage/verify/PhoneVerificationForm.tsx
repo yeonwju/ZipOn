@@ -76,7 +76,7 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
     tel: tel,
   }
   const handleRequestCode = async () => {
-    const result = await authFetch.post<UserPhoneVerifyResponse>(
+    const result = await authFetch.post<UserVerifyResponse>(
       `${API_ENDPOINTS.PHONE_VERIFY}`,
       payload
     )
@@ -101,7 +101,7 @@ export default function PhoneVerificationForm({ onComplete }: PhoneVerificationF
     code: verificationCode,
   }
   const handleVerifyCode = async () => {
-    const result = await authFetch.post<UserPhoneVerifyResponse>(
+    const result = await authFetch.post<UserVerifyResponse>(
       API_ENDPOINTS.PHONE_VERIFY_CHECK,
       verifyCode
     )

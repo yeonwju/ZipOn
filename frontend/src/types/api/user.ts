@@ -1,4 +1,4 @@
-interface UserPhoneVerifyResponse {
+interface UserVerifyResponse {
   data?: null
   message: string
   status: number
