@@ -6,6 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
@@ -89,6 +91,7 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         if (saved != null) {
             String[] param = saved.getParameterValues("redirect_url");
             if (param != null && param.length > 0) {
+                log.info(String.format("frontUrl: %s, redirect_url: %s",frontUrl, param[0]));
                 response.sendRedirect(String.format("%s%s", frontUrl, param[0]));
                 return;
             }
