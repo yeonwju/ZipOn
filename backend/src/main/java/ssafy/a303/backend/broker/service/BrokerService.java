@@ -26,6 +26,7 @@ public class BrokerService {
         if (!company.getStatus()) throw new CustomException(ErrorCode.INVALID_TAX_SEQ);
 
         User userRef = userRepository.getReferenceById(userSeq);
+        if(userRef.getName() == null) throw new CustomException(ErrorCode.USER_NOT_AUTHENTICATED);
 
         Broker broker = Broker.builder()
                 .company(company)
