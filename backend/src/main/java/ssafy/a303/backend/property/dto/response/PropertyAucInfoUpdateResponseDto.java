@@ -2,7 +2,6 @@ package ssafy.a303.backend.property.dto.response;
 
 import lombok.Data;
 
-@Data
 public record PropertyAucInfoUpdateResponseDto(
         Integer propertySeq,
         Boolean isAucPref,

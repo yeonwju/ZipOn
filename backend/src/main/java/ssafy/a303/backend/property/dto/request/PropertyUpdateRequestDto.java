@@ -3,7 +3,6 @@ package ssafy.a303.backend.property.dto.request;
 import lombok.Data;
 import ssafy.a303.backend.property.enums.Facing;
 
-@Data
 public record PropertyUpdateRequestDto(
         String content,
         Double area,

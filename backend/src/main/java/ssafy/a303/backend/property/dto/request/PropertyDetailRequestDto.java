@@ -6,7 +6,6 @@ import ssafy.a303.backend.property.enums.Facing;
 
 import java.util.List;
 
-@Data
 public record PropertyDetailRequestDto(
         String lessorNm,
         String address,
