@@ -20,6 +20,9 @@ export const API_ENDPOINTS = {
   USER_INFO: '/api/v1/user/me',
   COMPANY_STATUS: '/api/v1/company/status',
   BROKER_VERIFY: '/api/v1/broker',
+  PHONE_VERIFY: '/api/v1/user/verify/sms',
+  PHONE_VERIFY_CHECK: '/api/v1/user/verify/code',
+  BUSSINESS_REGISTER: '/api/v1/broker',
 } as const
 
 export const API_TIMEOUT = 10000 // 10초

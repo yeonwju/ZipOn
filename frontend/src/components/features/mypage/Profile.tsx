@@ -64,9 +64,7 @@ export default function Profile() {
           )}
           {user?.email && (
             <div className={'flex flex-row gap-1'}>
-              {user?.socialType === 'google' && (
-                <Image src={'/socials/google.svg'} alt={'구글 아이콘'} width={9} height={9}></Image>
-              )}
+              <Image src={'/socials/google.svg'} alt={'구글 아이콘'} width={9} height={9}></Image>
               <span className={'text-xs text-gray-400'}>{user?.email}</span>
             </div>
           )}

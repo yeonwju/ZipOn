@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import PhoneVerifyContent from '@/components/features/mypage/verify/PhoneVerifyContent'
+import { PhoneVerificationForm } from '@/components/features'
 import { VerifyFormSkeleton } from '@/components/skeleton/verify'
 
 /**
@@ -11,7 +11,7 @@ import { VerifyFormSkeleton } from '@/components/skeleton/verify'
 export default function PhoneVerifyPage() {
   return (
     <Suspense fallback={<VerifyFormSkeleton />}>
-      <PhoneVerifyContent />
+      <PhoneVerificationForm />
     </Suspense>
   )
 }

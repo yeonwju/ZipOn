@@ -81,13 +81,32 @@ async function baseFetch(
   if (!response.ok) {
     const contentType = response.headers.get('content-type')
 
+    console.error('=== API 에러 발생 ===')
+    console.error('URL:', url)
+    console.error('Method:', fetchOptions.method)
+    console.error('Status:', response.status, response.statusText)
+    console.error('Content-Type:', contentType)
+
     // JSON 에러 응답 처리
     if (contentType?.includes('application/json')) {
-      const error = await response.json()
-      throw new Error(error.message || `HTTP Error: ${response.status}`)
+      try {
+        const error = await response.json()
+        console.error('에러 응답 body:', error)
+        throw new Error(error.message || error.error || `HTTP Error: ${response.status}`)
+      } catch (parseError) {
+        console.error('에러 응답 파싱 실패:', parseError)
+        throw new Error(`HTTP Error: ${response.status}`)
+      }
     }
 
-    // HTML 에러 응답 처리
+    // HTML 또는 기타 에러 응답 처리
+    try {
+      const errorText = await response.text()
+      console.error('에러 응답 텍스트:', errorText.substring(0, 500)) // 처음 500자만
+    } catch (e) {
+      console.error('에러 응답 읽기 실패:', e)
+    }
+    
     throw new Error(`HTTP Error ${response.status}: ${response.statusText}`)
   }
 
