@@ -102,6 +102,20 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   const pathname = propPath || usePathname()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [canGoBack, setCanGoBack] = useState(false)
+
+  /* 앱 내부 히스토리 체크 */
+  useEffect(() => {
+    // 페이지 진입 시 앱 내부 히스토리가 있는지 체크
+    const hasInternalHistory = window.history.state?.idx !== undefined && window.history.state.idx > 0
+    setCanGoBack(hasInternalHistory)
+
+    // 첫 진입 시 히스토리 마커 설정
+    if (!sessionStorage.getItem('app_entry_marked')) {
+      sessionStorage.setItem('app_entry_marked', 'true')
+      window.history.replaceState({ ...window.history.state, isAppEntry: true }, '')
+    }
+  }, [pathname])
 
   /* 스크롤 시 헤더 숨김 처리 */
   useEffect(() => {
@@ -115,6 +129,26 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
+
+  /* 뒤로가기 핸들러 */
+  const handleBack = () => {
+    // 로그인 플로우에서 온 경우 처리
+    const fromPath = sessionStorage.getItem('auth_from_path')
+    if (fromPath) {
+      sessionStorage.removeItem('auth_from_path')
+      sessionStorage.removeItem('should_skip_onboard')
+      router.replace(fromPath)
+      return
+    }
+
+    // 앱 내부 히스토리가 있으면 뒤로가기
+    if (canGoBack && window.history.length > 1) {
+      router.back()
+    } else {
+      // 없으면 홈으로
+      router.replace('/home')
+    }
+  }
 
   /* ---------------------------------------------------
    * 6 동적 경로 처리 (정규식 기반)
@@ -166,7 +200,7 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
     >
       {/* 왼쪽: 뒤로가기 */}
       <button
-        onClick={() => router.back()}
+        onClick={handleBack}
         className="-ml-2 flex items-center justify-center p-2 transition-opacity hover:opacity-60"
         aria-label="뒤로가기"
       >
