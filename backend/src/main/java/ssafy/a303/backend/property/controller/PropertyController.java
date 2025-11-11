@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.common.response.ResponseDTO;
+import ssafy.a303.backend.property.dto.MultiPartRequest;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
@@ -47,7 +48,13 @@ public class PropertyController {
      */
     @Operation(
             summary = "주소 입력 및 등기부등본 검증",
-            description = "매물의 주소를 입력하고 등기부등본을 검증합니다."
+            description = "매물의 주소를 입력하고 등기부등본을 검증합니다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(type = "object", implementation = MultiPartRequest.class)
+                    )
+            )
     )
     @ApiResponses({
             @ApiResponse(
