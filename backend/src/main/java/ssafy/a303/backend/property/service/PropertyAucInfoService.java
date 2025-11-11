@@ -34,7 +34,7 @@ public class PropertyAucInfoService {
         assertCanEdit(p.getLessorSeq(), userSeq);
 
         // 매물의 경매 정보 조회
-        PropertyAucInfo aucInfo = aucInfoRepository.findByPropertySeq(propertySeq)
+        PropertyAucInfo aucInfo = aucInfoRepository.findByProperty(p)
                 .orElseThrow(() -> new IllegalArgumentException("경매 정보가 없습니다."));
 
         // 부분 수정 반영

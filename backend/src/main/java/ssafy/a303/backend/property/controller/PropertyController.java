@@ -55,7 +55,7 @@ public class PropertyController {
                     description = "등기부등본이 정상적으로 인증됨",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = VerificationResultResponseDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
@@ -100,7 +100,7 @@ public class PropertyController {
                     description = "매물 최종 등록",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = PropertyRegiResponseDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
@@ -170,7 +170,7 @@ public class PropertyController {
                     description = "매물 상세 정보 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = DetailResponseDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
@@ -238,7 +238,7 @@ public class PropertyController {
                     description = "지도 정보 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = PropertyMapDto.class),
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
@@ -342,7 +342,7 @@ public class PropertyController {
                     description = "매물 정보 수정 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class)
+                            schema = @Schema(implementation = PropertyUpdateResponseDto.class)
                     )
             )
     })

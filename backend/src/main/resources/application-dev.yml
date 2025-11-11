@@ -19,7 +19,7 @@ spring:
       max-request-size: 20MB
 
 ai:
-  base-url: http://localhost:8000
+  base-url: ${FAST_API}
 
 cloud:
   aws:
@@ -32,7 +32,7 @@ cloud:
       secret-key: ${AWS_SECRET_ACCESS_KEY}
 app:
   s3:
-    expose: presigned #pbulic
+    expose: presigned #public
 
 logging:
   level:
