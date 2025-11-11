@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.common.response.ResponseDTO;
-import ssafy.a303.backend.property.dto.CreatePropertyMultipart;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyUpdateRequestDto;
 import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
@@ -97,16 +96,6 @@ public class PropertyController {
             summary = "매물 상세 등록",
             description = "JSON 본문(req) + 이미지들(images)을 multipart/form-data 로 업로드하여 매물을 등록합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                    schema = @Schema(implementation = CreatePropertyMultipart.class),
-                    encoding = {
-                            @Encoding(name = "req", contentType = "application/json")
-                    }
-            )
     )
     @ApiResponses({
             @ApiResponse(

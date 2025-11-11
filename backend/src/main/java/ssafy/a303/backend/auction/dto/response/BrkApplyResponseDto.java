@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public record AucApplyResponse(
+public record BrkApplyResponseDto(
         Integer auctionSeq,
         Integer propertySeq,
         Integer userSeq,
@@ -12,7 +12,6 @@ public record AucApplyResponse(
         LocalDate strmDate,
         LocalTime strmStartTm,
         LocalTime strmEndTm,
-        LocalDateTime auctionEndAt,
-        LocalDateTime createdAt
+        LocalDateTime auctionEndAt
 ) {
 }

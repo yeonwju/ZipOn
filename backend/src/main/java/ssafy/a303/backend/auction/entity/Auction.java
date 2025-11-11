@@ -24,11 +24,11 @@ public class Auction {
     private Integer auctionSeq;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_seq")
+    @JoinColumn(name = "user_seq", nullable = false)
     private User user; // 경매를 방송할 중개인 또는 임대인 user
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "property_seq")
+    @JoinColumn(name = "property_seq", nullable = false)
     private Property property;
 
     @Column
