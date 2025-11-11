@@ -85,6 +85,9 @@ public record PropertyDetailRequestDto(
         String aucAvailable,
 
         //AI 관련
+        @Schema(description = "pdf 코드", example = "sfdsfsf")
+        @NotNull
+        String pdfCode,
         @Schema(description = "등기부등본 검증 여부", example = "true")
         @NotNull
         boolean isCertificated,

@@ -82,7 +82,16 @@ public record DetailResponseDto(
         @Schema(description = "경매 일자", example = "2025-12-12")
         String aucAt,
         @Schema(description = "경매 가능 일시", example = "2025-12-12")
-        String aucAvailable
+        String aucAvailable,
 
+        //ai 관련
+        @Schema(description = "pdf 코드", example = "sfdsfsf")
+        String pdfCode,
+        @Schema(description = "등기부등본 검증 여부", example = "true")
+        boolean isCertificated,
+        @Schema(description = "등기부등본 검증 점수", example = "86")
+        Integer riskScore,
+        @Schema(description = "등기부등본 검증 설명", example = "근저당이 없습니다.")
+        String riskReason
 ) {
 }

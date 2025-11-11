@@ -32,6 +32,7 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
       )
       from Property p
       left join PropertyAucInfo ai
+            on ai.property.propertySeq = p.propertySeq
       where (p.deletedAt is null or p.deletedAt = '')
         and p.latitude is not null and p.longitude is not null
         and (:minLat is null or p.latitude >= :minLat)
