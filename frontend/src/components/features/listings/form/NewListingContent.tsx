@@ -13,12 +13,14 @@ import { Button } from '@/components/ui/button'
 import useUserLocation from '@/hooks/map/useUserLocation'
 import { useUser } from '@/hooks/queries'
 import { registerListingVerification } from '@/services/listingService'
+import { AlertDialog, useAlertDialog } from '@/components/ui/alert-dialog'
 
 export default function NewListingContent() {
   const { refresh: refreshLocation, isRefreshing } = useUserLocation()
 
   // 유저 정보
   const { data: user } = useUser()
+  const { AlertDialog, showError } = useAlertDialog()
 
   // TODO: React Query useSuspenseQuery로 교체
 
@@ -101,9 +103,12 @@ export default function NewListingContent() {
 
       if (result.success) {
         console.log('인증 성공:', result)
+        setIsVerifying(false)
         setStep1Completed(true)
-        setIsVerifying(true)
+        setCurrentAccordion('item-2')
       } else {
+        showError(`등기부등본과 입력하신 정보가 일치하지 않습니다.`)
+        setIsVerifying(false)
         console.warn('인증 실패:', result)
       }
     } catch (error) {
@@ -234,6 +239,7 @@ export default function NewListingContent() {
           </div>
         </div>
       )}
+      <AlertDialog />
     </>
   )
 }
