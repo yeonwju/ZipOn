@@ -2,8 +2,17 @@ from fastapi import FastAPI, UploadFile, Form
 from app.schemas.verify_state import VerifyState
 from app.agent.verify_agent import create_pdf_verifier_graph
 from app.schemas.contract_state import ContractState
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Property Verification AI Server")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 로컬 테스트용 전체 허용
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/verify")
 async def verify_endpoint(
