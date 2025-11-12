@@ -43,7 +43,9 @@ public class LiveChatService {
         String key = "live:chat:" + liveSeq;
 
         // 채팅 메시지 리스트 끝에 추가 (FIFO 채팅 스트림 유지)
-        redisTemplate.opsForList().rightPush(key, message);
+        Long newSize = redisTemplate.opsForList().rightPush(key, message);
+        
+        log.info("[LIVE][CHAT] 💾 메시지 저장 완료: key={}, 저장 후 총 개수={}", key, newSize);
 
         // 채팅 기록은 24시간 동안만 유지 (자동 삭제)
         redisTemplate.expire(key, 24, TimeUnit.HOURS);

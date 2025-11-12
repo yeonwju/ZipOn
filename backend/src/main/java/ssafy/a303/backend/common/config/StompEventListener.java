@@ -39,14 +39,14 @@ public class StompEventListener {
       * "sessionXYZ" → (userSeq=5, liveSeq=77)}*/
     private final Map<String, UserLiveInfo> sessionToLiveMap = new ConcurrentHashMap<>();
 
-    private final RedisTemplate<Object, Object> redisTemplate;
+    private final RedisTemplate<String, Object> liveRedisObjectTemplate;
     private final StringRedisTemplate liveRedisTemplate;
     
     // 생성자 주입 (@Lazy로 순환 참조 해결)
     public StompEventListener(@Lazy LiveService liveService, 
-                              RedisTemplate<Object, Object> redisTemplate,
+                              @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
                               @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate) {
-        this.redisTemplate = redisTemplate;
+        this.liveRedisObjectTemplate = liveRedisObjectTemplate;
         this.liveRedisTemplate = liveRedisTemplate;
     }
 
@@ -85,10 +85,10 @@ public class StompEventListener {
             try {
                 // Redis Set 에서 시청자 제거 (live:viewers:{liveSeq})
                 String viewerKey = "live:viewers:" + info.liveSeq;
-                redisTemplate.opsForSet().remove(viewerKey, info.userSeq);
+                liveRedisObjectTemplate.opsForSet().remove(viewerKey, info.userSeq);
 
                 // 시청자 수 변경 이벤트 전송 (라이브 방송 내부 시청자용)
-                long viewerCount = java.util.Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
+                long viewerCount = java.util.Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(viewerKey)).orElse(0L);
                 liveRedisTemplate.convertAndSend(
                         "live:" + info.liveSeq,
                         "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"

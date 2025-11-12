@@ -58,7 +58,7 @@ public class StompController {
     private final LiveRedisPubSubService liveRedisPubSubService;
     private final UserRepository userRepository;
     private final MessageReadStatusRepository messageReadStatusRepository;
-    private final RedisTemplate<Object, Object> redisTemplate;
+    private final RedisTemplate<String, Object> liveRedisObjectTemplate;
     private final org.springframework.data.redis.core.StringRedisTemplate liveRedisTemplate;
     private final ObjectMapper objectMapper;
     
@@ -69,7 +69,7 @@ public class StompController {
                           LiveRedisPubSubService liveRedisPubSubService,
                           UserRepository userRepository,
                           MessageReadStatusRepository messageReadStatusRepository,
-                          RedisTemplate<Object, Object> redisTemplate,
+                          @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
                           @Qualifier("liveRedisTemplate") org.springframework.data.redis.core.StringRedisTemplate liveRedisTemplate) {
         this.chatService = chatService;
         this.chatRedisPubSubService = chatRedisPubSubService;
@@ -77,7 +77,7 @@ public class StompController {
         this.liveRedisPubSubService = liveRedisPubSubService;
         this.userRepository = userRepository;
         this.messageReadStatusRepository = messageReadStatusRepository;
-        this.redisTemplate = redisTemplate;
+        this.liveRedisObjectTemplate = liveRedisObjectTemplate;
         this.liveRedisTemplate = liveRedisTemplate;
         
         // ObjectMapper에 JavaTimeModule 등록
@@ -224,7 +224,7 @@ public class StompController {
         // 3) 채팅 수 업데이트 전송 (라이브 방송 내부 시청자용)
         try {
             String chatKey = "live:chat:" + liveSeq;
-            int chatCount = java.util.Optional.ofNullable(redisTemplate.opsForList().size(chatKey))
+            int chatCount = java.util.Optional.ofNullable(liveRedisObjectTemplate.opsForList().size(chatKey))
                     .map(Long::intValue).orElse(0);
             
             liveRedisTemplate.convertAndSend(

@@ -22,7 +22,7 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 
 import java.util.List;
 
-@Tag(name = "채팅")
+@Tag(name = "1:1 채팅")
 @RestController
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor

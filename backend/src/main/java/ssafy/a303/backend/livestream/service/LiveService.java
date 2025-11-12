@@ -39,7 +39,7 @@ public class LiveService {
     private final OpenVidu openVidu;
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
     private final StringRedisTemplate liveRedisTemplate;
-    private final RedisTemplate<Object, Object> redisTemplate;
+    private final RedisTemplate<String, Object> liveRedisObjectTemplate;
 
     public LiveService(
             AuctionRepository auctionRepository,
@@ -48,7 +48,7 @@ public class LiveService {
             OpenVidu openVidu,
             LiveStartNotificationPubSubService liveStartNotificationPubSubService,
             @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
-            RedisTemplate<Object, Object> redisTemplate
+            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate
     ) {
         this.auctionRepository = auctionRepository;
         this.liveStreamRepository = liveStreamRepository;
@@ -56,7 +56,7 @@ public class LiveService {
         this.openVidu = openVidu;
         this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
         this.liveRedisTemplate = liveRedisTemplate;
-        this.redisTemplate = redisTemplate;
+        this.liveRedisObjectTemplate = liveRedisObjectTemplate;
     }
 
     /**라이브 방송 시작*/
@@ -107,8 +107,8 @@ public class LiveService {
         String likeKey = "live:like:" + liveStream.getId();
 
         liveRedisTemplate.delete(viewerKey);
-        redisTemplate.delete(chatKey);
-        redisTemplate.delete(likeKey);
+        liveRedisObjectTemplate.delete(chatKey);
+        liveRedisObjectTemplate.delete(likeKey);
 
         //6. 새 방송 시작 알림 발행 (라이브 목록에 실시간으로 추가)
         try {
@@ -192,10 +192,10 @@ public class LiveService {
 
             // 7. Redis에 시청자 등록 (중복 방지: SET 구조)
             String viewerKey = "live:viewers:" + liveSeq;
-            redisTemplate.opsForSet().add(viewerKey, userSeq);
+            liveRedisObjectTemplate.opsForSet().add(viewerKey, userSeq);
 
             // 8. 현재 시청자 수를 Pub/Sub 로 전송 (라이브 방송 내부용)
-            long viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
+            long viewerCount = Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(viewerKey)).orElse(0L);
             liveRedisTemplate.convertAndSend(
                     "live:" + liveSeq,
                     "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
@@ -227,10 +227,10 @@ public class LiveService {
         
         // 2. Redis에서 시청자 제거
         String viewerKey = "live:viewers:" + liveSeq;
-        redisTemplate.opsForSet().remove(viewerKey, userSeq);
+        liveRedisObjectTemplate.opsForSet().remove(viewerKey, userSeq);
         
         // 3. 현재 시청자 수를 Pub/Sub 로 전송 (라이브 방송 내부용)
-        long viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
+        long viewerCount = Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(viewerKey)).orElse(0L);
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
                     "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
@@ -272,14 +272,14 @@ public class LiveService {
         String chatKey = "live:chat:" + liveSeq;
         String likeKey = "live:like:" + liveSeq;
 
-        int finalViewerCount = redisTemplate.opsForSet().size(viewerKey) != null
-                ? Objects.requireNonNull(redisTemplate.opsForSet().size(viewerKey)).intValue() : 0;
+        int finalViewerCount = liveRedisObjectTemplate.opsForSet().size(viewerKey) != null
+                ? Objects.requireNonNull(liveRedisObjectTemplate.opsForSet().size(viewerKey)).intValue() : 0;
 
-        int finalChatCount = redisTemplate.opsForList().size(chatKey) != null
-                ? Objects.requireNonNull(redisTemplate.opsForList().size(chatKey)).intValue() : 0;
+        int finalChatCount = liveRedisObjectTemplate.opsForList().size(chatKey) != null
+                ? Objects.requireNonNull(liveRedisObjectTemplate.opsForList().size(chatKey)).intValue() : 0;
 
-        int finalLikeCount = redisTemplate.opsForSet().size(likeKey) != null
-                ? Objects.requireNonNull(redisTemplate.opsForSet().size(likeKey)).intValue() : 0;
+        int finalLikeCount = liveRedisObjectTemplate.opsForSet().size(likeKey) != null
+                ? Objects.requireNonNull(liveRedisObjectTemplate.opsForSet().size(likeKey)).intValue() : 0;
 
         // 6. 엔티티 상태 변경 (LiveStream 종료 상태 & 최종 데이터 저장)
         liveStream.end(LocalDateTime.now(), finalViewerCount, finalChatCount, finalLikeCount);
@@ -294,16 +294,16 @@ public class LiveService {
         log.info("[LIVE] 방송 종료 이벤트 발행: liveSeq={}", liveSeq);
 
         // 8. 모든 시청자 강제 퇴장 처리 (Redis에서 제거)
-        Set<Object> viewers = redisTemplate.opsForSet().members(viewerKey);
+        Set<Object> viewers = liveRedisObjectTemplate.opsForSet().members(viewerKey);
         if (viewers != null && !viewers.isEmpty()) {
-            redisTemplate.delete(viewerKey);
+            liveRedisObjectTemplate.delete(viewerKey);
             log.info("[LIVE] 모든 시청자 강제 퇴장 처리 완료: {} 명", viewers.size());
         }
 
         // 9. Redis 데이터 TTL 설정 (방송 종료 후 1시간 지나면 자동 삭제)
         // 시청자는 이미 삭제되었으므로 채팅과 좋아요만 TTL 설정
-        redisTemplate.expire(chatKey, 1, TimeUnit.HOURS);
-        redisTemplate.expire(likeKey, 1, TimeUnit.HOURS);
+        liveRedisObjectTemplate.expire(chatKey, 1, TimeUnit.HOURS);
+        liveRedisObjectTemplate.expire(likeKey, 1, TimeUnit.HOURS);
 
         log.info("[LIVE] 방송 종료 완료: liveSeq={}, viewer={}, chat={}, like={}",
                 liveSeq, finalViewerCount, finalChatCount, finalLikeCount);
@@ -331,6 +331,8 @@ public class LiveService {
     /*라이브 방송 정보 조회*/
     public LiveInfoResponseDto getLiveInfo(Integer liveSeq, Integer userSeq) {
 
+        log.info("라이브 방송 정보 조회 api");
+
         // 1. 라이브 방송 조회
         LiveStream liveStream = liveStreamRepository.findById(liveSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.LIVE_STREAM_NOT_FOUND));
@@ -343,22 +345,31 @@ public class LiveService {
         //3. 방송이 끝났는지 아닌지 확인
         boolean isEnded = liveStream.getStatus() == LiveStreamStatus.ENDED;
 
+        //log.info("[LIVE] getLiveInfo: isEnded={}", isEnded);
+
         // 4. 방송이 끝났으면 DB에서 조회, 라이브 중이면 Redis에서 실시간 데이터 조회
         long viewerCount = isEnded
                 ? liveStream.getViewerCount()
-                : Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
+                : Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(viewerKey)).orElse(0L);
 
+        Long chatCountFromRedis = liveRedisObjectTemplate.opsForList().size(chatKey);
+        //log.info("[LIVE][INFO] 🔍 채팅 수 조회: chatKey={}, Redis에서 조회한 값={}", chatKey, chatCountFromRedis);
+        
         long chatCount = isEnded
                 ? liveStream.getChatCount()
-                : Optional.ofNullable(redisTemplate.opsForList().size(chatKey)).orElse(0L);
+                : Optional.ofNullable(chatCountFromRedis).orElse(0L);
 
         long likeCount = isEnded
                 ? liveStream.getLikeCount()
-                : Optional.ofNullable(redisTemplate.opsForSet().size(likeKey)).orElse(0L);
+                : Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(likeKey)).orElse(0L);
+
+        //log.info("[LIVE] getLiveInfo: viewerCount={}, chatCount={}, likeCount={}", viewerCount, chatCount, likeCount);
 
         // 이미 좋아요 되어있는지 확인 (종료된 방송은 Redis 데이터가 TTL로 삭제될 수 있으므로 체크 안함)
         // 종료된 방송은 좋아요 정보 제공 안 함
-        boolean liked = !isEnded && Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userSeq));
+        boolean liked = !isEnded && Boolean.TRUE.equals(liveRedisObjectTemplate.opsForSet().isMember(likeKey, userSeq));
+
+        //log.info("[LIVE] getLiveInfo: liked={}", liked);
 
         // 5. 응답 반환
         return LiveInfoResponseDto.builder()
@@ -384,6 +395,8 @@ public class LiveService {
     /*상태별 라이브 목록 조회*/
     public List<LiveInfoResponseDto> getLiveListByStatus(LiveStreamStatus status, Integer userSeq, LiveStreamSortType sortType) {
 
+        //log.info("상태별 라이브 목록 조회 api");
+
         // 상태별 방송 조회 (시작 시간 기준 최신순)
         List<LiveStream> liveStreams = liveStreamRepository
                 .findByStatusOrderByStartAtDesc(status);
@@ -399,24 +412,34 @@ public class LiveService {
                     // 종료된 방송이면 DB 값 / 진행중이면 Redis 실시간 값 사용
                     boolean isEnded = liveStream.getStatus() == LiveStreamStatus.ENDED;
 
+                    //log.info("[LIVE] getLiveListByStatus: isEnded={}", isEnded);
+
                     int viewerCount = isEnded
                             ? liveStream.getViewerCount()
-                            : Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey))
+                            : Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(viewerKey))
                             .map(Long::intValue).orElse(0);
 
+                    Long chatCountFromRedis = liveRedisObjectTemplate.opsForList().size(chatKey);
+                    //log.info("[LIVE][LIST] 🔍 채팅 수 조회: liveSeq={}, chatKey={}, Redis에서 조회한 값={}",
+                            //liveStream.getId(), chatKey, chatCountFromRedis);
+                    
                     int chatCount = isEnded
                             ? liveStream.getChatCount()
-                            : Optional.ofNullable(redisTemplate.opsForList().size(chatKey))
+                            : Optional.ofNullable(chatCountFromRedis)
                             .map(Long::intValue).orElse(0);
 
                     int likeCount = isEnded
                             ? liveStream.getLikeCount()
-                            : Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
+                            : Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(likeKey))
                             .map(Long::intValue).orElse(0);
+
+                    //log.info("[LIVE] getLiveListByStatus: liveSeq={}, viewerCount={}, chatCount={}, likeCount={}", liveStream.getId(), viewerCount, chatCount, likeCount);
 
                     // 이미 좋아요 되어있는지 확인 (종료된 방송은 Redis 데이터가 TTL로 삭제될 수 있으므로 체크 안함)
                     // 종료된 방송은 좋아요 정보 제공 안 함
-                    boolean liked = !isEnded && Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userSeq));
+                    boolean liked = !isEnded && Boolean.TRUE.equals(liveRedisObjectTemplate.opsForSet().isMember(likeKey, userSeq));
+
+                    log.info("[LIVE] getLiveListByStatus: liked={}", liked);
 
                     return LiveInfoResponseDto.builder()
                             .liveSeq(liveStream.getId())
@@ -460,29 +483,28 @@ public class LiveService {
         String likeKey = "live:like:" + liveSeq;
 
         // 변경 전 좋아요 수
-        int beforeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
+        int beforeCount = Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(likeKey))
                 .map(Long::intValue).orElse(0);
 
         // 이미 좋아요 되어있는지 확인
-        Boolean alreadyLiked = redisTemplate.opsForSet().isMember(likeKey, userSeq);
-        log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}", 
-                liveSeq, userSeq, beforeCount, alreadyLiked);
+        Boolean alreadyLiked = liveRedisObjectTemplate.opsForSet().isMember(likeKey, userSeq);
+        //log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}",liveSeq, userSeq, beforeCount, alreadyLiked);
 
         if (Boolean.TRUE.equals(alreadyLiked)) {
             // 좋아요 취소
-            redisTemplate.opsForSet().remove(likeKey, userSeq);
+            liveRedisObjectTemplate.opsForSet().remove(likeKey, userSeq);
             log.info("[LIVE][LIKE] 좋아요 취소");
         } else {
             // 좋아요 추가
-            redisTemplate.opsForSet().add(likeKey, userSeq);
+            liveRedisObjectTemplate.opsForSet().add(likeKey, userSeq);
             log.info("[LIVE][LIKE] 좋아요 추가");
         }
 
         // 변경 후 좋아요 수 조회
-        int likeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
+        int likeCount = Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(likeKey))
                 .map(Long::intValue).orElse(0);
 
-        log.info("[LIVE][LIKE] 변경 후 좋아요 수={}, WebSocket 발송", likeCount);
+        //log.info("[LIVE][LIKE] 변경 후 좋아요 수={}, WebSocket 발송", likeCount);
 
         // 실시간 좋아요 수 갱신 전송 (기존 라이브 방송 내부용)
         liveRedisTemplate.convertAndSend(
