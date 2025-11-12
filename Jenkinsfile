@@ -3,8 +3,8 @@ pipeline {
 
   environment {
     // --- BuildKit / Docker cache 활성화 ---
-    DOCKER_BUILDKIT = '1'
-    COMPOSE_DOCKER_CLI_BUILD = '1'
+    // DOCKER_BUILDKIT = '1'
+    // COMPOSE_DOCKER_CLI_BUILD = '1'
 
     // --- Common Paths ---
     DOCKER_OPTS  = "--pull"
