@@ -62,17 +62,25 @@ public class LiveRedisPubSubService implements MessageListener {
             String payload = new String(message.getBody());
             log.info("[REDIS][LIVE] 📨 Received message from Redis: {}", payload);
             
-            LiveChatMessageResponseDto dto = objectMapper.readValue(payload, LiveChatMessageResponseDto.class);
+            // Redis 채널명에서 liveSeq 추출 (live:1, live:2, ...)
+            String channel = new String(message.getChannel());
+            String[] parts = channel.split(":");
+            if (parts.length < 2) {
+                log.error("[REDIS][LIVE] 잘못된 채널 형식: {}", channel);
+                return;
+            }
+            String liveSeqStr = parts[1];
             
-            String destination = "/sub/live/" + dto.getLiveSeq();
-            log.info("[REDIS][LIVE] 📡 Broadcasting to STOMP: {} → {}", destination, dto.getContent());
+            String destination = "/sub/live/" + liveSeqStr;
             
-            messagingTemplate.convertAndSend(destination, dto);
+            // JSON 파싱 없이 그대로 전달 (프론트에서 type 필드로 구분)
+            // - 채팅 메시지: { liveSeq, senderSeq, senderName, content, sentAt }
+            // - 통계 업데이트: { type: "VIEWER_COUNT_UPDATE", count: 10 }
+            log.info("[REDIS][LIVE] 📡 Broadcasting to STOMP: {} → {}", destination, payload);
             
-            log.info("[REDIS][LIVE] ✅ Broadcast complete: liveSeq={}, sender={}, content={}", 
-                    dto.getLiveSeq(), dto.getSenderName(), dto.getContent());
-        } catch (JsonProcessingException e) {
-            log.error("[REDIS][LIVE] ❌ 메시지 역직렬화 실패: {}", e.getMessage(), e);
+            messagingTemplate.convertAndSend(destination, payload);
+            
+            log.info("[REDIS][LIVE] ✅ Broadcast complete: liveSeq={}", liveSeqStr);
         } catch (Exception e) {
             log.error("[REDIS][LIVE] ❌ 메시지 브로드캐스트 실패: {}", e.getMessage(), e);
         }

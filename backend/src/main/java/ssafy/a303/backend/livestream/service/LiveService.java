@@ -459,20 +459,30 @@ public class LiveService {
 
         String likeKey = "live:like:" + liveSeq;
 
+        // 변경 전 좋아요 수
+        int beforeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
+                .map(Long::intValue).orElse(0);
+
         // 이미 좋아요 되어있는지 확인
         Boolean alreadyLiked = redisTemplate.opsForSet().isMember(likeKey, userSeq);
+        log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}", 
+                liveSeq, userSeq, beforeCount, alreadyLiked);
 
         if (Boolean.TRUE.equals(alreadyLiked)) {
             // 좋아요 취소
             redisTemplate.opsForSet().remove(likeKey, userSeq);
+            log.info("[LIVE][LIKE] 좋아요 취소");
         } else {
             // 좋아요 추가
             redisTemplate.opsForSet().add(likeKey, userSeq);
+            log.info("[LIVE][LIKE] 좋아요 추가");
         }
 
         // 변경 후 좋아요 수 조회
         int likeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
                 .map(Long::intValue).orElse(0);
+
+        log.info("[LIVE][LIKE] 변경 후 좋아요 수={}, WebSocket 발송", likeCount);
 
         // 실시간 좋아요 수 갱신 전송 (기존 라이브 방송 내부용)
         liveRedisTemplate.convertAndSend(
