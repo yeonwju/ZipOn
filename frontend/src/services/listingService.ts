@@ -61,11 +61,19 @@ export async function registerListingVerification(request: {
     formData.append('regiBirth', request.regiBirth.trim())
     formData.append('address', request.address.trim())
 
+    console.log('🚀 authFetch.post 호출 직전')
+    console.log('🚀 엔드포인트:', API_ENDPOINTS.LISTINGS_REG_VERIFY)
+    console.log('🚀 formData entries:')
+    for (const [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value)
+    }
+
     const result = await authFetch.post<ListingsRegVerifyResponse>(
       API_ENDPOINTS.LISTINGS_REG_VERIFY,
       formData
     )
 
+    console.log('✅ authFetch.post 완료')
     console.log('=== 등기부등본 인증 요청 성공 ===')
     console.log('응답:', result)
 
