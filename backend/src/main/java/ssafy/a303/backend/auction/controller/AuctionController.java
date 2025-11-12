@@ -45,20 +45,21 @@ public class AuctionController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                                        "data": {
-                                                            "auctionSeq": 1,
-                                                            "propertySeq": 6,
-                                                            "userSeq": 2,
-                                                            "status": "REQUESTED",
-                                                            "strmDate": "2025-12-12",
-                                                            "strmStartTm": "18:00:00",
-                                                            "strmEndTm": "19:00:00",
-                                                            "auctionEndAt": "2025-12-13T12:00:00"
-                                                        },
-                                                        "message": "해당 매물에 중개/경매 신청이 되었습니다.",
-                                                        "status": 200,
-                                                        "timestamp": 1762913164208
-                                                    }
+                                                "data": {
+                                                    "auctionSeq": 3,
+                                                    "propertySeq": 9,
+                                                    "userSeq": 2,
+                                                    "status": "REQUESTED",
+                                                    "strmDate": null,
+                                                    "strmStartTm": null,
+                                                    "strmEndTm": null,
+                                                    "auctionEndAt": null,
+                                                    "intro": "빠르게 팔아드릴게요~"
+                                                },
+                                                "message": "해당 매물에 중개 신청 되었습니다.",
+                                                "status": 200,
+                                                "timestamp": 1762918106493
+                                            }        
                                     """
                             )
                     )
