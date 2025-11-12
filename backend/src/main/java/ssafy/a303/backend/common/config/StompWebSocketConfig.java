@@ -29,8 +29,7 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * ---------------------------------------------------
      * 클라이언트(프론트)가 최초로 WebSocket 연결을 시도하는 주소를 정의한다.
      * 예:
-     *    ws://localhost:8080/chat
-     *    ws://localhost:8080/live
+     *    ws://localhost:8080/ws
      *
      * SockJS:
      *    WebSocket이 막혀있는 환경(회사 네트워크 등)에서도
@@ -38,8 +37,17 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat", "/live")
-                .setAllowedOriginPatterns("*") // 배포 시 도메인만 허용
+        registry.addEndpoint("/ws")
+                // ⚠️ 보안: 프로덕션 배포 시 반드시 실제 도메인으로 변경!
+                // 개발 환경:
+                .setAllowedOriginPatterns(
+                        "http://localhost:3000",
+                        "http://localhost:5173",
+                        "http://127.0.0.1:3000",
+                        "http://127.0.0.1:5173"
+                )
+                // 프로덕션 환경 (배포 시 위 개발 환경을 주석 처리하고 아래 사용):
+                // .setAllowedOriginPatterns("https://your-domain.com")
                 .withSockJS(); // SockJS fallback 허용 (HTTP로 대체 연결)
     }
 

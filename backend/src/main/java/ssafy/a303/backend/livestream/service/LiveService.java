@@ -18,6 +18,7 @@ import ssafy.a303.backend.livestream.dto.request.LiveCreateRequestDto;
 import ssafy.a303.backend.livestream.dto.response.*;
 import ssafy.a303.backend.livestream.dto.response.LiveStartNotificationDto;
 import ssafy.a303.backend.livestream.entity.LiveStream;
+import ssafy.a303.backend.livestream.enums.LiveStreamSortType;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
 import ssafy.a303.backend.user.entity.User;
@@ -25,7 +26,9 @@ import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -258,33 +261,40 @@ public class LiveService {
         String likeKey = "live:like:" + liveSeq;
 
         int finalViewerCount = redisTemplate.opsForSet().size(viewerKey) != null
-                ? redisTemplate.opsForSet().size(viewerKey).intValue() : 0;
+                ? Objects.requireNonNull(redisTemplate.opsForSet().size(viewerKey)).intValue() : 0;
 
         int finalChatCount = redisTemplate.opsForList().size(chatKey) != null
-                ? redisTemplate.opsForList().size(chatKey).intValue() : 0;
+                ? Objects.requireNonNull(redisTemplate.opsForList().size(chatKey)).intValue() : 0;
 
         int finalLikeCount = redisTemplate.opsForSet().size(likeKey) != null
-                ? redisTemplate.opsForSet().size(likeKey).intValue() : 0;
+                ? Objects.requireNonNull(redisTemplate.opsForSet().size(likeKey)).intValue() : 0;
 
         // 6. 엔티티 상태 변경 (LiveStream 종료 상태 & 최종 데이터 저장)
         liveStream.end(LocalDateTime.now(), finalViewerCount, finalChatCount, finalLikeCount);
         liveStreamRepository.save(liveStream);
 
-        // 7. Redis 데이터 TTL 설정 (방송 종료 후 1시간 지나면 자동 삭제)
-        redisTemplate.expire(viewerKey, 1, TimeUnit.HOURS);
-        redisTemplate.expire(chatKey, 1, TimeUnit.HOURS);
-        redisTemplate.expire(likeKey, 1, TimeUnit.HOURS);
-
-        log.info("[LIVE] 방송 종료 완료: liveSeq={}, viewer={}, chat={}, like={}",
-                liveSeq, finalViewerCount, finalChatCount, finalLikeCount);
-
-        // 8. 방송 종료 이벤트 전송 (라이브 방송 내부 시청자용)
+        // 7. 방송 종료 이벤트 전송 (라이브 방송 내부 시청자용)
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
                 "{\"type\":\"LIVE_ENDED\"}"
         );
         
         log.info("[LIVE] 방송 종료 이벤트 발행: liveSeq={}", liveSeq);
+
+        // 8. 모든 시청자 강제 퇴장 처리 (Redis에서 제거)
+        Set<Object> viewers = redisTemplate.opsForSet().members(viewerKey);
+        if (viewers != null && !viewers.isEmpty()) {
+            redisTemplate.delete(viewerKey);
+            log.info("[LIVE] 모든 시청자 강제 퇴장 처리 완료: {} 명", viewers.size());
+        }
+
+        // 9. Redis 데이터 TTL 설정 (방송 종료 후 1시간 지나면 자동 삭제)
+        // 시청자는 이미 삭제되었으므로 채팅과 좋아요만 TTL 설정
+        redisTemplate.expire(chatKey, 1, TimeUnit.HOURS);
+        redisTemplate.expire(likeKey, 1, TimeUnit.HOURS);
+
+        log.info("[LIVE] 방송 종료 완료: liveSeq={}, viewer={}, chat={}, like={}",
+                liveSeq, finalViewerCount, finalChatCount, finalLikeCount);
 
         // 10. 종료 응답 반환
         return LiveEndResponseDto.builder()
@@ -334,8 +344,9 @@ public class LiveService {
                 ? liveStream.getLikeCount()
                 : Optional.ofNullable(redisTemplate.opsForSet().size(likeKey)).orElse(0L);
 
-        // 이미 좋아요 되어있는지 확인
-        Boolean liked = redisTemplate.opsForSet().isMember(likeKey, userSeq);
+        // 이미 좋아요 되어있는지 확인 (종료된 방송은 Redis 데이터가 TTL로 삭제될 수 있으므로 체크 안함)
+        // 종료된 방송은 좋아요 정보 제공 안 함
+        boolean liked = !isEnded && Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userSeq));
 
         // 5. 응답 반환
         return LiveInfoResponseDto.builder()
@@ -354,17 +365,18 @@ public class LiveService {
                         .build())
                 .startAt(liveStream.getStartAt())
                 .endAt(liveStream.getEndAt())
-                .liked(Boolean.TRUE.equals(liked))
+                .liked(liked)
                 .build();
     }
 
     /*상태별 라이브 목록 조회*/
-    public List<LiveInfoResponseDto> getLiveListByStatus(LiveStreamStatus status, Integer userSeq) {
+    public List<LiveInfoResponseDto> getLiveListByStatus(LiveStreamStatus status, Integer userSeq, LiveStreamSortType sortType) {
 
         // 상태별 방송 조회 (시작 시간 기준 최신순)
         List<LiveStream> liveStreams = liveStreamRepository
                 .findByStatusOrderByStartAtDesc(status);
 
+        // DTO 변환 후 정렬
         return liveStreams.stream()
                 .map(liveStream -> {
 
@@ -390,8 +402,9 @@ public class LiveService {
                             : Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
                             .map(Long::intValue).orElse(0);
 
-                    // 이미 좋아요 되어있는지 확인
-                    Boolean liked = redisTemplate.opsForSet().isMember(likeKey, userSeq);
+                    // 이미 좋아요 되어있는지 확인 (종료된 방송은 Redis 데이터가 TTL로 삭제될 수 있으므로 체크 안함)
+                    // 종료된 방송은 좋아요 정보 제공 안 함
+                    boolean liked = !isEnded && Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userSeq));
 
                     return LiveInfoResponseDto.builder()
                             .liveSeq(liveStream.getId())
@@ -409,8 +422,18 @@ public class LiveService {
                                     .build())
                             .startAt(liveStream.getStartAt())
                             .endAt(liveStream.getEndAt())
-                            .liked(Boolean.TRUE.equals(liked))
+                            .liked(liked)
                             .build();
+                })
+                // 정렬 타입에 따라 정렬
+                .sorted((a, b) -> {
+                    if (sortType == LiveStreamSortType.POPULAR) {
+                        // 인기순: 시청자 수 내림차순
+                        return Integer.compare(b.getViewerCount(), a.getViewerCount());
+                    } else {
+                        // 최신순: 시작 시간 내림차순 (이미 DB에서 정렬되어 있지만 명시적으로 처리)
+                        return b.getStartAt().compareTo(a.getStartAt());
+                    }
                 })
                 .toList();
     }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.livestream.dto.request.LiveCreateRequestDto;
 import ssafy.a303.backend.livestream.dto.response.*;
+import ssafy.a303.backend.livestream.enums.LiveStreamSortType;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.service.LiveChatService;
 import ssafy.a303.backend.livestream.service.LiveService;
@@ -275,10 +276,15 @@ public class LiveController {
     @Operation(
             summary = "상태 별 라이브 방송 목록 조회",
             description = """
-                LIVE / ENDED 상태에 따라 라이브 방송 목록을 조회합니다.
+                라이브 방송 목록을 **상태(status)** 및 **정렬 기준(sortType)** 에 따라 조회합니다.
                 
+                **상태 (status):**
                 - LIVE : 현재 진행 중인 라이브 방송 목록
                 - ENDED : 종료된 라이브 다시보기 목록
+                
+                **정렬 (sortType):**
+                - LATEST : 최신순 (시작 시간 기준, 기본값)
+                - POPULAR : 인기순 (시청자 수 기준)
                 """,
             security = @SecurityRequirement(name = "bearerAuth")
     )
@@ -323,10 +329,13 @@ public class LiveController {
     })
     @GetMapping
     public ResponseEntity<ResponseDTO<List<LiveInfoResponseDto>>> getLiveListByStatus(
+            @Parameter(description = "방송 상태 (LIVE: 진행중, ENDED: 종료)", example = "LIVE")
             @RequestParam(defaultValue = "LIVE") LiveStreamStatus status,
-            @AuthenticationPrincipal Integer userSeq
+            @Parameter(description = "정렬 타입 (LATEST: 최신순, POPULAR: 인기순)", example = "LATEST")
+            @RequestParam(defaultValue = "LATEST") LiveStreamSortType sortType,
+            @Parameter(hidden = true) @AuthenticationPrincipal Integer userSeq
     ){
-        List<LiveInfoResponseDto> reponse = liveService.getLiveListByStatus(status, userSeq);
+        List<LiveInfoResponseDto> reponse = liveService.getLiveListByStatus(status, userSeq, sortType);
         return ResponseDTO.ok(reponse, "라이브 방송 목록을 조회했습니다.");
     }
 
@@ -441,5 +450,4 @@ public class LiveController {
         List<LiveChatMessageResponseDto> response = liveChatService.getChatHistory(liveSeq, limit);
         return ResponseDTO.ok(response, "채팅 내역을 조회했습니다.");
     }
-
 }

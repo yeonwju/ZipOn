@@ -21,7 +21,6 @@ import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
-import ssafy.a303.backend.livestream.dto.response.LiveStatsUpdateDto;
 import ssafy.a303.backend.livestream.service.LiveChatService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
 import ssafy.a303.backend.livestream.service.LiveService;
