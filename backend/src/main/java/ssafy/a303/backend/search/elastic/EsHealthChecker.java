@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.elastic;
+package ssafy.a303.backend.search.elastic;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import lombok.RequiredArgsConstructor;

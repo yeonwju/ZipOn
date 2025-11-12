@@ -24,6 +24,7 @@ public class UserService {
         User user = opt.get();
         Optional<Broker> optB = brokerRepository.findBrokerByUserUserSeq(userSeq);
         return new MeResponseDTO(
+                user.getUserSeq(),
                 user.getEmail(),
                 user.getNickname(),
                 user.getName(),

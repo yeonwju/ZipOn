@@ -7,4 +7,5 @@ import ssafy.a303.backend.chat.entity.ChatMessage;
 
 @Repository
 public interface AuctionRepository extends JpaRepository<Auction, Integer> {
+
 }

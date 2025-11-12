@@ -11,6 +11,11 @@ public enum ErrorCode {
     EXTERNAL_API_ERROR(502, HttpStatus.BAD_GATEWAY, "외부 API 연동 중 오류가 발생했습니다."),
     EXTERNAL_API_LIMIT(429, HttpStatus.TOO_MANY_REQUESTS, "내일 오세요"),
     USER_NOT_FOUND(404, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    SMS_NOT_SENDED(404, HttpStatus.NOT_FOUND, "해당 번호로 전송한 코드가 없습니다."),
+    CODE_NOT_VALID(400, HttpStatus.BAD_REQUEST, "번호가 틀렸습니다."),
+
+    // 401 UNAUTHORIZED
+    USER_NOT_AUTHENTICATED(401, HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
 
     // JWT 관련 에러 코드,
     INVALID_TOKEN(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -22,14 +27,16 @@ public enum ErrorCode {
     // 사업장
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
 
+    // JSON
+    JSON_ERROR(400,HttpStatus.BAD_REQUEST, "직렬화 또는 역직렬화를 실패하였습니다."),
+
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),
     INVALID_PAGINATION(400, HttpStatus.BAD_REQUEST, "잘못된 페이지네이션 값입니다."),
     INVALID_REQUEST_PARAM(400, HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
 
-    // 401 UNAUTHORIZED
-    USER_NOT_AUTHENTICATED(401, HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
+
 
 
     // 403 FORBIDDEN
@@ -85,13 +92,21 @@ public enum ErrorCode {
     EMPTY_PDF_FILE(400, HttpStatus.BAD_REQUEST, "파일이 비어 있습니다."),
     ONLY_PDF_ALLOWED(400, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDF 파일만 업로드 가능합니다."),
     VERIFICATION_FAILED(400, HttpStatus.BAD_REQUEST, "등기부등본이 매물 정보와 일치하지 않습니다."),
+    JSON_TYPE_ERROR(400, HttpStatus.BAD_REQUEST, "요청 JSON 형식이 올바르지 않습니다."),
 
     // 매물 관련
     ADDRESS_DUPLICATE(400, HttpStatus.BAD_REQUEST, "이미 동일 주소의 매물이 등록되어 있습니다."),
     PROPERTY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물이 삭제되었거나 존재하지 않습니다."),
-    AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "래당 매물의 경매 정보가 존재하지 않습니다."),
+    AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물의 경매 정보가 존재하지 않습니다."),
+    CERTIFICATION_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "매물이 아직 생성되지 않아 검증 정보를 저장할 수 없습니다."),
 
-    NO_AUTHORIZATION(400, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
+    NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
+
+    // 매물 사진 S3
+    EMPTY_IMG_FILE(400, HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
+    ONLY_IMG_ALLOWED(400, HttpStatus.BAD_REQUEST, "이미지 파일만 업로드 가능합니다."),
+    S3_UPLOAD_FAILED(400, HttpStatus.BAD_REQUEST, "S3 업로드 실패"),
+
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),

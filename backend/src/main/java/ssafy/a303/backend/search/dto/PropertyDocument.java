@@ -1,9 +1,6 @@
-package ssafy.a303.backend.property.dto.elastic;
+package ssafy.a303.backend.search.dto;
 
 import lombok.*;
-import ssafy.a303.backend.property.enums.Building;
-
-import java.time.Instant;
 
 /**
  * DB에서 가져온 엔티티를 ES가 이해할 구조로 변환해서 전달.
@@ -22,6 +19,7 @@ public class PropertyDocument {
     private String si;
     private String gu;
     private String dong;
+
     private String facing;
     private String lessorNm;
     private String buildingType; // ES keyword (예: "APT","VILLA"...)
@@ -33,6 +31,10 @@ public class PropertyDocument {
     private Integer areaP;
     private Short roomCnt;
     private Short floor;
+
+    private Boolean isBrk;
+    private Boolean isAuc;
+    private Boolean hasBrk;
 
     private String createdAt;
 }

@@ -216,4 +216,22 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
+
+    // ================================================================
+    // [3] SMS 전용 Redis DB3
+    // ================================================================
+    @Bean
+    @Qualifier("smsRedisTemplate")
+    public StringRedisTemplate smsRedisTempate(
+        @Qualifier("smsRedisFactory") RedisConnectionFactory factory
+    ){
+        return new StringRedisTemplate(factory);
+    }
+    @Bean
+    @Qualifier("smsRedisFactory")
+    public RedisConnectionFactory smsRedisFactory(){
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+        config.setDatabase(3);
+        return new LettuceConnectionFactory(config);
+    }
 }
