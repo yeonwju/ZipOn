@@ -19,13 +19,11 @@ interface AddressSearchProps {
 }
 
 /**
- * Daum 주소 검색 컴포넌트
+ * 📍 Daum 주소 검색 컴포넌트 (지번 우선, 도로명 대체)
  *
- * react-daum-postcode 라이브러리와 shadcn/ui Dialog를 사용하여
- * 주소를 검색하고, 선택한 주소를 자동으로 좌표로 변환합니다.
- *
- * 도로명 주소가 존재하면 도로명 주소를 우선 사용하고,
- * 도로명이 없는 경우에만 지번 주소를 사용합니다.
+ * 1️⃣ 지번 주소(jibunAddress)가 있으면 지번 주소 사용
+ * 2️⃣ 없으면 도로명 주소(roadAddress) 사용
+ * 3️⃣ 둘 다 없으면 에러 표시
  */
 export default function AddressSearch({
   onAddressSelect,
@@ -41,14 +39,14 @@ export default function AddressSearch({
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   /**
-   * 주소 선택 완료 핸들러
+   * 주소 선택 완료 핸들러 (지번 → 도로명 순으로)
    */
   const handleAddressComplete = (data: DaumPostcodeData) => {
-    //  도로명 주소 우선, 없을 경우 지번 주소 사용
-    const selectedAddress = data.roadAddress || data.jibunAddress
+    // ✅ 지번 우선, 없으면 도로명 사용
+    const selectedAddress = data.jibunAddress || data.roadAddress
 
     if (!selectedAddress) {
-      setLocalError('선택한 주소에 유효한 도로명 또는 지번 주소가 없습니다.')
+      setLocalError('유효한 주소를 찾을 수 없습니다. 다른 주소를 선택해주세요.')
       return
     }
 
@@ -56,7 +54,7 @@ export default function AddressSearch({
     setLocalError(null)
     setIsDialogOpen(false)
 
-    // 주소를 좌표로 변환
+    // 좌표 변환
     convertAddressToCoords(selectedAddress)
   }
 
@@ -65,19 +63,16 @@ export default function AddressSearch({
    */
   const waitForKakaoMaps = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-      // 이미 로드되어 있으면 바로 resolve
       if (window.kakao?.maps?.services) {
         resolve()
         return
       }
 
-      // 최대 5초 동안 대기
       let attempts = 0
-      const maxAttempts = 50 // 50 * 100ms = 5초
+      const maxAttempts = 50 // 5초 (100ms * 50)
 
       const checkKakao = setInterval(() => {
         attempts++
-
         if (window.kakao?.maps?.services) {
           clearInterval(checkKakao)
           resolve()
@@ -85,48 +80,46 @@ export default function AddressSearch({
           clearInterval(checkKakao)
           reject(new Error('카카오맵 API 로드 시간 초과'))
         }
-      }, 100) // 100ms마다 체크
+      }, 100)
     })
   }
 
   /**
-   * 카카오 주소 검색 API를 사용하여 주소를 좌표로 변환
+   * 카카오 주소 검색 API로 주소를 좌표로 변환
    */
   const convertAddressToCoords = async (addressText: string) => {
     setIsConverting(true)
     setLocalError(null)
 
     try {
-      // 카카오맵 API가 로드될 때까지 대기
       await waitForKakaoMaps()
 
-    const geocoder = new window.kakao.maps.services.Geocoder()
+      const geocoder = new window.kakao.maps.services.Geocoder()
 
-    geocoder.addressSearch(addressText, (result, status) => {
-      setIsConverting(false)
+      geocoder.addressSearch(addressText, (result, status) => {
+        setIsConverting(false)
 
-      if (status === window.kakao.maps.services.Status.OK) {
-        const coords = {
-          lat: parseFloat(result[0].y),
-          lng: parseFloat(result[0].x),
+        if (status === window.kakao.maps.services.Status.OK) {
+          const coords = {
+            lat: parseFloat(result[0].y),
+            lng: parseFloat(result[0].x),
+          }
+
+          // ✅ 지번 주소 우선, 없으면 도로명으로 fallback
+          const jibunAddress = result[0].address?.address_name
+          const roadAddress = result[0].road_address?.address_name
+          const finalAddress = jibunAddress || roadAddress || addressText
+
+          setSearchedAddress(finalAddress)
+          setLocalError(null)
+
+          onAddressSelect(finalAddress, coords)
+        } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+          setLocalError('검색 결과가 없습니다. 정확한 주소를 입력해주세요.')
+        } else {
+          setLocalError('주소 검색 중 오류가 발생했습니다.')
         }
-
-        //  도로명 주소가 존재하면 도로명 주소 사용, 없을 때만 지번으로 fallback
-        const roadAddress = result[0].road_address?.address_name
-        const jibunAddress = result[0].address?.address_name
-        const finalAddress = roadAddress || jibunAddress || addressText
-
-        setSearchedAddress(finalAddress)
-        setLocalError(null)
-
-        //  부모 컴포넌트에 도로명 기준 주소 전달
-        onAddressSelect(finalAddress, coords)
-      } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
-        setLocalError('검색 결과가 없습니다. 정확한 주소를 입력해주세요.')
-      } else {
-        setLocalError('주소 검색 중 오류가 발생했습니다.')
-      }
-    })
+      })
     } catch (error) {
       setIsConverting(false)
       setLocalError('카카오맵 API를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침해주세요.')
@@ -134,7 +127,6 @@ export default function AddressSearch({
     }
   }
 
-  // 외부에서 전달된 defaultValue가 변경되면 반영
   useEffect(() => {
     setAddress(defaultValue)
   }, [defaultValue])
@@ -161,19 +153,17 @@ export default function AddressSearch({
             value={address}
             readOnly
             onClick={() => setIsDialogOpen(true)}
-            placeholder="클릭하여 주소를 검색하세요"
+            placeholder="클릭하여 주소를 검색하세요 (지번 우선)"
             className="flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm transition-colors outline-none placeholder:text-gray-400 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </div>
 
-        {/* 에러 메시지 */}
         {displayError && (
           <div className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
             {displayError}
           </div>
         )}
 
-        {/* 검색 중 표시 */}
         {displayLoading && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-600">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
@@ -182,14 +172,13 @@ export default function AddressSearch({
         )}
       </div>
 
-      {/* 주소 검색 Dialog (shadcn/ui) */}
+      {/* 주소 검색 Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="w-[90vh] bg-white px-2">
           <DialogHeader className="flex items-center justify-center py-4">
-            <DialogTitle className="text-md">주소 검색</DialogTitle>
+            <DialogTitle className="text-md">주소 검색 (지번 우선)</DialogTitle>
           </DialogHeader>
 
-          {/* DaumPostcode 컴포넌트 */}
           <div className="h-[500px] w-full">
             <DaumPostcode
               onComplete={handleAddressComplete}
