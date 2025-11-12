@@ -32,6 +32,7 @@ public class User {
     private String profileImg;
     @Column(length = 40)
     private String financeKey;
+    @Enumerated(EnumType.STRING)
     @Column
     private Role role;
     @CreationTimestamp
