@@ -2,7 +2,7 @@
  * API 엔드포인트 상수
  */
 
-export const API_BASE_URL = 'http://localhost:8080'
+export const API_BASE_URL = 'https://dev-zipon.duckdns.org'
 
 export const API_ENDPOINTS = {
   // 매물
