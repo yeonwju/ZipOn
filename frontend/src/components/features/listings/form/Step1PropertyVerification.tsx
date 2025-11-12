@@ -29,7 +29,6 @@ interface Step1Props {
 export default function Step1PropertyVerification({
   step1Completed,
   isVerifying,
-  baseAddress,
   detailAddress,
   addressCoords,
   files,
