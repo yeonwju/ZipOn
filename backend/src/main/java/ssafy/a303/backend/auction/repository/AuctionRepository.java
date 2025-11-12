@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 
+import java.util.Optional;
+
 public interface AuctionRepository extends JpaRepository<Auction, Integer> {
 
     /** 사람과 매물의 경매 상태 확인 */
@@ -19,5 +21,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     boolean existsActiveByPropertyAndUser(@Param("propertySeq") Integer propertySeq,
                                           @Param("userSeq") Integer userSeq,
                                           @Param("status")AuctionStatus status);
+
+    Optional<Auction> findByAuctionSeqAndUser_UserSeq(Integer auctionSeq, Integer userSeq);
 
 }

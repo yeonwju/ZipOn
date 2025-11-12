@@ -3,9 +3,12 @@ package ssafy.a303.backend.auction.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.auction.dto.request.BrkApplyRequestDto;
+import ssafy.a303.backend.auction.dto.request.BrkCancelRequestDto;
 import ssafy.a303.backend.auction.dto.response.BrkApplyResponseDto;
+import ssafy.a303.backend.auction.dto.response.BrkCancelResponseDto;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
+import ssafy.a303.backend.auction.entity.Canceler;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
@@ -90,6 +93,25 @@ public class AuctionService {
                         .build()
         );
         return BrkApplyResponseDto.of(saved);
+    }
+
+    /** 중개인이 신청 취소 */
+    public BrkCancelResponseDto cancelMyApply(Integer aucSeq, Integer userSeq, BrkCancelRequestDto req) {
+
+        /** 본인이 신청한건지 확인 */
+        Auction a = auctionRepository.findByAuctionSeqAndUser_UserSeq(aucSeq, userSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.CANCEL_NO_AUTH));
+
+        if(a.getStatus() != AuctionStatus.REQUESTED) {
+            throw new CustomException(ErrorCode.CANCEL_IMPOSSIBLE, "현재상태("+ a.getStatus()+")에서는 취소할 수 없습니다. (REQUESTED만 가능)");
+        }
+
+        a.setStatus(AuctionStatus.CANCELED);
+        a.setCancelAt(LocalDateTime.now());
+        a.setCancelBy(Canceler.BROKER);
+        a.setCancelReason(req != null ? req.reason() : null) ;
+
+        return BrkCancelResponseDto.of(a);
     }
 
 }

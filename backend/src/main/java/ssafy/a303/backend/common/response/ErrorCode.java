@@ -112,6 +112,8 @@ public enum ErrorCode {
     DUPLICATE_NOT_ALLOWED(401, HttpStatus.NOT_ACCEPTABLE, "동일 매물에 대한 중복 신청이 불가합니다."),
     TIME_NOT_ALLOWED(400, HttpStatus.NOT_ACCEPTABLE, "시작 시간을 종료 시간보다 앞서야 합니다."),
     DATE_NOT_ALLOWED(400, HttpStatus.NOT_ACCEPTABLE, "과거 날짜로는 경매를 신청할 수 없습니다."),
+    CANCEL_NO_AUTH(400, HttpStatus.NOT_ACCEPTABLE, "취소 권한이 없습니다. 본인이 신청한 건만 취소가능합니다."),
+    CANCEL_IMPOSSIBLE(400, HttpStatus.BAD_REQUEST, "취소불가"),
 
 
     // STOMP 관련
