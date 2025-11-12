@@ -109,12 +109,14 @@ public enum ErrorCode {
     S3_UPLOAD_FAILED(400, HttpStatus.BAD_REQUEST, "S3 업로드 실패"),
 
     // 중개 및 경매 신청
-    DUPLICATE_NOT_ALLOWED(401, HttpStatus.NOT_ACCEPTABLE, "동일 매물에 대한 중복 신청이 불가합니다."),
-    TIME_NOT_ALLOWED(400, HttpStatus.NOT_ACCEPTABLE, "시작 시간을 종료 시간보다 앞서야 합니다."),
-    DATE_NOT_ALLOWED(400, HttpStatus.NOT_ACCEPTABLE, "과거 날짜로는 경매를 신청할 수 없습니다."),
-    CANCEL_NO_AUTH(400, HttpStatus.NOT_ACCEPTABLE, "취소 권한이 없습니다. 본인이 신청한 건만 취소가능합니다."),
+    DUPLICATE_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "동일 매물에 대한 중복 신청이 불가합니다."),
+    TIME_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "시작 시간을 종료 시간보다 앞서야 합니다."),
+    DATE_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "과거 날짜로는 경매를 신청할 수 없습니다."),
+    CANCEL_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "취소 권한이 없습니다. 본인이 신청한 건만 취소가능합니다."),
     CANCEL_IMPOSSIBLE(400, HttpStatus.BAD_REQUEST, "취소불가"),
 
+    // 신청 중개인 조회
+    READ_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "본인 소유 매물의 중개 신청만 조회할 수 있습니다."),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),

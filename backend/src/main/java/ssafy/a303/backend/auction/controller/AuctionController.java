@@ -8,11 +8,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.auction.dto.request.BrkApplyRequestDto;
 import ssafy.a303.backend.auction.dto.request.BrkCancelRequestDto;
+import ssafy.a303.backend.auction.dto.response.BrkApplicantResponseDto;
 import ssafy.a303.backend.auction.dto.response.BrkApplyResponseDto;
 import ssafy.a303.backend.auction.dto.response.BrkCancelResponseDto;
 import ssafy.a303.backend.auction.service.AuctionService;
@@ -83,8 +88,15 @@ public class AuctionController {
         return ResponseDTO.ok(res, message);
     }
 
+    /**
+     * 중개인이 매물에 대한 중개 신청을 취소
+     * @param auctionSeq
+     * @param userSeq
+     * @param req
+     * @return
+     */
     @Operation(
-            summary = "중개 신청 취소",
+            summary = "중개 및 경매 신청 취소",
             description = "중개인이 신청을 취소합니다."
     )
     @ApiResponses({
@@ -125,6 +137,16 @@ public class AuctionController {
     {
         BrkCancelResponseDto res = auctionService.cancelMyApply(auctionSeq, userSeq, req);
         return ResponseDTO.ok(res, "신청이 취소되었습니다.");
+    }
+
+
+    @GetMapping("/{propertySeq}/applicants")
+    public ResponseEntity<ResponseDTO<Page<BrkApplicantResponseDto>>> listApplicants(@PathVariable Integer propertySeq,
+                                                                                    @AuthenticationPrincipal Integer userSeq,
+                                                                                    @PageableDefault(size = 10, sort = "strmDate", direction = Sort.Direction.DESC) Pageable pageable)
+    {
+        var page = auctionService.listApplicants(propertySeq, userSeq, pageable);
+        return ResponseDTO.ok(page, "신청된 중개인 목록 조회 성공");
     }
 
 

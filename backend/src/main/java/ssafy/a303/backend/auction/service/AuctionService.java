@@ -1,9 +1,13 @@
 package ssafy.a303.backend.auction.service;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.auction.dto.request.BrkApplyRequestDto;
 import ssafy.a303.backend.auction.dto.request.BrkCancelRequestDto;
+import ssafy.a303.backend.auction.dto.response.BrkApplicantResponseDto;
 import ssafy.a303.backend.auction.dto.response.BrkApplyResponseDto;
 import ssafy.a303.backend.auction.dto.response.BrkCancelResponseDto;
 import ssafy.a303.backend.auction.entity.Auction;
@@ -20,6 +24,9 @@ import ssafy.a303.backend.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -114,4 +121,17 @@ public class AuctionService {
         return BrkCancelResponseDto.of(a);
     }
 
+    /** REQUIRED, ACCEPTED 상태의 신청 리스트 조회 */
+    public Page<BrkApplicantResponseDto> listApplicants(Integer propertySeq,
+                                                        Integer userSeq,
+                                                        Pageable pageable){
+        Property p = propertyRepository.findById(propertySeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
+
+        if(!Objects.equals(p.getLessorSeq(), userSeq)) {
+            throw new CustomException(ErrorCode.READ_NO_AUTH);
+        }
+
+        return auctionRepository.findApplicantsByPropertySeq(propertySeq, pageable);
+    }
 }
