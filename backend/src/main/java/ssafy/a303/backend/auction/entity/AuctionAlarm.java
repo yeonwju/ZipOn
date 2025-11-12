@@ -1,6 +1,8 @@
 package ssafy.a303.backend.auction.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import ssafy.a303.backend.user.entity.User;
 
 @Entity
@@ -13,7 +15,8 @@ import ssafy.a303.backend.user.entity.User;
                 @Index(name = "idx_aa_user_seq_alarm_seq", columnList = "user_seq, auction_alarm_seq")
         }
 )
-
+@Getter
+@Setter
 public class AuctionAlarm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
