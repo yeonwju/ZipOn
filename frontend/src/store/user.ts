@@ -1,20 +1,20 @@
 /**
  * @deprecated 이 파일은 더 이상 사용되지 않습니다.
- * 
+ *
  * 사용자 정보는 React Query로 관리됩니다.
  * 대신 @/hooks/queries/useUser Hook을 사용하세요.
- * 
+ *
  * @example
  * ```tsx
  * // ❌ 기존 방식 (사용 금지)
  * import { useUserStore } from '@/store/user'
  * const user = useUserStore(state => state.user)
- * 
+ *
  * // ✅ 새로운 방식
  * import { useUser } from '@/hooks/queries/useUser'
  * const { data: user } = useUser()
  * ```
- * 
+ *
  * 이 파일은 향후 버전에서 삭제될 예정입니다.
  */
 
@@ -24,8 +24,8 @@ import { persist } from 'zustand/middleware'
 import { User } from '@/types/models/user'
 
 // 💡 테스트용: 기본값 변경 가능
-const DEFAULT_IS_BROKER = true
-const DEFAULT_IS_VERIFIED = true
+const DEFAULT_IS_BROKER = false
+const DEFAULT_IS_VERIFIED = false
 
 interface UserState {
   user: User | null

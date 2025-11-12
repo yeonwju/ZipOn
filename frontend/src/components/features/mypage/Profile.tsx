@@ -17,7 +17,7 @@ export default function Profile() {
   return (
     <div
       className={
-        'flex flex-row items-center gap-3 rounded-3xl border-2 border-gray-200 p-5 shadow-md'
+        'flex flex-row items-center gap-3 rounded-3xl border-2 border-gray-200 p-4 shadow-md'
       }
     >
       {/* 아바타 */}
@@ -64,9 +64,7 @@ export default function Profile() {
           )}
           {user?.email && (
             <div className={'flex flex-row gap-1'}>
-              {user?.socialType === 'google' && (
-                <Image src={'/socials/google.svg'} alt={'구글 아이콘'} width={9} height={9}></Image>
-              )}
+              <Image src={'/socials/google.svg'} alt={'구글 아이콘'} width={9} height={9}></Image>
               <span className={'text-xs text-gray-400'}>{user?.email}</span>
             </div>
           )}

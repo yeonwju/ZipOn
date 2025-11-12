@@ -1,5 +1,5 @@
 export interface User {
-  seq: number // 사용자 시퀀스
+  userSeq: number // 사용자 시퀀스
   email: string
   nickname: string | null
   name: string | null
@@ -7,7 +7,6 @@ export interface User {
   birth: string | null
   profileImg: string | null
   role: string // "USER" | "BROKER"
-  socialType: string | null // 소셜 로그인 타입 (추후 추가 가능)
-  isBroker: boolean | null // Role이 "BROKER"인지 여부
   isVerified: boolean | null //  인증 여부 (추후 백엔드에서 제공 예정)
+  isBroker: boolean | null // Role이 "BROKER"인지 여부
 }

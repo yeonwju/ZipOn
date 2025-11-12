@@ -2,11 +2,11 @@
  * API 엔드포인트 상수
  */
 
-export const API_BASE_URL = 'https://dev-zipon.duckdns.org'
+export const API_BASE_URL = 'http://localhost:8080'
 
 export const API_ENDPOINTS = {
   // 매물
-  LISTINGS_VERIFY: '/api/v1/properties/verifications',
+  LISTINGS_REG_VERIFY: '/api/v1/properties/verifications',
   LISTINGS_DETAIL_REGISTER: '/api/v1/properties/details',
   LISTINGS_DETAIL: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
   LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
@@ -20,6 +20,9 @@ export const API_ENDPOINTS = {
   USER_INFO: '/api/v1/user/me',
   COMPANY_STATUS: '/api/v1/company/status',
   BROKER_VERIFY: '/api/v1/broker',
+  PHONE_VERIFY: '/api/v1/user/verify/sms',
+  PHONE_VERIFY_CHECK: '/api/v1/user/verify/code',
+  BUSSINESS_REGISTER: '/api/v1/broker',
 } as const
 
 export const API_TIMEOUT = 10000 // 10초

@@ -16,11 +16,11 @@ import { useMiniPlayerStore } from '@/store/miniPlayer'
 
 /**
  * 라이브 방송 시청 페이지 (Client Component)
- * 
+ *
  * 보호 레벨:
  * 1차: Middleware (토큰 체크)
  * 2차: AuthGuard (사용자 정보 확인, React Query 캐싱)
- * 
+ *
  * 채팅 기능이 포함되어 있어 로그인 필수
  */
 export default function OnAirPage() {
@@ -30,7 +30,7 @@ export default function OnAirPage() {
   const { data: user } = useUser()
 
   // TODO: 실제 API에서 방송 정보 가져오기
-  const isHost = user?.seq === 1 // 방송 진행자 여부 (예시)
+  const isHost = user?.userSeq === 1 // 방송 진행자 여부 (예시)
   const userName = user?.name || '사용자' // 현재 사용자 이름
 
   // 라이브 정보 (TODO: API에서 가져오기)

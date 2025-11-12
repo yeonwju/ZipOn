@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
 /**
@@ -12,26 +12,12 @@ import { useEffect } from 'react'
  */
 export default function OnboardContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
 
   // 리다이렉트 파라미터 가져오기 (null이면 기본값)
   const redirectPath = searchParams.get('redirect') || '/home'
   const fromPath = searchParams.get('from') // 이전 페이지 정보
 
-  // 뒤로가기로 돌아온 경우 처리
-  useEffect(() => {
-    const storedFromPath = sessionStorage.getItem('auth_from_path')
-
-    // 세션 스토리지에 auth_from_path가 있고, URL에 from/redirect 파라미터가 없으면
-    // 이는 로그인 후 mypage에서 뒤로가기로 돌아온 것임
-    if (storedFromPath && !fromPath && !searchParams.get('redirect')) {
-      // 플래그 제거 후 원래 페이지로 리다이렉트
-      sessionStorage.removeItem('auth_from_path')
-      router.replace(storedFromPath)
-    }
-  }, [fromPath, router, searchParams])
-
-  // 이전 페이지 정보를 세션 스토리지에 저장 (로그인 후 히스토리 정리용)
+  // 이전 페이지 정보를 세션 스토리지에 저장 (로그인 후 뒤로가기 처리용)
   useEffect(() => {
     if (fromPath) {
       sessionStorage.setItem('auth_from_path', fromPath)
@@ -40,7 +26,7 @@ export default function OnboardContent() {
 
   // URL 수동 조합 (인코딩 처리)
   const loginUrl = new URL(
-    `https://dev-zipon.duckdns.org/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
+    `http://localhost:8080/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
   )
 
   return (
