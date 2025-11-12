@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   // 매물
   LISTINGS_REG_VERIFY: '/api/v1/properties/verifications',
   LISTINGS_DETAIL_REGISTER: '/api/v1/properties/details',
+  LISTINGS_CREATE: '/api/v1/properties/detail',
   LISTINGS_DETAIL: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
   LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
   LISTINGS_UPDATE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,

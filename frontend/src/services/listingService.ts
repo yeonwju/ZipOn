@@ -22,7 +22,11 @@ import { API_ENDPOINTS } from '@/constants'
 import { BuildingData } from '@/data/BuildingDummy'
 import { getListingDetailBySeq } from '@/data/ListingDetailDummy'
 import { authFetch } from '@/lib/fetch'
-import { ListingsRegVerifyRequest, ListingsRegVerifyResponse } from '@/types/api/listings'
+import {
+  ListingsRegVerifyResponse,
+  RegListingRequest,
+  RegListingResponse,
+} from '@/types/api/listings'
 import type { ListingData, ListingDetailData } from '@/types/models/listing'
 
 /**
@@ -61,9 +65,7 @@ export async function registerListingVerification(request: {
     formData.append('regiBirth', request.regiBirth.trim())
     formData.append('address', request.address.trim())
 
-    console.log('🚀 authFetch.post 호출 직전')
     console.log('🚀 엔드포인트:', API_ENDPOINTS.LISTINGS_REG_VERIFY)
-    console.log('🚀 formData entries:')
     for (const [key, value] of formData.entries()) {
       console.log(`  ${key}:`, value)
     }
@@ -73,22 +75,75 @@ export async function registerListingVerification(request: {
       formData
     )
 
-    console.log('✅ authFetch.post 완료')
-    console.log('=== 등기부등본 인증 요청 성공 ===')
-    console.log('응답:', result)
-
-    return {
-      success: true,
-      message: '인증에 성공했습니다.',
+    if (result.status === 200) {
+      console.log('=== 등기부등본 인증 성공 ===')
+      console.log('인증 데이터:', result.data)
+      return {
+        success: true,
+        data: result.data,
+      }
+    } else {
+      return {
+        success: false,
+      }
     }
   } catch (error) {
-    console.error('=== 등기부등본 인증 실패 ===')
+    // 네트워크 에러, 서버 에러 등의 예외 상황만 처리
+    console.error('=== 등기부등본 인증 중 에러 발생 ===')
     console.error('에러', error)
     const errorMessage = error instanceof Error ? error.message : '등기부등본 인증에 실패했습니다.'
 
-    throw new Error(errorMessage)
+    return {
+      success: false,
+      message: errorMessage,
+    }
   }
 }
+
+/**
+ * 매물 등록 상세정보
+ */
+export async function createListing(request: RegListingRequest) {
+  try {
+    console.log('=== 매물 등록 요청 ===')
+    console.log('이미지 개수:', request.images.length)
+
+    const formData = new FormData()
+
+    formData.append('req', request.req)
+
+    request.images.forEach(file => {
+      formData.append('images', file)
+    })
+
+    const result = await authFetch.post<RegListingResponse>(API_ENDPOINTS.LISTINGS_CREATE, formData)
+
+    if (result.data && result.data.propertySeq) {
+      console.log('=== 매물 등록 성공 ===')
+      console.log('매물 번호:', result.data.propertySeq)
+      return {
+        success: true,
+        data: result.data,
+      }
+    } else {
+      console.warn('=== 매물 등록 실패 (data 없음) ===')
+      return {
+        success: false,
+        message: '매물 등록 응답 데이터가 없습니다.',
+      }
+    }
+  } catch (error) {
+    console.error('=== 매물 등록 중 에러 발생 ===')
+    console.error('에러:', error)
+    const errorMessage = error instanceof Error ? error.message : '매물 등록에 실패했습니다.'
+
+    return {
+      success: false,
+      message: errorMessage,
+    }
+  }
+}
+
 /**
  * 매물 목록 가져오기
  *
