@@ -1,12 +1,16 @@
 package ssafy.a303.backend.chat.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.chat.dto.request.ChatMessageRequestDto;
 import ssafy.a303.backend.chat.dto.request.ChatRoomCreateRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
+import ssafy.a303.backend.chat.dto.response.ChatNotificationDto;
 import ssafy.a303.backend.chat.dto.response.ChatRoomResponseDto;
 import ssafy.a303.backend.chat.dto.response.MyChatListResponseDto;
 import ssafy.a303.backend.chat.entity.*;
@@ -22,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 @Log4j2
 public class ChatService {
@@ -33,6 +36,26 @@ public class ChatService {
     private final MessageReadStatusRepository messageReadStatusRepository;
     private final UserRepository userRepository;
     private final PropertyRepository propertyRepository;
+    private final ChatNotificationPubSubService chatNotificationPubSubService;
+
+    // 생성자에서 @Lazy 적용하여 순환 참조 해결
+    public ChatService(
+            ChatRoomRepository chatRoomRepository,
+            ChatMessageRepository chatMessageRepository,
+            ChatParticipantRepository chatParticipantRepository,
+            MessageReadStatusRepository messageReadStatusRepository,
+            UserRepository userRepository,
+            PropertyRepository propertyRepository,
+            @Lazy ChatNotificationPubSubService chatNotificationPubSubService
+    ) {
+        this.chatRoomRepository = chatRoomRepository;
+        this.chatMessageRepository = chatMessageRepository;
+        this.chatParticipantRepository = chatParticipantRepository;
+        this.messageReadStatusRepository = messageReadStatusRepository;
+        this.userRepository = userRepository;
+        this.propertyRepository = propertyRepository;
+        this.chatNotificationPubSubService = chatNotificationPubSubService;
+    }
 
     /**
      * 1:1 채팅방 생성 or 기존 방 반환
@@ -88,6 +111,33 @@ public class ChatService {
 
             isNew = true;
 
+            // 새 채팅방 생성 시 상대방에게 알림 전송
+            try {
+                ChatNotificationDto notification = ChatNotificationDto.builder()
+                        .roomSeq(chatRoom.getId())
+                        .sender(ChatNotificationDto.SenderDto.builder()
+                                .userSeq(requester.getUserSeq())
+                                .name(requester.getName())
+                                .nickname(requester.getNickname())
+                                .profileImg(requester.getProfileImg())
+                                .build())
+                        .content(requester.getNickname() + "님이 채팅을 시작했습니다.")
+                        .sentAt(LocalDateTime.now())
+                        .unreadCount(0) // 새 채팅방이므로 아직 읽지 않은 메시지 없음
+                        .build();
+
+                String channel = "user:notifications:" + opponent.getUserSeq();
+                String jsonMessage = new ObjectMapper()
+                        .registerModule(new JavaTimeModule())
+                        .writeValueAsString(notification);
+
+                chatNotificationPubSubService.publish(channel, jsonMessage);
+                log.info("[CHAT][CREATE] 새 채팅방 알림 발송 → opponent={}, roomSeq={}",
+                        opponent.getUserSeq(), chatRoom.getId());
+            } catch (Exception e) {
+                log.error("[CHAT][CREATE] 채팅방 생성 알림 발송 실패", e);
+                // 알림 실패해도 채팅방 생성은 성공으로 처리
+            }
         }
 
         return ChatRoomResponseDto.builder()
@@ -106,12 +156,10 @@ public class ChatService {
      * 내 채팅방 리스트 조회
      * --------------------------------------------------------------------
      * 로그인한 사용자가 참여 중인 모든 1:1 채팅방 목록을 조회한다.
-     *
      * 반환 정보 구성:
      * - opponent : 상대방 사용자 정보
      * - lastMessage : 최근 메시지 내용/시각 + 내가 보낸 메시지인지 여부
      * - unreadCount : 내가 읽지 않은 메시지 개수
-     *
      * 화면 예시:
      *   [프로필 이미지]  상대방 이름
      *   마지막 메시지 내용 ...       (읽지 않은 메시지 뱃지)
@@ -133,7 +181,7 @@ public class ChatService {
 
             ChatRoom room = cp.getChatRoom();
 
-            /**
+            /*
              * 4) 채팅방 참여자 중 '나를 제외한 사용자' = 상대방
              *    (1:1 채팅 가정이므로 항상 2명 존재)
              */
@@ -143,7 +191,7 @@ public class ChatService {
                     .findFirst()
                     .orElse(null); // 안전 처리 (이론상 null이면 안 됨)
 
-            /**
+            /*
              * 5) 최근 메시지 조회
              *    - 최하단에 삽입되는 구조이므로 "sentAt DESC LIMIT 1"
              */
@@ -151,13 +199,13 @@ public class ChatService {
                     .findTopByChatRoomOrderBySentAtDesc(room)
                     .orElse(null);
 
-            /**
+            /*
              * 6) 읽지 않은 메시지 개수 조회
              *    - "나 기준"으로 읽음 여부가 저장됨
              */
             long unread = messageReadStatusRepository.countByChatRoomAndUserAndIsReadFalse(room, me);
 
-            /**
+            /*
              * 7) DTO 변환
              *    ← 여기서 핵심은 "opponent" 와 "lastMessage" 를
              *       각각 하위 객체로 구조화하여 FE가 처리하기 쉽게 하는 것.

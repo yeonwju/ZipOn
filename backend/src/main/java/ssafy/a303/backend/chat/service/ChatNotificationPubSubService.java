@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -48,7 +49,7 @@ public class ChatNotificationPubSubService implements MessageListener {
      * Redis에서 알림 수신 → STOMP 브로드캐스트
      */
     @Override
-    public void onMessage(Message message, byte[] pattern) {
+    public void onMessage(@NotNull Message message, byte[] pattern) {
         try {
             // Redis 채널명에서 userSeq 추출
             String channel = new String(message.getChannel());
