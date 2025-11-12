@@ -2,6 +2,7 @@ package ssafy.a303.backend.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -106,6 +107,11 @@ public enum ErrorCode {
     EMPTY_IMG_FILE(400, HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
     ONLY_IMG_ALLOWED(400, HttpStatus.BAD_REQUEST, "이미지 파일만 업로드 가능합니다."),
     S3_UPLOAD_FAILED(400, HttpStatus.BAD_REQUEST, "S3 업로드 실패"),
+
+    // 중개 및 경매 신청
+    DUPLICATE_NOT_ALLOWED(401, HttpStatus.NOT_ACCEPTABLE, "동일 매물에 대한 중복 신청이 불가합니다."),
+    TIME_NOT_ALLOWED(400, HttpStatus.NOT_ACCEPTABLE, "시작 시간을 종료 시간보다 앞서야 합니다."),
+    DATE_NOT_ALLOWED(400, HttpStatus.NOT_ACCEPTABLE, "과거 날짜로는 경매를 신청할 수 없습니다."),
 
 
     // STOMP 관련

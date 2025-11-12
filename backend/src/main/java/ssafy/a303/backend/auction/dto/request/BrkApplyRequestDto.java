@@ -7,6 +7,7 @@ public record BrkApplyRequestDto(
 
         LocalDate strmDate,
         LocalTime strmStartTm,
-        LocalTime strmEndTm
+        LocalTime strmEndTm,
+        String intro
 ) {
 }

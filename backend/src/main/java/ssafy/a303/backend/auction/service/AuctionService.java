@@ -1,21 +1,95 @@
-//package ssafy.a303.backend.auction.service;
-//
-//import jakarta.transaction.Transactional;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.stereotype.Service;
-//import ssafy.a303.backend.auction.repository.AuctionRepository;
-//import ssafy.a303.backend.property.repository.PropertyRepository;
-//import ssafy.a303.backend.user.repository.UserRepository;
-//
-//@Service
-//@RequiredArgsConstructor
-//@Transactional
-//public class AuctionService {
-//
-//    private final AuctionRepository auctionRepository;
-//    private final PropertyRepository propertyRepository;
-//    private final UserRepository userRepository;
-//
-//    public
-//
-//}
+package ssafy.a303.backend.auction.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ssafy.a303.backend.auction.dto.request.BrkApplyRequestDto;
+import ssafy.a303.backend.auction.dto.response.BrkApplyResponseDto;
+import ssafy.a303.backend.auction.entity.Auction;
+import ssafy.a303.backend.auction.entity.AuctionStatus;
+import ssafy.a303.backend.auction.repository.AuctionRepository;
+import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.response.ErrorCode;
+import ssafy.a303.backend.property.entity.Property;
+import ssafy.a303.backend.property.repository.PropertyRepository;
+import ssafy.a303.backend.user.entity.User;
+import ssafy.a303.backend.user.repository.UserRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+@Service
+@RequiredArgsConstructor
+public class AuctionService {
+
+    private final AuctionRepository auctionRepository;
+    private final PropertyRepository propertyRepository;
+    private final UserRepository userRepository;
+
+    /**
+     * 중개 및 경매 신청 (중개인 -> 매물)
+     * @param propertySeq
+     * @param userSeq
+     * @param req
+     * @return
+     */
+    public BrkApplyResponseDto apply(Integer propertySeq, Integer userSeq, BrkApplyRequestDto req) {
+
+        /** 매물, 중개신청인 존재 여부 확인 */
+        Property property = propertyRepository.findById(propertySeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
+        User user = userRepository.findById(userSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        /** 동일 매물 중복 신청 불가 */
+        if (auctionRepository.existsActiveByPropertyAndUser(propertySeq, userSeq, AuctionStatus.REQUESTED)) {
+            throw new CustomException(ErrorCode.DUPLICATE_NOT_ALLOWED);
+        }
+
+        boolean wantStrm = req != null
+                && req.strmDate() != null
+                && req.strmStartTm() != null
+                && req.strmEndTm() != null;
+
+        Auction.AuctionBuilder b = Auction.builder()
+                .user(user)
+                .property(property)
+                .status(AuctionStatus.REQUESTED)
+                .intro(req.intro());
+
+        /** 중개만 신청 */
+        if(!wantStrm) {
+            Auction saved = auctionRepository.save(b.build());
+            return BrkApplyResponseDto.of(saved);
+        }
+
+        /** 경매도 신청 */
+        LocalDate date = req.strmDate();
+        LocalTime start = req.strmStartTm();
+        LocalTime end = req.strmEndTm();
+
+        // 시작, 종료 시간 전후 검증
+        if(!end.isAfter(start)) {
+            throw new CustomException(ErrorCode.TIME_NOT_ALLOWED);
+        }
+
+        // 날짜가 현재보다 미래 시점인지 검증
+        if(LocalDate.now().isAfter(date)) {
+            throw new CustomException(ErrorCode.DATE_NOT_ALLOWED);
+        }
+
+        /** 경매종료 시점 설정 (방송 다음날 오후 12시) */
+        LocalDateTime auctionEndAt = date.plusDays(1).atTime(12,0);
+
+        Auction saved = auctionRepository.save(
+                    b.strmDate(date)
+                        .strmStartTm(start)
+                        .strmEndTm(end)
+                        .auctionEndAt(auctionEndAt)
+                            .intro(req.intro())
+                        .build()
+        );
+        return BrkApplyResponseDto.of(saved);
+    }
+
+}
