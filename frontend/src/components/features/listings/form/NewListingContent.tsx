@@ -11,9 +11,14 @@ import {
 import { Accordion } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import useUserLocation from '@/hooks/map/useUserLocation'
+import { useUser } from '@/hooks/queries'
+import { registerListingVerification } from '@/services/listingService'
 
 export default function NewListingContent() {
   const { refresh: refreshLocation, isRefreshing } = useUserLocation()
+
+  // 유저 정보
+  const { data: user } = useUser()
 
   // TODO: React Query useSuspenseQuery로 교체
 
@@ -83,15 +88,27 @@ export default function NewListingContent() {
     setFiles(newFiles)
   }
 
-  const handleVerify = () => {
-    if (!canVerify) return
-    setIsVerifying(true)
+  async function handleVerify() {
+    try {
+      const request = {
+        file: files[0], // 첫 번째 파일만 전송 (백엔드는 단일 파일만 받음)
+        regiNm: user?.name,
+        regiBirth: user?.birth,
+        address: `${baseAddress} ${detailAddress}`,
+      }
 
-    setTimeout(() => {
-      setStep1Completed(true)
-      setIsVerifying(false)
-      setCurrentAccordion('item-2')
-    }, 1000)
+      const result = await registerListingVerification(request)
+
+      if (result.success) {
+        console.log('인증 성공:', result)
+        setStep1Completed(true)
+        setIsVerifying(true)
+      } else {
+        console.warn('인증 실패:', result)
+      }
+    } catch (error) {
+      console.error('인증 요청 중 오류 발생:', error)
+    }
   }
 
   const handleListingInfoChange = (info: typeof listingInfo) => {
@@ -200,7 +217,7 @@ export default function NewListingContent() {
 
       {/* 하단 고정 제출 버튼 */}
       {step1Completed && step2Completed && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white shadow-lg">
+        <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-gray-200 bg-white shadow-lg">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
             <div className="flex-1">
               <p className="text-sm font-semibold text-gray-900">모든 정보 입력 완료</p>
@@ -220,4 +237,3 @@ export default function NewListingContent() {
     </>
   )
 }
-

@@ -18,10 +18,69 @@
  * ```
  */
 
+import { API_ENDPOINTS } from '@/constants'
 import { BuildingData } from '@/data/BuildingDummy'
 import { getListingDetailBySeq } from '@/data/ListingDetailDummy'
+import { authFetch } from '@/lib/fetch'
+import { ListingsRegVerifyRequest, ListingsRegVerifyResponse } from '@/types/api/listings'
 import type { ListingData, ListingDetailData } from '@/types/models/listing'
 
+/**
+ * 매물 등록(등기부등본 인증)
+ */
+export async function registerListingVerification(request: {
+  file: File
+  regiNm: string | null | undefined
+  regiBirth: string | null | undefined
+  address: string
+}) {
+  try {
+    console.log('=== 등기부등본 인증 요청 ===')
+    console.log('파라미터 : ', request)
+
+    if (!request.file) {
+      throw new Error('파일은 필수입니다.')
+    }
+    if (!request.regiNm || request.regiNm.trim() === '') {
+      throw new Error('등기명의인 이름은 필수입니다.')
+    }
+    if (!request.regiBirth || request.regiBirth.trim() === '') {
+      throw new Error('등기명의인 생년월일은 필수입니다.')
+    }
+    if (!request.address || request.address.trim() === '') {
+      throw new Error('주소는 필수입니다.')
+    }
+
+    const formData = new FormData()
+
+    // 파일 단일 추가
+    formData.append('file', request.file)
+
+    // 문자열 필드 추가 (검증된 값만 추가)
+    formData.append('regiNm', request.regiNm.trim())
+    formData.append('regiBirth', request.regiBirth.trim())
+    formData.append('address', request.address.trim())
+
+    const result = await authFetch.post<ListingsRegVerifyResponse>(
+      API_ENDPOINTS.LISTINGS_REG_VERIFY,
+      formData
+    )
+
+    console.log('=== 등기부등본 인증 요청 성공 ===')
+    console.log('응답:', result)
+
+    return {
+      success: true,
+      message: '인증에 성공했습니다.',
+    }
+  } catch (error) {
+    console.error('=== 등기부등본 인증 실패 ===')
+    console.error('에러', error)
+    const errorMessage = error instanceof Error ? error.message : '등기부등본 인증에 실패했습니다.'
+
+    throw new Error(errorMessage)
+  }
+}
 /**
  * 매물 목록 가져오기
  *
@@ -110,4 +169,3 @@ export async function getListingDetail(seq: number): Promise<ListingDetailData |
   // 현재는 더미 데이터 반환
   return Promise.resolve(getListingDetailBySeq(seq))
 }
-

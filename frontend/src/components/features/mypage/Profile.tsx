@@ -17,7 +17,7 @@ export default function Profile() {
   return (
     <div
       className={
-        'flex flex-row items-center gap-3 rounded-3xl border-2 border-gray-200 p-5 shadow-md'
+        'flex flex-row items-center gap-3 rounded-3xl border-2 border-gray-200 p-4 shadow-md'
       }
     >
       {/* 아바타 */}
