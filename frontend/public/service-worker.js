@@ -10,8 +10,7 @@ const STATIC_ASSETS = [
   '/icons/maskable-512.png',
 ]
 
-// 백 개발 이후 수정 예정
-const NO_CACHE_PATHS = ['/api/auth', '/api/payment', '/api/account']
+const NO_CACHE_PATHS = ['/api/auth', '/api/v1']
 function isNoCache(url) {
   const { pathname } = new URL(url, self.location.origin)
   return NO_CACHE_PATHS.some(p => pathname.startsWith(p))
@@ -106,10 +105,8 @@ self.addEventListener('fetch', event => {
           ;(await caches.open(RUNTIME)).put(req, net.clone())
           return net
         } catch {
-          // 캐시된 페이지가 있으면 우선
           const cached = await caches.match(req)
           if (cached) return cached
-          // /offline 페이지가 캐시에 있으면 fallback
           const offline = await caches.match('/offline')
           if (offline) return offline
           return new Response('오프라인입니다.', {
@@ -137,4 +134,28 @@ self.addEventListener('fetch', event => {
       })()
     )
   }
+})
+
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js')
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js')
+
+firebase.initializeApp({
+  apiKey: 'AIzaSyDpO3fOehMwqRvbujS9MKHZs1Tb7ht7XVI',
+  authDomain: 'zipon-b45c7.firebaseapp.com',
+  projectId: 'zipon-b45c7',
+  storageBucket: 'zipon-b45c7.appspot.com',
+  messagingSenderId: '270803338199',
+  appId: '1:270803338199:web:40ce961744ab98211a0192',
+})
+
+const messaging = firebase.messaging()
+
+// 백그라운드 알림 처리
+messaging.onBackgroundMessage(payload => {
+  console.log('[firebase-messaging-sw.js] 백그라운드 메시지:', payload)
+  const { title, body, icon } = payload.notification
+  self.registration.showNotification(title, {
+    body,
+    icon: icon || '/icons/zipon.png',
+  })
 })
