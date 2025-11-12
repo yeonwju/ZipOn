@@ -10,6 +10,7 @@ import ssafy.a303.backend.auction.dto.projection.AuctionAlarmProjection;
 import ssafy.a303.backend.auction.entity.AuctionAlarm;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public interface AuctionAlarmRepository extends JpaRepository<AuctionAlarm, Long
             where a.auctionEndAt = :auctionEndAt
             """)
     List<AuctionAlarmProjection> findAuctionAlarmEndTargets(
-            @Param("auctionEndAt") LocalTime auctionEndAt
+            @Param("auctionEndAt") LocalDateTime auctionEndAt
     );
 
     @Query("""

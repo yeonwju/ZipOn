@@ -1,5 +1,6 @@
 package ssafy.a303.backend.auction.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -15,11 +16,13 @@ import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuctionAlarmService {
     private final AuctionAlarmRepository auctionAlarmRepository;
     private final UserRepository userRepository;
@@ -29,8 +32,10 @@ public class AuctionAlarmService {
     public void save(int userSeq, int auctionSeq){
         if(auctionAlarmRepository.existsByUser_UserSeqAndAuction_AuctionSeq(userSeq, auctionSeq))
             throw new CustomException(ErrorCode.ALARM_ALREADY_EXIST);
-        User user = userRepository.findById(userSeq).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Auction auction = auctionRepository.findById(auctionSeq).orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
+        User user = userRepository.findById(userSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Auction auction = auctionRepository.findById(auctionSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.AUCTION_NOT_FOUND));
         AuctionAlarm auctionAlarm = new AuctionAlarm();
         auctionAlarm.setUser(user);
         auctionAlarm.setAuction(auction);
@@ -47,8 +52,8 @@ public class AuctionAlarmService {
         return auctionAlarmRepository.findAuctionAlarmStartTargets(strmDate, strmStartTm);
     }
     // 끝날 때
-    public List<AuctionAlarmProjection> getAuctionAlarmEndTarget(LocalDate strmDate,LocalTime strmStartTm){
-        return auctionAlarmRepository.findAuctionAlarmStartTargets(strmDate, strmStartTm);
+    public List<AuctionAlarmProjection> getAuctionAlarmEndTarget(LocalDateTime auctionEndAt){
+        return auctionAlarmRepository.findAuctionAlarmEndTargets(auctionEndAt);
     }
     // 사용자 알람 읽기
     public Slice<AuctionAlarmProjection> getMyAlarmsScroll(int userSeq, Long cursor, int size) {
