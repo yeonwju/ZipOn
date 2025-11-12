@@ -2,6 +2,10 @@ pipeline {
   agent any
 
   environment {
+    // --- BuildKit / Docker cache 활성화 ---
+    DOCKER_BUILDKIT = '1'
+    COMPOSE_DOCKER_CLI_BUILD = '1'
+
     // --- Common Paths ---
     DOCKER_OPTS  = "--pull"
     HEALTH       = "/usr/local/bin/zipon-health.sh"
@@ -54,6 +58,9 @@ pipeline {
 
   stages {
 
+    // ========================
+    // 1️⃣ Checkout
+    // ========================
     stage('Checkout') {
       steps {
         checkout scm
@@ -61,6 +68,9 @@ pipeline {
       }
     }
 
+    // ========================
+    // 2️⃣ Environment Setup
+    // ========================
     stage('Set Environment') {
       steps {
         script {
@@ -71,37 +81,63 @@ pipeline {
       }
     }
 
-    stage('Build Images (Stable)') {
+    // ========================
+    // 3️⃣ Selective Build (Cache + BuildKit)
+    // ========================
+    stage('Build Images (Optimized)') {
       steps {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
           def FRONT_API_BASE_URL = currentBranch.contains('dev') ? 'https://dev-zipon.duckdns.org/api' : 'https://zipon.duckdns.org/api'
+          def changed = sh(script: "git diff --name-only HEAD~1 HEAD || true", returnStdout: true).trim()
 
           echo "🧱 Building images for commit ${gitsha} (branch=${currentBranch})"
+          echo "📂 Changed files:\n${changed}"
 
-          sh """
-            set -e
-            echo "[1/3] ⚡ FRONTEND build"
-            docker build ${env.DOCKER_OPTS} \
-              --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
-              --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
-              --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
-              -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
+          // --- FRONTEND ---
+          if (changed.contains('frontend/') || changed == '') {
+            echo "[1/3] ⚡ Building FRONTEND"
+            sh """
+              docker build ${env.DOCKER_OPTS} \
+                --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
+                --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
+                --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
+                -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
+            """
+          } else {
+            echo "[1/3] ⚡ FRONTEND skipped (no changes)"
+          }
 
-            echo "[2/3] ⚙️ BACKEND build"
-            docker build ${env.DOCKER_OPTS} \
-              --build-arg FRONT_URL="${env.FRONT_URL}" \
-              -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
+          // --- BACKEND ---
+          if (changed.contains('backend/') || changed == '') {
+            echo "[2/3] ⚙️ Building BACKEND"
+            sh """
+              docker build ${env.DOCKER_OPTS} \
+                --build-arg FRONT_URL="${env.FRONT_URL}" \
+                -t zipon-backend:latest -t zipon-backend:${gitsha} ./backend
+            """
+          } else {
+            echo "[2/3] ⚙️ BACKEND skipped (no changes)"
+          }
 
-            echo "[3/3] 🤖 AI build"
-            docker build ${env.DOCKER_OPTS} \
-              -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai
-          """
+          // --- AI ---
+          if (changed.contains('ai/') || changed == '') {
+            echo "[3/3] 🤖 Building AI"
+            sh """
+              docker build ${env.DOCKER_OPTS} \
+                -t zipon-ai:latest -t zipon-ai:${gitsha} ./ai
+            """
+          } else {
+            echo "[3/3] 🤖 AI skipped (no changes)"
+          }
         }
       }
     }
 
+    // ========================
+    // 4️⃣ Deploy to DEV
+    // ========================
     stage('Deploy DEV') {
       when { branch 'dev' }
       steps {
@@ -118,7 +154,7 @@ pipeline {
               set -e
               docker network connect zipon-net jenkins-container 2>/dev/null || true
 
-              echo "[DEV] Creating .env file at /home/ubuntu/zipon-app/.env..."
+              echo "[DEV] Creating .env file..."
               cat <<EOF2 > /home/ubuntu/zipon-app/.env
 SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
 SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
@@ -142,31 +178,27 @@ AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 FRONT_URL=$FRONT_URL
 FAST_API=http://zipondev-ai:8000
-
-# --- AI Environment ---
+# --- AI ---
 GMS_KEY=$GMS_KEY
 GMS_API_URL=$GMS_API_URL
 MODEL_NAME=$MODEL_NAME
 EOF2
 
-              echo "[DEV] ✅ .env generated:"
-              cat /home/ubuntu/zipon-app/.env
-
-              echo "[DEV] 🚀 Starting docker compose..."
+              echo "[DEV] ✅ .env generated."
               docker compose --env-file /home/ubuntu/zipon-app/.env -f "$DEV_COMPOSE" up -d --force-recreate --remove-orphans
 
-              echo "[DEV] ⏳ Waiting for backend startup..."
-              for i in $(seq 1 40); do
+              echo "[DEV] ⏳ Checking backend health..."
+              for i in $(seq 1 20); do
                 CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
                 if [ "$CODE" = "200" ]; then
                   echo "[DEV] ✅ Backend healthy (HTTP 200)"
                   exit 0
                 fi
-                echo "[DEV] ($i/40) Waiting... HTTP=$CODE"
+                echo "[DEV] ($i/20) Waiting... HTTP=$CODE"
                 sleep 2
               done
 
-              echo "[DEV] ❌ Health check failed, showing logs"
+              echo "[DEV] ❌ Health check failed."
               docker logs zipondev-backend --tail 40 || true
               exit 1
             '''
@@ -175,6 +207,9 @@ EOF2
       }
     }
 
+    // ========================
+    // 5️⃣ Swagger Export
+    // ========================
     stage('Publish OpenAPI') {
       when { branch 'dev' }
       steps {
@@ -182,16 +217,19 @@ EOF2
           set +e
           mkdir -p build
           echo "[SWAGGER] Fetching OpenAPI JSON..."
-          curl -sf http://127.0.0.1:28080/v3/api-docs -o build/swagger.json || echo "[WARN] Swagger fetch failed, skipping"
+          curl -sf http://127.0.0.1:28080/v3/api-docs -o build/swagger.json || echo "[WARN] Swagger fetch failed"
           if [ -f build/swagger.json ]; then
-            echo "[SWAGGER] ✅ Saved successfully (size: $(wc -c < build/swagger.json))"
+            echo "[SWAGGER] ✅ swagger.json saved (size: $(wc -c < build/swagger.json))"
           else
-            echo "[SWAGGER] ⚠️ No swagger.json generated"
+            echo "[SWAGGER] ⚠️ No swagger.json found"
           fi
         '''
       }
     }
 
+    // ========================
+    // 6️⃣ Deploy to PROD
+    // ========================
     stage('Deploy PROD') {
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
@@ -203,13 +241,16 @@ EOF2
     }
   }
 
+  // ========================
+  // 🔚 Post Actions
+  // ========================
   post {
     success {
       echo "✅ Pipeline complete."
       sh 'docker system prune -f || true'
     }
     failure {
-      echo "❌ Pipeline failed. Check above logs."
+      echo "❌ Pipeline failed. Check logs above."
     }
   }
 }
