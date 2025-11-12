@@ -4,7 +4,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -62,7 +61,7 @@ public class StompEventListener {
         sessions.add(sessionId);
         
         // STOMP 헤더에서 정보 추출 (필요 시)
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        //StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         
         log.info("🔵 WebSocket 연결됨: {} (현재 세션 수: {})", sessionId, sessions.size());
     }
