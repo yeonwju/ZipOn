@@ -28,9 +28,29 @@ public interface AuctionAlarmRepository extends JpaRepository<AuctionAlarm, Long
         where a.strmDate = :strmDate
           and a.strmStartTm = :strmStartTm
         """)
-    List<AuctionAlarmProjection> findAlarmTargets(
+    List<AuctionAlarmProjection> findAuctionAlarmStartTargets(
             @Param("strmDate") LocalDate strmDate,
             @Param("strmStartTm") LocalTime strmStartTm
+    );
+
+    @Query("""
+        select
+            aa.auctionAlarmSeq as auctionAlarmSeq,
+            aa.user.userSeq as userSeq,
+            a.auctionSeq as auctionSeq,
+            p.propertySeq as propertySeq,
+            p.propertyNm as propertyNm,
+            a.strmDate as strmDate,
+            a.strmStartTm as strmStartTm
+        from AuctionAlarm aa
+        join aa.auction a
+        join a.property p
+        where a.strmDate = :strmDate
+          and a.strmEndTm = :strmEndTm
+        """)
+    List<AuctionAlarmProjection> findAuctionAlarmEndTargets(
+            @Param("strmDate") LocalDate strmDate,
+            @Param("strmEndTm") LocalTime strmEndTm
     );
 
     @Query("""
