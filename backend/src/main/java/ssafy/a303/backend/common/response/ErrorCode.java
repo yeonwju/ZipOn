@@ -30,6 +30,9 @@ public enum ErrorCode {
     // JSON
     JSON_ERROR(400,HttpStatus.BAD_REQUEST, "직렬화 또는 역직렬화를 실패하였습니다."),
 
+    // 경매/방송 알람
+    ALARM_ALREADY_EXIST(406, HttpStatus.NOT_ACCEPTABLE, "이미 알람이 저장되었습니다."),
+
     // ┌────────────참고용───────────────────────────
     //400 BAD REQUEST
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),

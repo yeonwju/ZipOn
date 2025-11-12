@@ -27,12 +27,18 @@ public class AuctionAlarmService {
 
     // 저장
     public void save(int userSeq, int auctionSeq){
+        if(auctionAlarmRepository.existsByUser_UserSeqAndAuction_AuctionSeq(userSeq, auctionSeq))
+            throw new CustomException(ErrorCode.ALARM_ALREADY_EXIST);
         User user = userRepository.findById(userSeq).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Auction auction = auctionRepository.findById(auctionSeq).orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
         AuctionAlarm auctionAlarm = new AuctionAlarm();
         auctionAlarm.setUser(user);
         auctionAlarm.setAuction(auction);
         auctionAlarmRepository.save(auctionAlarm);
+    }
+    public void delete(int userSeq, int auctionSeq){
+        int result = auctionAlarmRepository.deleteByUser_UserSeqAndAuction_AuctionSeq(userSeq, auctionSeq);
+        if(result == 0) throw new CustomException(ErrorCode.BAD_REQUEST);
     }
 
     // 알람 대상자 찾기

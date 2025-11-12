@@ -3,6 +3,7 @@ package ssafy.a303.backend.auction.repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ssafy.a303.backend.auction.dto.projection.AuctionAlarmProjection;
@@ -72,5 +73,10 @@ public interface AuctionAlarmRepository extends JpaRepository<AuctionAlarm, Long
             @Param("cursor") Long cursor,    // 첫 페이지는 null 전달
             Pageable pageable                // PageRequest.of(0, size)
     );
+
+    boolean existsByUser_UserSeqAndAuction_AuctionSeq(int userSeq, int auctionSeq);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    int deleteByUser_UserSeqAndAuction_AuctionSeq(int userSeq, int auctionSeq);
 
 }
