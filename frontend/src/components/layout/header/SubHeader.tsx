@@ -50,6 +50,7 @@ const ICONS = {
  * --------------------------------------------------- */
 const rightIconsMap: Record<string, IconAction[]> = {
   default: [ICONS.search, ICONS.notification, ICONS.chat],
+  '/listings/new': [],
   '/auction/payment': [],
   '/auction/bid': [ICONS.notification, ICONS.chat],
   '/chat': [ICONS.search, ICONS.notification],
@@ -68,6 +69,7 @@ const rightIconsMap: Record<string, IconAction[]> = {
  * 4 기본 타이틀 매핑
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
+  '/listings/new': '매물 등록',
   '/auction/payment': '결제',
   '/auction/bid': '경매 입찰',
   '/verify/phone': '휴대폰 인증',
@@ -107,7 +109,8 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   /* 앱 내부 히스토리 체크 */
   useEffect(() => {
     // 페이지 진입 시 앱 내부 히스토리가 있는지 체크
-    const hasInternalHistory = window.history.state?.idx !== undefined && window.history.state.idx > 0
+    const hasInternalHistory =
+      window.history.state?.idx !== undefined && window.history.state.idx > 0
     setCanGoBack(hasInternalHistory)
 
     // 첫 진입 시 히스토리 마커 설정
