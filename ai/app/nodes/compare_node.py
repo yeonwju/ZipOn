@@ -10,6 +10,19 @@ def similarity(a: str, b: str) -> float:
     """문자열 유사도 계산"""
     return difflib.SequenceMatcher(None, normalize_text(a), normalize_text(b)).ratio()
 
+def normalize_address(addr: str) -> str:
+    """주소 비교를 위한 전처리"""
+    if not addr:
+        return ""
+
+    addr = addr.strip()
+    addr = re.sub(r"\s+", "", addr)  # 모든 공백 제거
+    addr = re.sub(r"번지|지번|도로명|길|로|가|동|읍|면|리", "", addr)  # 불필요 단어 제거
+    addr = re.sub(r"층|호|호실|호수", "호", addr)  # 호실 표현 통일
+    addr = re.sub(r"오피스텔|아파트|빌라|건물|타워|하이츠", "", addr)  # 건물명 제거
+    addr = re.sub(r"[^가-힣0-9\-호]", "", addr)  # 한글, 숫자, '-', '호'만 남김
+    return addr
+
 def compare_node(state: VerifyState) -> VerifyState:
     print("[NODE] 🧩 compare_node 실행 중...")
 
@@ -29,8 +42,10 @@ def compare_node(state: VerifyState) -> VerifyState:
     birth_match = birth_ex == birth_usr
 
     # --- 3️⃣ 주소 비교 ---
-    addr_sim = similarity(extracted.get("address"), user_input.get("address"))
-    address_match = addr_sim >= 0.75  # 75% 이상이면 OK
+    addr_ex = normalize_address(extracted.get("address"))
+    addr_usr = normalize_address(user_input.get("address"))
+    addr_sim = similarity(addr_ex, addr_usr)
+    address_match = addr_sim >= 0.70  # 70% 이상이면 OK
 
     verified = all([owner_match, birth_match, address_match])
 
