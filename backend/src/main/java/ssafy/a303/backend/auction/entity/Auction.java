@@ -14,10 +14,8 @@ import java.time.LocalTime;
 @Table(
         name = "auction",
         indexes = {
-                @Index(
-                        name = "idx_auction_strm_date_start",
-                        columnList = "strm_date, strm_start_tm"
-                )
+                @Index(name = "idx_auction_strm_date_start", columnList = "strm_date, strm_start_tm"),
+                @Index(name = "idx_auction_auction_end_at", columnList = "auction_end_at")
         })
 @Getter
 @Setter
