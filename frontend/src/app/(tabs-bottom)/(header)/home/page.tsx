@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import FirebaseInit from '@/components/common/FirebaseInit'
 import { BuildingTypeQuickFilter, ListingItem, RecommendLiveItem } from '@/components/features/home'
 import SideScrollCardSection from '@/components/layout/SideScrollCardSection'
 
@@ -18,45 +19,49 @@ export const dynamic = 'force-dynamic'
  */
 export default function HomePage() {
   return (
-    <section className="flex flex-col gap-5 p-2">
-      {/* 매물 유형별 바로보기 */}
-      <BuildingTypeQuickFilter />
-      <SideScrollCardSection title="실시간 인기 방송" cardMinWidth="220px">
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-        <RecommendLiveItem />
-      </SideScrollCardSection>
+    <>
+      <FirebaseInit />
 
-      <SideScrollCardSection title="추천 매물">
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-      </SideScrollCardSection>
+      <section className="flex flex-col gap-5 p-2">
+        {/* 매물 유형별 바로보기 */}
+        <BuildingTypeQuickFilter />
+        <SideScrollCardSection title="실시간 인기 방송" cardMinWidth="220px">
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+          <RecommendLiveItem />
+        </SideScrollCardSection>
 
-      <SideScrollCardSection title="경매 임박 매물">
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-        <ListingItem />
-      </SideScrollCardSection>
-    </section>
+        <SideScrollCardSection title="추천 매물">
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+        </SideScrollCardSection>
+
+        <SideScrollCardSection title="경매 임박 매물">
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+          <ListingItem />
+        </SideScrollCardSection>
+      </section>
+    </>
   )
 }
