@@ -8,8 +8,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import ssafy.a303.backend.livestream.dto.response.LiveStatsUpdateDto;
 import ssafy.a303.backend.livestream.service.LiveService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Map;
 import java.util.Objects;
@@ -43,12 +44,15 @@ public class StompEventListener {
     
     private final LiveService liveService;
     private final RedisTemplate<Object, Object> redisTemplate;
+    private final StringRedisTemplate liveRedisTemplate;
     
     // 생성자 주입 (@Lazy로 순환 참조 해결)
     public StompEventListener(@Lazy LiveService liveService, 
-                              RedisTemplate<Object, Object> redisTemplate) {
+                              RedisTemplate<Object, Object> redisTemplate,
+                              @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate) {
         this.liveService = liveService;
         this.redisTemplate = redisTemplate;
+        this.liveRedisTemplate = liveRedisTemplate;
     }
 
     /**
@@ -89,10 +93,14 @@ public class StompEventListener {
                 String viewerKey = "live:viewers:" + info.liveSeq;
                 redisTemplate.opsForSet().remove(viewerKey, info.userSeq);
 
-                // 시청자 수 변경 이벤트 Pub → 다른 시청자 화면에서 즉시 반영됨
-                liveService.publishLiveStatsUpdate(info.liveSeq, LiveStatsUpdateDto.UpdateType.VIEWER);
+                // 시청자 수 변경 이벤트 전송 (라이브 방송 내부 시청자용)
+                long viewerCount = java.util.Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
+                liveRedisTemplate.convertAndSend(
+                        "live:" + info.liveSeq,
+                        "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
+                );
                 
-                log.info("🔴 라이브 시청자 자동 퇴장: liveSeq={}, userSeq={}", info.liveSeq, info.userSeq);
+                log.info("🔴 라이브 시청자 자동 퇴장: liveSeq={}, userSeq={}, 남은 시청자={}", info.liveSeq, info.userSeq, viewerCount);
             } catch (Exception e) {
                 log.error("🔴 자동 퇴장 처리 실패: {}", e.getMessage(), e);
             }

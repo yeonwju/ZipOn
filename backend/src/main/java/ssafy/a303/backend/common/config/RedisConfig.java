@@ -21,7 +21,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
 import ssafy.a303.backend.chat.service.ChatNotificationPubSubService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
-import ssafy.a303.backend.livestream.service.LiveStatsUpdatePubSubService;
 import ssafy.a303.backend.livestream.service.LiveStartNotificationPubSubService;
 
 /**
@@ -171,27 +170,6 @@ public class RedisConfig {
     @Bean
     @Qualifier("liveMessageListenerAdapter")
     public MessageListenerAdapter liveMessageListenerAdapter(LiveRedisPubSubService service) {
-        return new MessageListenerAdapter(service, "onMessage");
-    }
-
-    // 실시간 방송 통계(시청자 수/좋아요 수/댓글 수) 업데이트 구독
-    @Bean
-    @Qualifier("liveStatsUpdateListenerContainer")
-    public RedisMessageListenerContainer liveStatsUpdateListenerContainer(
-            @Qualifier("liveRedisFactory") RedisConnectionFactory factory,
-            @Qualifier("liveStatsUpdateListenerAdapter") MessageListenerAdapter adapter) {
-
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(factory);
-        // live:stats:updates 채널 구독
-        container.addMessageListener(adapter, new PatternTopic("live:stats:updates"));
-        return container;
-    }
-
-    // 방송 통계 메시지를 → LiveStatsUpdatePubSubService.onMessage() 로 전달하는 어댑터
-    @Bean
-    @Qualifier("liveStatsUpdateListenerAdapter")
-    public MessageListenerAdapter liveStatsUpdateListenerAdapter(LiveStatsUpdatePubSubService service) {
         return new MessageListenerAdapter(service, "onMessage");
     }
 

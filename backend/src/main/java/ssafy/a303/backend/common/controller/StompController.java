@@ -247,8 +247,5 @@ public class StompController {
         }
         
         log.info("[STOMP][LIVE] ✅ Message processing complete");
-        
-        // 4) 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
-        liveService.publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.CHAT);
     }
 }

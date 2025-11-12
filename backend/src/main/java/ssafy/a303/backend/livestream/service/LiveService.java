@@ -38,7 +38,6 @@ public class LiveService {
     private final UserRepository userRepository;
     private final OpenVidu openVidu;
     private final LiveRedisPubSubService liveRedisPubSubService;
-    private final LiveStatsUpdatePubSubService liveStatsUpdatePubSubService;
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
 
     @Qualifier("liveRedisTemplate")
@@ -187,9 +186,6 @@ public class LiveService {
                     "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
             );
 
-            // 9. 라이브 목록 통계 업데이트 알림 발행
-            publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.VIEWER);
-
             log.info("[LIVE] Token 발급 성공: liveSeq={}, userSeq={}, role={}", liveSeq, userSeq, role);
 
             // 10. 토큰 정보 DTO로 반환
@@ -222,11 +218,8 @@ public class LiveService {
         long viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
-                "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
+                    "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
         );
-        
-        // 4. 라이브 목록 통계 업데이트 알림 발행
-        publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.VIEWER);
         
         log.info("[LIVE] 시청자 퇴장: liveSeq={}, userSeq={}, 남은 시청자={}", liveSeq, userSeq, viewerCount);
     }
@@ -290,9 +283,6 @@ public class LiveService {
                 "live:" + liveSeq,
                 "{\"type\":\"LIVE_ENDED\"}"
         );
-
-        // 9. 라이브 목록 통계 업데이트 발행 (목록 화면에서 방송 종료 표시)
-        publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.ALL);
         
         log.info("[LIVE] 방송 종료 이벤트 발행: liveSeq={}", liveSeq);
 
@@ -452,57 +442,12 @@ public class LiveService {
         // 실시간 좋아요 수 갱신 전송 (기존 라이브 방송 내부용)
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
-                "{\"type\":\"LIKE_COUNT_UPDATE\",\"count\":" + likeCount + "}"
+                    "{\"type\":\"LIKE_COUNT_UPDATE\",\"count\":" + likeCount + "}"
         );
-
-        // 라이브 목록 통계 업데이트 알림 발행 (공통 메서드 사용)
-        publishLiveStatsUpdate(liveSeq, LiveStatsUpdateDto.UpdateType.LIKE);
 
         // true = 좋아요 상태 유지, false = 취소 상태 유지
         return !Boolean.TRUE.equals(alreadyLiked);
     }
 
-    /**
-     * 라이브 통계 조회 및 업데이트 알림 발행 (공통 메서드)
-     * Redis에서 현재 통계를 조회하고 목록 화면으로 알림을 발행합니다.
-     * 
-     * @param liveSeq 라이브 방송 ID
-     * @param updateType 업데이트 타입 (VIEWER, CHAT, LIKE, ALL)
-     */
-    public void publishLiveStatsUpdate(Integer liveSeq, LiveStatsUpdateDto.UpdateType updateType) {
-        try {
-            // Redis Key 생성
-            String viewerKey = "live:viewers:" + liveSeq;
-            String chatKey = "live:chat:" + liveSeq;
-            String likeKey = "live:like:" + liveSeq;
-            
-            // Redis에서 현재 통계 조회
-            int viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey))
-                    .map(Long::intValue).orElse(0);
-            int chatCount = Optional.ofNullable(redisTemplate.opsForList().size(chatKey))
-                    .map(Long::intValue).orElse(0);
-            int likeCount = Optional.ofNullable(redisTemplate.opsForSet().size(likeKey))
-                    .map(Long::intValue).orElse(0);
-            
-            // 통계 업데이트 DTO 생성
-            LiveStatsUpdateDto statsUpdate = LiveStatsUpdateDto.builder()
-                    .liveSeq(liveSeq)
-                    .viewerCount(viewerCount)
-                    .chatCount(chatCount)
-                    .likeCount(likeCount)
-                    .updateType(updateType)
-                    .build();
-
-            // JSON 변환 및 발행
-            ObjectMapper objectMapper = new ObjectMapper();
-            String payload = objectMapper.writeValueAsString(statsUpdate);
-            liveStatsUpdatePubSubService.publish("live:stats:updates", payload);
-
-            log.info("[LIVE_STATS] 통계 업데이트 발행 → liveSeq={}, type={}, viewers={}, chats={}, likes={}",
-                    liveSeq, updateType, viewerCount, chatCount, likeCount);
-        } catch (Exception e) {
-            log.error("[LIVE_STATS] 통계 업데이트 발행 실패: {}", e.getMessage(), e);
-        }
-    }
-    }
+}
 
