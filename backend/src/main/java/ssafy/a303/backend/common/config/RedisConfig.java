@@ -26,11 +26,9 @@ import ssafy.a303.backend.livestream.service.LiveStartNotificationPubSubService;
 /**
  * ======================================================================
  * Redis를 다음과 같이 분리하여 사용한다.
- *
  *  DB0 → 공용 RedisTemplate (기본 Spring 사용 / 세션 등)
  *  DB1 → 1:1 채팅용 Redis (Pub/Sub + 채팅 메시지 저장)
  *  DB2 → 라이브 방송용 Redis (시청자/좋아요/채팅 실시간 이벤트)
- *
  * 분리 이유:
  *  - 채팅과 라이브 방송은 트래픽이 크고 실시간 특성이 강함
  *  - 서로 간섭되지 않도록 Redis DB를 논리적으로 분리

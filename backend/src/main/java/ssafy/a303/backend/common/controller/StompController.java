@@ -4,12 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import ssafy.a303.backend.chat.dto.request.ChatMessageRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
@@ -23,7 +21,6 @@ import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
 import ssafy.a303.backend.livestream.service.LiveChatService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
-import ssafy.a303.backend.livestream.service.LiveService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,16 +35,13 @@ import java.util.Base64;
  * 역할
  *  - 클라이언트가 STOMP 프로토콜을 통해 `/pub/**` 경로로 전송한 메시지를 수신
  *  - Redis Pub/Sub 기반으로 `/sub/**` 경로를 구독 중인 클라이언트에게 실시간으로 브로드캐스트
- *
  * 주요 경로
  *  - 1:1 채팅   → /pub/chat/{roomSeq} 발행, /sub/chat/{roomSeq} 구독
  *  - 라이브 채팅 → /pub/live/{liveSeq} 발행, /sub/live/{liveSeq} 구독
- *
  * STOMP 메시지 동작 흐름
  *  1) 클라이언트가 /pub 경로로 메시지를 보낸다.
  *  2) 서버는 @MessageMapping 메서드로 해당 메시지를 수신한다.
  *  3) DB에 저장한 후 Redis Pub/Sub 채널을 통해 /sub 경로 구독자에게 브로드캐스트한다.
- *
  * 인증 처리
  *  - CONNECT 시 JWT 인증 검증은 StompHandler에서 수행된다.
  *  - SUBSCRIBE 시 접근 권한(방 참여 여부 등)을 확인할 수 있다.
@@ -62,7 +56,6 @@ public class StompController {
     private final ChatRedisPubSubService chatRedisPubSubService;
     private final LiveChatService liveChatService;
     private final LiveRedisPubSubService liveRedisPubSubService;
-    private final LiveService liveService;
     private final UserRepository userRepository;
     private final MessageReadStatusRepository messageReadStatusRepository;
     private final RedisTemplate<Object, Object> redisTemplate;
@@ -74,7 +67,6 @@ public class StompController {
                           ChatRedisPubSubService chatRedisPubSubService,
                           LiveChatService liveChatService,
                           LiveRedisPubSubService liveRedisPubSubService,
-                          LiveService liveService,
                           UserRepository userRepository,
                           MessageReadStatusRepository messageReadStatusRepository,
                           RedisTemplate<Object, Object> redisTemplate,
@@ -83,7 +75,6 @@ public class StompController {
         this.chatRedisPubSubService = chatRedisPubSubService;
         this.liveChatService = liveChatService;
         this.liveRedisPubSubService = liveRedisPubSubService;
-        this.liveService = liveService;
         this.userRepository = userRepository;
         this.messageReadStatusRepository = messageReadStatusRepository;
         this.redisTemplate = redisTemplate;

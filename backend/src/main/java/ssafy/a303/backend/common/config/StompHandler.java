@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -62,13 +63,12 @@ public class StompHandler implements ChannelInterceptor {
      * STOMP 인바운드 메시지를 가로채는 핵심 메서드.
      *  - message: 클라이언트가 보낸 STOMP 프레임
      *  - channel: 메시지가 전달될 채널
-     *
      * Command에 따라 검증 로직 분기:
      *  - CONNECT → JWT 토큰 유효성 확인
      *  - SUBSCRIBE → 구독 권한(방 접근 가능 여부) 확인
      */
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
 
         // STOMP 헤더 정보를 파싱하기 위한 헬퍼 객체
         final StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);

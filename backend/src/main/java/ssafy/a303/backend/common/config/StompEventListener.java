@@ -14,7 +14,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * WebSocket(STOMP) 연결/해제 이벤트를 감지하여:
  * 1) 라이브 시청자 입장/퇴장 관리
  * 2) 시청자 수 변동 시 Redis Pub/Sub 로 실시간 갱신 신호 전송
- *
  * 즉, "누가 방송 들어왔고 나갔는지" 를 자동 처리하는 관리자 역할.
  */
 @Component
@@ -41,8 +39,7 @@ public class StompEventListener {
       * "sessionABC" → (userSeq=10, liveSeq=77),
       * "sessionXYZ" → (userSeq=5, liveSeq=77)}*/
     private final Map<String, UserLiveInfo> sessionToLiveMap = new ConcurrentHashMap<>();
-    
-    private final LiveService liveService;
+
     private final RedisTemplate<Object, Object> redisTemplate;
     private final StringRedisTemplate liveRedisTemplate;
     
@@ -50,7 +47,6 @@ public class StompEventListener {
     public StompEventListener(@Lazy LiveService liveService, 
                               RedisTemplate<Object, Object> redisTemplate,
                               @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate) {
-        this.liveService = liveService;
         this.redisTemplate = redisTemplate;
         this.liveRedisTemplate = liveRedisTemplate;
     }
@@ -74,7 +70,6 @@ public class StompEventListener {
     /**
      * WebSocket 연결이 끊어졌을 때 실행되는 이벤트
      * → 브라우저 닫기, 새로고침, 네트워크 끊김 모두 감지 가능
-     *
      * 여기서 중요한 역할:
      * - 해당 세션이 보고 있던 라이브 방송에서 자동 퇴장 처리
      * - Redis 에서 시청자 목록 제거
@@ -112,7 +107,6 @@ public class StompEventListener {
     /**
      * 사용자가 라이브 방송에 입장했을 때 호출되는 메서드
      * → LiveService.startLiveToken() 에서 명시적으로 호출됨
-     *
      * 이 메서드가 호출되어야 "퇴장 감지 시 어떤 방송에서 나갔는지" 알 수 있음
      */
     public void registerLiveViewer(String sessionId, Integer userSeq, Integer liveSeq) {
@@ -121,15 +115,8 @@ public class StompEventListener {
     }
 
     /**
-     * WebSocket 세션과 사용자 정보를 묶는 간단한 DTO 역할
-     */
-    private static class UserLiveInfo {
-        final Integer userSeq;
-        final Integer liveSeq;
-        
-        UserLiveInfo(Integer userSeq, Integer liveSeq) {
-            this.userSeq = userSeq;
-            this.liveSeq = liveSeq;
-        }
+         * WebSocket 세션과 사용자 정보를 묶는 간단한 DTO 역할
+         */
+        private record UserLiveInfo(Integer userSeq, Integer liveSeq) {
     }
 }

@@ -13,7 +13,6 @@ import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
-import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.request.LiveCreateRequestDto;
 import ssafy.a303.backend.livestream.dto.response.*;
 import ssafy.a303.backend.livestream.dto.response.LiveStartNotificationDto;
@@ -32,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 @Log4j2
 public class LiveService {
 
@@ -40,12 +38,27 @@ public class LiveService {
     private final LiveStreamRepository liveStreamRepository;
     private final UserRepository userRepository;
     private final OpenVidu openVidu;
-    private final LiveRedisPubSubService liveRedisPubSubService;
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
-
-    @Qualifier("liveRedisTemplate")
     private final StringRedisTemplate liveRedisTemplate;
     private final RedisTemplate<Object, Object> redisTemplate;
+
+    public LiveService(
+            AuctionRepository auctionRepository,
+            LiveStreamRepository liveStreamRepository,
+            UserRepository userRepository,
+            OpenVidu openVidu,
+            LiveStartNotificationPubSubService liveStartNotificationPubSubService,
+            @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
+            RedisTemplate<Object, Object> redisTemplate
+    ) {
+        this.auctionRepository = auctionRepository;
+        this.liveStreamRepository = liveStreamRepository;
+        this.userRepository = userRepository;
+        this.openVidu = openVidu;
+        this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
+        this.liveRedisTemplate = liveRedisTemplate;
+        this.redisTemplate = redisTemplate;
+    }
 
     /**라이브 방송 시작*/
     public LiveCreateResponseDto startLive(LiveCreateRequestDto requestDto, Integer hostUserSeq) {
@@ -161,7 +174,7 @@ public class LiveService {
                 throw new CustomException(ErrorCode.OPENVIDU_SESSION_NOT_FOUND);
             }
 
-            /** 4. 역할 설정 (방장: PUBLISHER / 시청자: SUBSCRIBER)
+            /* 4. 역할 설정 (방장: PUBLISHER / 시청자: SUBSCRIBER)
              * PUBLISHER : 송출자 , 카메라/마이크 전송 가능, 방장/방송 호스트
              * SUBSCRIBER : 시청자, 영상/오디오 보기만 가능, 송출은 불가, 시청자/관전자
              * */
@@ -183,7 +196,7 @@ public class LiveService {
             redisTemplate.opsForSet().add(viewerKey, userSeq);
 
             // 8. 현재 시청자 수를 Pub/Sub 로 전송 (라이브 방송 내부용)
-            long viewerCount = redisTemplate.opsForSet().size(viewerKey);
+            long viewerCount = Optional.ofNullable(redisTemplate.opsForSet().size(viewerKey)).orElse(0L);
             liveRedisTemplate.convertAndSend(
                     "live:" + liveSeq,
                     "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"

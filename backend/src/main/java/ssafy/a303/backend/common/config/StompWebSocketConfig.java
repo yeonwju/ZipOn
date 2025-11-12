@@ -30,7 +30,6 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * 클라이언트(프론트)가 최초로 WebSocket 연결을 시도하는 주소를 정의한다.
      * 예:
      *    ws://localhost:8080/ws
-     *
      * SockJS:
      *    WebSocket이 막혀있는 환경(회사 네트워크 등)에서도
      *    Long-Polling 방식으로 연결 자동 대체
@@ -42,9 +41,7 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 // 개발 환경:
                 .setAllowedOriginPatterns(
                         "http://localhost:3000",
-                        "http://localhost:5173",
-                        "http://127.0.0.1:3000",
-                        "http://127.0.0.1:5173"
+                        "http://127.0.0.1:3000"
                 )
                 // 프로덕션 환경 (배포 시 위 개발 환경을 주석 처리하고 아래 사용):
                 // .setAllowedOriginPatterns("https://your-domain.com")
@@ -55,11 +52,9 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * [2] STOMP 메시지 라우팅 규칙 설정
      * ---------------------------------------------------
      * 경로 체계:
-     *
      *  (1) 클라이언트 → 서버 (메시지 보낼 때)
      *      /pub/**  로 전송
      *      → @MessageMapping("...") 메서드로 라우팅됨
-     *
      *  (2) 서버 → 클라이언트 (메시지 받을 때)
      *      /sub/**  경로를 구독해야 메시지를 실시간으로 받을 수 있음
      *      → SimpleBroker가 자동으로 브로드캐스트 처리
