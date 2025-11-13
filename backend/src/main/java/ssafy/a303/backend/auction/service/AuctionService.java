@@ -2,6 +2,7 @@ package ssafy.a303.backend.auction.service;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
@@ -121,7 +123,7 @@ public class AuctionService {
         return BrkCancelResponseDto.of(a);
     }
 
-    /** REQUIRED, ACCEPTED 상태의 신청 리스트 조회 */
+    /** REQUESTED 상태의 신청 리스트 조회 */
     public Page<BrkApplicantResponseDto> listApplicants(Integer propertySeq,
                                                         Integer userSeq,
                                                         Pageable pageable){
@@ -132,6 +134,10 @@ public class AuctionService {
             throw new CustomException(ErrorCode.READ_NO_AUTH);
         }
 
-        return auctionRepository.findApplicantsByPropertySeq(propertySeq, pageable);
+        Page<BrkApplicantResponseDto> result = auctionRepository.findApplicantsByPropertySeq(propertySeq, pageable);
+
+        log.info("중개 신청 리스트 ={}", result.getContent().size());
+
+        return result;
     }
 }

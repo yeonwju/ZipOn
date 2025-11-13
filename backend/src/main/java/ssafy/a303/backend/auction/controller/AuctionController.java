@@ -25,7 +25,7 @@ import ssafy.a303.backend.auction.service.AuctionService;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 
-@Tag(name = "경매")
+@Tag(name = "중개 및 경매")
 @RestController
 @RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
@@ -139,7 +139,26 @@ public class AuctionController {
         return ResponseDTO.ok(res, "신청이 취소되었습니다.");
     }
 
-
+    @Operation(
+            summary = "중개 및 경매 신청 취소",
+            description = "페이징 처리 되어 있습니다. page, size, sort 쿼리 파라미터로"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "신청 중개인 리스트 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = BrkApplicantResponseDto.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            
+                                    """
+                            )
+                    )
+            )
+    })
     @GetMapping("/{propertySeq}/applicants")
     public ResponseEntity<ResponseDTO<Page<BrkApplicantResponseDto>>> listApplicants(@PathVariable Integer propertySeq,
                                                                                     @AuthenticationPrincipal Integer userSeq,

@@ -46,13 +46,11 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
         join a.user u
         join Broker b on b.user.userSeq = u.userSeq
         where a.property.propertySeq = :propertySeq
-            and (:status is null or a.status in :status)
         """,
     countQuery = """
     select count(a)
     from Auction a
     where a.property.propertySeq = :propertySeq
-    and (:status is null or a.status in :status)
     """)
     Page<BrkApplicantResponseDto> findApplicantsByPropertySeq(@Param("propertySeq") Integer propertySeq, Pageable pageable);
 
