@@ -140,7 +140,7 @@ public class AuctionController {
     }
 
     @Operation(
-            summary = "중개 및 경매 신청 취소",
+            summary = "신청 중개인 리스트 조회",
             description = "페이징 처리 되어 있습니다. page, size, sort 쿼리 파라미터로"
     )
     @ApiResponses({
@@ -153,7 +153,64 @@ public class AuctionController {
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
-                                            
+                                            {
+                                              "data": {
+                                                "content": [
+                                                  {
+                                                    "auctionSeq": 6,
+                                                    "brkUserSeq": 2,
+                                                    "brkNm": "김도현",
+                                                    "brkProfileImg": null,
+                                                    "status": "ACCEPTED",
+                                                    "mediateCnt": 1,
+                                                    "intro": "굿",
+                                                    "strmDate": "2025-12-11",
+                                                    "strmStartTm": "14:00:00",
+                                                    "strmEndTm": "15:00:00"
+                                                  },
+                                                  {
+                                                    "auctionSeq": 5,
+                                                    "brkUserSeq": 2,
+                                                    "brkNm": "김도현",
+                                                    "brkProfileImg": null,
+                                                    "status": "REQUESTED",
+                                                    "mediateCnt": 1,
+                                                    "intro": "겁나 빨리 팝니다",
+                                                    "strmDate": "2025-12-12",
+                                                    "strmStartTm": "16:00:00",
+                                                    "strmEndTm": "17:00:00"
+                                                  }
+                                                ],
+                                                "pageable": {
+                                                  "pageNumber": 0,
+                                                  "pageSize": 2,
+                                                  "sort": {
+                                                    "empty": false,
+                                                    "sorted": true,
+                                                    "unsorted": false
+                                                  },
+                                                  "offset": 0,
+                                                  "paged": true,
+                                                  "unpaged": false
+                                                },
+                                                "last": true,
+                                                "totalElements": 2,
+                                                "totalPages": 1,
+                                                "size": 2,
+                                                "number": 0,
+                                                "sort": {
+                                                  "empty": false,
+                                                  "sorted": true,
+                                                  "unsorted": false
+                                                },
+                                                "first": true,
+                                                "numberOfElements": 2,
+                                                "empty": false
+                                              },
+                                              "message": "신청된 중개인 목록 조회 성공",
+                                              "status": 200,
+                                              "timestamp": 1762998510965
+                                            }
                                     """
                             )
                     )

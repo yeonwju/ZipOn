@@ -123,7 +123,7 @@ public class AuctionService {
         return BrkCancelResponseDto.of(a);
     }
 
-    /** REQUESTED 상태의 신청 리스트 조회 */
+    /** REQUESTED, ACCEPTED 상태의 신청 리스트 조회 */
     public Page<BrkApplicantResponseDto> listApplicants(Integer propertySeq,
                                                         Integer userSeq,
                                                         Pageable pageable){
@@ -134,8 +134,12 @@ public class AuctionService {
             throw new CustomException(ErrorCode.READ_NO_AUTH);
         }
 
-        Page<BrkApplicantResponseDto> result = auctionRepository.findApplicantsByPropertySeq(propertySeq, pageable);
+        List<AuctionStatus> statuses = List.of(
+                AuctionStatus.REQUESTED,
+                AuctionStatus.ACCEPTED
+        );
 
+        Page<BrkApplicantResponseDto> result = auctionRepository.findApplicantsByPropertySeq(propertySeq, statuses, pageable);
         log.info("중개 신청 리스트 ={}", result.getContent().size());
 
         return result;
