@@ -23,6 +23,8 @@ import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.property.util.S3Uploader;
 import ssafy.a303.backend.search.service.PropertySearchService;
+import ssafy.a303.backend.user.entity.User;
+import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -43,6 +45,7 @@ public class PropertyService {
     private final CertificationRepository certificationRepository;
     private final S3Uploader s3Uploader;
     private final PropertySearchService propertySearchService;
+    private final UserRepository userRepository;
 
     @Value("${app.s3.expose:presigned}")
     private String exposeMode;
@@ -60,10 +63,12 @@ public class PropertyService {
         //로그인 유저와 등록하려는 사람의 이름이 동일한지.
         //token에 이름 정보
 
+        User lessor = userRepository.findById(userSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 매물 정보 등록
         Property p = Property.builder()
-                .lessorSeq(userSeq)
+                .lessor(lessor)
                 .address(req.address())
                 .propertyNm(req.propertyNm())
                 .buildingType(req.buildingType())
@@ -198,8 +203,11 @@ public class PropertyService {
                 ))
                 .toList();
 
+//        User lessor = userRepository.findById(userSeq)
+//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         DetailResponseDto detail = new DetailResponseDto(
-                propertySeq, p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(), p.getBuildingType(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),
@@ -242,7 +250,7 @@ public class PropertyService {
      * @param userSeq
      */
     public void assertCanEdit(Property p, Integer userSeq) {
-        if(userSeq == null || !Objects.equals(userSeq, p.getLessorSeq()))
+        if(userSeq == null || !Objects.equals(userSeq, p.getLessor().getUserSeq()))
             throw new CustomException(ErrorCode.NO_AUTHORIZATION);
     }
 
@@ -277,10 +285,7 @@ public class PropertyService {
         if (req.petAvailable() != null) p.setPetAvailable(req.petAvailable());
 
         return new PropertyUpdateResponseDto(
-                p.getPropertySeq(), p.getContent(), p.getArea(), p.getAreaP(),
-                p.getDeposit(), p.getMnRent(), p.getFee(),
-                p.getPeriod(), p.getFloor(), p.getFacing(), p.getRoomCnt(), p.getBathroomCnt(),
-                p.getConstructionDate(), p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable()
+                p.getPropertySeq()
         );
     }
 
