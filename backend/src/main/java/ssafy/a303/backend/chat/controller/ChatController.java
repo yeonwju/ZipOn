@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.chat.dto.request.ChatRoomCreateRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
@@ -21,7 +22,7 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 
 import java.util.List;
 
-@Tag(name = "채팅")
+@Tag(name = "1:1 채팅")
 @RestController
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
@@ -44,7 +45,7 @@ public class ChatController {
                     description = "채팅방 생성/조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatRoomResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅방 생성 성공",
                                     value = """
@@ -57,7 +58,8 @@ public class ChatController {
                         "opponent": {
                           "userSeq": 2,
                           "name": "홍길동",
-                          "nickname": "집주인"
+                          "nickname": "집주인",
+                          "profileImg": "https://s3.amazonaws.com/bucket/profile.jpg"
                         }
                       }
                     }
@@ -70,7 +72,7 @@ public class ChatController {
                     description = "잘못된 요청",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatRoomResponseDto.class),
                             examples = @ExampleObject(
                                     name = "잘못된 요청",
                                     value = """
@@ -85,12 +87,13 @@ public class ChatController {
     })
     @PostMapping("/room")
     public ResponseEntity<ResponseDTO<ChatRoomResponseDto>> createOrGetRoom(
-            @RequestBody ChatRoomCreateRequestDto requestDto) {
+            @RequestBody ChatRoomCreateRequestDto requestDto,
+            @AuthenticationPrincipal Integer userSeq) {
 
-        log.info("[CHAT][CREATE] propertySeq={}, isAucPref={}",
-                requestDto.getPropertySeq(), requestDto.getAucPref());
+        log.info("[CHAT][CREATE] userSeq={}, propertySeq={}, isAucPref={}",
+                userSeq, requestDto.getPropertySeq(), requestDto.getAucPref());
 
-        ChatRoomResponseDto response = chatService.createOrGetRoom(requestDto);
+        ChatRoomResponseDto response = chatService.createOrGetRoom(requestDto, userSeq);
 
         // new 상태에 따라 메시지 변경
         String message = response.getNewRoom()
@@ -114,7 +117,7 @@ public class ChatController {
                     description = "조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = MyChatListResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅방 목록 조회 성공",
                                     value = """
@@ -124,10 +127,16 @@ public class ChatController {
                       "data": [
                         {
                           "roomSeq": 1,
-                          "partnerSeq": 2,
-                          "partnerName": "홍길동",
-                          "lastMessage": "안녕하세요",
-                          "lastSentAt": "2025-11-06T10:30:00",
+                          "partner": {
+                            "userSeq": 2,
+                            "name": "홍길동",
+                            "nickname": "집주인",
+                            "profileImg": "https://s3.amazonaws.com/bucket/profile.jpg"
+                          },
+                          "lastMessage": {
+                            "content": "안녕하세요",
+                            "sentAt": "2025-11-06T10:30:00"
+                          },
                           "unreadCount": 3
                         }
                       ]
@@ -138,8 +147,9 @@ public class ChatController {
             )
     })
     @GetMapping("/my/rooms")
-    public ResponseEntity<ResponseDTO<List<MyChatListResponseDto>>> getMyChatRooms() {
-        List<MyChatListResponseDto> rooms = chatService.getMyChatRooms();
+    public ResponseEntity<ResponseDTO<List<MyChatListResponseDto>>> getMyChatRooms(
+            @AuthenticationPrincipal Integer userSeq) {
+        List<MyChatListResponseDto> rooms = chatService.getMyChatRooms(userSeq);
         return ResponseDTO.ok(rooms, "내 채팅 목록을 불러왔습니다.");
     }
 
@@ -157,25 +167,29 @@ public class ChatController {
                     description = "조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatMessageResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅 내역 조회 성공",
                                     value = """
-                    {
-                      "status": 200,
-                      "message": "채팅 내역을 불러왔습니다.",
-                      "data": [
-                        {
-                          "messageSeq": 1,
-                          "roomSeq": 1,
-                          "senderSeq": 2,
-                          "senderName": "홍길동",
-                          "content": "안녕하세요",
-                          "sentAt": "2025-11-06T10:30:00"
-                        }
-                      ]
-                    }
-                    """
+                                {
+                                  "status": 200,
+                                  "message": "채팅 내역을 불러왔습니다.",
+                                  "data": [
+                                    {
+                                      "messageSeq": 1,
+                                      "roomSeq": 1,
+                                      "sender": {
+                                        "userSeq": 2,
+                                        "name": "홍길동",
+                                        "nickname": "집주인",
+                                        "profileImg": "https://s3.amazonaws.com/bucket/profile.jpg"
+                                      },
+                                      "content": "안녕하세요",
+                                      "sentAt": "2025-11-06T10:30:00"
+                                    }
+                                  ]
+                                }
+                                """
                             )
                     )
             ),
@@ -184,7 +198,7 @@ public class ChatController {
                     description = "채팅방을 찾을 수 없음",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class),
+                            schema = @Schema(implementation = ChatMessageResponseDto.class),
                             examples = @ExampleObject(
                                     name = "채팅방 없음",
                                     value = """
@@ -225,8 +239,7 @@ public class ChatController {
                                     value = """
                     {
                       "status": 200,
-                      "message": "읽음 처리 완료되었습니다.",
-                      "data": null
+                      "message": "읽음 처리 완료되었습니다."
                     }
                     """
                             )
@@ -251,8 +264,10 @@ public class ChatController {
             )
     })
     @PostMapping("/room/{roomSeq}/read")
-    public ResponseEntity<ResponseDTO<Void>> readMessages(@PathVariable Integer roomSeq) {
-        chatService.readMessages(roomSeq);
+    public ResponseEntity<ResponseDTO<Void>> readMessages(
+            @PathVariable Integer roomSeq,
+            @AuthenticationPrincipal Integer userSeq) {
+        chatService.readMessages(roomSeq, userSeq);
         return ResponseDTO.ok(null, "읽음 처리 완료되었습니다.");
     }
 
@@ -276,8 +291,7 @@ public class ChatController {
                                     value = """
                     {
                       "status": 200,
-                      "message": "채팅방에서 정상적으로 퇴장하였습니다.",
-                      "data": null
+                      "message": "채팅방에서 정상적으로 퇴장하였습니다."
                     }
                     """
                             )
@@ -302,8 +316,10 @@ public class ChatController {
             )
     })
     @DeleteMapping("room/{roomId}/leave")
-    public ResponseEntity<ResponseDTO<Void>> leaveRoom(@PathVariable Integer roomId) {
-         chatService.leaveRoom(roomId);
+    public ResponseEntity<ResponseDTO<Void>> leaveRoom(
+            @PathVariable Integer roomId,
+            @AuthenticationPrincipal Integer userSeq) {
+         chatService.leaveRoom(roomId, userSeq);
          return ResponseDTO.ok(null, "채팅방에서 정상적으로 퇴장하였습니다.");
     }
 }

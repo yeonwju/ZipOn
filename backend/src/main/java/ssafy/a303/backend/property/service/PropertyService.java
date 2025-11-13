@@ -29,10 +29,7 @@ import ssafy.a303.backend.search.service.PropertySearchService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -165,6 +162,23 @@ public class PropertyService {
             }
         }
 
+        /** 중개인 없이 스스로 경매 라이브 진행하면 바로 Auction 테이블에 경매 정보 저장 */
+        if(!req.isBrkPref() && req.isAucPref()) {
+            Auction a = Auction.builder()
+                    .user(lessor)
+                    .property(p)
+                    .strmDate(req.aucAt().toLocalDate())
+                    .strmStartTm(req.aucAt().toLocalTime())
+                    .strmEndTm(req.aucAt().toLocalTime().plusHours(1))
+                    .auctionEndAt(LocalDateTime.of(
+                            req.aucAt().toLocalDate().plusDays(1),
+                            LocalTime.parse("12:00:00")
+                    ))
+                    .status(AuctionStatus.ACCEPTED)
+                    .build();
+            auctionRepository.save(a);
+        }
+
         /** ES 색인 */
         try {
             propertySearchService.setIndex(p);
@@ -212,15 +226,28 @@ public class PropertyService {
         Auction auction = auctionRepository.findByProperty_PropertySeqAndStatus(propertySeq, AuctionStatus.ACCEPTED)
                 .orElse(null);
 
-        LocalDateTime liveAt;
+        LocalDateTime liveAt = null;
         if(auction == null) {
             liveAt = null;
         } else {
             liveAt = LocalDateTime.of(auction.getStrmDate(), auction.getStrmStartTm());
         }
 
+        /** 중개인 없이 자기가 경매 라이브하는 경우 분기 처리 */
+        Integer auctionSeq = null;
+
+        if(aucInfo.getIsAucPref() && !aucInfo.getIsBrkPref()) {
+            auctionSeq = auction.getAuctionSeq();
+        }else {
+            if(auction == null){
+                auctionSeq = null;
+            }else{
+                auctionSeq = auction.getAuctionSeq();
+            }
+        }
+
         DetailResponseDto detail = new DetailResponseDto(
-                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), liveAt, p.getBrkSeq(), p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), liveAt, p.getBrkSeq(), auctionSeq, p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(), p.getBuildingType(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),

@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -25,30 +26,16 @@ import ssafy.a303.backend.common.response.ErrorCode;
 
 /**
  * StompHandler
- * -----------------------------------------------------------------------------
- * 역할:
- *  - WebSocket(STOMP) 인바운드 메시지를 가로채 인증/인가 로직을 수행하는 인터셉터
- *  - Spring Security FilterChain은 HTTP 요청에만 작동하므로,
- *    STOMP(WebSocket) 메시지는 직접 JWT 검증을 수행해야 한다.
-
- * 주요 동작:
- *   1) CONNECT → 클라이언트가 웹소켓 연결 시도 시 JWT 유효성 검증
- *   2) SUBSCRIBE → 특정 Topic(예: 채팅방)에 구독 요청 시 접근 권한 검증
- *   3) (선택) SEND → 메시지 발송 시에도 필요 시 검증 로직 추가 가능
-
- * STOMP 헤더 구조:
- *   - 클라이언트는 Authorization 헤더를 "native header"에 담아 전송해야 한다.
- *     예: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
- * 예시 구독 경로 규칙:
- *   - /sub/chat/{roomId} → 1:1 채팅방 (참가자만 접근 가능)
- *   - /sub/live/{liveId} → 실시간 방송 (공개 접근 가능)
+ * ------------------------------------------------------------------
+ * WebSocket(STOMP) 메시지에 대한 인증/인가 처리 담당 인터셉터.
+ * HTTP 요청은 Spring Security FilterChain이 처리하지만,
+ * WebSocket은 그 체인을 타지 않기 때문에 직접 JWT 검증을 해줘야 한다.
  */
 @Component
 @Log4j2
 public class StompHandler implements ChannelInterceptor {
 
-    /** JWT 서명 검증용 secret key (application.yml에서 주입) */
+    /** JWT 서명 검증용 secret key */
     @Value("${jwt.secret}")
     private String secretKey;
     
@@ -57,9 +44,13 @@ public class StompHandler implements ChannelInterceptor {
 
     /** 채팅방 접근 권한 검증에 사용할 서비스 */
     private final ChatService chatService;
+    
+    /** 라이브 방송 입장/퇴장 등록 처리 담당 */
+    private final StompEventListener stompEventListener;
 
-    public StompHandler(ChatService chatService) {
+    public StompHandler(ChatService chatService, StompEventListener stompEventListener) {
         this.chatService = chatService;
+        this.stompEventListener = stompEventListener;
     }
     
     @PostConstruct
@@ -69,23 +60,20 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     /**
-     * preSend()
-     * -------------------------------------------------------------------------
      * STOMP 인바운드 메시지를 가로채는 핵심 메서드.
      *  - message: 클라이언트가 보낸 STOMP 프레임
      *  - channel: 메시지가 전달될 채널
-
      * Command에 따라 검증 로직 분기:
      *  - CONNECT → JWT 토큰 유효성 확인
      *  - SUBSCRIBE → 구독 권한(방 접근 가능 여부) 확인
      */
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
 
         // STOMP 헤더 정보를 파싱하기 위한 헬퍼 객체
         final StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
-        // 1) 연결 시도 → JWT 유효성 검증
+        // 1) CONNECT: 웹소켓 연결 시도 시 → JWT 검증
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             try {
                 validateJwt(accessor);
@@ -97,7 +85,7 @@ public class StompHandler implements ChannelInterceptor {
             }
         }
 
-        // 2) 구독 시도 → 방/채널 접근 권한 검증
+        // 2) SUBSCRIBE: 특정 채널/방 구독 시도 시 → 접근 권한 검증
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
             try {
                 validateRoomPermission(accessor);
@@ -109,21 +97,12 @@ public class StompHandler implements ChannelInterceptor {
             }
         }
 
-        // 검증 통과 → 메시지를 그대로 Broker로 전달
+        // 검증 통과 → 이 message 를 그대로 다음 단계에 계속 흘려보낸다
         return message;
     }
 
-    // ========================================================================
-    // CONNECT 단계: JWT 토큰 검증
-    // ========================================================================
-
     /**
-     * 클라이언트의 STOMP CONNECT 요청 시 JWT 유효성을 검증한다.
-     * 검증 순서:
-     *  1) Authorization 헤더 존재 확인
-     *  2) "Bearer " 접두어 제거 후 실제 토큰 추출
-     *  3) JJWT로 서명키 검증 및 만료 확인
-     * 예외 발생 시 → CustomException으로 차단 (ErrorCode.INVALID_AUTH_HEADER 등)
+     * CONNECT 요청에서 Authorization 헤더를 확인하고 JWT 검증 수행
      */
     private void validateJwt(StompHeaderAccessor accessor) {
         // Authorization 헤더 추출 (STOMP는 HTTP가 아니므로 native header에서 가져온다)
@@ -174,20 +153,17 @@ public class StompHandler implements ChannelInterceptor {
         }
     }
 
-    // ========================================================================
-    // SUBSCRIBE 단계: 구독 경로 및 접근 권한 검증
-    // ========================================================================
-
     /**
-     * 사용자가 특정 Topic(/sub/...)을 구독하려 할 때
-     * 경로 규칙 및 사용자 권한을 검증한다.
-     * 예:
-     *   /sub/chat/12 → category=chat, id=12
-     *   /sub/live/5  → category=live, id=5
+     * SUBSCRIBE 요청 시 경로 규칙 및 사용자 권한을 검증한다.
+     * 경로 패턴:
+     *   - /sub/chat/12 → 1:1 채팅방 (권한 검증 필요)
+     *   - /sub/live/5  → 라이브 방송 채팅 (공개, 세션 등록 필요)
+     *   - /sub/user/notifications/123 → 개인 알림 (공개)
+     *   - /sub/live/new/broadcast → 새 방송 시작 알림 (공개)
      */
     private void validateRoomPermission(StompHeaderAccessor accessor) {
 
-        // A) 목적지(destination) 확인 (예: /sub/chat/12)
+        // A) 목적지(destination) 확인
         final String dest = accessor.getDestination();
         log.info("[STOMP][SUBSCRIBE] 구독 요청: {}", dest);
         
@@ -195,7 +171,14 @@ public class StompHandler implements ChannelInterceptor {
             throw new CustomException(ErrorCode.INVALID_DESTINATION);
         }
 
-        // B) 경로 파싱
+        // B) 공개 채널은 바로 허용 (권한 검증 불필요)
+        if (dest.startsWith("/sub/live/new/broadcast") ||
+            dest.startsWith("/sub/user/notifications/")) {
+            log.info("[STOMP][SUBSCRIBE] 공개 채널 구독 허용: {}", dest);
+            return;
+        }
+
+        // C) 경로 파싱 (chat 또는 live)
         final String[] path = dest.split("/");
         if (path.length < 4) {
             log.error("[STOMP][SUBSCRIBE] 경로 형식 오류: {}", dest);
@@ -229,7 +212,7 @@ public class StompHandler implements ChannelInterceptor {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
-        final String subject = claims.getSubject(); // 사용자 식별자 (이메일 or ID)
+        final String subject = claims.getSubject(); // 사용자 식별자 (ID)
 
         // D) 카테고리별 접근 정책 처리
         if ("chat".equals(category)) {
@@ -250,8 +233,23 @@ public class StompHandler implements ChannelInterceptor {
             log.info("[SUBSCRIBE] 채팅방 구독 허용 - subject: {}, roomId: {}", subject, roomId);
 
         } else if ("live".equals(category)) {
-            // 라이브 방송은 공개 접근으로 가정 (정책에 따라 접근제어 추가 가능)
+            // 라이브 방송 채팅 채널 구독 (공개 접근)
             log.info("[SUBSCRIBE] 라이브 구독 허용 - subject: {}, liveId: {}", subject, id);
+            
+            // ⭐ 세션 등록 (비정상 종료 시 자동 퇴장 처리용)
+            try {
+                String sessionId = accessor.getSessionId();
+                Integer userSeq = Integer.valueOf(subject);
+                Integer liveSeq = Integer.valueOf(id);
+                
+                stompEventListener.registerLiveViewer(sessionId, userSeq, liveSeq);
+                
+                log.info("[SUBSCRIBE] 라이브 시청자 세션 등록 완료: sessionId={}, userSeq={}, liveSeq={}", 
+                        sessionId, userSeq, liveSeq);
+            } catch (Exception e) {
+                log.warn("[SUBSCRIBE] 라이브 시청자 세션 등록 실패 (구독은 허용): {}", e.getMessage());
+                // 세션 등록 실패해도 구독은 허용 (비정상 종료 감지만 안 될 뿐)
+            }
 
         } else {
             // 지원하지 않는 구독 카테고리

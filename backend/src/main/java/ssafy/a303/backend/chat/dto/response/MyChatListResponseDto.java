@@ -23,21 +23,54 @@ import java.time.LocalDateTime;
 public class MyChatListResponseDto {
 
     @Schema(description = "채팅방 식별자", example = "1")
-    private Integer roomSeq;            // chat_room.room_seq
+    private Integer roomSeq;
 
-    @Schema(description = "상대방 사용자 식별자", example = "2")
-    private Integer partnerSeq;         // 상대방 user_seq
+    @Schema(description = "상대방 정보")
+    private PartnerDto partner;
 
-    @Schema(description = "상대방 이름", example = "홍길동")
-    private String partnerName;         // 상대방 이름 (user.name)
-
-    @Schema(description = "최근 메시지 내용", example = "안녕하세요")
-    private String lastMessage;         // 최근 메시지 내용
-
-    @Schema(description = "최근 메시지 전송 시각", example = "2025-11-06T10:30:00")
-    private LocalDateTime lastSentAt;   // 최근 메시지 시각
+    @Schema(description = "최근 메시지 정보")
+    private LastMessageDto lastMessage;
 
     @Schema(description = "읽지 않은 메시지 개수", example = "3")
-    private Integer unreadCount;        // 읽지 않은 메시지 개수
+    private Integer unreadCount;
 
+
+    /**
+     * 상대방 정보 DTO
+     */
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PartnerDto {
+
+        @Schema(description = "상대방 사용자 식별자", example = "2")
+        private Integer userSeq;
+
+        @Schema(description = "상대방 이름", example = "홍길동")
+        private String name;
+
+        @Schema(description = "상대방 닉네임", example = "나집사")
+        private String nickname;
+
+        @Schema(description = "상대방 프로필 이미지 URL", example = "https://s3.../profile.jpg")
+        private String profileImg;
+    }
+
+
+    /**
+     * 최근 메시지 정보 DTO
+     */
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LastMessageDto {
+
+        @Schema(description = "메시지 내용", example = "안녕하세요")
+        private String content;
+
+        @Schema(description = "메시지 전송 시각", example = "2025-11-06T10:30:00")
+        private LocalDateTime sentAt;
+    }
 }

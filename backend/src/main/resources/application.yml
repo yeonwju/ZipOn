@@ -66,6 +66,11 @@ elasticsearch:
   index:
     property: my_index
 
+openvidu:
+  url: ${OPENVIDU_URL}
+  secret: ${OPENVIDU_SECRET}
+
+
 solapi:
   key: ${SOLAPI_API_KEY}
   secret-key: ${SOLAPI_API_SECRET_KEY}

@@ -45,6 +45,4 @@ public class User {
     @Column
     private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "lessor")
-    private List<Property> properties = new ArrayList<>();
 }
