@@ -454,4 +454,64 @@ public class LiveController {
         List<LiveChatMessageResponseDto> response = liveChatService.getChatHistory(liveSeq, limit);
         return ResponseDTO.ok(response, "채팅 내역을 조회했습니다.");
     }
+
+    /**
+     * 라이브 방송 가능 경매 리스트 조회
+     */
+    @Operation(
+            summary = "라이브 방송 가능 경매 리스트 조회",
+            description = """
+                현재 로그인한 사용자의 라이브 방송이 가능한 경매 리스트를 조회합니다.
+                
+                **조회 조건:**
+                - 해당 사용자의 경매 (user_seq)
+                - 상태가 ACCEPTED인 경매
+                - 한 번도 라이브 방송을 하지 않은 경매
+                - 최신순 정렬 (createdAt DESC)
+                """,
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "경매 리스트 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LiveAuctionListResponseDto.class),
+                            examples = @ExampleObject(
+                                    name = "경매 리스트 조회 성공",
+                                    value = """
+                                {
+                                  "status": 200,
+                                  "message": "라이브 방송이 가능한 경매 리스트를 조회했습니다.",
+                                  "data": [
+                                    {
+                                      "auctionSeq": 5,
+                                      "propertySeq": 10,
+                                      "propertyNm": "강남역 오피스텔 35평"
+                                    },
+                                    {
+                                      "auctionSeq": 3,
+                                      "propertySeq": 8,
+                                      "propertyNm": "래미안 아파트 25평"
+                                    },
+                                    {
+                                      "auctionSeq": 1,
+                                      "propertySeq": 5,
+                                      "propertyNm": "힐스테이트 20평"
+                                    }
+                                  ]
+                                }
+                                """
+                            )
+                    )
+            )
+    })
+    @GetMapping("auctions")
+    public ResponseEntity<ResponseDTO<List<LiveAuctionListResponseDto>>> getAuctionList(
+            @Parameter(hidden = true) @AuthenticationPrincipal Integer userSeq) {
+
+        List<LiveAuctionListResponseDto> response = liveService.getAuctionList(userSeq);
+        return ResponseDTO.ok(response, "라이브 방송이 가능한 경매 리스트를 조회했습니다.");
+    }
 }

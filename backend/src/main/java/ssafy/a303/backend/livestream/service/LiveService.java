@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.entity.Auction;
+import ssafy.a303.backend.auction.entity.AuctionStatus;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
@@ -529,6 +530,33 @@ public class LiveService {
 
         // true = 좋아요 상태 유지, false = 취소 상태 유지
         return !Boolean.TRUE.equals(alreadyLiked);
+    }
+
+    /**
+     * 라이브 방송이 가능한 경매 리스트 조회
+     * - 조건 1: 해당 사용자의 경매 (user_seq)
+     * - 조건 2: 상태가 ACCEPTED인 경매
+     * - 조건 3: 한 번도 라이브 방송을 하지 않은 경매 (LiveStream 레코드 없음)
+     * - 정렬: 최신순 (createdAt DESC)
+     */
+    @Transactional(readOnly = true)
+    public List<LiveAuctionListResponseDto> getAuctionList(Integer userSeq){
+
+        //1. User 조회 (존재 여부 검증)
+        userRepository.findById(userSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        //2. 해당 사용자의 ACCEPTED 상태 경매 리스트 조회 (라이브 이력이 없는 경매만, 최신순 정렬)
+        List<Auction> auctionList = auctionRepository.findByUserSeqAndStatus(userSeq, AuctionStatus.ACCEPTED);
+
+        //3. DTO 변환
+        return auctionList.stream()
+                .map(auction -> LiveAuctionListResponseDto.builder()
+                        .auctionSeq(auction.getAuctionSeq())
+                        .propertySeq(auction.getProperty().getPropertySeq())
+                        .propertyNm(auction.getProperty().getPropertyNm())
+                        .build())
+                .toList();
     }
 
 }
