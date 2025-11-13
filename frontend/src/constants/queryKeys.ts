@@ -28,7 +28,7 @@ export const userQueryKeys = {
 } as const
 
 /**
- * 매물 관련 Query Keys (향후 사용)
+ * 매물 관련 Query Keys
  */
 export const listingQueryKeys = {
   all: ['listing'] as const,
@@ -37,6 +37,14 @@ export const listingQueryKeys = {
   details: () => [...listingQueryKeys.all, 'detail'] as const,
   detail: (id: number) => [...listingQueryKeys.details(), id] as const,
 } as const
+
+/**
+ * 브로커 관련 Query Keys
+ */
+export const brokerQueryKeys = {
+  all: ['broker'] as const,
+  lists: (propertySeq: number) => [...brokerQueryKeys.all, 'list', propertySeq] as const,
+}
 
 /**
  * 경매 관련 Query Keys (향후 사용)
@@ -91,4 +99,3 @@ export const queryKeys = {
   chat: chatQueryKeys,
   notification: notificationQueryKeys,
 } as const
-

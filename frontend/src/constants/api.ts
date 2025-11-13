@@ -23,6 +23,14 @@ export const API_ENDPOINTS = {
   PHONE_VERIFY: '/api/v1/user/verify/sms',
   PHONE_VERIFY_CHECK: '/api/v1/user/verify/code',
   BUSSINESS_REGISTER: '/api/v1/broker',
+
+  // 브로커
+  REQUEST_BORKER_LIST: (
+    propertySeq: number,
+    pageable: { page: number; size: number; sort: string }
+  ) => `/api/v1/auctions/${propertySeq}/applicants`,
+
+  SELECT_BROKER: (auctionSeq: number) => `/api/v1/auctions/${auctionSeq}/accept`,
 } as const
 
 export const API_TIMEOUT = 10000 // 10초
