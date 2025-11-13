@@ -27,8 +27,6 @@ export default function NewListingContent() {
   // 매물 등록 Mutation
   const createListing = useCreateListing()
 
-  // TODO: React Query useSuspenseQuery로 교체
-
   // Step1 데이터
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [baseAddress, setBaseAddress] = useState<string>('')
@@ -104,15 +102,14 @@ export default function NewListingContent() {
 
   async function handleVerify() {
     try {
+      setIsVerifying(true)
       const request = {
         file: files[0],
         regiNm: user?.name,
         regiBirth: user?.birth,
         address: `${baseAddress} ${detailAddress}`,
       }
-
       const result = await registerListingVerification(request)
-      setIsVerifying(true)
 
       if (result.success) {
         console.log('인증 성공:', result)
@@ -185,6 +182,11 @@ export default function NewListingContent() {
           isBrkPref: additionalInfo.isBrkPref,
           aucAt: additionalInfo.aucAt,
           aucAvailable: additionalInfo.aucAvailable,
+          pdfCode: pdfCode,
+          verificationStatus: verificationStatus,
+          isCertificated: isCertificated,
+          riskScore: riskScore,
+          riskReason: riskReason,
         }),
         images: listingInfo.images, // File[] 객체 그대로 전달
       }

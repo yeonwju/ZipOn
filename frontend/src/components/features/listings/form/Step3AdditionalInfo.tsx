@@ -36,7 +36,6 @@ export default function Step3AdditionalInfo({
   const updateField = (field: keyof AdditionalInfo, value: string | boolean) => {
     const newInfo = { ...additionalInfo, [field]: value }
     onAdditionalInfoChange(newInfo)
-    console.log(`📝 Step3 - ${field} 변경:`, value)
   }
 
   const handleAuctionDateChange = (date: Date | undefined) => {
@@ -224,7 +223,7 @@ export default function Step3AdditionalInfo({
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
-                  경매 가능 시간
+                  실시간 방송 가능 시간
                 </label>
                 <input
                   type="text"
