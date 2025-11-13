@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ssafy.a303.backend.property.entity.Property;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -32,6 +35,7 @@ public class User {
     private String profileImg;
     @Column(length = 40)
     private String financeKey;
+    @Enumerated(EnumType.STRING)
     @Column
     private Role role;
     @CreationTimestamp
@@ -40,4 +44,7 @@ public class User {
     private LocalDateTime updatedAt;
     @Column
     private LocalDateTime deletedAt;
+
+    @OneToMany(mappedBy = "lessor")
+    private List<Property> properties = new ArrayList<>();
 }

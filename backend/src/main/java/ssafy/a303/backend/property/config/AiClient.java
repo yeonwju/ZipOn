@@ -1,5 +1,6 @@
 package ssafy.a303.backend.property.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.dto.response.VerificationResultResponseDto;
 
 @Component
+@Slf4j
 public class AiClient {
 
     private final WebClient client;
@@ -32,6 +34,8 @@ public class AiClient {
         mb.part("file", pdf.getResource())
                 .filename(pdf.getOriginalFilename() != null ? pdf.getOriginalFilename() : "certification.pdf")
                 .contentType(MediaType.APPLICATION_PDF);
+
+        log.info("AI 서버로 요청을 보내기 직전입니다.");
 
         VerificationResultResponseDto res = client.post()
                 .uri("/verify")
