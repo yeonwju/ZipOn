@@ -25,6 +25,7 @@ export default function Step3AdditionalInfo({
 }: Step3Props) {
   const [auctionDatePickerOpen, setAuctionDatePickerOpen] = useState(false)
   const [constructionDatePickerOpen, setConstructionDatePickerOpen] = useState(false)
+  const [liveTimeDatePickerOpen, setLiveTimeDatePickerOpen] = useState(false)
 
   const [selectedAuctionDate, setSelectedAuctionDate] = useState<Date | undefined>(
     additionalInfo.aucAt ? new Date(additionalInfo.aucAt) : undefined
@@ -32,6 +33,13 @@ export default function Step3AdditionalInfo({
   const [selectedConstructionDate, setSelectedConstructionDate] = useState<Date | undefined>(
     additionalInfo.constructionDate ? new Date(additionalInfo.constructionDate) : undefined
   )
+  const [selectedLiveDate, setSelectedLiveDate] = useState<Date | undefined>(
+    additionalInfo.aucAvailable ? new Date(additionalInfo.aucAvailable) : undefined
+  )
+  const [selectedLiveTime, setSelectedLiveTime] = useState({
+    hour: additionalInfo.aucAvailable ? new Date(additionalInfo.aucAvailable).getHours() : 14,
+    minute: additionalInfo.aucAvailable ? new Date(additionalInfo.aucAvailable).getMinutes() : 0,
+  })
 
   const updateField = (field: keyof AdditionalInfo, value: string | boolean) => {
     const newInfo = { ...additionalInfo, [field]: value }
@@ -56,6 +64,28 @@ export default function Step3AdditionalInfo({
       updateField('constructionDate', '')
     }
     setConstructionDatePickerOpen(false)
+  }
+
+  const handleLiveDateChange = (date: Date | undefined) => {
+    setSelectedLiveDate(date)
+    updateLiveDateTime(date, selectedLiveTime.hour, selectedLiveTime.minute)
+    setLiveTimeDatePickerOpen(false)
+  }
+
+  const handleLiveTimeChange = (hour: number, minute: number) => {
+    setSelectedLiveTime({ hour, minute })
+    updateLiveDateTime(selectedLiveDate, hour, minute)
+  }
+
+  const updateLiveDateTime = (date: Date | undefined, hour: number, minute: number) => {
+    if (date) {
+      // LocalDateTime 형식으로 변환: "2025-12-10T14:30:00"
+      const dateTime = new Date(date)
+      dateTime.setHours(hour, minute, 0, 0)
+      updateField('aucAvailable', dateTime.toISOString().slice(0, 19)) // "YYYY-MM-DDTHH:mm:ss"
+    } else {
+      updateField('aucAvailable', '')
+    }
   }
 
   return (
@@ -223,15 +253,78 @@ export default function Step3AdditionalInfo({
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
-                  실시간 방송 가능 시간
+                  실시간 방송 가능 날짜 및 시간
                 </label>
-                <input
-                  type="text"
-                  value={additionalInfo.aucAvailable}
-                  onChange={e => updateField('aucAvailable', e.target.value)}
-                  placeholder="예: 12월 10일 오후 시간대 희망합니다."
-                  className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                />
+                
+                {/* 날짜 선택 */}
+                <div className="mb-3">
+                  <Popover open={liveTimeDatePickerOpen} onOpenChange={setLiveTimeDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id="live-time-date"
+                        className="h-[36px] w-full justify-between border border-gray-300 font-normal"
+                      >
+                        {selectedLiveDate
+                          ? selectedLiveDate.toLocaleDateString('ko-KR')
+                          : '날짜 선택'}
+                        <ChevronDownIcon size={16} />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto overflow-hidden border border-gray-300 p-0"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={selectedLiveDate}
+                        onSelect={handleLiveDateChange}
+                        className={'bg-white'}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* 시간 선택 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-600">시</label>
+                    <select
+                      value={selectedLiveTime.hour}
+                      onChange={e => handleLiveTimeChange(Number(e.target.value), selectedLiveTime.minute)}
+                      className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                    >
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <option key={i} value={i}>
+                          {String(i).padStart(2, '0')}시
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-600">분</label>
+                    <select
+                      value={selectedLiveTime.minute}
+                      onChange={e => handleLiveTimeChange(selectedLiveTime.hour, Number(e.target.value))}
+                      className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                    >
+                      {[0, 10, 20, 30, 40, 50].map(min => (
+                        <option key={min} value={min}>
+                          {String(min).padStart(2, '0')}분
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 선택된 시간 미리보기 */}
+                {selectedLiveDate && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    선택된 시간: {selectedLiveDate.toLocaleDateString('ko-KR')}{' '}
+                    {String(selectedLiveTime.hour).padStart(2, '0')}:
+                    {String(selectedLiveTime.minute).padStart(2, '0')}
+                  </p>
+                )}
               </div>
             </div>
           </div>
