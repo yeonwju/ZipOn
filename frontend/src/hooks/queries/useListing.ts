@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { listingQueryKeys } from '@/constants'
-import { createListing } from '@/services/listingService'
+import { createListing, getListingDetail } from '@/services/listingService'
 import { RegListingRequest } from '@/types/api/listings'
 
 /**
@@ -18,5 +18,12 @@ export function useCreateListing() {
     onError: error => {
       console.error('매물 등록 실패:', error)
     },
+  })
+}
+
+export function useSearchListingDetail(seq: number) {
+  return useQuery({
+    queryKey: listingQueryKeys.detail(seq),
+    queryFn: () => getListingDetail(seq),
   })
 }
