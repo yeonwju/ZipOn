@@ -4,6 +4,7 @@ import { useUser } from '@/hooks/queries'
 import { useSearchListingDetail } from '@/hooks/queries/useListing'
 import { getListingButtonConfig, isLiveTimePassed } from '@/utils/listingButtons'
 
+import ListingAIAnalysis from './ListingAIAnalysis'
 import ListingDescription from './ListingDescription'
 import ListingFeatures from './ListingFeatures'
 import ListingImageGallery from './ListingImageGallery'
@@ -73,7 +74,7 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
   if (result.isBrkPref) features.push('중개 선호')
 
   return (
-    <div className="h-full">
+    <div className="h-full pb-20">
       {/* 컨텐츠 */}
       <main>
         {/* 이미지 갤러리 */}
@@ -96,6 +97,9 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
 
         {/* 상세 설명 */}
         <ListingDescription description={result.content} />
+
+        {/* AI 분석 */}
+        <ListingAIAnalysis riskScore={result.riskScore} riskReason={result.riskReason} />
       </main>
 
       {/* 고정 하단 버튼 - liveAt 지나면 표시 안 함 */}
