@@ -1,7 +1,4 @@
-import { notFound } from 'next/navigation'
-
 import { ListingDetail } from '@/components/features/listings'
-import { getListingDetail } from '@/services/listingService'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,18 +18,5 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params
   const seq = Number(id)
 
-  // 유효하지 않은 ID인 경우
-  if (isNaN(seq) || seq < 1 || seq > 100) {
-    notFound()
-  }
-
-  // 매물 상세 정보 가져오기
-  const listing = await getListingDetail(seq)
-
-  // 매물이 없는 경우
-  if (!listing) {
-    notFound()
-  }
-
-  return <ListingDetail listing={listing} />
+  return <ListingDetail propertySeq={seq} />
 }
