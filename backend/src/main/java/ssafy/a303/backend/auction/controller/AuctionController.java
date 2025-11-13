@@ -25,7 +25,7 @@ import ssafy.a303.backend.auction.service.AuctionService;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.property.dto.response.DetailResponseDto;
 
-@Tag(name = "경매")
+@Tag(name = "중개 및 경매")
 @RestController
 @RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
@@ -139,7 +139,83 @@ public class AuctionController {
         return ResponseDTO.ok(res, "신청이 취소되었습니다.");
     }
 
-
+    @Operation(
+            summary = "신청 중개인 리스트 조회",
+            description = "페이징 처리 되어 있습니다. page, size, sort 쿼리 파라미터로"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "신청 중개인 리스트 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = BrkApplicantResponseDto.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            {
+                                              "data": {
+                                                "content": [
+                                                  {
+                                                    "auctionSeq": 6,
+                                                    "brkUserSeq": 2,
+                                                    "brkNm": "김도현",
+                                                    "brkProfileImg": null,
+                                                    "status": "ACCEPTED",
+                                                    "mediateCnt": 1,
+                                                    "intro": "굿",
+                                                    "strmDate": "2025-12-11",
+                                                    "strmStartTm": "14:00:00",
+                                                    "strmEndTm": "15:00:00"
+                                                  },
+                                                  {
+                                                    "auctionSeq": 5,
+                                                    "brkUserSeq": 2,
+                                                    "brkNm": "김도현",
+                                                    "brkProfileImg": null,
+                                                    "status": "REQUESTED",
+                                                    "mediateCnt": 1,
+                                                    "intro": "겁나 빨리 팝니다",
+                                                    "strmDate": "2025-12-12",
+                                                    "strmStartTm": "16:00:00",
+                                                    "strmEndTm": "17:00:00"
+                                                  }
+                                                ],
+                                                "pageable": {
+                                                  "pageNumber": 0,
+                                                  "pageSize": 2,
+                                                  "sort": {
+                                                    "empty": false,
+                                                    "sorted": true,
+                                                    "unsorted": false
+                                                  },
+                                                  "offset": 0,
+                                                  "paged": true,
+                                                  "unpaged": false
+                                                },
+                                                "last": true,
+                                                "totalElements": 2,
+                                                "totalPages": 1,
+                                                "size": 2,
+                                                "number": 0,
+                                                "sort": {
+                                                  "empty": false,
+                                                  "sorted": true,
+                                                  "unsorted": false
+                                                },
+                                                "first": true,
+                                                "numberOfElements": 2,
+                                                "empty": false
+                                              },
+                                              "message": "신청된 중개인 목록 조회 성공",
+                                              "status": 200,
+                                              "timestamp": 1762998510965
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
     @GetMapping("/{propertySeq}/applicants")
     public ResponseEntity<ResponseDTO<Page<BrkApplicantResponseDto>>> listApplicants(@PathVariable Integer propertySeq,
                                                                                     @AuthenticationPrincipal Integer userSeq,

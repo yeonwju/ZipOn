@@ -10,6 +10,7 @@ import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface AuctionRepository extends JpaRepository<Auction, Integer> {
@@ -46,15 +47,15 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
         join a.user u
         join Broker b on b.user.userSeq = u.userSeq
         where a.property.propertySeq = :propertySeq
-            and (:status is null or a.status in :status)
+        and a.status in :status
         """,
     countQuery = """
     select count(a)
     from Auction a
     where a.property.propertySeq = :propertySeq
-    and (:status is null or a.status in :status)
+    and a.status in :status
     """)
-    Page<BrkApplicantResponseDto> findApplicantsByPropertySeq(@Param("propertySeq") Integer propertySeq, Pageable pageable);
+    Page<BrkApplicantResponseDto> findApplicantsByPropertySeq(@Param("propertySeq") Integer propertySeq, @Param("status") List<AuctionStatus> status, Pageable pageable);
 
 
 }
