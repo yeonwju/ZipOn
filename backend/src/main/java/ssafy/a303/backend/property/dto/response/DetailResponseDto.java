@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record DetailResponseDto(
@@ -14,6 +15,11 @@ public record DetailResponseDto(
         Integer lessorSeq,
         @Schema(description = "임대인의 프로필 사진", example = "assfasfas")
         String lessorProfileImg,
+
+        @Schema(description = "라이브 시작 날짜와 시간", example = "1212-12-12 12:12:12")
+        LocalDateTime liveAt,
+        @Schema(description = "중개인의 user seq", example = "1")
+        Integer brkSeq,
 
         //기본 정보
         @Schema(description = "매물 seq", example = "1")
