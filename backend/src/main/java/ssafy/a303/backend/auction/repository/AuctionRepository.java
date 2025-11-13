@@ -44,10 +44,11 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     boolean existsActiveByPropertyAndUser(@Param("propertySeq") Integer propertySeq,
                                           @Param("userSeq") Integer userSeq,
                                           @Param("status")AuctionStatus status);
+
     /** 특정 경매의 신청 정보를 user seq로 찾기 */
     Optional<Auction> findByAuctionSeqAndUser_UserSeq(Integer auctionSeq, Integer userSeq);
 
-    /** 매물 seq로 해당 매물의 신청 정보 조회 */
+    /** 매물 seq로 해당 매물에 신청한 중개인 정보 조회 */
     @Query(value = """
         select new ssafy.a303.backend.auction.dto.response.BrkApplicantResponseDto(
         a.auctionSeq,
@@ -75,5 +76,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     """)
     Page<BrkApplicantResponseDto> findApplicantsByPropertySeq(@Param("propertySeq") Integer propertySeq, @Param("status") List<AuctionStatus> status, Pageable pageable);
 
+    /** ACCEPTED 상태인 중개 매칭 정보 */
+    Optional<Auction> findByProperty_PropertySeqAndStatus(Integer propertySeq, AuctionStatus status);
 
 }

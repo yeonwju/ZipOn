@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.dto.request.BrkApplyRequestDto;
 import ssafy.a303.backend.auction.dto.request.BrkCancelRequestDto;
 import ssafy.a303.backend.auction.dto.response.BrkApplicantResponseDto;
@@ -19,6 +20,7 @@ import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.repository.PropertyRepository;
+import ssafy.a303.backend.search.service.PropertySearchService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
@@ -37,6 +39,7 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final PropertyRepository propertyRepository;
     private final UserRepository userRepository;
+    private final PropertySearchService searchService;
 
     /**
      * 중개 및 경매 신청 (중개인 -> 매물)
@@ -130,7 +133,7 @@ public class AuctionService {
         Property p = propertyRepository.findById(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
-        if(!Objects.equals(p.getLessorSeq(), userSeq)) {
+        if(!Objects.equals(p.getLessor().getUserSeq(), userSeq)) {
             throw new CustomException(ErrorCode.READ_NO_AUTH);
         }
 
@@ -143,5 +146,30 @@ public class AuctionService {
         log.info("중개 신청 리스트 ={}", result.getContent().size());
 
         return result;
+    }
+
+    @Transactional
+    public void acceptBrk(Integer userSeq, Integer auctionSeq) {
+        // 1. 선택된 경매 조회
+        Auction auction = auctionRepository.findById(auctionSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.AUCTION_NOT_FOUND));
+
+        Property property = auction.getProperty();
+        // 2. 현재 로그인한 사람이 이 매물의 임대인인지 확인
+        if(!property.getLessor().getUserSeq().equals(userSeq)) {
+            throw new CustomException(ErrorCode.ACCEPT_NO_AUTH);
+        }
+        //3. 이미 처리된 신청인지 확인
+        if(auction.getStatus() != AuctionStatus.REQUESTED) {
+            throw new CustomException(ErrorCode.ALREADY_PROCESSED);
+        }
+
+        // 매물에 중개인 user seq 기록
+        property.setBrkSeq(auction.getUser().getUserSeq());
+        property.setHasBrk(true);
+        // 경매 상태 ACCEPTED로 변경
+        auction.setStatus(AuctionStatus.ACCEPTED);
+        // has_brk es 필드 갱신
+        searchService.setIndex(property);
     }
 }

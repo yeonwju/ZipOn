@@ -139,6 +139,14 @@ public class AuctionController {
         return ResponseDTO.ok(res, "신청이 취소되었습니다.");
     }
 
+    /**
+     * 중개인 신청 목록 조회
+     * REQUESTED, ACCEPTED 상태의 신청만 조회
+     * @param propertySeq
+     * @param userSeq
+     * @param pageable
+     * @return
+     */
     @Operation(
             summary = "신청 중개인 리스트 조회",
             description = "페이징 처리 되어 있습니다. page, size, sort 쿼리 파라미터로"
@@ -225,6 +233,78 @@ public class AuctionController {
         return ResponseDTO.ok(page, "신청된 중개인 목록 조회 성공");
     }
 
+    /**
+     * 임대인이 원하는 중개인 선택
+     * @param userSeq
+     * @param auctionSeq
+     * @return
+     */
+    @Operation(
+            summary = "임대인이 원하는 중개인 선택",
+            description = "임대인이 중개인을 선택합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "중개인 선택 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Void.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            {
+                                              "message": "중개인을 선택했습니다.",
+                                              "status": 200,
+                                              "timestamp": 1763011473919
+                                            }        
+                                    """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "본인매물 소유 중개 신청만 조회 or 해당 매물의 임대인만 중개인 선택 가능",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Void.class),
+                            examples = @ExampleObject(
+                                    name = "실패 응답 예시",
+                                    value = """
+                                            {
+                                              "message": "해당 매물의 임대인만 중개인을 선택할 수 있습니다.",
+                                              "status": 401,
+                                              "timestamp": 1763011473919
+                                            }        
+                                    """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "이미 성사된 중개거나, 중개인에 의해 취소된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Void.class),
+                            examples = @ExampleObject(
+                                    name = "실패 응답 예시",
+                                    value = """
+                                            {
+                                              "message": "이미 중개가 성사되었거나, 취소된 요청입니다.",
+                                              "status": 400,
+                                              "timestamp": 1763011473919
+                                            }        
+                                    """
+                            )
+                    )
+            )
+    })
+    @PostMapping("/{auctionSeq}/accept")
+    public ResponseEntity<ResponseDTO<Void>> acceptBrk(@AuthenticationPrincipal Integer userSeq,
+                                                       @PathVariable Integer auctionSeq) {
+        auctionService.acceptBrk(userSeq, auctionSeq);
+        return ResponseDTO.ok(null, "중개인을 선택했습니다.");
+    }
 
 
 }

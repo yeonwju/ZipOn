@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 import ssafy.a303.backend.property.enums.VerificationStatus;
+import ssafy.a303.backend.user.entity.User;
 
 import java.sql.Timestamp;
 
@@ -30,8 +31,9 @@ public class Property {
     private PropertyAucInfo aucInfo;
 
     // 임대인 이름
-    @Column(name = "lessor_seq", nullable = false)
-    private Integer lessorSeq;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lessor_seq", nullable = false)
+    private User lessor;
 
     // 중개인 user seq
     @Column(name = "brk_seq")

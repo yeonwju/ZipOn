@@ -80,7 +80,7 @@ public class ChatService {
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         } else { // 임대인
-            opponent = userRepository.findById(property.getLessorSeq())
+            opponent = userRepository.findById(property.getLessor().getUserSeq())
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         }
 
