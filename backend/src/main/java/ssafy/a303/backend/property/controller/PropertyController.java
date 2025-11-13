@@ -38,6 +38,8 @@ public class PropertyController {
     private final PropertyService propertyService;
     private final VerificationService verificationService;
 
+    private final ObjectMapper objectMapper;
+
     /**
      * 매물 검증
      * 1) 매물 주소 입력
@@ -135,7 +137,7 @@ public class PropertyController {
                                                                                 @AuthenticationPrincipal Integer userSeq)
     {
         try {
-            PropertyDetailRequestDto req = new ObjectMapper().readValue(reqJson, PropertyDetailRequestDto.class);
+            PropertyDetailRequestDto req = objectMapper.readValue(reqJson, PropertyDetailRequestDto.class);
             PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
             return ResponseDTO.created(res, "매물 등록 완료");
         } catch (JsonProcessingException e) {
@@ -167,41 +169,36 @@ public class PropertyController {
                                               "data": {
                                                 "lessorSeq": 2,
                                                 "lessorProfileImg": null,
-                                                "liveAt": "2025-12-11T14:00:00",
-                                                "brkSeq": 2,
-                                                "propertySeq": 18,
+                                                "liveAt": "2025-12-10T12:00:00",
+                                                "brkSeq": null,
+                                                "auctionSeq": 7,
+                                                "propertySeq": 23,
                                                 "lessorNm": "김싸피",
                                                 "propertyNm": "멀티캠퍼스",
-                                                "content": "위치도 좋고 따뜻해서 살기 좋아요",
+                                                "content": "이 집은 아주 좋습니다.",
                                                 "address": "서울특별시 테헤란로 2223-3232",
                                                 "latitude": 23.433434,
                                                 "longitude": 12.324223,
                                                 "buildingType": "OFFICE",
-                                                "area": 109.7,
-                                                "areaP": 42,
-                                                "deposit": 50000000,
+                                                "area": 84.8,
+                                                "areaP": 32,
+                                                "deposit": 10000000,
                                                 "mnRent": 800000,
-                                                "fee": 150000,
-                                                "images": [
-                                                  {
-                                                    "s3key": "dev/uploads/properties/18/818b9069-adff-4482-a74d-2610d4be7e4d.png",
-                                                    "url": "https://zipon-media.s3.ap-northeast-2.amazonaws.com/dev/uploads/properties/18/818b9069-adff-4482-a74d-2610d4be7e4d.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251113T060417Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIARIOSKIFZ6IIHZ32C%2F20251113%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Expires=43200&X-Amz-Signature=498b70f14bef03fbb904363d34c0bcc70b310982e604b6a8277af545b2a7f010",
-                                                    "order": 1
-                                                  }
-                                                ],
+                                                "fee": 50000,
+                                                "images": [],
                                                 "period": 24,
                                                 "floor": 5,
-                                                "facing": "S",
-                                                "roomCnt": 4,
-                                                "bathroomCnt": 2,
-                                                "constructionDate": "2010-01-01",
-                                                "parkingCnt": 2,
+                                                "facing": "N",
+                                                "roomCnt": 2,
+                                                "bathroomCnt": 1,
+                                                "constructionDate": "2020-12-20",
+                                                "parkingCnt": 1,
                                                 "hasElevator": true,
-                                                "petAvailable": false,
+                                                "petAvailable": true,
                                                 "isAucPref": true,
-                                                "isBrkPref": true,
-                                                "hasBrk": true,
-                                                "aucAt": "2025-12-10",
+                                                "isBrkPref": false,
+                                                "hasBrk": false,
+                                                "aucAt": "2025-12-10T12:00:00",
                                                 "aucAvailable": "12월 10일 오후 시간대 희망합니다.",
                                                 "pdfCode": "fjeilfjls",
                                                 "isCertificated": true,
@@ -210,8 +207,8 @@ public class PropertyController {
                                               },
                                               "message": "해당 매물의 상세 정보를 조회합니다.",
                                               "status": 200,
-                                              "timestamp": 1763013857569
-                                            }                
+                                              "timestamp": 1763020944787
+                                            }                     
                                     """
                             )
                     )

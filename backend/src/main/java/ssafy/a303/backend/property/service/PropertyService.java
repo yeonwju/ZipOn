@@ -29,10 +29,7 @@ import ssafy.a303.backend.search.service.PropertySearchService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -163,6 +160,23 @@ public class PropertyService {
                 }
                 throw e;
             }
+        }
+
+        /** 중개인 없이 스스로 경매 라이브 진행하면 바로 Auction 테이블에 경매 정보 저장 */
+        if(!req.isBrkPref() && req.isAucPref()) {
+            Auction a = Auction.builder()
+                    .user(lessor)
+                    .property(p)
+                    .strmDate(req.aucAt().toLocalDate())
+                    .strmStartTm(req.aucAt().toLocalTime())
+                    .strmEndTm(req.aucAt().toLocalTime().plusHours(1))
+                    .auctionEndAt(LocalDateTime.of(
+                            req.aucAt().toLocalDate().plusDays(1),
+                            LocalTime.parse("12:00:00")
+                    ))
+                    .status(AuctionStatus.ACCEPTED)
+                    .build();
+            auctionRepository.save(a);
         }
 
         /** ES 색인 */

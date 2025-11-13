@@ -94,7 +94,7 @@ public record DetailResponseDto(
 
         // 경매 관련
         @Schema(description = "경매 일자", example = "2025-12-12")
-        String aucAt,
+        LocalDateTime aucAt,
         @Schema(description = "경매 가능 일시", example = "2025-12-12")
         String aucAvailable,
 

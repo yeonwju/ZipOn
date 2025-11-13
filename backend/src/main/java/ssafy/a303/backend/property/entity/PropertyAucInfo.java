@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "property_auction_info")
@@ -32,7 +33,7 @@ public class PropertyAucInfo {
     private Boolean isBrkPref;
 
     @Column(name = "auc_at")
-    private String aucAt;
+    private LocalDateTime aucAt;
 
     @Column(name = "auc_available")
     private String aucAvailable;
@@ -53,7 +54,7 @@ public class PropertyAucInfo {
         this.isBrkPref = isBrkPref;
     }
 
-    public void updateAucAt(String aucAt) {
+    public void updateAucAt(LocalDateTime aucAt) {
         this.aucAt = aucAt;
     }
 
