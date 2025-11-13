@@ -58,6 +58,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     """)
     Page<BrkApplicantResponseDto> findApplicantsByPropertySeq(@Param("propertySeq") Integer propertySeq, @Param("status") List<AuctionStatus> status, Pageable pageable);
 
-
+    
 
 }

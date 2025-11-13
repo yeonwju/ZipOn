@@ -1,5 +1,6 @@
 package ssafy.a303.backend.common.response;
 
+import co.elastic.clients.elasticsearch.nodes.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.http.protocol.HTTP;
@@ -120,8 +121,10 @@ public enum ErrorCode {
     CANCEL_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "취소 권한이 없습니다. 본인이 신청한 건만 취소가능합니다."),
     CANCEL_IMPOSSIBLE(400, HttpStatus.BAD_REQUEST, "취소불가"),
 
-    // 신청 중개인 조회
+    // 임대인 중개인 매칭
     READ_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "본인 소유 매물의 중개 신청만 조회할 수 있습니다."),
+    ACCEPT_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "해당 매물의 임대인만 중개인을 선택할 수 있습니다."),
+    ALREADY_PROCESSED(400, HttpStatus.BAD_REQUEST, "이미 중개가 성사되었거나, 취소된 요청입니다."),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),
