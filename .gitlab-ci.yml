@@ -1,0 +1,26 @@
+stages:
+  - trigger_jenkins
+
+# dev
+trigger-dev:
+  stage: trigger_jenkins
+  only:
+    - dev
+  script:
+    - echo "🚀 Trigger Jenkins (DEV job)"
+    - |
+      curl -X POST "http://k13a303.p.ssafy.io:8888/job/dev/build" \
+        --user "$JENKINS_USER:$JENKINS_TOKEN"
+    - echo "✅ Jenkins DEV job trigger sent"
+
+# master
+trigger-master:
+  stage: trigger_jenkins
+  only:
+    - master
+  script:
+    - echo "🚀 Trigger Jenkins (MASTER job)"
+    - |
+      curl -X POST "http://k13a303.p.ssafy.io:8888/job/master/build" \
+        --user "$JENKINS_USER:$JENKINS_TOKEN"
+    - echo "✅ Jenkins MASTER job trigger sent"
