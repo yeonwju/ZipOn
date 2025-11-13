@@ -115,40 +115,13 @@ public class PropertyController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                                "data": {
-                                                    "propertySeq": 8,
-                                                    "lessorNm": "김싸피",
-                                                    "propertyNm": "멀티캠퍼스",
-                                                    "content": "이 집은 아주 좋습니다.",
-                                                    "address": "서울특별시 테헤란로 2223-3232",
-                                                    "latitude": 23.433434,
-                                                    "longitude": 12.324223,
-                                                    "buildingType": "OFFICE",
-                                                    "area": 84.8,
-                                                    "areaP": 32,
-                                                    "deposit": 10000000,
-                                                    "mnRent": 800000,
-                                                    "fee": 50000,
-                                                    "images": [],
-                                                    "period": 24,
-                                                    "floor": 5,
-                                                    "facing": "N",
-                                                    "roomCnt": 2,
-                                                    "bathroomCnt": 1,
-                                                    "constructionDate": "2020-20-20",
-                                                    "parkingCnt": 1,
-                                                    "hasElevator": true,
-                                                    "petAvailable": true,
-                                                    "isAucPref": true,
-                                                    "isBrkPref": true,
-                                                    "hasBrk": false,
-                                                    "aucAt": "2025-12-10",
-                                                    "aucAvailable": "12월 10일 오후 시간대 희망합니다."
-                                                },
-                                                "message": "매물 등록 완료",
-                                                "status": 201,
-                                                "timestamp": 1762750909568
-                                            }
+                                               "data": {
+                                                 "propertySeq": 15
+                                               },
+                                               "message": "매물 등록 완료",
+                                               "status": 201,
+                                               "timestamp": 1762992526128
+                                             }
                                             """
                             )
                     )

@@ -107,6 +107,7 @@ public class PropertyService {
                 .riskReason(req.riskReason())
                 .verificationStatus(VerificationStatus.PASSED)
                 .build();
+        certificationRepository.save(c);
 
         // 이미지 S3 업로드
         List<String> s3keys = new ArrayList<>();
