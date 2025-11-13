@@ -9,6 +9,12 @@ import ssafy.a303.backend.property.enums.Facing;
 import java.util.List;
 
 public record DetailResponseDto(
+        // 유저 사진, seq
+        @Schema(description = "임대인의 user seq", example = "2")
+        Integer lessorSeq,
+        @Schema(description = "임대인의 프로필 사진", example = "assfasfas")
+        String lessorProfileImg,
+
         //기본 정보
         @Schema(description = "매물 seq", example = "1")
         @NotNull

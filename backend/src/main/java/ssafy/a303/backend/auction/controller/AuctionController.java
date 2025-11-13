@@ -139,6 +139,14 @@ public class AuctionController {
         return ResponseDTO.ok(res, "신청이 취소되었습니다.");
     }
 
+    /**
+     * 중개인 신청 목록 조회
+     * REQUESTED, ACCEPTED 상태의 신청만 조회
+     * @param propertySeq
+     * @param userSeq
+     * @param pageable
+     * @return
+     */
     @Operation(
             summary = "신청 중개인 리스트 조회",
             description = "페이징 처리 되어 있습니다. page, size, sort 쿼리 파라미터로"
@@ -225,6 +233,10 @@ public class AuctionController {
         return ResponseDTO.ok(page, "신청된 중개인 목록 조회 성공");
     }
 
+    @PostMapping("/{auctionSeq}/accept")
+    public ResponseEntity<ResponseDTO<Void>> acceptBrk(@AuthenticationPrincipal Integer userSeq,
+                                                       @PathVariable Integer auctionSeq) {
 
+    }
 
 }

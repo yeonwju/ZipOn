@@ -130,7 +130,7 @@ public class AuctionService {
         Property p = propertyRepository.findById(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
-        if(!Objects.equals(p.getLessorSeq(), userSeq)) {
+        if(!Objects.equals(p.getLessor().getUserSeq(), userSeq)) {
             throw new CustomException(ErrorCode.READ_NO_AUTH);
         }
 

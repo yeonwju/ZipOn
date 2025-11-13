@@ -165,7 +165,9 @@ public class PropertyController {
                                     value = """
                                             {
                                                       "data": {
-                                                        "propertySeq": 17,
+                                                        "lessorSeq": 2,
+                                                        "lessorProfileImg": null,
+                                                        "propertySeq": 18,
                                                         "lessorNm": "김싸피",
                                                         "propertyNm": "멀티캠퍼스",
                                                         "content": "이 집은 아주 좋습니다.",
@@ -178,7 +180,13 @@ public class PropertyController {
                                                         "deposit": 10000000,
                                                         "mnRent": 800000,
                                                         "fee": 50000,
-                                                        "images": [],
+                                                        "images": [
+                                                          {
+                                                            "s3key": "dev/uploads/properties/18/818b9069-adff-4482-a74d-2610d4be7e4d.png",
+                                                            "url": "https://zipon-media.s3.ap-northeast-2.amazonaws.com/dev/uploads/properties/18/818b9069-adff-4482-a74d-2610d4be7e4d.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251113T044221Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIARIOSKIFZ6IIHZ32C%2F20251113%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Expires=43200&X-Amz-Signature=7a4a56c7f5218e31b26721d1531b4a8e7824aca4bb10b45ca921badd8a9f27c8",
+                                                            "order": 1
+                                                          }
+                                                        ],
                                                         "period": 24,
                                                         "floor": 5,
                                                         "facing": "N",
@@ -200,7 +208,7 @@ public class PropertyController {
                                                       },
                                                       "message": "해당 매물의 상세 정보를 조회합니다.",
                                                       "status": 200,
-                                                      "timestamp": 1762992888289
+                                                      "timestamp": 1763008941199
                                                     }
                                     """
                             )
