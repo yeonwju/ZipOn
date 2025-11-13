@@ -1,28 +1,40 @@
 'use client'
 
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { useSelectBroker } from '@/hooks/queries/useBroker'
+import { BrokerInfo } from '@/types/api/broker'
 
 interface BrokerCardProps {
-  broker: {
-    id: number
-    name: string
-    profileImage: string
-    dealCount: number
-    introduction: string
-    experience: string
-    specialty: string
-    responseTime: string
-    rating: number
-  }
+  broker: BrokerInfo
   onSelect?: (brokerId: number) => void
 }
 
 export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const params = useParams()
+  const propertySeq = Number(params.id)
+  
+  const selectBrokerMutation = useSelectBroker(broker.auctionSeq, propertySeq)
+
+  const handleSubmit = async () => {
+    try {
+      const result = await selectBrokerMutation.mutateAsync()
+      
+      if (result.success) {
+        console.log('✅ 중개인 선택 성공:', result.message)
+        onSelect?.(broker.brkUserSeq)
+      } else {
+        console.error('❌ 중개인 선택 실패:', result.message)
+      }
+    } catch (error) {
+      console.error('중개인 선택 중 오류:', error)
+    }
+  }
 
   return (
     <div className="rounded-2xl border border-gray-300 bg-gray-50 p-4 shadow-sm">
@@ -30,11 +42,13 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={broker.profileImage} alt={broker.name} />
+            <AvatarImage src={broker.brkProfileImg || '/profile.svg'} alt={broker.brkNm} />
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-900">{broker.name}</span>
-            <span className="text-xs text-gray-500">거래성사 {broker.dealCount}회</span>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-gray-900">{broker.brkNm}</span>
+            </div>
+            <span className="text-xs text-gray-500">거래성사 {broker.mediateCnt}회</span>
           </div>
         </div>
 
@@ -56,40 +70,24 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
           {/* 자기소개 */}
           <div>
             <h4 className="mb-2 text-sm font-semibold text-gray-900">자기소개</h4>
-            <p className="text-sm text-gray-700">{broker.introduction}</p>
+            <p className="text-sm text-gray-700">{broker.intro}</p>
           </div>
 
-          {/* 경력 */}
+          {/* 라이브 일정 */}
           <div>
-            <h4 className="mb-2 text-sm font-semibold text-gray-900">경력</h4>
-            <p className="text-sm text-gray-700">{broker.experience}</p>
-          </div>
-
-          {/* 전문 분야 */}
-          <div>
-            <h4 className="mb-2 text-sm font-semibold text-gray-900">전문 분야</h4>
-            <p className="text-sm text-gray-700">{broker.specialty}</p>
-          </div>
-
-          <div>
-            <h4 className="mb-2 text-sm font-semibold text-gray-900">라이브 시간</h4>
-            <p className="text-sm text-gray-700">14:00 ~ 15:00</p>
-          </div>
-
-          {/* 응답 시간 */}
-          <div className="rounded-lg border border-blue-100 bg-blue-50 p-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">평균 응답 시간</span>
-              <span className="font-semibold text-blue-600">{broker.responseTime}</span>
-            </div>
+            <h4 className="mb-2 text-sm font-semibold text-gray-900">라이브 방송 가능 일정</h4>
+            <p className="text-sm text-gray-700">
+              {broker.strmDate} {broker.strmStartTm} ~ {broker.strmEndTm}
+            </p>
           </div>
 
           {/* 선택 버튼 */}
           <Button
-            onClick={() => onSelect?.(broker.id)}
-            className="mt-4 w-full rounded-full bg-blue-400 py-6 text-sm font-semibold text-white"
+            onClick={handleSubmit}
+            disabled={selectBrokerMutation.isPending}
+            className="mt-4 w-full rounded-full bg-blue-400 py-6 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
           >
-            {broker.name} 중개인 선택
+            {selectBrokerMutation.isPending ? '선택 중...' : `${broker.brkNm} 중개인 선택`}
           </Button>
         </div>
       )}

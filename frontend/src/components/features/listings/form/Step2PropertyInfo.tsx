@@ -34,7 +34,6 @@ export default function Step2PropertyInfo({
   const updateField = (field: keyof ListingInfo, value: string | boolean | File[]) => {
     const newInfo = { ...listingInfo, [field]: value }
     onListingInfoChange(newInfo)
-    console.log(`📝 Step2 - ${field} 변경:`, value)
   }
 
   return (

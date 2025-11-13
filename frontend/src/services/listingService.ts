@@ -20,14 +20,15 @@
 
 import { API_ENDPOINTS } from '@/constants'
 import { BuildingData } from '@/data/BuildingDummy'
-import { getListingDetailBySeq } from '@/data/ListingDetailDummy'
-import { authFetch } from '@/lib/fetch'
+import { authFetch, publicFetch } from '@/lib/fetch'
 import {
+  ListingDetailDataResponse,
+  ListingDetailResponse,
   ListingsRegVerifyResponse,
   RegListingRequest,
   RegListingResponse,
 } from '@/types/api/listings'
-import type { ListingData, ListingDetailData } from '@/types/models/listing'
+import type { ListingData } from '@/types/models/listing'
 
 /**
  * 매물 등록(등기부등본 인증)
@@ -145,6 +146,45 @@ export async function createListing(request: RegListingRequest) {
 }
 
 /**
+ * 매물 상세 정보 조회
+ *
+ * @param seq - 매물 Seq
+ * @returns 매물 상세 정보 (성공/실패 여부 포함)
+ */
+export async function getListingDetail(
+  seq: number
+): Promise<
+  { success: true; data: ListingDetailDataResponse } | { success: false; message?: string }
+> {
+  try {
+    const result = await authFetch.get<ListingDetailResponse>(API_ENDPOINTS.LISTINGS_DETAIL(seq))
+    if (result.data) {
+      console.log('=== 매물 상세정보 조회 성공 ===')
+      console.log('=== 매물 번호 : ', seq)
+      return {
+        success: true,
+        data: result.data,
+      }
+    } else {
+      console.warn('=== 매물 상세정보 없음 ===')
+      return {
+        success: false,
+        message: '매물 정보를 찾을 수 없습니다.',
+      }
+    }
+  } catch (error) {
+    console.error('=== 매물 상세조회 중 에러 발생 ===')
+    console.error('에러:', error)
+    const errorMessage = error instanceof Error ? error.message : '매물 상세조회에 실패했습니다.'
+
+    return {
+      success: false,
+      message: errorMessage,
+    }
+  }
+}
+
+/**
  * 매물 목록 가져오기
  *
  * 현재는 샘플 데이터를 반환하지만, 실제 API 연동 시 이 함수만 수정하면 됩니다.
@@ -207,28 +247,4 @@ export async function getFilteredListings(filters?: {
 
   // 현재는 전체 목록 반환 (필터링은 클라이언트에서 처리)
   return getListings()
-}
-
-/**
- * 특정 매물 상세 정보 가져오기
- *
- * @param seq - 매물 Seq (1-100)
- * @returns 매물 상세 정보 (없으면 null)
- */
-export async function getListingDetail(seq: number): Promise<ListingDetailData | null> {
-  // TODO: 실제 API 연동 시 아래 코드로 교체
-  // try {
-  //   const response = await fetch(`/api/listings/${seq}`)
-  //   if (!response.ok) {
-  //     return null
-  //   }
-  //   const data = await response.json()
-  //   return data.data // API 응답에서 data 필드 추출
-  // } catch (error) {
-  //   console.error('Failed to fetch listing:', error)
-  //   return null
-  // }
-
-  // 현재는 더미 데이터 반환
-  return Promise.resolve(getListingDetailBySeq(seq))
 }
