@@ -15,6 +15,10 @@ import java.util.Optional;
 
 public interface AuctionRepository extends JpaRepository<Auction, Integer> {
 
+    /** 경매 ID로 조회 (Property Fetch Join) - 라이브 방송용 */
+    @Query("SELECT a FROM Auction a JOIN FETCH a.property WHERE a.auctionSeq = :auctionSeq")
+    Optional<Auction> findByIdWithProperty(@Param("auctionSeq") Integer auctionSeq);
+
     /** 사람과 매물의 경매 상태 확인 */
     @Query("""
             select count(a) > 0

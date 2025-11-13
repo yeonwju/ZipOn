@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -64,18 +65,19 @@ public class LiveService {
     }
 
     /**라이브 방송 시작*/
+    @Transactional
     public LiveCreateResponseDto startLive(LiveCreateRequestDto requestDto, Integer hostUserSeq) {
 
-        //1. 경매 조회
-        Auction auction = auctionRepository.findById(requestDto.getAuctionSeq())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND)); // todo: 경매 못찾겠다는 에러코드 생기면 그걸로 바꾸기
+        //1. 경매 조회 (Property Fetch Join)
+        Auction auction = auctionRepository.findByIdWithProperty(requestDto.getAuctionSeq())
+                .orElseThrow(() -> new CustomException(ErrorCode.AUC_INFO_NOT_FOUND));
 
         //2. User 조회
         User host = userRepository.findById(hostUserSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        //3. 매물 썸네일 조회
-        String propertyThumbnail = String.valueOf(propertyRepository.findById(auction.getProperty().getPropertySeq()));
+        //3. 매물 썸네일 조회 (Auction의 Property에서 직접 가져오기)
+        String propertyThumbnail = auction.getProperty().getThumbnail();
 
         //4. OpenVidu Session 생성
         SessionProperties properties = new SessionProperties.Builder().build();

@@ -123,6 +123,8 @@ public class StompController {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
+        log.info("[CHAT] userSeq={}", userSeq);
+
         User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
