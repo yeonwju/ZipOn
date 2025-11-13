@@ -1,10 +1,12 @@
 'use client'
 
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { useSelectBroker } from '@/hooks/queries/useBroker'
 import { BrokerInfo } from '@/types/api/broker'
 
 interface BrokerCardProps {
@@ -14,6 +16,25 @@ interface BrokerCardProps {
 
 export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const params = useParams()
+  const propertySeq = Number(params.id)
+  
+  const selectBrokerMutation = useSelectBroker(broker.auctionSeq, propertySeq)
+
+  const handleSubmit = async () => {
+    try {
+      const result = await selectBrokerMutation.mutateAsync()
+      
+      if (result.success) {
+        console.log('✅ 중개인 선택 성공:', result.message)
+        onSelect?.(broker.brkUserSeq)
+      } else {
+        console.error('❌ 중개인 선택 실패:', result.message)
+      }
+    } catch (error) {
+      console.error('중개인 선택 중 오류:', error)
+    }
+  }
 
   return (
     <div className="rounded-2xl border border-gray-300 bg-gray-50 p-4 shadow-sm">
@@ -62,10 +83,11 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
 
           {/* 선택 버튼 */}
           <Button
-            onClick={() => onSelect?.(broker.brkUserSeq)}
-            className="mt-4 w-full rounded-full bg-blue-400 py-6 text-sm font-semibold text-white"
+            onClick={handleSubmit}
+            disabled={selectBrokerMutation.isPending}
+            className="mt-4 w-full rounded-full bg-blue-400 py-6 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
           >
-            중개인 선택
+            {selectBrokerMutation.isPending ? '선택 중...' : `${broker.brkNm} 중개인 선택`}
           </Button>
         </div>
       )}

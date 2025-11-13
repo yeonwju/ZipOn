@@ -44,8 +44,6 @@ export const listingQueryKeys = {
 export const brokerQueryKeys = {
   all: ['broker'] as const,
   lists: (propertySeq: number) => [...brokerQueryKeys.all, 'list', propertySeq] as const,
-  details: () => [...brokerQueryKeys.all, 'detail'] as const,
-  detail: (id: number) => [...brokerQueryKeys.details(), id] as const,
 }
 
 /**

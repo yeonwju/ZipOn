@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '@/constants'
 import { authFetch } from '@/lib/fetch'
-import { BrokerInfo, GetBrokerListResponseDTO } from '@/types/api/broker'
+import { BrokerInfo, GetBrokerListResponseDTO, SelectBrokerResponseDTO } from '@/types/api/broker'
 
 export async function getBrokerList(
   propertySeq: number,
@@ -32,6 +32,35 @@ export async function getBrokerList(
     console.error('에러:', error)
     const errorMessage =
       error instanceof Error ? error.message : '신청 브로커 리스트 조회에 실패했습니다.'
+
+    return {
+      success: false,
+      message: errorMessage,
+    }
+  }
+}
+
+export async function selectBroker(
+  auctionSeq: number
+): Promise<{ success: true; message: string } | { success: false; message: string }> {
+  try {
+    const result = await authFetch.post<SelectBrokerResponseDTO>(
+      API_ENDPOINTS.SELECT_BROKER(auctionSeq)
+    )
+    if (result.status === 200) {
+      return {
+        success: true,
+        message: result.message,
+      }
+    } else {
+      return {
+        success: false,
+        message: result.message,
+      }
+    }
+  } catch (error) {
+    console.log('=== 중개인 선택 에러 ===')
+    const errorMessage = error instanceof Error ? error.message : '브로커 선택에 실패했습니다.'
 
     return {
       success: false,

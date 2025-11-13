@@ -29,6 +29,8 @@ export const API_ENDPOINTS = {
     propertySeq: number,
     pageable: { page: number; size: number; sort: string }
   ) => `/api/v1/auctions/${propertySeq}/applicants`,
+
+  SELECT_BROKER: (auctionSeq: number) => `/api/v1/auctions/${auctionSeq}/accept`,
 } as const
 
 export const API_TIMEOUT = 10000 // 10초
