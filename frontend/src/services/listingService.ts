@@ -22,7 +22,7 @@ import { API_ENDPOINTS } from '@/constants'
 import { BuildingData } from '@/data/BuildingDummy'
 import { authFetch, publicFetch } from '@/lib/fetch'
 import {
-  ListingDetailDataRequest,
+  ListingDetailDataResponse,
   ListingDetailResponse,
   ListingsRegVerifyResponse,
   RegListingRequest,
@@ -154,7 +154,7 @@ export async function createListing(request: RegListingRequest) {
 export async function getListingDetail(
   seq: number
 ): Promise<
-  { success: true; data: ListingDetailDataRequest } | { success: false; message?: string }
+  { success: true; data: ListingDetailDataResponse } | { success: false; message?: string }
 > {
   try {
     const result = await authFetch.get<ListingDetailResponse>(API_ENDPOINTS.LISTINGS_DETAIL(seq))

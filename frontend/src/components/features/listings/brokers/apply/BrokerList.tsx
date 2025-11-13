@@ -1,19 +1,9 @@
+import { BrokerInfo } from '@/types/api/broker'
+
 import BrokerCard from './BrokerCard'
 
-interface Broker {
-  id: number
-  name: string
-  profileImage: string
-  dealCount: number
-  introduction: string
-  experience: string
-  specialty: string
-  responseTime: string
-  rating: number
-}
-
 interface BrokerListProps {
-  brokers: Broker[]
+  brokers: BrokerInfo[]
   onSelect?: (brokerId: number) => void
 }
 
@@ -29,7 +19,7 @@ export default function BrokerList({ brokers, onSelect }: BrokerListProps) {
   return (
     <div className="flex flex-col gap-4">
       {brokers.map(broker => (
-        <BrokerCard key={broker.id} broker={broker} onSelect={onSelect} />
+        <BrokerCard key={broker.auctionSeq} broker={broker} onSelect={onSelect} />
       ))}
     </div>
   )

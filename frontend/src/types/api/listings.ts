@@ -32,7 +32,7 @@ export interface RegListingResponse {
   timestamp?: string | null
 }
 
-export interface ListingDetailDataRequest {
+export interface ListingDetailDataResponse {
   buildingType: string
   propertySeq: number
   lessorSeq?: number // 집주인(매물 등록자) Seq
@@ -72,7 +72,7 @@ export interface ListingDetailDataRequest {
 }
 
 export type ListingDetailResponse = {
-  data: ListingDetailDataRequest
+  data: ListingDetailDataResponse
   message: string
   status: number
   timestamp: number
