@@ -47,6 +47,9 @@ public class LiveStream extends BaseTimeEntity {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
+    @Column(name = "thumbnail", length = 255)
+    private String thumbnail; // 방송 대표사진
+
     /** status ENUM('LIVE','ENDED') NOT NULL : 기본 LIVE */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 10)

@@ -19,6 +19,7 @@ import ssafy.a303.backend.livestream.entity.LiveStream;
 import ssafy.a303.backend.livestream.enums.LiveStreamSortType;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
+import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
@@ -40,6 +41,7 @@ public class LiveService {
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
     private final StringRedisTemplate liveRedisTemplate;
     private final RedisTemplate<String, Object> liveRedisObjectTemplate;
+    private final PropertyRepository propertyRepository;
 
     public LiveService(
             AuctionRepository auctionRepository,
@@ -48,7 +50,8 @@ public class LiveService {
             OpenVidu openVidu,
             LiveStartNotificationPubSubService liveStartNotificationPubSubService,
             @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
-            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate
+            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
+            PropertyRepository propertyRepository
     ) {
         this.auctionRepository = auctionRepository;
         this.liveStreamRepository = liveStreamRepository;
@@ -57,6 +60,7 @@ public class LiveService {
         this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
         this.liveRedisTemplate = liveRedisTemplate;
         this.liveRedisObjectTemplate = liveRedisObjectTemplate;
+        this.propertyRepository = propertyRepository;
     }
 
     /**라이브 방송 시작*/
@@ -70,7 +74,10 @@ public class LiveService {
         User host = userRepository.findById(hostUserSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        //3. OpenVidu Session 생성
+        //3. 매물 썸네일 조회
+        String propertyThumbnail = String.valueOf(propertyRepository.findById(auction.getProperty().getPropertySeq()));
+
+        //4. OpenVidu Session 생성
         SessionProperties properties = new SessionProperties.Builder().build();
         Session session;
 
@@ -82,11 +89,12 @@ public class LiveService {
             throw new CustomException(ErrorCode.OPENVIDU_SESSION_CREATE_FAILED);
         }
 
-        // 4. LiveStream 생성
+        // 5. LiveStream 생성
         LiveStream liveStream = LiveStream.builder()
                 .auction(auction)
                 .host(host)
                 .title(requestDto.getTitle())
+                .thumbnail(propertyThumbnail)
                 .streamUrl(session.getSessionId())
                 .chatChannel("live:" + session.getSessionId())
                 .status(LiveStreamStatus.LIVE)
@@ -101,7 +109,7 @@ public class LiveService {
 
         log.info("[LIVE] LiveStream 생성 완료: liveSeq={}", liveStream.getId());
 
-        // 5. 해당 라이브 방 Redis 초기화
+        // 6. 해당 라이브 방 Redis 초기화
         String viewerKey = "live:viewers:" + liveStream.getId();
         String chatKey = "live:chat:" + liveStream.getId();
         String likeKey = "live:like:" + liveStream.getId();
@@ -110,13 +118,14 @@ public class LiveService {
         liveRedisObjectTemplate.delete(chatKey);
         liveRedisObjectTemplate.delete(likeKey);
 
-        //6. 새 방송 시작 알림 발행 (라이브 목록에 실시간으로 추가)
+        //7. 새 방송 시작 알림 발행 (라이브 목록에 실시간으로 추가)
         try {
             LiveStartNotificationDto notification = LiveStartNotificationDto.builder()
                     .liveSeq(liveStream.getId())
                     .auctionSeq(auction.getAuctionSeq())
                     .sessionId(session.getSessionId())
                     .title(liveStream.getTitle())
+                    .thumbnail(liveStream.getThumbnail())
                     .status(liveStream.getStatus())
                     .host(LiveStartNotificationDto.HostDto.builder()
                             .userSeq(host.getUserSeq())
@@ -137,12 +146,13 @@ public class LiveService {
             log.error("[LIVE] 새 방송 알림 발행 실패: {}", e.getMessage(), e);
         }
 
-        //7. 방 생성 응답값 build
+        //8. 방 생성 응답값 build
         return LiveCreateResponseDto.builder()
                 .liveSeq(liveStream.getId())
                 .auctionSeq(auction.getAuctionSeq())
                 .sessionId(session.getSessionId())
                 .title(liveStream.getTitle())
+                .thumbnail(liveStream.getThumbnail())
                 .status(liveStream.getStatus())
                 .host(LiveCreateResponseDto.HostDto.builder()
                         .userSeq(host.getUserSeq())
@@ -314,6 +324,7 @@ public class LiveService {
                 .auctionSeq(liveStream.getAuction().getAuctionSeq())
                 .sessionId(liveStream.getStreamUrl())
                 .title(liveStream.getTitle())
+                .thumbnail(liveStream.getThumbnail())
                 .status(liveStream.getStatus())
                 .viewerCount(finalViewerCount)
                 .chatCount(finalChatCount)
@@ -377,6 +388,7 @@ public class LiveService {
                 .auctionSeq(liveStream.getAuction().getAuctionSeq())
                 .sessionId(liveStream.getStreamUrl())
                 .title(liveStream.getTitle())
+                .thumbnail(liveStream.getThumbnail())
                 .status(liveStream.getStatus())
                 .viewerCount((int) viewerCount)
                 .chatCount((int) chatCount)
@@ -446,6 +458,7 @@ public class LiveService {
                             .auctionSeq(liveStream.getAuction().getAuctionSeq())
                             .sessionId(liveStream.getStreamUrl())
                             .title(liveStream.getTitle())
+                            .thumbnail(liveStream.getThumbnail())
                             .status(liveStream.getStatus())
                             .viewerCount(viewerCount)
                             .chatCount(chatCount)

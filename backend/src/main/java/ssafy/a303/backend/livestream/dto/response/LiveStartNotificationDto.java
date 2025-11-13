@@ -31,6 +31,9 @@ public class LiveStartNotificationDto {
     /** 방송 제목 */
     private String title;
 
+    /* 라이브 방송 썸네일 */
+    private String thumbnail;
+
     /** 방송 상태 */
     private LiveStreamStatus status;
 

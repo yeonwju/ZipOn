@@ -30,6 +30,9 @@ public class LiveEndResponseDto {
     @Schema(description = "방송 제목")
     private String title;
 
+    @Schema(description = "방송 대표사진")
+    private String thumbnail;
+
     @Schema(description = "방송 상태", example = "ENDED")
     private LiveStreamStatus status;
 
