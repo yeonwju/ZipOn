@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record PropertyDetailRequestDto(
@@ -80,7 +81,7 @@ public record PropertyDetailRequestDto(
         @NotNull
         Boolean isBrkPref,
         @Schema(description = "경매 일자", example = "2025-12-12")
-        String aucAt,
+        LocalDateTime aucAt,
         @Schema(description = "경매 가능 일시", example = "2025-12-12")
         String aucAvailable,
 

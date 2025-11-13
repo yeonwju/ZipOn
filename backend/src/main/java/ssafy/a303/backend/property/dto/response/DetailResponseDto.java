@@ -20,6 +20,8 @@ public record DetailResponseDto(
         LocalDateTime liveAt,
         @Schema(description = "중개인의 user seq", example = "1")
         Integer brkSeq,
+        @Schema(description = "중개 매칭 seq", example = "1")
+        Integer auctionSeq,
 
         //기본 정보
         @Schema(description = "매물 seq", example = "1")
@@ -92,7 +94,7 @@ public record DetailResponseDto(
 
         // 경매 관련
         @Schema(description = "경매 일자", example = "2025-12-12")
-        String aucAt,
+        LocalDateTime aucAt,
         @Schema(description = "경매 가능 일시", example = "2025-12-12")
         String aucAvailable,
 
