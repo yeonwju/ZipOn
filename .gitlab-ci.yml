@@ -8,6 +8,8 @@ trigger-dev:
   stage: trigger_jenkins
   only:
     - dev
+  tags:
+    - zipon
   script:
     - echo "🚀 Trigger Jenkins (DEV job)"
 
@@ -38,6 +40,8 @@ trigger-master:
   stage: trigger_jenkins
   only:
     - master
+  tags:
+    - zipon
   script:
     - echo "🚀 Trigger Jenkins (MASTER job)"
 
