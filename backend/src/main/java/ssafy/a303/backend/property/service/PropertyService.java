@@ -212,15 +212,28 @@ public class PropertyService {
         Auction auction = auctionRepository.findByProperty_PropertySeqAndStatus(propertySeq, AuctionStatus.ACCEPTED)
                 .orElse(null);
 
-        LocalDateTime liveAt;
+        LocalDateTime liveAt = null;
         if(auction == null) {
             liveAt = null;
         } else {
             liveAt = LocalDateTime.of(auction.getStrmDate(), auction.getStrmStartTm());
         }
 
+        /** 중개인 없이 자기가 경매 라이브하는 경우 분기 처리 */
+        Integer auctionSeq = null;
+
+        if(aucInfo.getIsAucPref() && !aucInfo.getIsBrkPref()) {
+            auctionSeq = auction.getAuctionSeq();
+        }else {
+            if(auction == null){
+                auctionSeq = null;
+            }else{
+                auctionSeq = auction.getAuctionSeq();
+            }
+        }
+
         DetailResponseDto detail = new DetailResponseDto(
-                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), liveAt, p.getBrkSeq(), p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), liveAt, p.getBrkSeq(), auctionSeq, p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(), p.getBuildingType(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),

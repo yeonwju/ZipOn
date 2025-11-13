@@ -20,6 +20,8 @@ public record DetailResponseDto(
         LocalDateTime liveAt,
         @Schema(description = "중개인의 user seq", example = "1")
         Integer brkSeq,
+        @Schema(description = "중개 매칭 seq", example = "1")
+        Integer auctionSeq,
 
         //기본 정보
         @Schema(description = "매물 seq", example = "1")
