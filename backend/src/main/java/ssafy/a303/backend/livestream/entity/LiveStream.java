@@ -2,6 +2,7 @@ package ssafy.a303.backend.livestream.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.common.entity.BaseTimeEntity;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.user.entity.User;
@@ -28,14 +29,13 @@ public class LiveStream extends BaseTimeEntity {
     @Column(name = "live_seq")
     private Integer id;
 
-    //todo: 경매 테이블 생기면 연결하기
-//    /** auc_seq FK → auction.auction_seq (경매와의 연결) */
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "auc_seq", nullable = false)
-//    private Auction auction;
+    /** auc_seq FK → auction.auction_seq (경매와의 연결) */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "auc_seq", nullable = false)
+    private Auction auction;
 
     /** user_seq FK → user.user_seq (방장/호스트) */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_seq", nullable = false)
     private User host;
 
@@ -46,6 +46,9 @@ public class LiveStream extends BaseTimeEntity {
     /** title VARCHAR(200) NOT NULL : 방송 제목 */
     @Column(name = "title", nullable = false, length = 200)
     private String title;
+
+    @Column(name = "thumbnail", length = 255)
+    private String thumbnail; // 방송 대표사진
 
     /** status ENUM('LIVE','ENDED') NOT NULL : 기본 LIVE */
     @Enumerated(EnumType.STRING)
