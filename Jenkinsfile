@@ -2,9 +2,9 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_BUILDKIT = '1'
-    COMPOSE_DOCKER_CLI_BUILD = '1'
-    
+    // DOCKER_BUILDKIT = '1'
+    // COMPOSE_DOCKER_CLI_BUILD = '1'
+
     // --- Common Paths ---
     DOCKER_OPTS  = "--pull"
     HEALTH       = "/usr/local/bin/zipon-health.sh"
