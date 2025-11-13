@@ -156,7 +156,7 @@ EOF2
               cat /home/ubuntu/zipon-app/.env
 
               echo "[DEV] 🚀 Starting docker compose..."
-              docker compose --env-file /home/ubuntu/zipon-app/.env -f "$DEV_COMPOSE" up -d --force-recreate --remove-orphans
+              docker compose --env-file /home/ubuntu/zipon-app/.env -f "$DEV_COMPOSE" up -d --force-recreate
 
               echo "[DEV] ⏳ Waiting for backend startup..."
               for i in $(seq 1 40); do
