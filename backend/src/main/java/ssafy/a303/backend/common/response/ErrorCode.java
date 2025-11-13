@@ -2,6 +2,7 @@ package ssafy.a303.backend.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -103,7 +104,7 @@ public enum ErrorCode {
     ADDRESS_DUPLICATE(400, HttpStatus.BAD_REQUEST, "이미 동일 주소의 매물이 등록되어 있습니다."),
     PROPERTY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물이 삭제되었거나 존재하지 않습니다."),
     AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물의 경매 정보가 존재하지 않습니다."),
-    CERTIFICATION_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "매물이 아직 생성되지 않아 검증 정보를 저장할 수 없습니다."),
+    CERTIFICATION_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "매물의 검증정보가 존재하지 않습니다."),
 
     NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 
@@ -112,6 +113,15 @@ public enum ErrorCode {
     ONLY_IMG_ALLOWED(400, HttpStatus.BAD_REQUEST, "이미지 파일만 업로드 가능합니다."),
     S3_UPLOAD_FAILED(400, HttpStatus.BAD_REQUEST, "S3 업로드 실패"),
 
+    // 중개 및 경매 신청
+    DUPLICATE_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "동일 매물에 대한 중복 신청이 불가합니다."),
+    TIME_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "시작 시간을 종료 시간보다 앞서야 합니다."),
+    DATE_NOT_ALLOWED(400, HttpStatus.BAD_REQUEST, "과거 날짜로는 경매를 신청할 수 없습니다."),
+    CANCEL_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "취소 권한이 없습니다. 본인이 신청한 건만 취소가능합니다."),
+    CANCEL_IMPOSSIBLE(400, HttpStatus.BAD_REQUEST, "취소불가"),
+
+    // 신청 중개인 조회
+    READ_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "본인 소유 매물의 중개 신청만 조회할 수 있습니다."),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),

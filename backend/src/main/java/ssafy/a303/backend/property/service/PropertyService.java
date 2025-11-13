@@ -107,6 +107,7 @@ public class PropertyService {
                 .riskReason(req.riskReason())
                 .verificationStatus(VerificationStatus.PASSED)
                 .build();
+        certificationRepository.save(c);
 
         // 이미지 S3 업로드
         List<String> s3keys = new ArrayList<>();
@@ -152,10 +153,6 @@ public class PropertyService {
                 }
                 throw e;
             }
-
-            String thumbnailUrl = (p.getThumbnail() != null)
-                    ? s3Uploader.presignedGetUrl(p.getThumbnail(), Duration.ofHours(12))
-                    : null;
         }
 
         /** ES 색인 */
@@ -166,37 +163,7 @@ public class PropertyService {
         }
 
         return new PropertyRegiResponseDto(
-                p.getPropertySeq(),
-                p.getLessorNm(),
-                p.getPropertyNm(),
-                p.getContent(),
-                p.getAddress(),
-                p.getLatitude(),
-                p.getLongitude(),
-                p.getBuildingType(),
-                p.getArea(),
-                p.getAreaP(),
-                p.getDeposit(),
-                p.getMnRent(),
-                p.getFee(),
-                imageUrls,
-                p.getPeriod(),
-                p.getFloor(),
-                p.getFacing(),
-                p.getRoomCnt(),
-                p.getBathroomCnt(),
-                p.getConstructionDate(),
-                p.getParkingCnt(),
-                p.getHasElevator(),
-                p.getPetAvailable(),
-                aucInfo.getIsAucPref(),
-                aucInfo.getIsBrkPref(),
-                p.getHasBrk(),
-                aucInfo.getAucAt(),
-                aucInfo.getAucAvailable(),
-                p.getIsCertificated(),
-                c.getRiskScore(),
-                c.getRiskReason()
+                p.getPropertySeq()
         );
     }
 
