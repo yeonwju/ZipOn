@@ -79,7 +79,7 @@ pipeline {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          def FRONT_API_BASE_URL = currentBranch.contains('dev') ? 'https://dev-zipon.duckdns.org/api' : 'https://zipon.duckdns.org/api'
+          def FRONT_API_BASE_URL = currentBranch.contains('dev') ? 'https://dev-zipon.duckdns.org' : 'https://zipon.duckdns.org'
 
           echo "🧱 Building images for commit ${gitsha} (branch=${currentBranch})"
 
