@@ -1,7 +1,7 @@
-import type { ListingDetailData } from '@/types/models/listing'
+import { ListingDetailDataResponse } from '@/types/api/listings'
 
 interface BrokerPropertyInfoProps {
-  listing: ListingDetailData
+  listing: ListingDetailDataResponse
 }
 
 export default function BrokerPropertyInfo({ listing }: BrokerPropertyInfoProps) {

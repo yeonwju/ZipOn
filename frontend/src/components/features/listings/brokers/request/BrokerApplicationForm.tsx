@@ -1,8 +1,11 @@
 'use client'
 
 import { CalendarIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -13,25 +16,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useRequestBroker } from '@/hooks/queries/useBroker'
 import { cn } from '@/lib/utils'
 
 interface BrokerApplicationFormProps {
-  onSubmit?: (data: { date: string; time: string; introduction: string }) => void
   className?: string
 }
 
-export default function BrokerApplicationForm({ onSubmit, className }: BrokerApplicationFormProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [selectedTime, setSelectedTime] = useState('')
-  const [introduction, setIntroduction] = useState('')
+// 0~24시간 배열 생성 (HH:mm:ss 포맷)
+const generateTimeOptions = () => {
+  return Array.from({ length: 24 }, (_, i) => {
+    const hour = i.toString().padStart(2, '0')
+    return {
+      value: `${hour}:00:00`,
+      label: `${i}시`,
+    }
+  })
+}
+
+// 시간을 1시간 추가하는 함수
+const addOneHour = (time: string): string => {
+  const [hour] = time.split(':')
+  const nextHour = (parseInt(hour) + 1) % 24
+  return `${nextHour.toString().padStart(2, '0')}:00:00`
+}
+
+export default function BrokerApplicationForm({ className }: BrokerApplicationFormProps) {
+  const [strmDate, setStrmDate] = useState<Date | undefined>(undefined)
+  const [strmStartTm, setStrmStartTm] = useState('')
+  const [strmEndTm, setStrmEndTm] = useState('')
+  const [intro, setIntro] = useState('')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-  const handleSubmit = () => {
-    onSubmit?.({
-      date: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-      time: selectedTime,
-      introduction: introduction.trim(),
-    })
+  const router = useRouter()
+  const params = useParams()
+  const { showSuccess, AlertDialog } = useAlertDialog()
+  const timeOptions = generateTimeOptions()
+
+  const handleStartTimeChange = (value: string) => {
+    setStrmStartTm(value)
+    // 시작 시간이 선택되면 자동으로 종료 시간을 1시간 뒤로 설정
+    setStrmEndTm(addOneHour(value))
+  }
+
+  // Date를 YYYY-MM-DD 형식으로 변환
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const requestBrokerMutation = useRequestBroker(Number(params.id))
+
+  const handleSubmit = async () => {
+    if (!strmDate || !strmStartTm || !intro.trim()) return
+
+    const requestData = {
+      strmDate: formatDate(strmDate),
+      strmStartTm: strmStartTm,
+      strmEndTm: strmEndTm,
+      intro: intro.trim(),
+    }
+
+    console.log('중개 신청 데이터:', requestData)
+
+    try {
+      await requestBrokerMutation.mutateAsync(requestData)
+      showSuccess('중개 신청이 완료되었습니다!', () => {
+        router.replace(`/listings/${params.id}`)
+      })
+    } catch (error) {
+      console.error('중개 신청 실패:', error)
+    }
   }
 
   return (
@@ -48,12 +105,12 @@ export default function BrokerApplicationForm({ onSubmit, className }: BrokerApp
                 variant="outline"
                 className={cn(
                   'w-full justify-start text-left font-normal',
-                  !selectedDate && 'text-muted-foreground'
+                  !strmDate && 'text-muted-foreground'
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? (
-                  selectedDate.toLocaleDateString('ko-KR', {
+                {strmDate ? (
+                  strmDate.toLocaleDateString('ko-KR', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -66,9 +123,9 @@ export default function BrokerApplicationForm({ onSubmit, className }: BrokerApp
             <PopoverContent className="w-auto border border-none p-0" align="start">
               <Calendar
                 mode="single"
-                selected={selectedDate}
+                selected={strmDate}
                 onSelect={date => {
-                  setSelectedDate(date)
+                  setStrmDate(date)
                   setIsCalendarOpen(false)
                 }}
                 disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
@@ -80,27 +137,30 @@ export default function BrokerApplicationForm({ onSubmit, className }: BrokerApp
 
         {/* 시간 선택 */}
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">방송 시간</label>
-          <Select value={selectedTime} onValueChange={setSelectedTime}>
+          <label className="text-sm font-medium text-gray-700">방송 시작 시간</label>
+          <Select value={strmStartTm} onValueChange={handleStartTimeChange}>
             <SelectTrigger className="w-full border border-gray-200">
-              <SelectValue placeholder="시간을 선택해주세요" />
+              <SelectValue placeholder="시작 시간을 선택해주세요" />
             </SelectTrigger>
-            <SelectContent className={'border border-gray-200 bg-white'}>
-              <SelectItem value="09:00">오전 9시</SelectItem>
-              <SelectItem value="10:00">오전 10시</SelectItem>
-              <SelectItem value="11:00">오전 11시</SelectItem>
-              <SelectItem value="12:00">오후 12시</SelectItem>
-              <SelectItem value="13:00">오후 1시</SelectItem>
-              <SelectItem value="14:00">오후 2시</SelectItem>
-              <SelectItem value="15:00">오후 3시</SelectItem>
-              <SelectItem value="16:00">오후 4시</SelectItem>
-              <SelectItem value="17:00">오후 5시</SelectItem>
-              <SelectItem value="18:00">오후 6시</SelectItem>
-              <SelectItem value="19:00">오후 7시</SelectItem>
-              <SelectItem value="20:00">오후 8시</SelectItem>
+            <SelectContent className="max-h-[300px] border border-gray-200 bg-white">
+              {timeOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
+
+        {/* 종료 시간 표시 */}
+        {strmEndTm && (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">방송 종료 시간</label>
+            <div className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
+              {parseInt(strmEndTm.split(':')[0])}시 (자동 설정)
+            </div>
+          </div>
+        )}
 
         {/* 자기소개 입력 */}
         <div className="flex flex-col gap-2">
@@ -109,24 +169,27 @@ export default function BrokerApplicationForm({ onSubmit, className }: BrokerApp
           </label>
           <textarea
             id="introduction"
-            value={introduction}
-            onChange={e => setIntroduction(e.target.value)}
+            value={intro}
+            onChange={e => setIntro(e.target.value)}
             placeholder="간단한 자기소개와 중개 경력을 입력해주세요."
             rows={4}
             className="w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-gray-900 transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           />
-          <span className="text-xs text-gray-500">{introduction.length}/200자</span>
+          <span className="text-xs text-gray-500">{intro.length}/200자</span>
         </div>
 
         {/* 신청 버튼 */}
         <Button
           onClick={handleSubmit}
-          disabled={!selectedDate || !selectedTime || !introduction.trim()}
+          disabled={!strmDate || !strmStartTm || !intro.trim() || requestBrokerMutation.isPending}
           className="mt-2 w-full rounded-full bg-blue-500 py-6 text-sm font-semibold text-white disabled:bg-gray-300"
         >
-          중개 신청하기
+          {requestBrokerMutation.isPending ? '신청 중...' : '중개 신청하기'}
         </Button>
       </div>
+
+      {/* AlertDialog */}
+      <AlertDialog />
     </div>
   )
 }

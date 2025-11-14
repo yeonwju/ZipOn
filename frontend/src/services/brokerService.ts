@@ -1,18 +1,18 @@
 import { API_ENDPOINTS } from '@/constants'
 import { authFetch } from '@/lib/fetch'
-import { BrokerInfo, GetBrokerListResponseDTO, SelectBrokerResponseDTO } from '@/types/api/broker'
+import {
+  BrokerInfo,
+  GetBrokerListResponseDTO,
+  RequestBrokerResponseDTO,
+  SelectBrokerResponseDTO,
+} from '@/types/api/broker'
 
 export async function getBrokerList(
-  propertySeq: number,
-  pageable = {
-    page: 0,
-    size: 200,
-    sort: 'strmDate',
-  }
+  propertySeq: number
 ): Promise<{ success: true; data: BrokerInfo[] } | { success: false; message?: string }> {
   try {
     const result = await authFetch.get<GetBrokerListResponseDTO>(
-      API_ENDPOINTS.REQUEST_BORKER_LIST(propertySeq, pageable)
+      API_ENDPOINTS.REQUEST_BORKER_LIST(propertySeq)
     )
 
     if (result.data) {
@@ -65,6 +65,34 @@ export async function selectBroker(
     return {
       success: false,
       message: errorMessage,
+    }
+  }
+}
+
+export async function RequestBroker(
+  propertySeq: number,
+  request: { strmDate: string; strmStartTm: string; strmEndTm: string; intro: string }
+) {
+  try {
+    const result = await authFetch.post<RequestBrokerResponseDTO>(
+      API_ENDPOINTS.REQUEST_BROKER(propertySeq),
+      request
+    )
+    if (result.status === 200) {
+      return {
+        success: true,
+        message: result.message,
+      }
+    } else {
+      return {
+        success: false,
+      }
+    }
+  } catch (error) {
+    console.log('error', error)
+    return {
+      success: false,
+      message: error,
     }
   }
 }

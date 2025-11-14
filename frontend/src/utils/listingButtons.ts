@@ -25,6 +25,7 @@ export interface ButtonConfig {
  */
 export function isLiveTimePassed(liveAt: string | undefined): boolean {
   if (!liveAt) return false
+  console.log(liveAt)
   return new Date(liveAt) < new Date()
 }
 
@@ -181,7 +182,7 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '중개인 신청 현황',
-          action: () => console.log('중개인 신청 현황'),
+          action: () => (window.location.href = `/listings/${propertySeq}/brokers/apply`),
         },
         secondary: {
           text: '매물 수정',
@@ -197,7 +198,7 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '중개 신청',
-          action: () => console.log('중개 신청'),
+          action: () => (window.location.href = `/listings/${propertySeq}/brokers`),
         },
       }
     }

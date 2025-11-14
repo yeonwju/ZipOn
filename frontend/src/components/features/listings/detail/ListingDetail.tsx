@@ -52,7 +52,7 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
 
   // 버튼 설정 가져오기
   const buttonConfig = isLiveTimePassed(result.liveAt)
-    ? null // 라이브 시작 시간이 지나면 버튼 표시 안 함
+    ? null
     : getListingButtonConfig(
         result.isAucPref,
         result.isBrkPref,
@@ -63,7 +63,7 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
         result.auctionSeq,
         propertySeq
       )
-
+  console.log('buttonConfig:', buttonConfig)
   // 특징 배열 생성
   const features: string[] = []
   if (result.hasElevator) features.push('엘리베이터')
