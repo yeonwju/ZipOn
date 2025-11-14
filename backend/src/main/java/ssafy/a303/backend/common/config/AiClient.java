@@ -1,4 +1,4 @@
-package ssafy.a303.backend.property.config;
+package ssafy.a303.backend.common.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
