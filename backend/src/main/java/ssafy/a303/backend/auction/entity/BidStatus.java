@@ -1,6 +1,6 @@
 package ssafy.a303.backend.auction.entity;
 
-public enum AttendanceStatus {
+public enum BidStatus {
         WAITING,
         OFFERED,
         ACCEPTED,

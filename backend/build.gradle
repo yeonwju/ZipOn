@@ -78,10 +78,15 @@ dependencies {
     // sms
     implementation 'com.solapi:sdk:1.0.3'
 
+    //kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
+
     // Openvidu
     implementation 'io.openvidu:openvidu-java-client:2.29.0'
 }
-
 
 tasks.named('test') {
     useJUnitPlatform()

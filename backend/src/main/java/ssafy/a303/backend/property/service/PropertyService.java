@@ -236,14 +236,10 @@ public class PropertyService {
         /** 중개인 없이 자기가 경매 라이브하는 경우 분기 처리 */
         Integer auctionSeq = null;
 
-        if(aucInfo.getIsAucPref() && !aucInfo.getIsBrkPref()) {
+        if(auction == null) {
+            auctionSeq = null;
+        } else {
             auctionSeq = auction.getAuctionSeq();
-        }else {
-            if(auction == null){
-                auctionSeq = null;
-            }else{
-                auctionSeq = auction.getAuctionSeq();
-            }
         }
 
         DetailResponseDto detail = new DetailResponseDto(
