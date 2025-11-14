@@ -34,7 +34,7 @@ public class MyPageService {
     }
 
     /**
-     * 나의 경매 참여 내역 + 각 경매별 순위를 단일 쿼리로 조회
+     * 나의 경매 참여 내역+각 경매별 순위를 단일 쿼리로 조회
      */
     public List<MyAuctionResponseDto> getMyAuctions(Integer userSeq) {
 
