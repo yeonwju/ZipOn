@@ -46,5 +46,6 @@ public class ChatMessage extends BaseTimeEntity {
      * - 메시지 삭제 시 읽음 상태도 함께 삭제
      */
     @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.REMOVE)
+    @Builder.Default
     private List<MessageReadStatus> readStatuses = new ArrayList<>();
 }

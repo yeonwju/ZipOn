@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ssafy.a303.backend.auction.entity.AttendanceStatus;
+import ssafy.a303.backend.auction.entity.BidStatus;
 
 /**
  * 경매 참여 내역 응답 DTO
@@ -26,7 +26,7 @@ public class MyAuctionResponseDto {
     private Long propertySeq;
 
     @Schema(description = "경매 진행 상태", example = "WAITING")
-    private AttendanceStatus attendanceStatus;
+    private BidStatus bidStatus;
 
     @Schema(description = "경매 주소", example = "송도 더샵하버뷰 1202동 804호")
     private String address;
