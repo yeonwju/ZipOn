@@ -1,29 +1,31 @@
 'use client'
 
-import type { ListingDetailData } from '@/types/models/listing'
+import ListingImageGallery from '@/components/features/listings/detail/ListingImageGallery'
+import { ListingDetailDataResponse } from '@/types/api/listings'
 
-import ListingImageGallery from '../../detail/ListingImageGallery'
 import BrokerApplicationForm from './BrokerApplicationForm'
 import BrokerOwnerInfo from './BrokerOwnerInfo'
 import BrokerPropertyInfo from './BrokerPropertyInfo'
 
 interface BrokerApplicationDetailProps {
-  listing: ListingDetailData
+  listing?: ListingDetailDataResponse
   ownerName: string
   ownerImage?: string
   preferredTime?: string
   ownerDescription?: string
-  onSubmit?: (data: { date: string; time: string; introduction: string }) => void
 }
 
 export default function BrokerApplicationDetail({
   listing,
   ownerName,
-  ownerImage = '/profile.svg',
+  ownerImage,
   preferredTime,
   ownerDescription,
-  onSubmit,
 }: BrokerApplicationDetailProps) {
+  if (!listing) {
+    return null
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       {/* 이미지 갤러리 */}
@@ -46,7 +48,7 @@ export default function BrokerApplicationDetail({
             preferredTime={preferredTime}
             ownerDescription={ownerDescription}
           />
-          <BrokerApplicationForm onSubmit={onSubmit} />
+          <BrokerApplicationForm />
         </section>
       </div>
     </div>

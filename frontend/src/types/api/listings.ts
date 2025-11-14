@@ -36,9 +36,10 @@ export interface ListingDetailDataResponse {
   buildingType: string
   propertySeq: number
   lessorSeq?: number // 집주인(매물 등록자) Seq
+  lessorNm: string
+  lessorProfileImg?: string
   brkSeq?: number // 중개인 Seq
   auctionSeq?: number
-  lessorNm: string
   propertyNm: string
   content: string
   address: string

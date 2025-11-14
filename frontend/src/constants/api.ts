@@ -25,11 +25,8 @@ export const API_ENDPOINTS = {
   BUSSINESS_REGISTER: '/api/v1/broker',
 
   // 브로커
-  REQUEST_BORKER_LIST: (
-    propertySeq: number,
-    pageable: { page: number; size: number; sort: string }
-  ) => `/api/v1/auctions/${propertySeq}/applicants`,
-
+  REQUEST_BORKER_LIST: (propertySeq: number) => `/api/v1/auctions/${propertySeq}/applicants`,
+  REQUEST_BROKER: (propertySeq: number) => `/api/v1/auctions/applications/${propertySeq}`,
   SELECT_BROKER: (auctionSeq: number) => `/api/v1/auctions/${auctionSeq}/accept`,
 } as const
 
