@@ -109,6 +109,7 @@ public enum ErrorCode {
 
     NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 
+
     // 매물 사진 S3
     EMPTY_IMG_FILE(400, HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
     ONLY_IMG_ALLOWED(400, HttpStatus.BAD_REQUEST, "이미지 파일만 업로드 가능합니다."),
@@ -126,6 +127,10 @@ public enum ErrorCode {
     ACCEPT_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "해당 매물의 임대인만 중개인을 선택할 수 있습니다."),
     ALREADY_PROCESSED(400, HttpStatus.BAD_REQUEST, "이미 중개가 성사되었거나, 취소된 요청입니다."),
 
+    //계약 관련
+    AI_CONTRACT_ERROR(500, HttpStatus.BAD_GATEWAY, "AI 서버 응답 없음"),
+    AI_EMPTY_RESPONSE(400, HttpStatus.BAD_REQUEST, "AI 서버에서 빈 응답이 돌아왔습니다."),
+
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),
     INVALID_DESTINATION(400, HttpStatus.BAD_REQUEST, "STOMP 구독 경로(destination)가 누락되었거나 올바르지 않습니다. (예: /sub/chat/{roomId})"),
@@ -140,6 +145,16 @@ public enum ErrorCode {
     CHAT_PARTICIPANT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "채팅 참여자를 찾을 수 없습니다."),
     INVALID_CHAT_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 채팅 요청입니다."),
     BROKER_NOT_FOUND(404, HttpStatus.NOT_FOUND, "중개인 정보를 찾을 수 없습니다."),
+
+    // OpenVidu / Live Stream 관련 ---
+    OPENVIDU_SESSION_CREATE_FAILED(500, HttpStatus.INTERNAL_SERVER_ERROR, "라이브 방송 세션 생성에 실패했습니다."),
+    OPENVIDU_TOKEN_CREATE_FAILED(500, HttpStatus.INTERNAL_SERVER_ERROR, "OpenVidu 접속 토큰 발급에 실패했습니다."),
+    OPENVIDU_SESSION_NOT_FOUND(404, HttpStatus.NOT_FOUND, "존재하지 않는 방송 세션입니다."),
+    LIVE_STREAM_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 라이브 방송을 찾을 수 없습니다."),
+    LIVE_STREAM_ALREADY_ENDED(400, HttpStatus.BAD_REQUEST, "이미 종료된 라이브 방송입니다."),
+    LIVE_STREAM_NOT_OWNER(403, HttpStatus.FORBIDDEN, "방송을 종료할 권한이 없습니다."),
+    OPENVIDU_SESSION_CLOSE_FAILED(500, HttpStatus.INTERNAL_SERVER_ERROR, "라이브 방송 종료 중 오류가 발생했습니다."),
+
     ;
     // ────────────────────────────────────────────────────
     private final int code;

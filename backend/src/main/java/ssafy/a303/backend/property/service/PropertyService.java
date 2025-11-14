@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ssafy.a303.backend.auction.entity.Auction;
+import ssafy.a303.backend.auction.entity.AuctionStatus;
+import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
@@ -26,9 +29,7 @@ import ssafy.a303.backend.search.service.PropertySearchService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,7 @@ public class PropertyService {
     private final S3Uploader s3Uploader;
     private final PropertySearchService propertySearchService;
     private final UserRepository userRepository;
+    private final AuctionRepository auctionRepository;
 
     @Value("${app.s3.expose:presigned}")
     private String exposeMode;
@@ -160,6 +162,23 @@ public class PropertyService {
             }
         }
 
+        /** 중개인 없이 스스로 경매 라이브 진행하면 바로 Auction 테이블에 경매 정보 저장 */
+        if(!req.isBrkPref() && req.isAucPref()) {
+            Auction a = Auction.builder()
+                    .user(lessor)
+                    .property(p)
+                    .strmDate(req.aucAt().toLocalDate())
+                    .strmStartTm(req.aucAt().toLocalTime())
+                    .strmEndTm(req.aucAt().toLocalTime().plusHours(1))
+                    .auctionEndAt(LocalDateTime.of(
+                            req.aucAt().toLocalDate().plusDays(1),
+                            LocalTime.parse("12:00:00")
+                    ))
+                    .status(AuctionStatus.ACCEPTED)
+                    .build();
+            auctionRepository.save(a);
+        }
+
         /** ES 색인 */
         try {
             propertySearchService.setIndex(p);
@@ -203,11 +222,28 @@ public class PropertyService {
                 ))
                 .toList();
 
-//        User lessor = userRepository.findById(userSeq)
-//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        /** 매칭이 성사되어 라이브가 진행되는 경매 정보 가져오기 */
+        Auction auction = auctionRepository.findByProperty_PropertySeqAndStatus(propertySeq, AuctionStatus.ACCEPTED)
+                .orElse(null);
+
+        LocalDateTime liveAt = null;
+        if(auction == null) {
+            liveAt = null;
+        } else {
+            liveAt = LocalDateTime.of(auction.getStrmDate(), auction.getStrmStartTm());
+        }
+
+        /** 중개인 없이 자기가 경매 라이브하는 경우 분기 처리 */
+        Integer auctionSeq = null;
+
+        if(auction == null) {
+            auctionSeq = null;
+        } else {
+            auctionSeq = auction.getAuctionSeq();
+        }
 
         DetailResponseDto detail = new DetailResponseDto(
-                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
+                p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), liveAt, p.getBrkSeq(), auctionSeq, p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(), p.getBuildingType(),
                 p.getArea(), p.getAreaP(),
                 p.getDeposit(), p.getMnRent(), p.getFee(),

@@ -78,7 +78,12 @@ elasticsearch:
   host: ${ELASTICSEARCH_URL}
   port: 9200
   index:
-    property: my_index
+    property: ${ELASTICSEARCH_INDEX:zipon-properties}
+
+openvidu:
+  url: ${OPENVIDU_URL}
+  secret: ${OPENVIDU_SECRET}
+
 
 solapi:
   key: ${SOLAPI_API_KEY}

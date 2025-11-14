@@ -73,7 +73,7 @@ public class PropertySearchController {
                     description = "매물 검색 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDTO.class)
+                            schema = @Schema(implementation = SearchResponseDto.class)
                     )
             )
     })

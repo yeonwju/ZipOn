@@ -233,7 +233,12 @@ public class AuctionController {
         return ResponseDTO.ok(page, "신청된 중개인 목록 조회 성공");
     }
 
-
+    /**
+     * 임대인이 원하는 중개인 선택
+     * @param userSeq
+     * @param auctionSeq
+     * @return
+     */
     @Operation(
             summary = "임대인이 원하는 중개인 선택",
             description = "임대인이 중개인을 선택합니다."
@@ -300,5 +305,6 @@ public class AuctionController {
         auctionService.acceptBrk(userSeq, auctionSeq);
         return ResponseDTO.ok(null, "중개인을 선택했습니다.");
     }
+
 
 }

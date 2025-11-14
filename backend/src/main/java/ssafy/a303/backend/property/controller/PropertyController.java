@@ -38,6 +38,8 @@ public class PropertyController {
     private final PropertyService propertyService;
     private final VerificationService verificationService;
 
+    private final ObjectMapper objectMapper;
+
     /**
      * 매물 검증
      * 1) 매물 주소 입력
@@ -135,7 +137,7 @@ public class PropertyController {
                                                                                 @AuthenticationPrincipal Integer userSeq)
     {
         try {
-            PropertyDetailRequestDto req = new ObjectMapper().readValue(reqJson, PropertyDetailRequestDto.class);
+            PropertyDetailRequestDto req = objectMapper.readValue(reqJson, PropertyDetailRequestDto.class);
             PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
             return ResponseDTO.created(res, "매물 등록 완료");
         } catch (JsonProcessingException e) {
@@ -164,52 +166,49 @@ public class PropertyController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                                      "data": {
-                                                        "lessorSeq": 2,
-                                                        "lessorProfileImg": null,
-                                                        "propertySeq": 18,
-                                                        "lessorNm": "김싸피",
-                                                        "propertyNm": "멀티캠퍼스",
-                                                        "content": "이 집은 아주 좋습니다.",
-                                                        "address": "서울특별시 테헤란로 2223-3232",
-                                                        "latitude": 23.433434,
-                                                        "longitude": 12.324223,
-                                                        "buildingType": "OFFICE",
-                                                        "area": 84.8,
-                                                        "areaP": 32,
-                                                        "deposit": 10000000,
-                                                        "mnRent": 800000,
-                                                        "fee": 50000,
-                                                        "images": [
-                                                          {
-                                                            "s3key": "dev/uploads/properties/18/818b9069-adff-4482-a74d-2610d4be7e4d.png",
-                                                            "url": "https://zipon-media.s3.ap-northeast-2.amazonaws.com/dev/uploads/properties/18/818b9069-adff-4482-a74d-2610d4be7e4d.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251113T044221Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIARIOSKIFZ6IIHZ32C%2F20251113%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Expires=43200&X-Amz-Signature=7a4a56c7f5218e31b26721d1531b4a8e7824aca4bb10b45ca921badd8a9f27c8",
-                                                            "order": 1
-                                                          }
-                                                        ],
-                                                        "period": 24,
-                                                        "floor": 5,
-                                                        "facing": "N",
-                                                        "roomCnt": 2,
-                                                        "bathroomCnt": 1,
-                                                        "constructionDate": "2020-20-20",
-                                                        "parkingCnt": 1,
-                                                        "hasElevator": true,
-                                                        "petAvailable": true,
-                                                        "isAucPref": true,
-                                                        "isBrkPref": true,
-                                                        "hasBrk": false,
-                                                        "aucAt": "2025-12-10",
-                                                        "aucAvailable": "12월 10일 오후 시간대 희망합니다.",
-                                                        "pdfCode": "fjeilfjls",
-                                                        "isCertificated": true,
-                                                        "riskScore": 87,
-                                                        "riskReason": "여긴 사지 마세요."
-                                                      },
-                                                      "message": "해당 매물의 상세 정보를 조회합니다.",
-                                                      "status": 200,
-                                                      "timestamp": 1763008941199
-                                                    }
+                                              "data": {
+                                                "lessorSeq": 2,
+                                                "lessorProfileImg": null,
+                                                "liveAt": "2025-12-10T12:00:00",
+                                                "brkSeq": null,
+                                                "auctionSeq": 7,
+                                                "propertySeq": 23,
+                                                "lessorNm": "김싸피",
+                                                "propertyNm": "멀티캠퍼스",
+                                                "content": "이 집은 아주 좋습니다.",
+                                                "address": "서울특별시 테헤란로 2223-3232",
+                                                "latitude": 23.433434,
+                                                "longitude": 12.324223,
+                                                "buildingType": "OFFICE",
+                                                "area": 84.8,
+                                                "areaP": 32,
+                                                "deposit": 10000000,
+                                                "mnRent": 800000,
+                                                "fee": 50000,
+                                                "images": [],
+                                                "period": 24,
+                                                "floor": 5,
+                                                "facing": "N",
+                                                "roomCnt": 2,
+                                                "bathroomCnt": 1,
+                                                "constructionDate": "2020-12-20",
+                                                "parkingCnt": 1,
+                                                "hasElevator": true,
+                                                "petAvailable": true,
+                                                "isAucPref": true,
+                                                "isBrkPref": false,
+                                                "hasBrk": false,
+                                                "aucAt": "2025-12-10T12:00:00",
+                                                "aucAvailable": "12월 10일 오후 시간대 희망합니다.",
+                                                "pdfCode": "fjeilfjls",
+                                                "isCertificated": true,
+                                                "riskScore": 87,
+                                                "riskReason": "여긴 사지 마세요."
+                                              },
+                                              "message": "해당 매물의 상세 정보를 조회합니다.",
+                                              "status": 200,
+                                              "timestamp": 1763020944787
+                                            }                     
                                     """
                             )
                     )
