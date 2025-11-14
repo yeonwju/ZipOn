@@ -53,8 +53,8 @@ public class PropertyController {
             description = "매물의 주소를 입력하고 등기부등본을 검증합니다.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(type = "object", implementation = MultiPartRequest.class)
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
+//                            schema = @Schema(type = "object", implementation = MultiPartRequest.class)
                     )
             )
     )
