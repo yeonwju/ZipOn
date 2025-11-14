@@ -4,12 +4,13 @@ import { Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 
 import type { ChatRoomList } from '@/types'
+import { ChatRoomListResponseData } from '@/types/api/chat'
 
 import ChatRoomCard from './ChatRoomCard'
 
 interface ChatRoomListProps {
   className?: string
-  chatRooms: ChatRoomList[]
+  chatRooms: ChatRoomListResponseData[] | null | undefined
   onDeleteRoom?: (roomSeq: number) => void
 }
 
@@ -121,7 +122,7 @@ export default function ChatRoomList({ chatRooms, className, onDeleteRoom }: Cha
 
   return (
     <div className={`flex flex-col ${className ?? ''}`}>
-      {chatRooms.map(chatRoom => (
+      {chatRooms?.map(chatRoom => (
         <SwipeableItem key={chatRoom.roomSeq} onDelete={() => handleDelete(chatRoom.roomSeq)}>
           <ChatRoomCard chatRoom={chatRoom} />
         </SwipeableItem>

@@ -20,8 +20,8 @@ export function useCreateChatRoom() {
   const router = useRouter()
 
   return useMutation({
-    mutationFn: (params: { propertySeq: number; isAucPref: boolean }) =>
-      createChatRoom(params.propertySeq, params.isAucPref),
+    mutationFn: (params: { propertySeq: number; isBrkPref: boolean }) =>
+      createChatRoom(params.propertySeq, params.isBrkPref),
 
     onSuccess: data => {
       // 채팅방 목록 캐시 무효화

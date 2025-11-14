@@ -51,7 +51,7 @@ export function getListingButtonConfig(
   currentUserSeq: number | undefined,
   auctionSeq: number | undefined,
   propertySeq: number | undefined,
-  onCreateChatRoom?: (params: { propertySeq: number; isAucPref: boolean }) => void
+  onCreateChatRoom?: (params: { propertySeq: number; isBrkPref: boolean }) => void
 ): ButtonConfig | null {
   const isOwner = lessorSeq === currentUserSeq
   const isBroker = brkSeq === currentUserSeq
@@ -173,7 +173,7 @@ export function getListingButtonConfig(
           text: '중개인 1대1 대화',
           action: () => {
             if (onCreateChatRoom && propertySeq) {
-              onCreateChatRoom({ propertySeq, isAucPref })
+              onCreateChatRoom({ propertySeq, isBrkPref })
             }
           },
         },
@@ -230,7 +230,7 @@ export function getListingButtonConfig(
         text: '집주인 1대1 대화',
         action: () => {
           if (onCreateChatRoom && propertySeq) {
-            onCreateChatRoom({ propertySeq, isAucPref })
+            onCreateChatRoom({ propertySeq, isBrkPref })
           }
         },
       },
