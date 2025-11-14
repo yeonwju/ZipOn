@@ -2,8 +2,7 @@
  * API 엔드포인트 상수
  */
 
-export const API_BASE_URL = 'https://dev-zipon.duckdns.org'
-
+export const API_BASE_URL = { NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL }
 export const API_ENDPOINTS = {
   // 매물
   LISTINGS_REG_VERIFY: '/api/v1/properties/verifications',

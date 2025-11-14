@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
+import { API_BASE_URL } from '@/constants'
+
 /**
  * Onboard Content (Client Component)
  *
@@ -26,9 +28,8 @@ export default function OnboardContent() {
 
   // URL 수동 조합 (인코딩 처리)
   const loginUrl = new URL(
-    `https://dev-zipon.duckdns.org/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
+    `${API_BASE_URL}/api/v1/login/google?redirect_url=${encodeURIComponent(redirectPath)}`
   )
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8 text-center">
