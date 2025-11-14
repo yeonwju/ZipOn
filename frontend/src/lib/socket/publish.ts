@@ -1,6 +1,6 @@
-import { ChatMessageRequest } from './types'
 import { connectWS } from './connection'
 import { StompClientState } from './state'
+import { ChatMessageRequest } from './types'
 
 /**
  * WebSocket 메시지 전송 (Publish)
@@ -62,4 +62,3 @@ export async function sendChat(
     console.error('❌ 메시지 전송 실패:', error)
   }
 }
-

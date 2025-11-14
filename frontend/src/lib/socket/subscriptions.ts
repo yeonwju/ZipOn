@@ -1,7 +1,7 @@
 import { IMessage, StompSubscription } from '@stomp/stompjs'
 
-import { ChatMessage, ChatNotification } from './types'
 import { StompClientState } from './state'
+import { ChatMessage, ChatNotification } from './types'
 
 /**
  * WebSocket 구독 관리
@@ -123,4 +123,3 @@ export function unsubscribeChat(roomSeq: number) {
     console.log('🔌 채팅방 구독 해제:', `chat-${roomSeq}`)
   }
 }
-
