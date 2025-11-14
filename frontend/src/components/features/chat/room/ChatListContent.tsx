@@ -25,7 +25,7 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
   const queryClient = useQueryClient()
   const { data: user } = useUser()
   const { data: chatRooms, refetch } = useGetChatRoomList()
-  const { updateLastMessage } = useChatStore()
+  const { updateLastMessage, updateUnreadCount } = useChatStore()
 
   // Zustand에서 마지막 메시지 정보 가져오기
   const lastMessages = useChatStore(
@@ -63,7 +63,7 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
     })
   }, [chatRooms, lastMessages])
 
-  // 채팅 목록에 들어올 때마다 최신 데이터 가져오기
+  // 채팅 목록에 들어올 때마다 최신 데이터 가져오기 및 Zustand unreadCount 동기화
   useEffect(() => {
     if (user?.userSeq && authToken) {
       // 쿼리 무효화하여 최신 데이터 가져오기
@@ -72,8 +72,17 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
       })
       // refetch도 실행
       refetch()
+      
+      // 서버 데이터의 unreadCount를 Zustand에 동기화
+      if (chatRooms) {
+        chatRooms.forEach(room => {
+          if (room.unreadCount > 0) {
+            updateUnreadCount(room.roomSeq, room.unreadCount)
+          }
+        })
+      }
     }
-  }, [user?.userSeq, authToken, queryClient, refetch])
+  }, [user?.userSeq, authToken, queryClient, refetch, chatRooms])
 
   useEffect(() => {
     // 사용자 정보가 없으면 구독하지 않음
@@ -90,13 +99,16 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
     const handleNotification = (notification: ChatNotification) => {
       console.log('🔔 새 채팅 알림:', notification)
 
-      // Zustand에 마지막 메시지 정보 저장
+      // Zustand에 마지막 메시지 정보 저장 (unreadCount도 함께 업데이트됨)
       updateLastMessage(notification.roomSeq, {
         content: notification.content,
         sentAt: notification.sentAt,
         sender: notification.sender,
         unreadCount: notification.unreadCount,
       })
+      
+      // 읽지 않은 메시지 수도 즉시 업데이트 (실시간 뱃지 표시용)
+      updateUnreadCount(notification.roomSeq, notification.unreadCount)
 
       // 채팅방 목록 캐시 업데이트
       queryClient.setQueryData<ChatRoomListResponseData[] | null>(

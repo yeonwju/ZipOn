@@ -43,17 +43,17 @@ export default function ChatRoomCard({ className, chatRoom }: ChatRoomCardProps)
     >
       <Avatar>
         <AvatarImage
-          src={chatRoom.partner.profileImg ?? '/default-profile.svg'}
+          src={chatRoom.partner?.profileImg ?? '/default-profile.svg'}
           alt="프로필 이미지"
           className={'h-13 w-13 rounded-full'}
         />
       </Avatar>
 
       <section className="min-w-0 flex-1">
-        <div className="truncate font-medium">{chatRoom.partner.name ?? '알 수 없음'}</div>
+        <div className="truncate font-medium">{chatRoom.partner?.name ?? '알 수 없음'}</div>
         <div className="truncate text-sm text-gray-500">
           {chatRoom.lastMessage?.content ??
-            `${chatRoom.partner.name ?? '상대방'}님이 ${userName ?? '본인'}을 초대하였습니다.`}
+            `${chatRoom.partner?.name ?? '알 수 없음'}님이 ${userName ?? '본인'}을 초대하였습니다.`}
         </div>
       </section>
 

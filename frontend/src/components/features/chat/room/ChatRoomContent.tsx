@@ -55,8 +55,8 @@ export default function ChatRoomContent({ authToken }: ChatRoomContentProps) {
   return (
     <ChatRoom
       roomSeq={roomId}
-      partnerName={chatRoom.partner.name ?? '알 수 없음'}
-      partnerProfileImage={chatRoom.partner.profileImg ?? '/default-profile.svg'}
+      partnerName={chatRoom.partner?.name ?? '알 수 없음'}
+      partnerProfileImage={chatRoom.partner?.profileImg ?? '/default-profile.svg'}
       initialMessages={initialMessages}
       currentUserSeq={currentUserSeq}
       authToken={authToken}

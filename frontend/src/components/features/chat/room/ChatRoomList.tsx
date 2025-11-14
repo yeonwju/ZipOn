@@ -3,6 +3,7 @@
 import { Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 
+import { useLeaveChatRoom } from '@/hooks/queries/useChat'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 
 import ChatRoomCard from './ChatRoomCard'
@@ -110,11 +111,18 @@ function SwipeableItem({ children, onDelete }: SwipeableItemProps) {
 }
 
 export default function ChatRoomList({ chatRooms, className, onDeleteRoom }: ChatRoomListProps) {
+  const { mutate: leaveChatRoom, isPending } = useLeaveChatRoom()
+
   const handleDelete = (roomSeq: number) => {
     if (onDeleteRoom) {
       onDeleteRoom(roomSeq)
     } else {
-      // 기본 동작: 콘솔에 로그
+      // 기본 동작: 채팅방 나가기 Mutation 실행
+      if (isPending) {
+        console.log('채팅방 나가기 처리 중...')
+        return
+      }
+      leaveChatRoom(roomSeq)
       console.log('채팅방 나가기:', roomSeq)
     }
   }

@@ -59,14 +59,14 @@ export interface ChatRoomListResponseData {
   roomSeq: number
   partner: {
     userSeq: number
-    name: string
-    nickname: string
-    profileImg: string
-  }
+    name: string | null
+    nickname: string | null
+    profileImg: string | null
+  } | null
   lastMessage: {
     content: string
     sentAt: string
-  }
+  } | null
   unreadCount: number
 }
 /**

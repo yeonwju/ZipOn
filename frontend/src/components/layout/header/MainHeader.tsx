@@ -2,14 +2,30 @@
 
 import Badge from '@mui/material/Badge'
 import clsx from 'clsx'
-import {BellRing, MessageCircle, Search} from 'lucide-react'
+import { BellRing, MessageCircle, Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { useGetChatRoomList } from '@/hooks/queries/useChat'
+import { useChatStore } from '@/store/chatStore'
+import { useShallow } from 'zustand/react/shallow'
+
 export default function MainHeader() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+
+  // 채팅방 목록 조회하여 읽지 않은 메시지가 있는지 확인
+  const { data: chatRooms } = useGetChatRoomList()
+  
+  // Zustand에서 실시간 읽지 않은 메시지 수 확인 (WebSocket 알림 즉시 반영)
+  const totalUnreadCount = useChatStore(
+    useShallow(state => state.getTotalUnreadCount())
+  )
+  
+  // 서버 데이터와 Zustand 데이터 병합하여 확인
+  const serverUnreadCount = chatRooms?.reduce((sum, room) => sum + (room.unreadCount ?? 0), 0) ?? 0
+  const hasChatNotification = totalUnreadCount > 0 || serverUnreadCount > 0
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,9 +73,13 @@ export default function MainHeader() {
           </Badge>
         </Link>
         <Link href="/chat" className="flex flex-col items-center transition-colors">
-          <Badge color="primary" badgeContent={'1'} variant={'dot'} overlap="circular">
+          {hasChatNotification ? (
+            <Badge color="primary" badgeContent={1} variant="dot" overlap="circular">
+              <MessageCircle size={17} />
+            </Badge>
+          ) : (
             <MessageCircle size={17} />
-          </Badge>
+          )}
         </Link>
       </div>
     </nav>
