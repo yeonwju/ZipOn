@@ -7,16 +7,16 @@ import ssafy.a303.backend.user.entity.User;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attendance")
+@Table(name = "bid")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Attendance {
+public class Bid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer attendanceSeq;
+    private Integer bidSeq;
     @ManyToOne
     @JoinColumn(name = "user_seq", nullable = false)
     private User user;
@@ -32,7 +32,7 @@ public class Attendance {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private AttendanceStatus status = AttendanceStatus.WAITING;
+    private BidStatus status = BidStatus.WAITING;
     @Column
     private LocalDateTime decidedAt;
 }
