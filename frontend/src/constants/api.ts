@@ -28,6 +28,13 @@ export const API_ENDPOINTS = {
   REQUEST_BORKER_LIST: (propertySeq: number) => `/api/v1/auctions/${propertySeq}/applicants`,
   REQUEST_BROKER: (propertySeq: number) => `/api/v1/auctions/applications/${propertySeq}`,
   SELECT_BROKER: (auctionSeq: number) => `/api/v1/auctions/${auctionSeq}/accept`,
+
+  // 채팅
+  CREATE_CHAT: '/api/v1/chat/room',
+  CHAT_ROOM_HISTORY: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/history`,
+  CHAT_ROOM_LIST: `/api/v1/chat/my/rooms`,
+  CHAT_ROOM_LEAVE: (roomId: number) => `/api/v1/chat/room/${roomId}/leave`,
+  CHAT_MESSAGE_READ_CHECK: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/read`,
 } as const
 
 export const API_TIMEOUT = 10000 // 10초
