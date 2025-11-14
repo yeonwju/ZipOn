@@ -127,6 +127,10 @@ public enum ErrorCode {
     ACCEPT_NO_AUTH(401, HttpStatus.UNAUTHORIZED, "해당 매물의 임대인만 중개인을 선택할 수 있습니다."),
     ALREADY_PROCESSED(400, HttpStatus.BAD_REQUEST, "이미 중개가 성사되었거나, 취소된 요청입니다."),
 
+    //계약 관련
+    AI_CONTRACT_ERROR(500, HttpStatus.BAD_GATEWAY, "AI 서버 응답 없음"),
+    AI_EMPTY_RESPONSE(400, HttpStatus.BAD_REQUEST, "AI 서버에서 빈 응답이 돌아왔습니다."),
+
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),
     INVALID_DESTINATION(400, HttpStatus.BAD_REQUEST, "STOMP 구독 경로(destination)가 누락되었거나 올바르지 않습니다. (예: /sub/chat/{roomId})"),
