@@ -11,6 +11,8 @@ import ssafy.a303.backend.common.exception.CustomException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.http.MediaType;
 import ssafy.a303.backend.common.response.ErrorCode;
+import ssafy.a303.backend.contract.dto.response.AiRawResponseDto;
+import ssafy.a303.backend.contract.dto.response.ContractAiResponseDto;
 import ssafy.a303.backend.property.dto.response.VerificationResultResponseDto;
 
 @Component
@@ -49,6 +51,23 @@ public class AiClient {
             throw new CustomException(ErrorCode.AI_NO_RESPONSE);
         }
         return res;
+    }
+
+    public AiRawResponseDto verifyContract(MultipartFile file) {
+        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder
+                .part("file", file.getResource())
+                .filename(file.getOriginalFilename())
+                .contentType(MediaType.APPLICATION_PDF);
+
+        return client.post()
+                .uri("/review")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+                .retrieve()
+                .bodyToMono(AiRawResponseDto.class)
+                .block();
+
     }
 
 }
