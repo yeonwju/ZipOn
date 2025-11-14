@@ -13,11 +13,11 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { JSX, useEffect, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useGetChatRoomList } from '@/hooks/queries/useChat'
 import { useChatStore } from '@/store/chatStore'
-import { JSX, useEffect, useState } from 'react'
-import { useShallow } from 'zustand/react/shallow'
 
 type IconAction = {
   href?: string
@@ -184,12 +184,10 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
 
   // 채팅방 목록 조회하여 읽지 않은 메시지가 있는지 확인
   const { data: chatRooms } = useGetChatRoomList()
-  
+
   // Zustand에서 실시간 읽지 않은 메시지 수 확인 (WebSocket 알림 즉시 반영)
-  const totalUnreadCount = useChatStore(
-    useShallow(state => state.getTotalUnreadCount())
-  )
-  
+  const totalUnreadCount = useChatStore(useShallow(state => state.getTotalUnreadCount()))
+
   // 서버 데이터와 Zustand 데이터 병합하여 확인
   const serverUnreadCount = chatRooms?.reduce((sum, room) => sum + (room.unreadCount ?? 0), 0) ?? 0
   const hasChatNotification = totalUnreadCount > 0 || serverUnreadCount > 0

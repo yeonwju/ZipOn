@@ -7,7 +7,6 @@ import { useShallow } from 'zustand/react/shallow'
 import ChatRoomList from '@/components/features/chat/room/ChatRoomList'
 import { chatQueryKeys } from '@/constants'
 import { useGetChatRoomList } from '@/hooks/queries/useChat'
-import { useChatStore } from '@/store/chatStore'
 import { useUser } from '@/hooks/queries/useUser'
 import {
   ChatNotification,
@@ -15,6 +14,7 @@ import {
   subscribeNotifications,
   unsubscribeNotifications,
 } from '@/lib/socket'
+import { useChatStore } from '@/store/chatStore'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 
 interface ChatListContentProps {
@@ -28,9 +28,7 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
   const { updateLastMessage, updateUnreadCount } = useChatStore()
 
   // Zustand에서 마지막 메시지 정보 가져오기
-  const lastMessages = useChatStore(
-    useShallow(state => state.lastMessages)
-  )
+  const lastMessages = useChatStore(useShallow(state => state.lastMessages))
 
   // 서버 데이터와 Zustand 마지막 메시지 병합
   const mergedChatRooms = useMemo(() => {
@@ -72,7 +70,7 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
       })
       // refetch도 실행
       refetch()
-      
+
       // 서버 데이터의 unreadCount를 Zustand에 동기화
       if (chatRooms) {
         chatRooms.forEach(room => {
@@ -106,7 +104,7 @@ export default function ChatListContent({ authToken }: ChatListContentProps) {
         sender: notification.sender,
         unreadCount: notification.unreadCount,
       })
-      
+
       // 읽지 않은 메시지 수도 즉시 업데이트 (실시간 뱃지 표시용)
       updateUnreadCount(notification.roomSeq, notification.unreadCount)
 
