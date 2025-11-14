@@ -31,7 +31,7 @@ public class PropertyAucInfoService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 매물입니다."));
 
         // 수정 권한 확인
-        assertCanEdit(p.getLessorSeq(), userSeq);
+        assertCanEdit(p.getLessor().getUserSeq(), userSeq);
 
         // 매물의 경매 정보 조회
         PropertyAucInfo aucInfo = aucInfoRepository.findByProperty(p)

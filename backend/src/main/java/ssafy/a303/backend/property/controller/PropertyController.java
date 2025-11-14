@@ -38,6 +38,8 @@ public class PropertyController {
     private final PropertyService propertyService;
     private final VerificationService verificationService;
 
+    private final ObjectMapper objectMapper;
+
     /**
      * 매물 검증
      * 1) 매물 주소 입력
@@ -115,40 +117,13 @@ public class PropertyController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                                "data": {
-                                                    "propertySeq": 8,
-                                                    "lessorNm": "김싸피",
-                                                    "propertyNm": "멀티캠퍼스",
-                                                    "content": "이 집은 아주 좋습니다.",
-                                                    "address": "서울특별시 테헤란로 2223-3232",
-                                                    "latitude": 23.433434,
-                                                    "longitude": 12.324223,
-                                                    "buildingType": "OFFICE",
-                                                    "area": 84.8,
-                                                    "areaP": 32,
-                                                    "deposit": 10000000,
-                                                    "mnRent": 800000,
-                                                    "fee": 50000,
-                                                    "images": [],
-                                                    "period": 24,
-                                                    "floor": 5,
-                                                    "facing": "N",
-                                                    "roomCnt": 2,
-                                                    "bathroomCnt": 1,
-                                                    "constructionDate": "2020-20-20",
-                                                    "parkingCnt": 1,
-                                                    "hasElevator": true,
-                                                    "petAvailable": true,
-                                                    "isAucPref": true,
-                                                    "isBrkPref": true,
-                                                    "hasBrk": false,
-                                                    "aucAt": "2025-12-10",
-                                                    "aucAvailable": "12월 10일 오후 시간대 희망합니다."
-                                                },
-                                                "message": "매물 등록 완료",
-                                                "status": 201,
-                                                "timestamp": 1762750909568
-                                            }
+                                               "data": {
+                                                 "propertySeq": 15
+                                               },
+                                               "message": "매물 등록 완료",
+                                               "status": 201,
+                                               "timestamp": 1762992526128
+                                             }
                                             """
                             )
                     )
@@ -162,7 +137,7 @@ public class PropertyController {
                                                                                 @AuthenticationPrincipal Integer userSeq)
     {
         try {
-            PropertyDetailRequestDto req = new ObjectMapper().readValue(reqJson, PropertyDetailRequestDto.class);
+            PropertyDetailRequestDto req = objectMapper.readValue(reqJson, PropertyDetailRequestDto.class);
             PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
             return ResponseDTO.created(res, "매물 등록 완료");
         } catch (JsonProcessingException e) {
@@ -191,39 +166,49 @@ public class PropertyController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                                 "data": {
-                                                     "propertySeq": 1,
-                                                     "lessorNm": "김싸피",
-                                                     "propertyNm": "멀티캠퍼스",
-                                                     "content": "이 집은 아주 좋습니다.",
-                                                     "address": "서울특별시 테헤란로 2223-3232",
-                                                     "latitude": 23.433434,
-                                                     "longitude": 12.324223,
-                                                     "area": 84.8,
-                                                     "areaP": 32,
-                                                     "deposit": 10000000,
-                                                     "mnRent": 800000,
-                                                     "fee": 50000,
-                                                     "images": [],
-                                                     "period": 24,
-                                                     "floor": 5,
-                                                     "facing": "N",
-                                                     "roomCnt": 2,
-                                                     "bathroomCnt": 1,
-                                                     "constructionDate": "2020-20-20",
-                                                     "parkingCnt": 1,
-                                                     "hasElevator": true,
-                                                     "petAvailable": true,
-                                                     "isAucPref": true,
-                                                     "isBrkPref": true,
-                                                     "hasBrk": false,
-                                                     "aucAt": "2025-12-10",
-                                                     "aucAvailable": "12월 10일 오후 시간대 희망합니다."
-                                                 },
-                                                 "message": "해당 매물의 상세 정보를 조회합니다.",
-                                                 "status": 200,
-                                                 "timestamp": 1762751163185
-                                             }
+                                              "data": {
+                                                "lessorSeq": 2,
+                                                "lessorProfileImg": null,
+                                                "liveAt": "2025-12-10T12:00:00",
+                                                "brkSeq": null,
+                                                "auctionSeq": 7,
+                                                "propertySeq": 23,
+                                                "lessorNm": "김싸피",
+                                                "propertyNm": "멀티캠퍼스",
+                                                "content": "이 집은 아주 좋습니다.",
+                                                "address": "서울특별시 테헤란로 2223-3232",
+                                                "latitude": 23.433434,
+                                                "longitude": 12.324223,
+                                                "buildingType": "OFFICE",
+                                                "area": 84.8,
+                                                "areaP": 32,
+                                                "deposit": 10000000,
+                                                "mnRent": 800000,
+                                                "fee": 50000,
+                                                "images": [],
+                                                "period": 24,
+                                                "floor": 5,
+                                                "facing": "N",
+                                                "roomCnt": 2,
+                                                "bathroomCnt": 1,
+                                                "constructionDate": "2020-12-20",
+                                                "parkingCnt": 1,
+                                                "hasElevator": true,
+                                                "petAvailable": true,
+                                                "isAucPref": true,
+                                                "isBrkPref": false,
+                                                "hasBrk": false,
+                                                "aucAt": "2025-12-10T12:00:00",
+                                                "aucAvailable": "12월 10일 오후 시간대 희망합니다.",
+                                                "pdfCode": "fjeilfjls",
+                                                "isCertificated": true,
+                                                "riskScore": 87,
+                                                "riskReason": "여긴 사지 마세요."
+                                              },
+                                              "message": "해당 매물의 상세 정보를 조회합니다.",
+                                              "status": 200,
+                                              "timestamp": 1763020944787
+                                            }                     
                                     """
                             )
                     )

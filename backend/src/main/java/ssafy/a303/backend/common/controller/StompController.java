@@ -1,27 +1,33 @@
 package ssafy.a303.backend.common.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import ssafy.a303.backend.chat.dto.request.ChatMessageRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
+import ssafy.a303.backend.chat.dto.response.ChatNotificationDto;
+import ssafy.a303.backend.chat.repository.MessageReadStatusRepository;
 import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
 import ssafy.a303.backend.chat.service.ChatService;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
+import ssafy.a303.backend.livestream.service.LiveChatService;
 import ssafy.a303.backend.livestream.service.LiveRedisPubSubService;
-import ssafy.a303.backend.livestream.service.LiveService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.time.LocalDateTime;
+import java.util.Base64;
 
 /**
  * StompController (WebSocket 메시지 처리 컨트롤러)
@@ -29,16 +35,13 @@ import ssafy.a303.backend.user.repository.UserRepository;
  * 역할
  *  - 클라이언트가 STOMP 프로토콜을 통해 `/pub/**` 경로로 전송한 메시지를 수신
  *  - Redis Pub/Sub 기반으로 `/sub/**` 경로를 구독 중인 클라이언트에게 실시간으로 브로드캐스트
- *
  * 주요 경로
  *  - 1:1 채팅   → /pub/chat/{roomSeq} 발행, /sub/chat/{roomSeq} 구독
  *  - 라이브 채팅 → /pub/live/{liveSeq} 발행, /sub/live/{liveSeq} 구독
- *
  * STOMP 메시지 동작 흐름
  *  1) 클라이언트가 /pub 경로로 메시지를 보낸다.
  *  2) 서버는 @MessageMapping 메서드로 해당 메시지를 수신한다.
  *  3) DB에 저장한 후 Redis Pub/Sub 채널을 통해 /sub 경로 구독자에게 브로드캐스트한다.
- *
  * 인증 처리
  *  - CONNECT 시 JWT 인증 검증은 StompHandler에서 수행된다.
  *  - SUBSCRIBE 시 접근 권한(방 참여 여부 등)을 확인할 수 있다.
@@ -51,22 +54,31 @@ public class StompController {
 
     private final ChatService chatService;
     private final ChatRedisPubSubService chatRedisPubSubService;
-    private final LiveService liveService;
+    private final LiveChatService liveChatService;
     private final LiveRedisPubSubService liveRedisPubSubService;
     private final UserRepository userRepository;
+    private final MessageReadStatusRepository messageReadStatusRepository;
+    private final RedisTemplate<String, Object> liveRedisObjectTemplate;
+    private final org.springframework.data.redis.core.StringRedisTemplate liveRedisTemplate;
     private final ObjectMapper objectMapper;
     
     // 생성자 주입
     public StompController(ChatService chatService, 
                           ChatRedisPubSubService chatRedisPubSubService,
-                          LiveService liveService,
+                          LiveChatService liveChatService,
                           LiveRedisPubSubService liveRedisPubSubService,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          MessageReadStatusRepository messageReadStatusRepository,
+                          @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
+                          @Qualifier("liveRedisTemplate") org.springframework.data.redis.core.StringRedisTemplate liveRedisTemplate) {
         this.chatService = chatService;
         this.chatRedisPubSubService = chatRedisPubSubService;
-        this.liveService = liveService;
+        this.liveChatService = liveChatService;
         this.liveRedisPubSubService = liveRedisPubSubService;
         this.userRepository = userRepository;
+        this.messageReadStatusRepository = messageReadStatusRepository;
+        this.liveRedisObjectTemplate = liveRedisObjectTemplate;
+        this.liveRedisTemplate = liveRedisTemplate;
         
         // ObjectMapper에 JavaTimeModule 등록
         this.objectMapper = new ObjectMapper();
@@ -101,8 +113,8 @@ public class StompController {
             }
             
             // Payload 디코딩
-            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
-            com.fasterxml.jackson.databind.JsonNode node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(payload);
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            JsonNode node = new ObjectMapper().readTree(payload);
             userSeq = node.get("sub").asInt();
             
             log.info("[CHAT] 토큰에서 userSeq 추출: {}", userSeq);
@@ -110,6 +122,8 @@ public class StompController {
             log.error("[CHAT] 토큰 파싱 오류: {}", e.getMessage());
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
+
+        log.info("[CHAT] userSeq={}", userSeq);
 
         User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -120,11 +134,45 @@ public class StompController {
         // 3. DTO → JSON 문자열 변환
         String payload = objectMapper.writeValueAsString(response);
 
-        // 4. Redis Pub/Sub 채널로 메시지 발행
+        // 4. Redis Pub/Sub 채널로 메시지 발행 (채팅방 내부 구독자용)
         chatRedisPubSubService.publish("chat:" + roomSeq, payload);
 
         log.info("[REDIS][CHAT] roomSeq={}, sender={}, message={}",
                 roomSeq, sender.getNickname(), response.getContent());
+
+        // 5. 수신자의 알림 채널로도 발행 (채팅방 목록 구독자용)
+        try {
+            User recipient = chatService.getRecipient(roomSeq, sender.getUserSeq());
+            
+            // 수신자 기준 읽지 않은 메시지 개수 조회
+            long unreadCount = messageReadStatusRepository.countByChatRoomIdAndUserUserSeqAndIsReadFalse(
+                    roomSeq, recipient.getUserSeq());
+            
+            // 알림 DTO 생성
+            ChatNotificationDto notification = ChatNotificationDto.builder()
+                    .roomSeq(roomSeq)
+                    .sender(ChatNotificationDto.SenderDto.builder()
+                            .userSeq(sender.getUserSeq())
+                            .name(sender.getName())
+                            .nickname(sender.getNickname())
+                            .profileImg(sender.getProfileImg())
+                            .build())
+                    .content(response.getContent())
+                    .sentAt(response.getSentAt())
+                    .unreadCount((int) unreadCount)
+                    .build();
+            
+            String notificationPayload = objectMapper.writeValueAsString(notification);
+            
+            // 수신자의 개인 알림 채널로 발행
+            chatRedisPubSubService.publish("user:notifications:" + recipient.getUserSeq(), notificationPayload);
+            
+            log.info("[REDIS][NOTIFICATION] 수신자 알림 발행 → userSeq={}, roomSeq={}, unreadCount={}",
+                    recipient.getUserSeq(), roomSeq, unreadCount);
+        } catch (Exception e) {
+            log.error("[REDIS][NOTIFICATION] 알림 발행 실패: {}", e.getMessage(), e);
+            // 알림 실패해도 메시지는 정상 전송되었으므로 예외 무시
+        }
     }
 
     // =================================================================================================
@@ -133,26 +181,63 @@ public class StompController {
     @MessageMapping("/live/{liveSeq}")
     public void sendLiveMessage(
             @DestinationVariable Integer liveSeq,
-            LiveChatMessageRequestDto requestDto
+            LiveChatMessageRequestDto requestDto,
+            @Header("Authorization") String authHeader
     ) throws JsonProcessingException {
 
-        log.info("[LIVE] liveSeq={}, content={}", liveSeq, requestDto.getContent());
+        log.info("[STOMP][LIVE] 📨 Message received: liveSeq={}, content={}", liveSeq, requestDto.getContent());
 
-        // 사용자 조회 방식 동일하게 변경
-        String userSeqString = SecurityContextHolder.getContext().getAuthentication().getName();
-        Integer userSeq = Integer.valueOf(userSeqString);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.error("[STOMP][LIVE] ❌ Invalid Authorization header");
+            throw new CustomException(ErrorCode.INVALID_AUTH_HEADER);
+        }
+
+        String token = authHeader.substring(7);
+        String payload = new String(Base64.getUrlDecoder().decode(token.split("\\.")[1]));
+        JsonNode node = new ObjectMapper().readTree(payload);
+        Integer userSeq = node.get("sub").asInt();
+
+        log.info("[STOMP][LIVE] 👤 Sender userSeq: {}", userSeq);
 
         User sender = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        LiveChatMessageResponseDto response =
-                liveService.buildResponse(requestDto, sender.getUserSeq(), sender.getNickname());
+        // 1) 라이브 메시지 DTO 생성 + Redis 저장
+        LiveChatMessageResponseDto response = LiveChatMessageResponseDto.builder()
+                .liveSeq(liveSeq)
+                .senderSeq(userSeq)
+                .senderName(sender.getName())
+                .content(requestDto.getContent())
+                .sentAt(LocalDateTime.now())
+                .build();
 
-        String payload = objectMapper.writeValueAsString(response);
+        log.info("[STOMP][LIVE] 💾 Saving to Redis...");
+        
+        // 메시지 redis 저장
+        liveChatService.saveChatMessage(liveSeq, response);
 
-        liveRedisPubSubService.publish("live:" + liveSeq, payload);
+        String messageJson = objectMapper.writeValueAsString(response);
+        
+        log.info("[STOMP][LIVE] 📡 Publishing to Redis channel: live:{}", liveSeq);
 
-        log.info("[REDIS][LIVE] liveSeq={}, sender={}, message={}",
-                liveSeq, sender.getNickname(), response.getContent());
+        // 2) Redis Pub/Sub → 라이브룸 구독자에게 메시지 push
+        liveRedisPubSubService.publish("live:" + liveSeq, messageJson);
+        
+        // 3) 채팅 수 업데이트 전송 (라이브 방송 내부 시청자용)
+        try {
+            String chatKey = "live:chat:" + liveSeq;
+            int chatCount = java.util.Optional.ofNullable(liveRedisObjectTemplate.opsForList().size(chatKey))
+                    .map(Long::intValue).orElse(0);
+            
+            liveRedisTemplate.convertAndSend(
+                    "live:" + liveSeq,
+                    "{\"type\":\"CHAT_COUNT_UPDATE\",\"count\":" + chatCount + "}"
+            );
+            log.info("[STOMP][LIVE] 📊 Chat count update sent: {}", chatCount);
+        } catch (Exception e) {
+            log.error("[LIVE] 채팅 수 업데이트 전송 실패: {}", e.getMessage());
+        }
+        
+        log.info("[STOMP][LIVE] ✅ Message processing complete");
     }
 }

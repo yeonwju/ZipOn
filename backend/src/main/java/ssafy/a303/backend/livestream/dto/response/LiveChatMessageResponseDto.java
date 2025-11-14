@@ -1,5 +1,7 @@
 package ssafy.a303.backend.livestream.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,10 +18,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LiveChatMessageResponseDto {
-    private Integer liveSeq;        // 방송 ID
-    private Integer senderSeq;      // 발신자 ID
-    private String senderName;  // 발신자 닉네임
-    private String content;         // 채팅 내용
-    private LocalDateTime sentAt;   // 전송 시각
+    @Schema(description = "라이브 방송 식별자", example = "12")
+    private Integer liveSeq;
+
+    @Schema(description = "메시지를 보낸 사용자 식별자", example = "101")
+    private Integer senderSeq;
+
+    @Schema(description = "발신자 이름", example = "홍길동")
+    private String senderName;
+
+    @Schema(description = "전송된 채팅 메시지", example = "이 집 구조 좋아보이네요!")
+    private String content;
+
+    @Schema(description = "서버 기준 메시지 전송 시간", example = "2025-11-07T10:45:22")
+    private LocalDateTime sentAt;
 }

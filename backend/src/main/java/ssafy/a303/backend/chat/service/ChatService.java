@@ -1,13 +1,16 @@
 package ssafy.a303.backend.chat.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.chat.dto.request.ChatMessageRequestDto;
 import ssafy.a303.backend.chat.dto.request.ChatRoomCreateRequestDto;
 import ssafy.a303.backend.chat.dto.response.ChatMessageResponseDto;
+import ssafy.a303.backend.chat.dto.response.ChatNotificationDto;
 import ssafy.a303.backend.chat.dto.response.ChatRoomResponseDto;
 import ssafy.a303.backend.chat.dto.response.MyChatListResponseDto;
 import ssafy.a303.backend.chat.entity.*;
@@ -23,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 @Log4j2
 public class ChatService {
@@ -34,18 +36,35 @@ public class ChatService {
     private final MessageReadStatusRepository messageReadStatusRepository;
     private final UserRepository userRepository;
     private final PropertyRepository propertyRepository;
+    private final ChatNotificationPubSubService chatNotificationPubSubService;
+
+    // 생성자에서 @Lazy 적용하여 순환 참조 해결
+    public ChatService(
+            ChatRoomRepository chatRoomRepository,
+            ChatMessageRepository chatMessageRepository,
+            ChatParticipantRepository chatParticipantRepository,
+            MessageReadStatusRepository messageReadStatusRepository,
+            UserRepository userRepository,
+            PropertyRepository propertyRepository,
+            @Lazy ChatNotificationPubSubService chatNotificationPubSubService
+    ) {
+        this.chatRoomRepository = chatRoomRepository;
+        this.chatMessageRepository = chatMessageRepository;
+        this.chatParticipantRepository = chatParticipantRepository;
+        this.messageReadStatusRepository = messageReadStatusRepository;
+        this.userRepository = userRepository;
+        this.propertyRepository = propertyRepository;
+        this.chatNotificationPubSubService = chatNotificationPubSubService;
+    }
 
     /**
      * 1:1 채팅방 생성 or 기존 방 반환
      * isNew = true → 새로 만든 방
      * isNew = false → 기존 방 존재
      */
-    public ChatRoomResponseDto createOrGetRoom(ChatRoomCreateRequestDto requestDto) {
+    public ChatRoomResponseDto createOrGetRoom(ChatRoomCreateRequestDto requestDto, Integer userSeq) {
 
-        // 로그인 유저 ID
-        Integer requesterSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        User requester = userRepository.findById(requesterSeq)
+        User requester = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Property property = propertyRepository.findById(requestDto.getPropertySeq())
@@ -61,7 +80,7 @@ public class ChatService {
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         } else { // 임대인
-            opponent = userRepository.findById(property.getLessorSeq())
+            opponent = userRepository.findById(property.getLessor().getUserSeq())
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         }
 
@@ -92,6 +111,33 @@ public class ChatService {
 
             isNew = true;
 
+            // 새 채팅방 생성 시 상대방에게 알림 전송
+            try {
+                ChatNotificationDto notification = ChatNotificationDto.builder()
+                        .roomSeq(chatRoom.getId())
+                        .sender(ChatNotificationDto.SenderDto.builder()
+                                .userSeq(requester.getUserSeq())
+                                .name(requester.getName())
+                                .nickname(requester.getNickname())
+                                .profileImg(requester.getProfileImg())
+                                .build())
+                        .content(requester.getNickname() + "님이 채팅을 시작했습니다.")
+                        .sentAt(LocalDateTime.now())
+                        .unreadCount(0) // 새 채팅방이므로 아직 읽지 않은 메시지 없음
+                        .build();
+
+                String channel = "user:notifications:" + opponent.getUserSeq();
+                String jsonMessage = new ObjectMapper()
+                        .registerModule(new JavaTimeModule())
+                        .writeValueAsString(notification);
+
+                chatNotificationPubSubService.publish(channel, jsonMessage);
+                log.info("[CHAT][CREATE] 새 채팅방 알림 발송 → opponent={}, roomSeq={}",
+                        opponent.getUserSeq(), chatRoom.getId());
+            } catch (Exception e) {
+                log.error("[CHAT][CREATE] 채팅방 생성 알림 발송 실패", e);
+                // 알림 실패해도 채팅방 생성은 성공으로 처리
+            }
         }
 
         return ChatRoomResponseDto.builder()
@@ -101,62 +147,94 @@ public class ChatService {
                         .userSeq(opponent.getUserSeq())
                         .name(opponent.getName())
                         .nickname(opponent.getNickname())
+                        .profileImg(opponent.getProfileImg())
                         .build())
                 .build();
     }
 
     /**
      * 내 채팅방 리스트 조회
+     * --------------------------------------------------------------------
+     * 로그인한 사용자가 참여 중인 모든 1:1 채팅방 목록을 조회한다.
+     * 반환 정보 구성:
+     * - opponent : 상대방 사용자 정보
+     * - lastMessage : 최근 메시지 내용/시각 + 내가 보낸 메시지인지 여부
+     * - unreadCount : 내가 읽지 않은 메시지 개수
+     * 화면 예시:
+     *   [프로필 이미지]  상대방 이름
+     *   마지막 메시지 내용 ...       (읽지 않은 메시지 뱃지)
+     *   마지막 메시지 보낸 시간
      */
-    public List<MyChatListResponseDto> getMyChatRooms() {
+    public List<MyChatListResponseDto> getMyChatRooms(Integer userSeq) {
 
-        // 1) 현재 로그인된 사용자 userSeq 가져오기 (JWT → SecurityContext)
-        Integer userSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        // 2) 사용자 정보 조회 (User 엔티티)
+        // 실제 User 엔티티 조회
         User me = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        // 응답 리스트
         List<MyChatListResponseDto> result = new ArrayList<>();
 
-        // 3) 내가 참여하고 있는 모든 채팅방 가져오기
+        // 3) 내가 참여 중인 모든 채팅방 목록 조회
         List<ChatParticipant> myParticipations = chatParticipantRepository.findAllByUser(me);
 
         for (ChatParticipant cp : myParticipations) {
 
-            // 4) 해당 채팅방 엔티티
             ChatRoom room = cp.getChatRoom();
 
-            // 5) 채팅방의 참여자 중 "나 아닌 사람 = 상대방" 찾기
-            // .stream() List 같은 데이터 묶음을 반복문 없이 손쉽게 필터링/변환/검색
+            /*
+             * 4) 채팅방 참여자 중 '나를 제외한 사용자' = 상대방
+             *    (1:1 채팅 가정이므로 항상 2명 존재)
+             */
             User partner = room.getParticipants().stream()
                     .map(ChatParticipant::getUser)
                     .filter(u -> !u.getUserSeq().equals(me.getUserSeq())) // 나 제외
                     .findFirst()
-                    .orElse(null); // 이론상 null이면 안되지만 안전 장치
+                    .orElse(null); // 안전 처리 (이론상 null이면 안 됨)
 
-            // 6) 해당 채팅방의 가장 최근 메시지(없을 수도 있음)
+            /*
+             * 5) 최근 메시지 조회
+             *    - 최하단에 삽입되는 구조이므로 "sentAt DESC LIMIT 1"
+             */
             ChatMessage lastMessage = chatMessageRepository
                     .findTopByChatRoomOrderBySentAtDesc(room)
                     .orElse(null);
 
-            // 7) 내가 읽지 않은 메시지 개수 조회
+            /*
+             * 6) 읽지 않은 메시지 개수 조회
+             *    - "나 기준"으로 읽음 여부가 저장됨
+             */
             long unread = messageReadStatusRepository.countByChatRoomAndUserAndIsReadFalse(room, me);
 
-            // 8) 최종 응답 DTO 생성
-            result.add(MyChatListResponseDto.builder()
-                    .roomSeq(room.getId())
-                    .partnerSeq(partner != null ? partner.getUserSeq() : null)
-                    .partnerName(partner != null ? partner.getName() : "알 수 없음")
-                    .lastMessage(lastMessage != null ? lastMessage.getContent() : "")
-                    .lastSentAt(lastMessage != null ? lastMessage.getSentAt() : null)
-                    .unreadCount((int) unread)
-                    .build());
+            /*
+             * 7) DTO 변환
+             *    ← 여기서 핵심은 "opponent" 와 "lastMessage" 를
+             *       각각 하위 객체로 구조화하여 FE가 처리하기 쉽게 하는 것.
+             */
+            result.add(
+                    MyChatListResponseDto.builder()
+                            .roomSeq(room.getId())
+                            .partner(partner != null
+                                    ? MyChatListResponseDto.PartnerDto.builder()
+                                    .userSeq(partner.getUserSeq())
+                                    .name(partner.getName())
+                                    .nickname(partner.getNickname())
+                                    .profileImg(partner.getProfileImg())
+                                    .build()
+                                    : null
+                            )
+                            .lastMessage(lastMessage != null
+                                    ? MyChatListResponseDto.LastMessageDto.builder()
+                                    .content(lastMessage.getContent())
+                                    .sentAt(lastMessage.getSentAt())
+                                    .build()
+                                    : null
+                            )
+                            .unreadCount((int) unread)
+                            .build()
+            );
         }
 
-        // 9) 채팅방 목록 반환
         return result;
-
     }
 
     /**
@@ -169,15 +247,23 @@ public class ChatService {
         List<ChatMessageResponseDto> result = new ArrayList<>();
 
         for (ChatMessage m : chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom)) {
+
+            ChatMessageResponseDto.SenderDto senderDto = ChatMessageResponseDto.SenderDto.builder()
+                    .userSeq(m.getSender().getUserSeq())
+                    .name(m.getSender().getName())
+                    .nickname(m.getSender().getNickname())
+                    .profileImg(m.getSender().getProfileImg())
+                    .build();
+
             result.add(ChatMessageResponseDto.builder()
                     .messageSeq(m.getId())
                     .roomSeq(roomSeq)
-                    .senderSeq(m.getSender().getUserSeq())
-                    .senderName(m.getSender().getName())
+                    .sender(senderDto)
                     .content(m.getContent())
                     .sentAt(m.getSentAt())
                     .build());
         }
+
         return result;
     }
 
@@ -212,6 +298,7 @@ public class ChatService {
 
     /**
      * 메시지 저장 + 읽음 상태 생성 + 응답 DTO 반환
+     * @return 저장된 메시지의 응답 DTO
      */
     public ChatMessageResponseDto saveMessage(Integer roomSeq, ChatMessageRequestDto requestDto, User sender) {
 
@@ -241,22 +328,45 @@ public class ChatService {
         }
 
         // 응답 DTO 로 변환
+        ChatMessageResponseDto.SenderDto senderDto = ChatMessageResponseDto.SenderDto.builder()
+                .userSeq(sender.getUserSeq())
+                .name(sender.getName())
+                .nickname(sender.getNickname())
+                .profileImg(sender.getProfileImg())
+                .build();
+
         return ChatMessageResponseDto.builder()
                 .messageSeq(message.getId())
                 .roomSeq(chatRoom.getId())
-                .senderSeq(sender.getUserSeq())
-                .senderName(sender.getName())
+                .sender(senderDto)
                 .content(message.getContent())
                 .sentAt(message.getSentAt())
                 .build();
     }
 
     /**
+     * 채팅방의 상대방(수신자) 찾기
+     * @param roomSeq 채팅방 ID
+     * @param senderSeq 발신자 ID
+     * @return 수신자 User 엔티티
+     */
+    public User getRecipient(Integer roomSeq, Integer senderSeq) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 채팅방 참여자 중 발신자가 아닌 사람 = 수신자
+        return chatRoom.getParticipants().stream()
+                .map(ChatParticipant::getUser)
+                .filter(user -> !user.getUserSeq().equals(senderSeq))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    /**
      * 메시지 읽음 처리
      */
-    public void readMessages(Integer roomSeq) {
+    public void readMessages(Integer roomSeq, Integer userSeq) {
 
-        Integer userSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         User reader = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -271,14 +381,13 @@ public class ChatService {
     /**
      * 채팅방 나가기
      */
-    public void leaveRoom(Integer roomId) {
+    public void leaveRoom(Integer roomId, Integer userSeq) {
         // 1. 채팅방 조회
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        // 2. 현재 로그인 사용자 조회
-        Integer currentUserSeq = Integer.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        User currentUser = userRepository.findById(currentUserSeq)
+        // 2. 사용자 조회
+        User currentUser = userRepository.findById(userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 3. 참여자 엔티티 조회

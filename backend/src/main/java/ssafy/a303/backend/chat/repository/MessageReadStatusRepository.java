@@ -14,4 +14,7 @@ public interface MessageReadStatusRepository extends JpaRepository<MessageReadSt
 
     /** 아직 읽지 않은 메시지 개수 */
     long countByChatRoomAndUserAndIsReadFalse(ChatRoom room, User user);
+
+    /** 아직 읽지 않은 메시지 개수 (ID 기반 조회) */
+    long countByChatRoomIdAndUserUserSeqAndIsReadFalse(Integer roomId, Integer userSeq);
 }

@@ -37,6 +37,9 @@ public class Auction {
     private Property property;
 
     @Column
+    private String intro;
+
+    @Column
     private LocalDate strmDate;
 
     @Column
