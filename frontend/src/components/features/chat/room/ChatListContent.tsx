@@ -15,7 +15,11 @@ import {
 } from '@/lib/socket'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 
-export default function ChatListContent() {
+interface ChatListContentProps {
+  authToken: string | null
+}
+
+export default function ChatListContent({ authToken }: ChatListContentProps) {
   const queryClient = useQueryClient()
   const { data: user } = useUser()
   const { data: chatRooms } = useGetChatRoomList()
@@ -23,6 +27,11 @@ export default function ChatListContent() {
   useEffect(() => {
     // 사용자 정보가 없으면 구독하지 않음
     if (!user?.userSeq) {
+      return
+    }
+
+    if (!authToken) {
+      console.error('❌ ChatListContent: 인증 토큰이 없습니다.')
       return
     }
 
@@ -62,7 +71,7 @@ export default function ChatListContent() {
     // WebSocket 연결 및 알림 구독
     const initWebSocket = async () => {
       try {
-        await connectWS()
+        await connectWS(authToken)
         console.log('✅ ChatListContent: WebSocket 연결 성공')
 
         // 알림 구독 (중복 방지 로직 포함)
@@ -80,7 +89,7 @@ export default function ChatListContent() {
       unsubscribeNotifications(user.userSeq)
       // 주의: WebSocket 연결은 전역이므로 다른 컴포넌트에서도 사용할 수 있어 여기서 끊지 않음
     }
-  }, [user?.userSeq, queryClient])
+  }, [user?.userSeq, queryClient, authToken])
 
   return <ChatRoomList chatRooms={chatRooms} />
 }

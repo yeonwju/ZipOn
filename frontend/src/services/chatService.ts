@@ -38,7 +38,7 @@ export async function createChatRoom(
 
 export async function getChatRoomHistory(roomSeq: number): Promise<{
   success: boolean
-  data: ChatRoomHistoryResponseData | null
+  data: ChatRoomHistoryResponseData[] | null
 }> {
   try {
     const result = await authFetch.get<ChatRoomHistoryResponse>(

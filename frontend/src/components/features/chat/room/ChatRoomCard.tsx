@@ -4,7 +4,6 @@ import Link from 'next/link'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { useUser } from '@/hooks/queries/useUser'
-import type { ChatRoomList } from '@/types'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 
 interface ChatRoomCardProps {

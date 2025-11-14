@@ -6,6 +6,10 @@ import { AuthGuard } from '@/components/auth'
 import ChatRoomContent from '@/components/features/chat/room/ChatRoomContent'
 import { ChatRoomSkeleton } from '@/components/skeleton/chat'
 
+interface ChatRoomPageClientProps {
+  authToken: string | null
+}
+
 /**
  * 채팅방 페이지 Client Component
  * 
@@ -13,11 +17,11 @@ import { ChatRoomSkeleton } from '@/components/skeleton/chat'
  * 1차: Middleware (토큰 체크)
  * 2차: AuthGuard (사용자 정보 확인, React Query 캐싱)
  */
-export default function ChatRoomPageClient() {
+export default function ChatRoomPageClient({ authToken }: ChatRoomPageClientProps) {
   return (
     <AuthGuard>
       <Suspense fallback={<ChatRoomSkeleton />}>
-        <ChatRoomContent />
+        <ChatRoomContent authToken={authToken} />
       </Suspense>
     </AuthGuard>
   )

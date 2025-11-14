@@ -27,7 +27,7 @@ export interface CreateChatRoomResponse {
 export interface ChatRoomHistoryResponse {
   status: number
   message: string
-  data: ChatRoomHistoryResponseData
+  data: ChatRoomHistoryResponseData[]
 }
 
 export interface ChatRoomHistoryResponseData {
