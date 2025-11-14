@@ -64,7 +64,7 @@ elasticsearch:
   host: ${ELASTICSEARCH_URL}
   port: 9200
   index:
-    property: my_index
+    property: ${ELASTICSEARCH_INDEX:zipon-properties}
 
 openvidu:
   url: ${OPENVIDU_URL}

@@ -42,7 +42,7 @@ public class PropertySearchService {
     private final PropertyAucInfoRepository aucInfoRepository;
 
     // 검색 대상 인덱스명
-    @Value("${elasticsearch.index.property}")
+    @Value("${ELASTICSEARCH_INDEX}")
     private String index;
 
     /**
