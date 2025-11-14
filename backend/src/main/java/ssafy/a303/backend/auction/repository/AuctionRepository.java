@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ssafy.a303.backend.auction.dto.response.BrkApplicantResponseDto;
+import ssafy.a303.backend.auction.entity.Attendance;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 
@@ -78,5 +79,35 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
 
     /** ACCEPTED 상태인 중개 매칭 정보 */
     Optional<Auction> findByProperty_PropertySeqAndStatus(Integer propertySeq, AuctionStatus status);
+
+    /**
+     * 나의 경매 참여 내역 + 각 경매에서의 실제 순위까지 한 번에 조회하는 쿼리
+     * 반환 컬럼:
+     * 0: thumbnail (매물 썸네일)
+     * 1: auctionSeq (경매 식별자)
+     * 2: propertySeq (매물 식별자)
+     * 3: attendanceStatus (입찰 상태)
+     * 4: address (매물 주소)
+     * 5: bidAmount (입찰 금액)
+     * 6: bidRank (해당 경매에서 나보다 앞선 사람 수) ★
+     */
+    @Query("""
+    SELECT auc.property.thumbnail as thumbnail,
+           auc.auctionSeq as auctionSeq,
+           auc.property.propertySeq as propertySeq,
+           at.status as attendanceStatus,
+           auc.property.address as address,
+           at.bidAmount as bidAmount,
+           (SELECT COUNT(at2)
+            FROM Attendance at2
+            WHERE at2.auction.auctionSeq = at.auction.auctionSeq
+            AND at2.status != 'REJECTED'
+            AND at2.rank < at.rank) as bidRank
+    FROM Attendance at
+    JOIN at.auction auc
+    WHERE at.user.userSeq = :userSeq
+    ORDER BY at.rank DESC
+    """)
+    List<Object[]> getMyAuctionsWithRank(@Param("userSeq") Integer userSeq);
 
 }
