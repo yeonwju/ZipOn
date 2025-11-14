@@ -4,7 +4,6 @@ stages:
   - trigger_jenkins
 
 # DEV
-
 trigger-dev:
   stage: trigger_jenkins
   only:
@@ -14,41 +13,40 @@ trigger-dev:
   script:
     - echo "🚀 Trigger Jenkins (DEV job)"
 
-    # 1) Jenkins Crumb 가져오기 (CSRF 보호 우회)
+    # 1) Jenkins Crumb 가져오기
     - |
       CRUMB=$(curl -s \
         --user "$JENKINS_USER:$JENKINS_TOKEN" \
         "http://k13a303.p.ssafy.io:8888/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
       echo "✓ CRUMB = $CRUMB"
 
-    # 2) Jenkins 빌드 시작
+    # 2) Jenkins DEV Job 빌드 시작
     - |
       curl -X POST \
-        "http://k13a303.p.ssafy.io:8888/job/dev/build?token=trigger" \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/dev/build" \
         -H "$CRUMB" \
         --user "$JENKINS_USER:$JENKINS_TOKEN"
 
     - echo "⏳ Waiting for Jenkins to start build..."
     - sleep 3
 
-    # 3) 최근 빌드번호 가져오기
+    # 3) 가장 최근 빌드 번호 조회
     - |
       BUILD_NUMBER=$(curl -s \
         --user "$JENKINS_USER:$JENKINS_TOKEN" \
-        "http://k13a303.p.ssafy.io:8888/job/dev/lastBuild/buildNumber")
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/dev/lastBuild/buildNumber")
       echo "🔢 Jenkins BUILD_NUMBER = $BUILD_NUMBER"
 
-    # 4) Jenkins 콘솔 출력 가져오기
+    # 4) 콘솔 출력 조회
     - |
       echo "📜 Fetching Jenkins Console Output..."
       curl -s \
         --user "$JENKINS_USER:$JENKINS_TOKEN" \
-        "http://k13a303.p.ssafy.io:8888/job/dev/$BUILD_NUMBER/consoleText"
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/dev/$BUILD_NUMBER/consoleText"
 
     - echo "✅ DEV pipeline Done."
 
 # MASTER
-
 trigger-master:
   stage: trigger_jenkins
   only:
@@ -65,28 +63,28 @@ trigger-master:
         "http://k13a303.p.ssafy.io:8888/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
       echo "✓ CRUMB = $CRUMB"
 
-    # 2) Jenkins 빌드 시작
+    # 2) Jenkins MASTER Job 빌드 시작
     - |
       curl -X POST \
-        "http://k13a303.p.ssafy.io:8888/job/master/build?token=trigger" \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/master/build" \
         -H "$CRUMB" \
         --user "$JENKINS_USER:$JENKINS_TOKEN"
 
     - echo "⏳ Waiting for Jenkins to start build..."
     - sleep 3
 
-    # 3) 최근 빌드번호 가져오기
+    # 3) 가장 최근 빌드 번호 조회
     - |
       BUILD_NUMBER=$(curl -s \
         --user "$JENKINS_USER:$JENKINS_TOKEN" \
-        "http://k13a303.p.ssafy.io:8888/job/master/lastBuild/buildNumber")
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/master/lastBuild/buildNumber")
       echo "🔢 Jenkins BUILD_NUMBER = $BUILD_NUMBER"
 
-    # 4) Jenkins 콘솔 출력 가져오기
+    # 4) 콘솔 출력 조회
     - |
       echo "📜 Fetching Jenkins Console Output..."
       curl -s \
         --user "$JENKINS_USER:$JENKINS_TOKEN" \
-        "http://k13a303.p.ssafy.io:8888/job/master/$BUILD_NUMBER/consoleText"
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/master/$BUILD_NUMBER/consoleText"
 
     - echo "✅ MASTER pipeline Done."
