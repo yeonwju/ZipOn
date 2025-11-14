@@ -2,10 +2,12 @@ package ssafy.a303.backend.common.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import ssafy.a303.backend.common.exception.CustomException;
 
 import org.springframework.web.reactive.function.BodyInserters;
@@ -60,12 +62,29 @@ public class AiClient {
                 .filename(file.getOriginalFilename())
                 .contentType(MediaType.APPLICATION_PDF);
 
+        log.info("[AI] 계약서 AI 서버로 요청 시작...");
+
         return client.post()
                 .uri("/review")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .retrieve()
+                // AI 상태 코드 에러 처리
+                .onStatus(
+                        HttpStatusCode::isError,
+                        response -> {
+                            log.error("[AI] 서버가 에러 상태 응답: {}", response.statusCode());
+                            return response.bodyToMono(String.class)
+                                    .defaultIfEmpty("AI 서버 오류")
+                                    .flatMap(msg -> Mono.error(new CustomException(ErrorCode.AI_CONTRACT_ERROR,"AI 서버 응답 오류: " + msg)));
+                        }
+                )
+                //정상 응답
                 .bodyToMono(AiRawResponseDto.class)
+                //응답이 null
+                .switchIfEmpty(Mono.error(
+                        new CustomException(ErrorCode.AI_EMPTY_RESPONSE)
+                ))
                 .block();
 
     }
