@@ -14,6 +14,10 @@ import {
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+
+import { useGetChatRoomList } from '@/hooks/queries/useChat'
+import { useChatStore } from '@/store/chatStore'
 
 type IconAction = {
   href?: string
@@ -24,45 +28,117 @@ type IconAction = {
 /* ---------------------------------------------------
  * 1 Badge 아이콘 생성 헬퍼
  * --------------------------------------------------- */
-const createBadgeIcon = (icon: JSX.Element, href: string, badgeContent?: string): IconAction => ({
-  href,
-  icon: (
-    <Badge color="primary" badgeContent={badgeContent ?? '1'} variant="dot" overlap="circular">
-      {icon}
-    </Badge>
-  ),
-})
+const createBadgeIcon = (
+  icon: JSX.Element,
+  href: string,
+  badgeContent?: string | number | null
+): IconAction => {
+  if (badgeContent === null || badgeContent === undefined || badgeContent === 0) {
+    return {
+      href,
+      icon,
+    }
+  }
+
+  return {
+    href,
+    icon: (
+      <Badge color="primary" badgeContent={badgeContent} variant="dot" overlap="circular">
+        {icon}
+      </Badge>
+    ),
+  }
+}
 
 /* ---------------------------------------------------
- *  2 공통 아이콘 세트
+ *  2 기본 아이콘 (뱃지 없음)
  * --------------------------------------------------- */
-const ICONS = {
+const BASE_ICONS = {
   search: { href: '/search', icon: <Search size={17} /> },
-  notification: createBadgeIcon(<BellRing size={17} />, '/notification'),
-  chat: createBadgeIcon(<MessageCircle size={17} />, '/chat'),
+  notification: { href: '/notification', icon: <BellRing size={17} /> },
+  chat: { href: '/chat', icon: <MessageCircle size={17} /> },
   settings: { href: '/mypage/edit', icon: <Settings size={17} /> },
   calendar: { href: '/calendar', icon: <CalendarDays size={17} /> },
   like: { href: '/like', icon: <Heart size={17} /> },
 }
 
 /* ---------------------------------------------------
- * 3 기본 아이콘 매핑
+ *  기존 ICONS (하위 호환성을 위해 유지)
  * --------------------------------------------------- */
-const rightIconsMap: Record<string, IconAction[]> = {
-  default: [ICONS.search, ICONS.notification, ICONS.chat],
-  '/listings/new': [],
-  '/auction/payment': [],
-  '/auction/bid': [ICONS.notification, ICONS.chat],
-  '/chat': [ICONS.search, ICONS.notification],
-  '/verify/phone': [],
-  '/verify/business': [],
-  '/mypage/my-listings': [ICONS.notification, ICONS.chat],
-  '/mypage/my-auction': [ICONS.notification, ICONS.chat],
-  '/mypage': [ICONS.notification, ICONS.chat, ICONS.settings],
-  '/listing': [ICONS.like],
-  '/live/list': [ICONS.calendar, ICONS.notification, ICONS.chat],
-  '/calendar': [ICONS.notification, ICONS.chat],
-  '/live/create': [],
+const ICONS = {
+  search: BASE_ICONS.search,
+  notification: createBadgeIcon(<BellRing size={17} />, '/notification', null),
+  chat: createBadgeIcon(<MessageCircle size={17} />, '/chat', null),
+  settings: BASE_ICONS.settings,
+  calendar: BASE_ICONS.calendar,
+  like: BASE_ICONS.like,
+}
+
+/* ---------------------------------------------------
+ * 3 기본 아이콘 매핑 (뱃지 정보는 컴포넌트에서 동적으로 생성)
+ * --------------------------------------------------- */
+const getDefaultIcons = (
+  hasChatNotification: boolean,
+  hasNotification: boolean = false
+): IconAction[] => {
+  const notificationIcon = hasNotification
+    ? createBadgeIcon(<BellRing size={17} />, '/notification', 1)
+    : BASE_ICONS.notification
+
+  const chatIcon = hasChatNotification
+    ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+    : BASE_ICONS.chat
+
+  return [BASE_ICONS.search, notificationIcon, chatIcon]
+}
+
+const rightIconsMap: Record<string, (hasChatNotification: boolean) => IconAction[]> = {
+  default: (hasChatNotification: boolean) => getDefaultIcons(hasChatNotification),
+  '/listings/new': () => [],
+  '/auction/payment': () => [],
+  '/auction/bid': (hasChatNotification: boolean) => [
+    BASE_ICONS.notification,
+    hasChatNotification
+      ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+      : BASE_ICONS.chat,
+  ],
+  '/chat': () => [BASE_ICONS.search, BASE_ICONS.notification],
+  '/verify/phone': () => [],
+  '/verify/business': () => [],
+  '/mypage/my-listings': (hasChatNotification: boolean) => [
+    BASE_ICONS.notification,
+    hasChatNotification
+      ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+      : BASE_ICONS.chat,
+  ],
+  '/mypage/my-auction': (hasChatNotification: boolean) => [
+    BASE_ICONS.notification,
+    hasChatNotification
+      ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+      : BASE_ICONS.chat,
+  ],
+  '/mypage': (hasChatNotification: boolean) => [
+    BASE_ICONS.notification,
+    hasChatNotification
+      ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+      : BASE_ICONS.chat,
+    BASE_ICONS.settings,
+  ],
+  '/listing': () => [BASE_ICONS.like],
+  '/live/list': (hasChatNotification: boolean) => [
+    BASE_ICONS.calendar,
+    BASE_ICONS.notification,
+    hasChatNotification
+      ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+      : BASE_ICONS.chat,
+  ],
+  '/calendar': (hasChatNotification: boolean) => [
+    BASE_ICONS.notification,
+    hasChatNotification
+      ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+      : BASE_ICONS.chat,
+  ],
+  '/live/create': () => [],
 }
 
 /* ---------------------------------------------------
@@ -105,6 +181,16 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [canGoBack, setCanGoBack] = useState(false)
+
+  // 채팅방 목록 조회하여 읽지 않은 메시지가 있는지 확인
+  const { data: chatRooms } = useGetChatRoomList()
+
+  // Zustand에서 실시간 읽지 않은 메시지 수 확인 (WebSocket 알림 즉시 반영)
+  const totalUnreadCount = useChatStore(useShallow(state => state.getTotalUnreadCount()))
+
+  // 서버 데이터와 Zustand 데이터 병합하여 확인
+  const serverUnreadCount = chatRooms?.reduce((sum, room) => sum + (room.unreadCount ?? 0), 0) ?? 0
+  const hasChatNotification = totalUnreadCount > 0 || serverUnreadCount > 0
 
   /* 앱 내부 히스토리 체크 */
   useEffect(() => {
@@ -161,13 +247,28 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
 
   if (/^\/listings\/\d+\/brokers$/.test(pathname)) {
     dynamicTitle = '중개 신청'
-    dynamicIcons = [ICONS.notification, ICONS.chat]
+    dynamicIcons = [
+      BASE_ICONS.notification,
+      hasChatNotification
+        ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+        : BASE_ICONS.chat,
+    ]
   } else if (/^\/listings\/\d+\/brokers\/apply$/.test(pathname)) {
     dynamicTitle = '중개인 선택'
-    dynamicIcons = [ICONS.notification, ICONS.chat]
+    dynamicIcons = [
+      BASE_ICONS.notification,
+      hasChatNotification
+        ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+        : BASE_ICONS.chat,
+    ]
   } else if (/^\/auction\/\d+$/.test(pathname)) {
     dynamicTitle = '경매 입찰'
-    dynamicIcons = [ICONS.notification, ICONS.chat]
+    dynamicIcons = [
+      BASE_ICONS.notification,
+      hasChatNotification
+        ? createBadgeIcon(<MessageCircle size={17} />, '/chat', 1)
+        : BASE_ICONS.chat,
+    ]
   } else if (/^\/auction\/\d+\/payment\/pending$/.test(pathname)) {
     dynamicTitle = '결제 대기'
     dynamicIcons = []
@@ -187,8 +288,8 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
   const rightIcons =
     customRightIcons ||
     dynamicIcons || // ✅ null이 아닐 때만 덮어씀
-    (titleKey && rightIconsMap[titleKey]) ||
-    rightIconsMap.default
+    (titleKey && rightIconsMap[titleKey]?.(hasChatNotification)) ||
+    rightIconsMap.default(hasChatNotification)
 
   /* ---------------------------------------------------
    * 8 렌더링

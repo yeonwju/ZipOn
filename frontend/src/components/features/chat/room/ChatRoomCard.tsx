@@ -4,11 +4,11 @@ import Link from 'next/link'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { useUser } from '@/hooks/queries/useUser'
-import type { ChatRoomList } from '@/types'
+import { ChatRoomListResponseData } from '@/types/api/chat'
 
 interface ChatRoomCardProps {
   className?: string
-  chatRoom: ChatRoomList
+  chatRoom: ChatRoomListResponseData
 }
 
 export default function ChatRoomCard({ className, chatRoom }: ChatRoomCardProps) {
@@ -43,23 +43,23 @@ export default function ChatRoomCard({ className, chatRoom }: ChatRoomCardProps)
     >
       <Avatar>
         <AvatarImage
-          src={chatRoom.profileImgSrc ?? '/default-profile.svg'}
+          src={chatRoom.partner?.profileImg ?? '/default-profile.svg'}
           alt="프로필 이미지"
           className={'h-13 w-13 rounded-full'}
         />
       </Avatar>
 
       <section className="min-w-0 flex-1">
-        <div className="truncate font-medium">{chatRoom.partnerName ?? '알 수 없음'}</div>
+        <div className="truncate font-medium">{chatRoom.partner?.name ?? '알 수 없음'}</div>
         <div className="truncate text-sm text-gray-500">
-          {chatRoom.lastMessage ??
-            `${chatRoom.partnerName ?? '상대방'}님이 ${userName ?? '당신'}을 초대하였습니다.`}
+          {chatRoom.lastMessage?.content ??
+            `${chatRoom.partner?.name ?? '알 수 없음'}님이 ${userName ?? '본인'}을 초대하였습니다.`}
         </div>
       </section>
 
       <section className="flex flex-col items-end gap-1">
-        <div className="whitespace-nowrap text-xs text-gray-400">
-          {chatRoom.lastSentAt ? formatDate(chatRoom.lastSentAt) : '미정'}
+        <div className="text-xs whitespace-nowrap text-gray-400">
+          {chatRoom.lastMessage ? formatDate(chatRoom.lastMessage?.sentAt) : '미정'}
         </div>
 
         {chatRoom.unreadCount > 0 && (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useUser } from '@/hooks/queries'
+import { useCreateChatRoom } from '@/hooks/queries/useChat'
 import { useSearchListingDetail } from '@/hooks/queries/useListing'
 import { getListingButtonConfig, isLiveTimePassed } from '@/utils/listingButtons'
 
@@ -27,6 +28,7 @@ interface ListingDetailProps {
 export default function ListingDetail({ propertySeq }: ListingDetailProps) {
   const { data: response, isLoading, isError } = useSearchListingDetail(propertySeq)
   const { data: user } = useUser()
+  const { mutate: createChatRoom } = useCreateChatRoom()
 
   // 로딩 중
   if (isLoading) {
@@ -61,7 +63,8 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
         result.brkSeq,
         user?.userSeq,
         result.auctionSeq,
-        propertySeq
+        propertySeq,
+        createChatRoom
       )
   console.log('buttonConfig:', buttonConfig)
   // 특징 배열 생성

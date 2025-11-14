@@ -1,4 +1,3 @@
-export { default as ChatListClientPage } from './ChatListClientPage'
 export { default as ChatInput } from './message/ChatInput'
 export { default as ChatMessageList } from './message/ChatMessageList'
 export { default as ChatMessageMy } from './message/ChatMessageMy'

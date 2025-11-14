@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from 'react'
 
-import type { ChatHistory } from '@/types'
+import { ChatRoomHistoryResponseData } from '@/types/api/chat'
 
 import ChatMessageMy from './ChatMessageMy'
 import ChatMessageOther from './ChatMessageOther'
 
 interface ChatMessageListProps {
-  messages: ChatHistory[]
+  messages: ChatRoomHistoryResponseData[]
   currentUserSeq: number
   partnerProfileImage?: string
 }
@@ -26,7 +26,10 @@ export default function ChatMessageList({
   }, [messages])
 
   // 날짜 구분선 표시 여부 확인
-  const shouldShowDateDivider = (currentMessage: ChatHistory, prevMessage?: ChatHistory) => {
+  const shouldShowDateDivider = (
+    currentMessage: ChatRoomHistoryResponseData,
+    prevMessage?: ChatRoomHistoryResponseData
+  ) => {
     if (!prevMessage) return true
 
     const currentDate = new Date(currentMessage.sentAt).toDateString()
@@ -56,10 +59,13 @@ export default function ChatMessageList({
   }
 
   // 프로필 이미지 표시 여부 (연속된 메시지인지 확인)
-  const shouldShowProfile = (currentMessage: ChatHistory, prevMessage?: ChatHistory) => {
+  const shouldShowProfile = (
+    currentMessage: ChatRoomHistoryResponseData,
+    prevMessage?: ChatRoomHistoryResponseData
+  ) => {
     if (!prevMessage) return true
-    if (currentMessage.senderSeq === currentUserSeq) return false
-    if (prevMessage.senderSeq !== currentMessage.senderSeq) return true
+    if (currentMessage.sender.userSeq === currentUserSeq) return false
+    if (prevMessage.sender.userSeq !== currentMessage.sender.userSeq) return true
 
     // 같은 발신자의 연속 메시지
     const currentTime = new Date(currentMessage.sentAt).getTime()
@@ -71,9 +77,12 @@ export default function ChatMessageList({
   }
 
   // 시간 표시 여부 (같은 시간대의 연속 메시지는 마지막에만 시간 표시)
-  const shouldShowTime = (currentMessage: ChatHistory, nextMessage?: ChatHistory) => {
+  const shouldShowTime = (
+    currentMessage: ChatRoomHistoryResponseData,
+    nextMessage?: ChatRoomHistoryResponseData
+  ) => {
     if (!nextMessage) return true
-    if (currentMessage.senderSeq !== nextMessage.senderSeq) return true
+    if (currentMessage.sender.userSeq !== nextMessage.sender.userSeq) return true
 
     const currentMinute = new Date(currentMessage.sentAt).toISOString().slice(0, 16)
     const nextMinute = new Date(nextMessage.sentAt).toISOString().slice(0, 16)
@@ -86,7 +95,7 @@ export default function ChatMessageList({
       {messages.map((message, index) => {
         const prevMessage = index > 0 ? messages[index - 1] : undefined
         const nextMessage = index < messages.length - 1 ? messages[index + 1] : undefined
-        const isMyMessage = message.senderSeq === currentUserSeq
+        const isMyMessage = message.sender.userSeq === currentUserSeq
 
         return (
           <div key={message.messageSeq}>
@@ -119,4 +128,3 @@ export default function ChatMessageList({
     </div>
   )
 }
-
