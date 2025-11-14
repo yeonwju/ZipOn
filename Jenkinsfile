@@ -161,7 +161,7 @@ EOF2
 
               echo "[DEV] ⏳ Waiting for backend startup..."
               for i in $(seq 1 40); do
-                CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:28080/v3/api-docs || true)
+                CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
                 if [ "$CODE" = "200" ]; then
                   echo "[DEV] ✅ Backend healthy (HTTP 200)"
                   exit 0
