@@ -13,7 +13,7 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/attendance")
-public class AttendanceController {
+public class BidController {
 
     private final BidEventProducer producer;
 

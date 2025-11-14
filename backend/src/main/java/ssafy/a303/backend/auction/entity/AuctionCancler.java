@@ -1,6 +1,6 @@
 package ssafy.a303.backend.auction.entity;
 
-public enum Canceler {
+public enum AuctionCancler {
     OWNER,
     BROKER,
     OTHER

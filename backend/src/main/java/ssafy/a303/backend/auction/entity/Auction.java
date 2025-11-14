@@ -63,7 +63,7 @@ public class Auction {
 
     @Enumerated(EnumType.STRING)
     @Column
-    private Canceler cancelBy;
+    private AuctionCancler cancelBy;
 
     @Column
     private String cancelReason;
