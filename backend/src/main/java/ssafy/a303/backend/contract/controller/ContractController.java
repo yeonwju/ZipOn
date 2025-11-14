@@ -46,7 +46,14 @@ public class ContractController {
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
-                                    
+                                            {
+                                              "data": {
+                                                "lines": []
+                                              },
+                                              "message": "계약서 검증 결과입니다.",
+                                              "status": 200,
+                                              "timestamp": 1763130506609
+                                            }
                                     """
                             )
                     )
