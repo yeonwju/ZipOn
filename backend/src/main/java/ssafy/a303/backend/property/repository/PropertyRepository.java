@@ -41,5 +41,17 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
                                     @Param("minLng") Double minLng,
                                     @Param("maxLng") Double maxLng);
 
+    /**
+     * 특정 유저가 등록한 매물 목록 조회 (삭제되지 않은 매물만)
+     * 최신 등록 순으로 정렬
+     */
+    @Query("""
+    SELECT p
+    FROM Property p
+    WHERE p.lessor.userSeq = :userSeq
+    AND (p.deletedAt IS NULL OR p.deletedAt = '')
+    ORDER BY p.createdAt DESC
+    """)
+    List<Property> findByLessorUserSeq(@Param("userSeq") Integer userSeq);
 
 }
