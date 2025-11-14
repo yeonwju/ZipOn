@@ -78,6 +78,9 @@ dependencies {
     // sms
     implementation 'com.solapi:sdk:1.0.3'
 
+    // Firebase
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
+
     // Openvidu
     implementation 'io.openvidu:openvidu-java-client:2.29.0'
 }
