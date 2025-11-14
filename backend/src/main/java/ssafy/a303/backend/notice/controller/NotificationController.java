@@ -12,7 +12,7 @@ import ssafy.a303.backend.notice.dto.FcmTokenRequest;
 import ssafy.a303.backend.notice.service.FcmService;
 
 @RestController
-@RequestMapping("/api/vi/notifications")
+@RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 
