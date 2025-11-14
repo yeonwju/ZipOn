@@ -7,13 +7,14 @@ import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 
 @Service
 @RequiredArgsConstructor
-public class Producer {
+public class BidEventProducer {
 
     private static final String TOPIC = "auction-bid";
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendBid(BidEventMessage message){
-
+        String key = String.valueOf(message.auctionSeq());
+        kafkaTemplate.send(TOPIC, key, message);
     }
 
 }

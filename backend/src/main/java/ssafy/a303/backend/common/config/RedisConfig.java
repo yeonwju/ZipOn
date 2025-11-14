@@ -214,5 +214,21 @@ public class RedisConfig {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         config.setDatabase(3);
         return new LettuceConnectionFactory(config);
+    }// ================================================================
+    // [4] SMS 전용 Redis DB4
+    // ================================================================
+    @Bean
+    @Qualifier("bidRedisTemplate")
+    public StringRedisTemplate bidRedisTempate(
+        @Qualifier("bidRedisFactory") RedisConnectionFactory factory
+    ){
+        return new StringRedisTemplate(factory);
+    }
+    @Bean
+    @Qualifier("bidRedisFactory")
+    public RedisConnectionFactory bidRedisFactory(){
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+        config.setDatabase(4);
+        return new LettuceConnectionFactory(config);
     }
 }

@@ -11,7 +11,7 @@ public record BidEventMessage(
         LocalDateTime bidAt
 ) {
     public static BidEventMessage of(Integer auctionSeq, Integer userSeq, Long amount){
-        LocalDateTime now = KoreaClock.nowLocalDateTime();
+        LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
         return new BidEventMessage(auctionSeq, userSeq, amount, now);
     }
 }
