@@ -52,8 +52,8 @@ public class NotificationHistory {
     @Column
     private Long targetId;
 
-    @Column(nullable = false)
-    private boolean isRead;
+    @Column(name = "is_read", nullable = false)
+    private boolean read;
 
     @Column
     private LocalDateTime readAt;

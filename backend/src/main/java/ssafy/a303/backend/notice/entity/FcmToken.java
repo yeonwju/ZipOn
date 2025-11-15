@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Table(
         name = "fcm_token",
         indexes = {
-                @Index(name = "idx_fcm_user_seq", columnList = "user_seq"),
-                @Index(name = "idx_fcm_token", columnList = "token")
+                @Index(name = "uk_fcm_token", columnList = "token", unique = true),
+                @Index(name = "idx_fcm_user_seq", columnList = "user_seq")
         }
 )
 @Getter

@@ -11,11 +11,14 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-        name = "noti_reservation",
+        name = "notification_reservation",
         indexes = {
                 @Index(name = "idx_nr_user_seq", columnList = "user_seq"),
                 @Index(name = "idx_nr_auction_seq", columnList = "auction_seq"),
-                @Index(name = "idx_nr_scheduled_at", columnList = "scheduled_at")
+                @Index(name = "idx_nr_scheduled_at", columnList = "scheduled_at"),
+                @Index(name = "uk_nr_user_auction_type",
+                        columnList = "user_seq, auction_seq, type",
+                        unique = true)
         }
 )
 @Getter
