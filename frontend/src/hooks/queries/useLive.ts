@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 
 import { liveQueryKeys } from '@/constants'
@@ -47,16 +47,17 @@ export function useGetCanLiveAuctionList() {
  * - liveQueryKeys.live({ status, sortType }) 사용: 필터링된 라이브 목록
  * - status와 sortType을 filters로 전달하여 각각 다른 캐시 키 생성
  * - 예: ['live', 'list', { status: 'ONAIR', sortType: 'LATEST' }]
+ * - useSuspenseQuery를 사용하여 Suspense 경계에서 스켈레톤 UI 표시
  */
 export function useGetLiveList({ status, sortType }: { status: string; sortType: string }) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: liveQueryKeys.live({ status, sortType }),
     queryFn: async () => {
       const result = await getLiveList({ status, sortType })
       if (!result.success) {
         throw new Error('라이브 목록 조회 실패')
       }
-      return result.data
+      return result.data ?? []
     },
   })
 }

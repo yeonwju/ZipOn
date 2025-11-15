@@ -1,23 +1,26 @@
 import { LiveItem } from '@/components/features/live'
 import { LiveItemProps } from '@/data/LiveItemDummy'
+import { LiveListData } from '@/types/api/live'
 
 export interface LiveItemsProps {
-  items: LiveItemProps[]
+  items: LiveListData[]
 }
 
 export default function LiveItems({ items }: LiveItemsProps) {
   return (
-    <div className={'grid w-full grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}>
+    <div
+      className={'grid w-full grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}
+    >
       {items.map(item => (
-        <div key={item.id} className="w-full">
+        <div key={item.liveSeq} className="w-full">
           <LiveItem
-            id={item.id}
-            imgSrc={item.imgSrc}
+            id={item.liveSeq}
+            imgSrc={item.thumbnail}
             title={item.title}
-            viewCnt={item.viewCnt}
-            chatCnt={item.chatCnt}
-            brokerName={item.brokerName}
-            brokerImgSrc={item.brokerImgSrc}
+            viewCnt={item.viewerCount}
+            chatCnt={item.chatCount}
+            brokerName={item.host.name}
+            brokerImgSrc={item.host.profileImg}
           ></LiveItem>
         </div>
       ))}
