@@ -64,8 +64,8 @@ export const auctionQueryKeys = {
 export const liveQueryKeys = {
   all: ['live'] as const,
   auctions: () => [...liveQueryKeys.all, 'auction'] as const,
-  lists: () => [...liveQueryKeys.all, 'list'] as const,
-  list: (filters?: Record<string, unknown>) => [...liveQueryKeys.lists(), filters] as const,
+  lives: () => [...liveQueryKeys.all, 'list'] as const,
+  live: (filters?: Record<string, unknown>) => [...liveQueryKeys.lives(), filters] as const,
   details: () => [...liveQueryKeys.all, 'detail'] as const,
   detail: (id: number) => [...liveQueryKeys.details(), id] as const,
 } as const

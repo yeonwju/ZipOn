@@ -11,7 +11,7 @@ import {
 } from '@/components/features/live'
 import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 import useUserLocation from '@/hooks/map/useUserLocation'
-import { useGetCanLiveAuctionList } from '@/hooks/queries/useLive'
+import { useGetCanLiveAuctionList, useStartLive } from '@/hooks/queries/useLive'
 import { calculateDistance } from '@/utils/distance'
 
 export default function LiveCreateContent() {
@@ -23,6 +23,9 @@ export default function LiveCreateContent() {
 
   // React Query로 라이브 가능한 경매 목록 조회
   const { data: auctionItems } = useGetCanLiveAuctionList()
+
+  // 라이브 방송 시작 Mutation
+  const { mutate: startLive, isPending: isStartingLive } = useStartLive()
 
   const { location: currentLocation, refresh: refreshLocation, isRefreshing } = useUserLocation()
 
@@ -54,13 +57,10 @@ export default function LiveCreateContent() {
   const handleCreateLive = () => {
     if (!canCreateLive || !selectedAuctionSeq) return
 
-    // TODO: 실제 라이브 방송 생성 API 호출
-    console.log('라이브 방송 생성:', {
-      title,
+    // 라이브 방송 시작 API 호출
+    startLive({
       auctionSeq: selectedAuctionSeq,
-      addressCoords,
-      currentLocation,
-      distance,
+      title: title.trim(),
     })
   }
 
