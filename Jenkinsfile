@@ -37,6 +37,7 @@ pipeline {
     // --- Frontend ---
     NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
     NEXT_PUBLIC_PWA_ENABLE        = '1'
+    NEXT_PUBLIC_SOCKET_URL        = "https://dev-zipon.duckdns.org/ws"
 
     // --- AWS ---
     AWS_REGION = "ap-northeast-2"
@@ -90,6 +91,7 @@ pipeline {
               --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONT_API_BASE_URL}" \
               --build-arg NEXT_PUBLIC_KAKAO_MAP_API_KEY="${NEXT_PUBLIC_KAKAO_MAP_API_KEY}" \
               --build-arg NEXT_PUBLIC_PWA_ENABLE="${NEXT_PUBLIC_PWA_ENABLE}" \
+              --build-arg NEXT_PUBLIC_SOCKET_URL="${NEXT_PUBLIC_SOCKET_URL}" \
               -t zipon-frontend:latest -t zipon-frontend:${gitsha} ./frontend
 
             echo "[2/3] ⚙️ BACKEND build"
