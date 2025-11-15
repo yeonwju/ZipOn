@@ -9,10 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { LiveAuctionResponseData } from '@/types/api/live'
+import { LiveAuctionData } from '@/types/api/live'
 
 interface LiveAuctionPickerProps {
-  auctionItems: LiveAuctionResponseData[] | null
+  auctionItems: LiveAuctionData[] | null
   onSelect?: (value: string) => void
   title: string
   description: string

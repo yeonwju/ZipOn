@@ -39,6 +39,15 @@ export const API_ENDPOINTS = {
   // 라이브
   CAN_LIVE_AUCTION: '/api/v1/live/auctions',
   START_LIVE: '/api/v1/live',
+  LIVE_LIST: (status: string, sortType: string) =>
+    `/api/v1/live?status=${status}&sortType=${sortType}`,
+  LIVE_ENTER_TOKEN: (liveSeq: number, isHost: boolean) =>
+    `/api/v1/live/${liveSeq}/token?isHost=${isHost}`,
+  LIVE_LIKE: (liveSeq: number) => `/api/v1/live/${liveSeq}/like`,
+  LIVE_EXIT: (liveSeq: number) => `/api/v1/live/${liveSeq}/leave`,
+  LIVE_END: (liveSeq: number) => `/api/v1/live/${liveSeq}/end`,
+  LIVE_INFO_SEARCH: (liveSeq: number) => `/api/v1/live/${liveSeq}`,
+  LIVE_CHAT_HISTORY: (liveSeq: number) => `/api/v1/live/${liveSeq}/chat`,
 } as const
 
 export const API_TIMEOUT = 10000 // 10초
