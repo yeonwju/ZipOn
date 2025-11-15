@@ -23,10 +23,14 @@ export function subscribeChat(
 
   const subscriptionKey = `chat-${roomSeq}`
 
-  // 이미 구독 중이면 기존 구독 반환
+  // 이미 구독 중이면 기존 구독 해제 후 새로 구독 (콜백 업데이트를 위해)
   if (activeChatSubscriptions.has(roomSeq)) {
-    console.log('✅ 이미 채팅방 구독 중:', subscriptionKey)
-    return activeChatSubscriptions.get(roomSeq)
+    console.log('🔄 기존 채팅방 구독 해제 후 재구독:', subscriptionKey)
+    const existingSubscription = activeChatSubscriptions.get(roomSeq)
+    if (existingSubscription) {
+      existingSubscription.unsubscribe()
+      activeChatSubscriptions.delete(roomSeq)
+    }
   }
 
   const subscription = stompClient.subscribe(`/sub/chat/${roomSeq}`, (message: IMessage) => {

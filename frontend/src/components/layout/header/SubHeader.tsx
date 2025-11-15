@@ -194,16 +194,10 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
 
   /* 앱 내부 히스토리 체크 */
   useEffect(() => {
-    // 페이지 진입 시 앱 내부 히스토리가 있는지 체크
-    const hasInternalHistory =
-      window.history.state?.idx !== undefined && window.history.state.idx > 0
-    setCanGoBack(hasInternalHistory)
-
-    // 첫 진입 시 히스토리 마커 설정
-    if (!sessionStorage.getItem('app_entry_marked')) {
-      sessionStorage.setItem('app_entry_marked', 'true')
-      window.history.replaceState({ ...window.history.state, isAppEntry: true }, '')
-    }
+    // 브라우저 히스토리 길이로 뒤로가기 가능 여부 판단
+    // 히스토리 길이가 1보다 크면 뒤로가기 가능
+    const hasHistory = window.history.length > 1
+    setCanGoBack(hasHistory)
   }, [pathname])
 
   /* 스크롤 시 헤더 숨김 처리 */
@@ -230,11 +224,12 @@ export default function SubHeader({ pathname: propPath, title, customRightIcons 
       return
     }
 
-    // 앱 내부 히스토리가 있으면 뒤로가기
-    if (canGoBack && window.history.length > 1) {
+    // 브라우저 히스토리가 있으면 뒤로가기 (일반적인 네비게이션 플로우)
+    // 채팅방에서도 일반적인 뒤로가기 사용 (채팅 목록에서 왔다면 채팅 목록으로, 다른 곳에서 왔다면 그곳으로)
+    if (window.history.length > 1) {
       router.back()
     } else {
-      // 없으면 홈으로
+      // 히스토리가 없으면 (앱 첫 진입 등) 홈으로
       router.replace('/home')
     }
   }

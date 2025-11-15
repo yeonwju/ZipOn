@@ -15,6 +15,7 @@ export default function ChatInput({
   placeholder = '메시지를 입력하세요',
 }: ChatInputProps) {
   const [message, setMessage] = useState('')
+  const [isComposing, setIsComposing] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,11 +25,24 @@ export default function ChatInput({
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 한글 조합 중이면 Enter 키 무시
+    if (isComposing) {
+      return
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit(e)
     }
+  }
+
+  const handleCompositionStart = () => {
+    setIsComposing(true)
+  }
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false)
   }
 
   return (
@@ -40,7 +54,9 @@ export default function ChatInput({
       <textarea
         value={message}
         onChange={e => setMessage(e.target.value)}
-        onKeyDown={handleKeyPress}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
         placeholder={placeholder}
         className="max-h-24 min-h-[40px] flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 focus:outline-none"
         rows={1}
