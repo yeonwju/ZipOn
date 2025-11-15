@@ -1,5 +1,6 @@
+import Link from 'next/link'
+
 import { LiveItem } from '@/components/features/live'
-import { LiveItemProps } from '@/data/LiveItemDummy'
 import { LiveListData } from '@/types/api/live'
 
 export interface LiveItemsProps {
@@ -13,15 +14,17 @@ export default function LiveItems({ items }: LiveItemsProps) {
     >
       {items.map(item => (
         <div key={item.liveSeq} className="w-full">
-          <LiveItem
-            id={item.liveSeq}
-            imgSrc={item.thumbnail}
-            title={item.title}
-            viewCnt={item.viewerCount}
-            chatCnt={item.chatCount}
-            brokerName={item.host.name}
-            brokerImgSrc={item.host.profileImg}
-          ></LiveItem>
+          <Link href={`/live/onair/${item.liveSeq}`}>
+            <LiveItem
+              id={item.liveSeq}
+              imgSrc={item.thumbnail}
+              title={item.title}
+              viewCnt={item.viewerCount}
+              chatCnt={item.chatCount}
+              brokerName={item.host.name}
+              brokerImgSrc={item.host.profileImg}
+            />
+          </Link>
         </div>
       ))}
     </div>

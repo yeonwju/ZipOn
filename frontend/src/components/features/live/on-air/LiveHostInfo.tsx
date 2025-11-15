@@ -1,11 +1,12 @@
 'use client'
 
 import Image from 'next/image'
+import React from 'react'
 
 interface LiveHostInfoProps {
-  title: string
-  hostName: string
-  hostProfileImage?: string
+  title: string | undefined
+  hostName: string | undefined
+  hostProfileImage?: string | undefined
   interaction?: React.ReactNode
 }
 
@@ -37,7 +38,7 @@ export default function LiveHostInfo({
           <div className="relative h-6 w-6 overflow-hidden rounded-full">
             <Image
               src={hostProfileImage}
-              alt={hostName}
+              alt={hostName || '방송자 이미지'}
               fill
               className="object-cover"
               sizes="30px"

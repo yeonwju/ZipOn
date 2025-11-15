@@ -1,7 +1,7 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 
 import { AuthGuard } from '@/components/auth'
 import {
@@ -11,72 +11,110 @@ import {
   LiveHostInfo,
   LiveInteraction,
 } from '@/components/features/live'
+import { useGetLiveEnterToken, useGetLiveInfo } from '@/hooks/queries/useLive'
 import { useUser } from '@/hooks/queries/useUser'
 import { useMiniPlayerStore } from '@/store/miniPlayer'
 
-/**
- * 라이브 방송 시청 페이지 (Client Component)
- *
- * 보호 레벨:
- * 1차: Middleware (토큰 체크)
- * 2차: AuthGuard (사용자 정보 확인, React Query 캐싱)
- *
- * 채팅 기능이 포함되어 있어 로그인 필수
- */
 export default function OnAirPage() {
   const router = useRouter()
   const { activateMiniPlayer } = useMiniPlayerStore()
   const [currentStream, setCurrentStream] = useState<MediaStream | null>(null)
+  const tokenRequestedRef = useRef(false)
+
+  const { id } = useParams() as { id: string }
+  const liveSeq = Number(id)
+
   const { data: user } = useUser()
+  const {
+    data: liveInfo,
+    isLoading: liveInfoLoading,
+    isError: liveInfoError,
+  } = useGetLiveInfo(liveSeq)
 
-  // TODO: 실제 API에서 방송 정보 가져오기
-  const isHost = user?.userSeq === 1 // 방송 진행자 여부 (예시)
-  const userName = user?.name || '사용자' // 현재 사용자 이름
+  const {
+    mutate: requestToken,
+    data: tokenResponse,
+    isPending: tokenLoading,
+  } = useGetLiveEnterToken()
 
-  // 라이브 정보 (TODO: API에서 가져오기)
-  const liveInfo = {
-    title: '🏠 강남 역삼동 신축 오피스텔 실시간 투어',
-    hostName: '변가원',
-    hostProfileImage: '/profile.svg',
-    viewers: 342,
-    likes: 1523,
-  }
+  const isHost = user?.userSeq !== undefined && liveInfo?.host?.userSeq === user?.userSeq
 
-  // 스트림이 준비되면 저장
+  // 토큰 요청 (단 1회만 실행)
+  useEffect(() => {
+    // 필수 조건 확인
+    if (!user?.userSeq || !liveInfo) return
+
+    // 이미 토큰 요청을 했으면 다시 요청하지 않음
+    if (tokenRequestedRef.current) return
+
+    // 토큰이 이미 발급되었으면 요청하지 않음
+    if (tokenResponse?.data?.token) {
+      tokenRequestedRef.current = true
+      return
+    }
+
+    // 토큰 요청 중이면 요청하지 않음
+    if (tokenLoading) return
+
+    // 토큰 요청 실행
+    tokenRequestedRef.current = true
+    requestToken({
+      liveSeq,
+      isHost,
+    })
+  }, [user?.userSeq, liveInfo?.liveSeq, isHost])
+
+  const token = tokenResponse?.data?.token ?? null
+
   const handleStreamReady = (stream: MediaStream) => {
     setCurrentStream(stream)
   }
 
-  // 미니 플레이어 모드 활성화
   const handleMinimize = () => {
     if (currentStream) {
-      const clonedStream = currentStream.clone()
-      activateMiniPlayer(clonedStream)
+      activateMiniPlayer(currentStream.clone())
       router.push('/home')
     }
+  }
+
+  // 로딩 처리
+  if (liveInfoLoading || tokenLoading) {
+    return (
+      <AuthGuard>
+        <div className="p-4 text-white">방송 연결 중...</div>
+      </AuthGuard>
+    )
+  }
+
+  if (liveInfoError || !liveInfo) {
+    return (
+      <AuthGuard>
+        <div className="p-4 text-white">방송 정보를 불러올 수 없습니다.</div>
+      </AuthGuard>
+    )
   }
 
   return (
     <AuthGuard>
       <main className="relative h-screen overflow-hidden bg-black">
-        {/* 비디오 스트림 배경 */}
-        <LiveBroadcast onStreamReady={handleStreamReady} />
+        {/* ⭐ 오픈비듀 연결 (token, isHost 넘김) */}
+        {token && <LiveBroadcast token={token} isHost={isHost} onStreamReady={handleStreamReady} />}
 
-        {/* 상단 헤더 (투명) */}
         <LiveHeader onMinimize={handleMinimize} />
 
-        {/* 좌측 상단: 방송 정보 & 진행자 프로필 */}
         <LiveHostInfo
           title={liveInfo.title}
-          hostName={liveInfo.hostName}
-          hostProfileImage={liveInfo.hostProfileImage}
+          hostName={liveInfo.host.name}
+          hostProfileImage={liveInfo.host.profileImg}
           interaction={
-            <LiveInteraction initialViewers={liveInfo.viewers} initialLikes={liveInfo.likes} />
+            <LiveInteraction
+              initialViewers={liveInfo.viewerCount}
+              initialLikes={liveInfo.likeCount}
+            />
           }
         />
 
-        {/* 하단: 채팅 영역 */}
-        <LiveChatContainer isHost={isHost} userName={userName} />
+        <LiveChatContainer isHost={isHost} userName={user?.name ?? '사용자'} />
       </main>
     </AuthGuard>
   )

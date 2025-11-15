@@ -82,7 +82,7 @@ export function useGetLiveInfo(liveSeq: number) {
       }
       return result.data
     },
-    enabled: !!liveSeq, // liveSeq가 있을 때만 쿼리 실행
+    enabled: !!liveSeq,
   })
 }
 
