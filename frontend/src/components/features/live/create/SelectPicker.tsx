@@ -9,10 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SelectItem as SelectItemData } from '@/types/common'
+import { LiveAuctionResponseData } from '@/types/api/live'
 
 interface LiveAuctionPickerProps {
-  auctionItems: SelectItemData[]
+  auctionItems: LiveAuctionResponseData[] | null
   onSelect?: (value: string) => void
   title: string
   description: string
@@ -52,13 +52,13 @@ export default function SelectPicker({
 
           {/* 실제 아이템들 */}
           <SelectGroup className="w-full">
-            {auctionItems.map(item => (
+            {auctionItems?.map(item => (
               <SelectItem
-                key={item.value}
-                value={item.value}
+                key={item.propertySeq}
+                value={item.auctionSeq.toLocaleString()}
                 className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-50"
               >
-                {item.title}
+                {item.propertyNm}
               </SelectItem>
             ))}
           </SelectGroup>

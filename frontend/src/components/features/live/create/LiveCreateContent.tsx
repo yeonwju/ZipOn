@@ -11,6 +11,7 @@ import {
 } from '@/components/features/live'
 import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 import useUserLocation from '@/hooks/map/useUserLocation'
+import { useGetCanLiveAuctionList } from '@/hooks/queries/useLive'
 import { calculateDistance } from '@/utils/distance'
 
 export default function LiveCreateContent() {
@@ -18,20 +19,10 @@ export default function LiveCreateContent() {
   useKakaoLoader()
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [title, setTitle] = useState('')
+  const [selectedAuctionSeq, setSelectedAuctionSeq] = useState<number | null>(null)
 
-  // TODO: React Query useSuspenseQuery로 교체
-  const mockAuctionItems = [
-    { value: 'a1', title: '송파 푸르지오' },
-    { value: 'a2', title: '노원 롯데캐슬' },
-    { value: 'a3', title: '강남 래미안 루센티아' },
-    { value: 'a4', title: '목동 하이페리온' },
-    { value: 'a5', title: '마포 자이' },
-    { value: 'a6', title: '잠실 리센츠' },
-    { value: 'a7', title: '용산 센트럴파크' },
-    { value: 'a8', title: '은평 롯데캐슬' },
-    { value: 'a9', title: '위례 자이' },
-    { value: 'a10', title: '청담 더 펜트하우스' },
-  ]
+  // React Query로 라이브 가능한 경매 목록 조회
+  const { data: auctionItems } = useGetCanLiveAuctionList()
 
   const { location: currentLocation, refresh: refreshLocation, isRefreshing } = useUserLocation()
 
@@ -42,16 +33,31 @@ export default function LiveCreateContent() {
 
   const isWithinDistance = distance !== null && distance <= 100
   const hasTitleInput = title.trim() !== ''
+  const hasSelectedAuction = selectedAuctionSeq !== null
 
   const canCreateLive =
-    isWithinDistance && hasTitleInput && addressCoords !== null && currentLocation !== null
+    isWithinDistance &&
+    hasTitleInput &&
+    hasSelectedAuction &&
+    addressCoords !== null &&
+    currentLocation !== null
+
+  const handleSelectAuction = (value: string) => {
+    // value는 auctionSeq를 toLocaleString()으로 변환한 값 (예: "1,234")
+    // 쉼표를 제거하고 숫자로 변환
+    const auctionSeq = Number(value.replace(/,/g, ''))
+    if (!isNaN(auctionSeq)) {
+      setSelectedAuctionSeq(auctionSeq)
+    }
+  }
 
   const handleCreateLive = () => {
-    if (!canCreateLive) return
+    if (!canCreateLive || !selectedAuctionSeq) return
 
     // TODO: 실제 라이브 방송 생성 API 호출
     console.log('라이브 방송 생성:', {
       title,
+      auctionSeq: selectedAuctionSeq,
       addressCoords,
       currentLocation,
       distance,
@@ -70,7 +76,8 @@ export default function LiveCreateContent() {
             <SelectPicker
               title={'방송할 매물 선택'}
               description={'경매 대기 목록'}
-              auctionItems={mockAuctionItems}
+              auctionItems={auctionItems ?? null}
+              onSelect={handleSelectAuction}
             />
           </div>
 

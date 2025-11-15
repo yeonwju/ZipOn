@@ -64,7 +64,7 @@ export function getListingButtonConfig(
         primary: {
           text: '라이브 시작',
           action: () => {
-            window.location.href = `/live/create?auctionSeq=${auctionSeq}`
+            window.location.href = `/live/create`
           },
         },
         secondary: {
@@ -130,7 +130,9 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '라이브 시작',
-          action: () => console.log('라이브 시작'),
+          action: () => {
+            window.location.href = `/live/create`
+          },
         },
         secondary: {
           text: '매물 수정',

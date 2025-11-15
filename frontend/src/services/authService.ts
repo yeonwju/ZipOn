@@ -53,7 +53,10 @@ export interface BusinessVerificationRequest {
 export async function fetchCurrentUser(): Promise<User | null> {
   try {
     const result = await authFetch.get<ApiResponse<User>>(API_ENDPOINTS.USER_INFO)
-    console.log('사용자 정보', result.data)
+    // 개발 환경에서만 로그 출력
+    if (process.env.NODE_ENV === 'development') {
+      console.log('사용자 정보', result.data)
+    }
     return result.data
   } catch (error) {
     // 개발 환경에서는 경고만 표시 (백엔드 서버 없을 수 있음)

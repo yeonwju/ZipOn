@@ -36,8 +36,12 @@ export default function useUserLocation() {
   const bestAccuracyRef = useRef<number>(Infinity)
   const watcherIdRef = useRef<number | null>(null)
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const retryCountRef = useRef<number>(0)
+  const accuracyRetryCountRef = useRef<number>(0) // 정확도 재시도 횟수
   const ACCURACY_THRESHOLD = 50 // m
-  const RETRY_DELAY = 3000 // 재시도 주기 (3초)
+  const RETRY_DELAY = 5000 // 재시도 주기 (5초로 증가)
+  const MAX_RETRIES = 2 // 최대 재시도 횟수 (3회에서 2회로 감소)
+  const MAX_ACCURACY_RETRIES = 2 // 정확도 기준 초과 시 최대 재시도 횟수
 
   const handleSuccess = (pos: GeolocationPosition) => {
     const { latitude, longitude, accuracy } = pos.coords
@@ -48,15 +52,34 @@ export default function useUserLocation() {
       bestAccuracyRef.current = accuracy
       setLocation({ lat: latitude, lng: longitude, accuracy })
       setIsRefreshing(false)
+      // 성공 시 정확도 재시도 카운터 리셋
+      accuracyRetryCountRef.current = 0
     }
 
-    // 정확도 기준 초과 시 → 일정 시간 후 재요청
+    // 정확도 기준 초과 시 → 제한적으로 재시도
     if (accuracy > ACCURACY_THRESHOLD) {
-      console.warn(`위치 정확도가 낮습니다 (${accuracy.toFixed(1)}m). 재시도 중...`)
-      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current)
-      retryTimeoutRef.current = setTimeout(() => {
-        requestLocation()
-      }, RETRY_DELAY)
+      if (accuracyRetryCountRef.current < MAX_ACCURACY_RETRIES) {
+        accuracyRetryCountRef.current += 1
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(
+            `위치 정확도가 낮습니다 (${accuracy.toFixed(1)}m). 재시도 중... (${accuracyRetryCountRef.current}/${MAX_ACCURACY_RETRIES})`
+          )
+        }
+        if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = setTimeout(() => {
+          requestLocation()
+        }, RETRY_DELAY)
+      } else {
+        // 최대 재시도 횟수 초과 - 현재 위치라도 사용
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(
+            `위치 정확도가 낮지만 최대 재시도 횟수에 도달했습니다. 현재 위치(${accuracy.toFixed(1)}m)를 사용합니다.`
+          )
+        }
+        setLocation({ lat: latitude, lng: longitude, accuracy })
+        setIsRefreshing(false)
+        accuracyRetryCountRef.current = 0
+      }
     }
   }
 
@@ -64,39 +87,91 @@ export default function useUserLocation() {
     let errorMsg: string
     switch (err.code) {
       case err.PERMISSION_DENIED:
-        errorMsg = '위치 접근 권한이 거부되었습니다.'
+        errorMsg = '위치 접근 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.'
         break
       case err.POSITION_UNAVAILABLE:
-        errorMsg = '위치 정보를 사용할 수 없습니다.'
+        errorMsg = '위치 정보를 사용할 수 없습니다. GPS가 켜져있는지 확인해주세요.'
         break
       case err.TIMEOUT:
-        errorMsg = '위치 요청 시간이 초과되었습니다.'
+        errorMsg = '위치 요청 시간이 초과되었습니다. 다시 시도 중...'
         break
       default:
-        errorMsg = err.message
+        errorMsg = err.message || '위치 정보를 가져올 수 없습니다.'
         break
     }
+    
+    // 개발 환경에서만 상세 에러 로그
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('위치 정보 에러:', {
+        code: err.code,
+        message: err.message,
+        retryCount: retryCountRef.current,
+      })
+    }
+    
     setError(errorMsg)
     setIsRefreshing(false)
 
-    // 에러 발생 시에도 일정 시간 후 재시도
-    if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current)
-    retryTimeoutRef.current = setTimeout(() => {
-      requestLocation()
-    }, RETRY_DELAY)
+    // TIMEOUT 또는 POSITION_UNAVAILABLE인 경우 제한적으로 재시도
+    // POSITION_UNAVAILABLE은 일시적인 문제일 수 있음 (예: GPS 초기화 중)
+    if (
+      (err.code === err.TIMEOUT || err.code === err.POSITION_UNAVAILABLE) &&
+      retryCountRef.current < MAX_RETRIES
+    ) {
+      retryCountRef.current += 1
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = setTimeout(() => {
+        // 재시도 시 enableHighAccuracy를 false로 시도 (더 관대한 설정)
+        requestLocationWithFallback(false)
+      }, RETRY_DELAY)
+    } else if (err.code === err.TIMEOUT || err.code === err.POSITION_UNAVAILABLE) {
+      // 최대 재시도 횟수 초과
+      setError(
+        '위치 정보를 가져올 수 없습니다. GPS가 켜져있는지 확인하고, 페이지를 새로고침해주세요.'
+      )
+      retryCountRef.current = 0
+    }
+    // PERMISSION_DENIED는 재시도하지 않음
   }
 
-  const requestLocation = () => {
+  const requestLocationWithFallback = (useHighAccuracy: boolean = true) => {
     // 이전 watcher가 있으면 제거
     if (watcherIdRef.current !== null) {
       navigator.geolocation.clearWatch(watcherIdRef.current)
+      watcherIdRef.current = null
     }
 
-    watcherIdRef.current = navigator.geolocation.watchPosition(handleSuccess, handleError, {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0,
-    })
+    const options = {
+      enableHighAccuracy: useHighAccuracy,
+      timeout: useHighAccuracy ? 10000 : 15000, // 정확도 낮출 때는 timeout 더 길게
+      maximumAge: useHighAccuracy ? 0 : 60000, // 정확도 낮출 때는 캐시 허용
+    }
+
+    // 먼저 getCurrentPosition으로 빠르게 위치 가져오기 시도
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        handleSuccess(pos)
+        // 성공 후 watchPosition으로 지속 추적
+        watcherIdRef.current = navigator.geolocation.watchPosition(handleSuccess, handleError, {
+          enableHighAccuracy: useHighAccuracy,
+          timeout: 15000,
+          maximumAge: 30000, // 30초 캐시 허용 (성능 개선)
+        })
+      },
+      (err) => {
+        // getCurrentPosition 실패 시 watchPosition으로 시도
+        watcherIdRef.current = navigator.geolocation.watchPosition(handleSuccess, handleError, {
+          enableHighAccuracy: false, // 실패 시 정확도 낮춤
+          timeout: 15000,
+          maximumAge: 60000, // 1분 캐시 허용
+        })
+      },
+      options
+    )
+  }
+
+  const requestLocation = () => {
+    requestLocationWithFallback(true)
   }
 
   useEffect(() => {
@@ -106,15 +181,37 @@ export default function useUserLocation() {
       return
     }
 
-    // 초기 요청
-    requestLocation()
+    // 위치 권한 상태 확인 (가능한 경우)
+    if ('permissions' in navigator) {
+      navigator.permissions
+        .query({ name: 'geolocation' })
+        .then((result) => {
+          if (result.state === 'denied') {
+            setError('위치 접근 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.')
+            return
+          }
+          // 권한이 있거나 prompt 상태면 위치 요청
+          if (result.state === 'granted' || result.state === 'prompt') {
+            requestLocation()
+          }
+        })
+        .catch(() => {
+          // permissions API가 지원되지 않으면 바로 요청
+          requestLocation()
+        })
+    } else {
+      // permissions API가 없으면 바로 요청
+      requestLocation()
+    }
 
     return () => {
       if (watcherIdRef.current !== null) {
         navigator.geolocation.clearWatch(watcherIdRef.current)
+        watcherIdRef.current = null
       }
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
       }
     }
   }, [])
@@ -126,6 +223,8 @@ export default function useUserLocation() {
     setIsRefreshing(true)
     setError(null)
     bestAccuracyRef.current = Infinity
+    retryCountRef.current = 0
+    accuracyRetryCountRef.current = 0
     requestLocation()
   }
 
