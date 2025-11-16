@@ -62,6 +62,7 @@ export default function OnAirPage() {
       liveSeq,
       isHost,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.userSeq, liveInfo?.liveSeq, isHost])
 
   const token = tokenResponse?.data?.token ?? null
@@ -77,27 +78,82 @@ export default function OnAirPage() {
     }
   }
 
-  // 로딩 처리
-  if (liveInfoLoading || tokenLoading) {
+  // 에러 처리
+  if (liveInfoError || (!liveInfoLoading && !liveInfo)) {
     return (
       <AuthGuard>
-        <div className="p-4 text-white">방송 연결 중...</div>
+        <div className="flex h-screen w-screen items-center justify-center bg-black">
+          <div className="text-center">
+            <p className="text-white">방송 정보를 불러올 수 없습니다.</p>
+          </div>
+        </div>
       </AuthGuard>
     )
   }
 
-  if (liveInfoError || !liveInfo) {
+  // 로딩 처리 - liveInfo 또는 토큰 로딩 중
+  // tokenLoading이 false이고 tokenResponse가 없으면 아직 요청하지 않은 것
+  // tokenLoading이 true이면 요청 중
+  // tokenResponse가 있고 token이 없으면 에러 상태
+  const isWaitingForToken = liveInfoLoading || tokenLoading || (!token && !tokenResponse)
+
+  if (isWaitingForToken) {
     return (
       <AuthGuard>
-        <div className="p-4 text-white">방송 정보를 불러올 수 없습니다.</div>
+        <main className="relative h-screen overflow-hidden bg-black">
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
+              </div>
+              <p className="text-white">방송 연결 중...</p>
+            </div>
+          </div>
+          {/* liveInfo가 있으면 헤더 정보는 미리 표시 */}
+          {liveInfo && (
+            <>
+              <LiveHeader onMinimize={handleMinimize} />
+              <LiveHostInfo
+                title={liveInfo.title}
+                hostName={liveInfo.host.name}
+                hostProfileImage={liveInfo.host.profileImg}
+                interaction={
+                  <LiveInteraction
+                    initialViewers={liveInfo.viewerCount}
+                    initialLikes={liveInfo.likeCount}
+                  />
+                }
+              />
+            </>
+          )}
+        </main>
       </AuthGuard>
     )
+  }
+
+  // 토큰 발급 실패 시
+  if (!token && tokenResponse && !tokenResponse.data?.token) {
+    return (
+      <AuthGuard>
+        <div className="flex h-screen w-screen items-center justify-center bg-black">
+          <div className="text-center">
+            <p className="text-white">방송 연결에 실패했습니다.</p>
+            <p className="mt-2 text-sm text-gray-400">토큰 발급에 실패했습니다.</p>
+          </div>
+        </div>
+      </AuthGuard>
+    )
+  }
+
+  // 이 시점에서는 liveInfo와 token이 모두 존재함 (위의 조건문에서 보장)
+  if (!liveInfo || !token) {
+    return null
   }
 
   return (
     <AuthGuard>
       <main className="relative h-screen overflow-hidden bg-black">
-        {token && <LiveBroadcast token={token} isHost={isHost} onStreamReady={handleStreamReady} />}
+        <LiveBroadcast token={token} isHost={isHost} onStreamReady={handleStreamReady} />
 
         <LiveHeader onMinimize={handleMinimize} />
 

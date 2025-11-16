@@ -18,8 +18,10 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
   const isConnectingRef = useRef(false)
   const isCleaningUpRef = useRef(false)
+  const usedTokenRef = useRef<string | null>(null)
 
   const [error, setError] = useState<string | null>(null)
+  const [playError, setPlayError] = useState(false)
 
   const handleStreamReady = useCallback(
     (stream: MediaStream | null) => {
@@ -35,14 +37,27 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
       return
     }
 
+    // 같은 토큰으로 이미 연결했으면 무시 (토큰은 1회만 사용 가능)
+    if (usedTokenRef.current === token) {
+      console.log('[OpenVidu] Token already used, skip')
+      return
+    }
+
     // 이미 연결 중이거나 정리 중이면 무시
     if (isConnectingRef.current || isCleaningUpRef.current) {
       console.log('[OpenVidu] Already connecting or cleaning up, skip')
       return
     }
 
+    // 이전 토큰이 있으면 정리 (토큰이 변경된 경우)
+    if (usedTokenRef.current && usedTokenRef.current !== token) {
+      console.log('[OpenVidu] Token changed, cleaning up previous connection')
+      // cleanup은 cleanup 함수에서 처리됨
+    }
+
     isConnectingRef.current = true
     setError(null)
+    setPlayError(false)
 
     console.log('[OpenVidu] Initializing...')
 
@@ -83,6 +98,8 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
             // srcObject가 있으면 직접 사용
             if (openViduVideoElement.srcObject) {
               videoRef.current.srcObject = openViduVideoElement.srcObject as MediaStream
+              // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+              videoRef.current.muted = true
               console.log(
                 '[OpenVidu] Subscriber video stream attached to video element (from srcObject)'
               )
@@ -92,6 +109,8 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                 const mediaStream = subscriber.stream?.getMediaStream()
                 if (mediaStream) {
                   videoRef.current.srcObject = mediaStream
+                  // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+                  videoRef.current.muted = true
                   console.log(
                     '[OpenVidu] Subscriber video stream attached to video element (from getMediaStream)'
                   )
@@ -112,9 +131,19 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
             }
 
             // video element가 로드되면 재생 시작
-            videoRef.current.play().catch(err => {
-              console.error('[OpenVidu] Subscriber video play error:', err)
-            })
+            videoRef.current
+              .play()
+              .then(() => {
+                setPlayError(false)
+                console.log('[OpenVidu] Subscriber video playing successfully')
+              })
+              .catch(err => {
+                console.error('[OpenVidu] Subscriber video play error:', err)
+                if (err.name === 'NotAllowedError') {
+                  setPlayError(true)
+                  console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                }
+              })
           }
         })
 
@@ -128,10 +157,22 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                 const mediaStream = subscriber.stream?.getMediaStream()
                 if (mediaStream) {
                   videoRef.current.srcObject = mediaStream
+                  // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+                  videoRef.current.muted = true
                   console.log('[OpenVidu] Subscriber: Stream attached from getMediaStream()')
-                  videoRef.current.play().catch(err => {
-                    console.error('[OpenVidu] Subscriber video play error:', err)
-                  })
+                  videoRef.current
+                    .play()
+                    .then(() => {
+                      setPlayError(false)
+                      console.log('[OpenVidu] Subscriber video playing successfully')
+                    })
+                    .catch(err => {
+                      console.error('[OpenVidu] Subscriber video play error:', err)
+                      if (err.name === 'NotAllowedError') {
+                        setPlayError(true)
+                        console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                      }
+                    })
                 } else {
                   console.log('[OpenVidu] Subscriber: MediaStream not available yet')
                 }
@@ -140,9 +181,23 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               }
             } else {
               console.log('[OpenVidu] Subscriber: Stream already attached, playing')
-              videoRef.current.play().catch(err => {
-                console.error('[OpenVidu] Subscriber video play error:', err)
-              })
+              // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+              if (videoRef.current) {
+                videoRef.current.muted = true
+              }
+              videoRef.current
+                .play()
+                .then(() => {
+                  setPlayError(false)
+                  console.log('[OpenVidu] Subscriber video playing successfully')
+                })
+                .catch(err => {
+                  console.error('[OpenVidu] Subscriber video play error:', err)
+                  if (err.name === 'NotAllowedError') {
+                    setPlayError(true)
+                    console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                  }
+                })
             }
           }
         })
@@ -155,10 +210,22 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               const mediaStream = subscriber.stream?.getMediaStream()
               if (mediaStream) {
                 videoRef.current.srcObject = mediaStream
+                // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+                videoRef.current.muted = true
                 console.log('[OpenVidu] Subscriber: Stream attached from streamPropertyChanged')
-                videoRef.current.play().catch(err => {
-                  console.error('[OpenVidu] Subscriber video play error:', err)
-                })
+                videoRef.current
+                  .play()
+                  .then(() => {
+                    setPlayError(false)
+                    console.log('[OpenVidu] Subscriber video playing successfully')
+                  })
+                  .catch(err => {
+                    console.error('[OpenVidu] Subscriber video play error:', err)
+                    if (err.name === 'NotAllowedError') {
+                      setPlayError(true)
+                      console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                    }
+                  })
               }
             } catch (err) {
               console.warn(
@@ -181,10 +248,22 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               const mediaStream = subscriber.stream.getMediaStream()
               if (mediaStream) {
                 videoRef.current.srcObject = mediaStream
+                // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+                videoRef.current.muted = true
                 console.log('[OpenVidu] Subscriber: Stream attached after timeout')
-                videoRef.current.play().catch(err => {
-                  console.error('[OpenVidu] Subscriber video play error:', err)
-                })
+                videoRef.current
+                  .play()
+                  .then(() => {
+                    setPlayError(false)
+                    console.log('[OpenVidu] Subscriber video playing successfully')
+                  })
+                  .catch(err => {
+                    console.error('[OpenVidu] Subscriber video play error:', err)
+                    if (err.name === 'NotAllowedError') {
+                      setPlayError(true)
+                      console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                    }
+                  })
               }
             } catch (err) {
               console.warn('[OpenVidu] Subscriber: Failed to get MediaStream after timeout:', err)
@@ -210,6 +289,8 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
         console.log('[OpenVidu] Session connected!')
         isConnectingRef.current = false
+        // 토큰 사용 표시
+        usedTokenRef.current = token
 
         if (isHost) {
           try {
@@ -258,13 +339,30 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                   // 이미 videoRef.current에 연결되어 있으면 확인만
                   if (videoRef.current.srcObject !== publisherVideoElement.srcObject) {
                     videoRef.current.srcObject = publisherVideoElement.srcObject as MediaStream
+                    // muted 속성을 명시적으로 설정 (호스트는 자신의 비디오를 보지만 음소거 유지)
+                    videoRef.current.muted = true
                     console.log('[OpenVidu] Video stream attached to video element')
                   }
 
                   // video element가 로드되면 재생 시작
-                  videoRef.current.play().catch(err => {
-                    console.error('[OpenVidu] Video play error:', err)
-                  })
+                  videoRef.current
+                    .play()
+                    .then(() => {
+                      setPlayError(false)
+                      console.log('[OpenVidu] Publisher video playing successfully')
+                    })
+                    .catch(err => {
+                      // AbortError는 비디오가 DOM에서 제거되었을 때 발생하는 일반적인 에러 (무시)
+                      if (err.name === 'AbortError') {
+                        console.log('[OpenVidu] Video play aborted (element may be removed)')
+                        return
+                      }
+                      console.error('[OpenVidu] Video play error:', err)
+                      if (err.name === 'NotAllowedError') {
+                        setPlayError(true)
+                        console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                      }
+                    })
 
                   handleStreamReady(publisherVideoElement.srcObject as MediaStream)
                 }
@@ -295,9 +393,23 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                   )
                 } else {
                   console.log('[OpenVidu] Stream already attached, playing')
-                  videoRef.current.play().catch(err => {
-                    console.error('[OpenVidu] Video play error:', err)
-                  })
+                  // muted 속성을 명시적으로 설정
+                  if (videoRef.current) {
+                    videoRef.current.muted = true
+                  }
+                  videoRef.current
+                    .play()
+                    .then(() => {
+                      setPlayError(false)
+                      console.log('[OpenVidu] Publisher video playing successfully')
+                    })
+                    .catch(err => {
+                      console.error('[OpenVidu] Video play error:', err)
+                      if (err.name === 'NotAllowedError') {
+                        setPlayError(true)
+                        console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                      }
+                    })
                 }
               }
             })
@@ -390,6 +502,9 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
             videoElement.srcObject = null
           }
 
+          // 토큰 사용 상태는 유지 (토큰은 1회만 사용 가능하므로)
+          // usedTokenRef.current는 유지
+
           console.log('[OpenVidu] Cleanup completed')
         } catch (err) {
           console.error('[OpenVidu] Cleanup error:', err)
@@ -399,6 +514,29 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
       }, 0)
     }
   }, [token, isHost, handleStreamReady])
+
+  // 비디오 재생 재시도 핸들러
+  const handlePlayRetry = useCallback(async () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      try {
+        // 재시도 시에도 muted 속성 확인
+        videoRef.current.muted = true
+        await videoRef.current.play()
+        setPlayError(false)
+        console.log('[OpenVidu] Video play retry successful')
+      } catch (err) {
+        console.error('[OpenVidu] Video play retry failed:', err)
+        setPlayError(true)
+      }
+    }
+  }, [])
+
+  // 비디오 클릭 시 재생 재시도
+  const handleVideoClick = useCallback(() => {
+    if (playError && videoRef.current) {
+      handlePlayRetry()
+    }
+  }, [playError, handlePlayRetry])
 
   if (!token) {
     return (
@@ -413,13 +551,27 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
       {error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted={isHost}
-          className="h-full w-full object-cover"
-        />
+        <div className="relative h-full w-full">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted={true}
+            className="h-full w-full object-cover"
+            onClick={handleVideoClick}
+          />
+          {playError && (
+            <div
+              className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50"
+              onClick={handlePlayRetry}
+            >
+              <div className="text-center">
+                <div className="mb-2 text-4xl">▶️</div>
+                <p className="text-white">화면을 클릭하여 재생하세요</p>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
