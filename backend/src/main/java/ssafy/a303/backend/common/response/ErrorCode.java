@@ -30,7 +30,9 @@ public enum ErrorCode {
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
 
     // JSON
-    JSON_ERROR(400,HttpStatus.BAD_REQUEST, "직렬화 또는 역직렬화를 실패하였습니다."),
+    JSON_SERIALIZE_ERROR(400,HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+    JSON_DESERIALIZE_ERROR(400,HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+
 
     // 경매
     AUCTION_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 경매가 존재하지 않습니다."),

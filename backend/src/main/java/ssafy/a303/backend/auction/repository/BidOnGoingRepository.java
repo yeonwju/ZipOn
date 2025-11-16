@@ -1,14 +1,10 @@
 package ssafy.a303.backend.auction.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
-import ssafy.a303.backend.common.exception.CustomException;
-import ssafy.a303.backend.common.response.ErrorCode;
-import ssafy.a303.backend.sms.dto.SmsVerificationData;
+import ssafy.a303.backend.common.helper.DataSerializer;
 
 import java.util.Set;
 
@@ -16,19 +12,14 @@ import java.util.Set;
 public class BidOnGoingRepository {
     private static final String KEY_FORMAT = "bid::auction::%s";
     private final StringRedisTemplate redis;
-    private final ObjectMapper objectMapper;
 
-    public BidOnGoingRepository(
-            @Qualifier("bidRedisTemplate") StringRedisTemplate redis,
-            ObjectMapper objectMapper
-    ) {
+    public BidOnGoingRepository(@Qualifier("bidRedisTemplate") StringRedisTemplate redis) {
         this.redis = redis;
-        this.objectMapper = objectMapper;
     }
 
     // 저장
     public void updateScore(BidEventMessage message) {
-        String json = toJson(message);
+        String json = DataSerializer.serialize(message);
         redis.opsForZSet().add(
                 generateKey(message.auctionSeq()),
                 String.valueOf(json),
@@ -59,27 +50,11 @@ public class BidOnGoingRepository {
         return redis.opsForZSet().reverseRange(
                 generateKey(auctionSeq),
                 limit,
-                - 1
+                -1
         );
     }
 
     private String generateKey(int auctionSeq) {
         return KEY_FORMAT.formatted(auctionSeq);
     }
-
-    private String toJson(BidEventMessage data) {
-        try {
-            return objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e){
-            throw new CustomException(ErrorCode.JSON_ERROR);
-        }
-    }
-    private BidEventMessage fromJson(String json){
-        try {
-            return objectMapper.readValue(json, BidEventMessage.class);
-        } catch (JsonProcessingException e){
-            throw new CustomException(ErrorCode.JSON_ERROR);
-        }
-    }
-
 }
