@@ -1,9 +1,7 @@
 package ssafy.a303.backend.common.response;
 
-import co.elastic.clients.elasticsearch.nodes.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -30,8 +28,8 @@ public enum ErrorCode {
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
 
     // JSON
-    JSON_SERIALIZE_ERROR(400,HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
-    JSON_DESERIALIZE_ERROR(400,HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+    JSON_SERIALIZE_ERROR(400, HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+    JSON_DESERIALIZE_ERROR(400, HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
 
 
     // 경매
@@ -44,8 +42,6 @@ public enum ErrorCode {
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),
     INVALID_PAGINATION(400, HttpStatus.BAD_REQUEST, "잘못된 페이지네이션 값입니다."),
     INVALID_REQUEST_PARAM(400, HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
-
-
 
 
     // 403 FORBIDDEN
