@@ -538,14 +538,6 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
     }
   }, [playError, handlePlayRetry])
 
-  if (!token) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <p className="text-red-500">토큰이 없습니다.</p>
-      </div>
-    )
-  }
-
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-black">
       {error ? (

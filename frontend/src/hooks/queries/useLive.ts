@@ -159,25 +159,8 @@ export function useStartLive() {
  * - liveSeq를 기반으로 캐시 관리
  */
 export function useGetLiveEnterToken() {
-  const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: (params: { liveSeq: number; isHost: boolean }) => getLiveEnterToken(params),
-
-    onSuccess: (data, variables) => {
-      if (data.success && data.data) {
-        // 해당 라이브의 상세 정보 캐시 업데이트 (토큰 정보 포함)
-        queryClient.setQueryData<LiveInfoData | undefined>(
-          liveQueryKeys.detail(variables.liveSeq),
-          old => {
-            if (old) {
-              return { ...old, token: data.data } as LiveInfoData & { token: LiveEnterTokenData }
-            }
-            return old
-          }
-        )
-      }
-    },
   })
 }
 
