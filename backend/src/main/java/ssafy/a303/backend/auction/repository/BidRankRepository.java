@@ -9,11 +9,11 @@ import ssafy.a303.backend.common.helper.DataSerializer;
 import java.util.Set;
 
 @Repository
-public class BidOnGoingRepository {
+public class BidRankRepository {
     private static final String KEY_FORMAT = "bid::auction::%s";
     private final StringRedisTemplate redis;
 
-    public BidOnGoingRepository(@Qualifier("bidRedisTemplate") StringRedisTemplate redis) {
+    public BidRankRepository(@Qualifier("bidRedisTemplate") StringRedisTemplate redis) {
         this.redis = redis;
     }
 
@@ -22,17 +22,8 @@ public class BidOnGoingRepository {
         String json = DataSerializer.serialize(message);
         redis.opsForZSet().add(
                 generateKey(message.auctionSeq()),
-                String.valueOf(json),
-                message.amount().doubleValue()
-        );
-    }
-
-    // 전체 조회
-    public Set<String> getAllUsers(Integer auctionSeq) {
-        return redis.opsForZSet().reverseRange(
-                generateKey(auctionSeq),
-                0,
-                -1
+                json,
+                message.amount()
         );
     }
 
@@ -56,5 +47,9 @@ public class BidOnGoingRepository {
 
     private String generateKey(int auctionSeq) {
         return KEY_FORMAT.formatted(auctionSeq);
+    }
+
+    public void deleteKey(int auctionSeq){
+        redis.delete(generateKey(auctionSeq));
     }
 }

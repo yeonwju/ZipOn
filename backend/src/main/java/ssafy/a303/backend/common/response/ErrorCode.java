@@ -34,6 +34,11 @@ public enum ErrorCode {
 
     // 경매
     AUCTION_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 경매가 존재하지 않습니다."),
+    AUCTION_NOT_IN_PROGRESS(404, HttpStatus.NOT_FOUND, "해당 경매가 진행중이지 않습니다."),
+    AUCTION_UNABLE_TO_START(404, HttpStatus.NOT_FOUND, "해당 경매가 진행 가능한 시간이 아닙니다."),
+    AMOUNT_MAX_VALUE(400,HttpStatus.BAD_REQUEST,"21억 이상 입찰할 수 없습니다."),
+    ALREADY_BID(409, HttpStatus.CONFLICT, "이미 입찰하였습니다."),
+
     // 경매/방송 알람
     ALARM_ALREADY_EXIST(406, HttpStatus.NOT_ACCEPTABLE, "이미 알람이 저장되었습니다."),
 

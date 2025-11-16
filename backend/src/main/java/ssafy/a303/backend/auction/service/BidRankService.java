@@ -1,54 +1,65 @@
 package ssafy.a303.backend.auction.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.Bid;
 import ssafy.a303.backend.auction.entity.BidStatus;
-import ssafy.a303.backend.auction.repository.AuctionRepository;
-import ssafy.a303.backend.auction.repository.BidOnGoingRepository;
-import ssafy.a303.backend.auction.repository.BidRepository;
+import ssafy.a303.backend.auction.repository.*;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.helper.DataSerializer;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class BidOnGoingService {
+public class BidRankService {
 
-    private final BidOnGoingRepository bidOnGoingRepository;
+    private final BidRankRepository bidRankRepository;
+    private final AuctionInProgressRepository auctionInProgressRepository;
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
+    private final BidTryCountRepository bidTryCountRepository;
     private static final int LIMIT = 10;
 
     public void updateRanking(BidEventMessage message) {
-        auctionRepository.findById(message.auctionSeq()).orElseThrow(() -> new CustomException(ErrorCode.AUCTION_NOT_FOUND));
-        bidOnGoingRepository.updateScore(message);
+        if(!auctionInProgressRepository.checkAuctionInProgress(message.auctionSeq()))
+            throw new CustomException(ErrorCode.AUCTION_NOT_IN_PROGRESS);
+        boolean firstTime = bidTryCountRepository.tryFirstBid(message.auctionSeq(), message.userSeq());
+        if(!firstTime){
+            throw new CustomException(ErrorCode.ALREADY_BID);
+        }
+        bidRankRepository.updateScore(message);
     }
 
     @Transactional
     public void saveRedisToDataBase(int auctionSeq) {
-        Set<String> top = bidOnGoingRepository.getTopUsers(auctionSeq, LIMIT);
-        Set<String> rest = bidOnGoingRepository.getRestUsers(auctionSeq, LIMIT);
+        Set<String> top = bidRankRepository.getTopUsers(auctionSeq, LIMIT);
+        Set<String> rest = bidRankRepository.getRestUsers(auctionSeq, LIMIT);
 
-        saveDB(top, true);
-        saveDB(rest, false);
+        Auction auction = auctionRepository.getReferenceById(auctionSeq);
+
+        saveDB(top, auction, true);
+        saveDB(rest, auction, false);
+
+        bidRankRepository.deleteKey(auctionSeq);
+        bidTryCountRepository.deleteKey(auctionSeq);
     }
 
-    private void saveDB(Set<String> data, boolean isRanker) {
+    private void saveDB(Set<String> data, Auction auction, boolean isRanker) {
         int rank = 1;
-
+        List<Bid> bids = new ArrayList<>();
         for (String json : data) {
             BidEventMessage msg = DataSerializer.deserialize(json, BidEventMessage.class);
             User user = userRepository.getReferenceById(msg.userSeq());
-            Auction auction = auctionRepository.getReferenceById(msg.auctionSeq());
 
             int finalRank;
             BidStatus status;
@@ -70,7 +81,8 @@ public class BidOnGoingService {
                     .status(status)
                     .build();
 
-            bidRepository.save(bid);
+            bids.add(bid);
         }
+        bidRepository.saveAll(bids);
     }
 }
