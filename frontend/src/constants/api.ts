@@ -34,7 +34,6 @@ export const API_ENDPOINTS = {
   CHAT_ROOM_HISTORY: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/history`,
   CHAT_ROOM_LIST: `/api/v1/chat/my/rooms`,
   CHAT_ROOM_LEAVE: (roomId: number) => `/api/v1/chat/room/${roomId}/leave`,
-  CHAT_MESSAGE_READ_CHECK: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/read`,
 
   // 라이브
   CAN_LIVE_AUCTION: '/api/v1/live/auctions',

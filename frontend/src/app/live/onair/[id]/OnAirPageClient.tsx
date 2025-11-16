@@ -60,32 +60,46 @@ export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPa
   // 통계 업데이트 핸들러
   const handleStatsUpdate = useCallback(
     (update: LiveStatsUpdate) => {
+      console.log('[OnAirPageClient] 통계 업데이트 수신:', update)
       switch (update.type) {
         case 'VIEWER_COUNT_UPDATE':
           if (update.count !== undefined) {
+            console.log('[OnAirPageClient] 시청자 수 업데이트:', update.count)
             setViewers(update.count)
           }
           break
         case 'CHAT_COUNT_UPDATE':
           // 채팅 수는 LiveChatContainer에서 처리 (여기서는 처리하지 않음)
+          console.log('[OnAirPageClient] 채팅 수 업데이트:', update.count)
           break
         case 'LIKE_COUNT_UPDATE':
           if (update.count !== undefined) {
+            console.log('[OnAirPageClient] 좋아요 수 업데이트:', update.count)
             setLikes(update.count)
           }
           break
         case 'LIVE_ENDED':
           // 방송 종료 처리
+          console.log('[OnAirPageClient] 방송 종료 알림 수신')
           alert('방송이 종료되었습니다.')
           router.push('/live')
           break
+        default:
+          console.warn('[OnAirPageClient] 알 수 없는 통계 업데이트 타입:', update)
       }
     },
     [router]
   )
 
   // 뒤로가기 및 페이지 언마운트 시 구독 해제 및 퇴장 처리
+  // 호스트는 뒤로가기 허용, 방송 종료는 버튼으로만
   useEffect(() => {
+    // 호스트는 뒤로가기 허용 (퇴장 처리 안 함)
+    if (isHost) {
+      console.log('[OnAirPage] 호스트 모드: 뒤로가기 허용')
+      return
+    }
+
     let isLeaving = false
 
     const handleLeave = async () => {
@@ -100,12 +114,12 @@ export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPa
       }
     }
 
-    // popstate 이벤트 (뒤로가기/앞으로가기)
+    // popstate 이벤트 (뒤로가기/앞으로가기) - 시청자만 처리
     const handlePopState = () => {
       handleLeave()
     }
 
-    // beforeunload 이벤트 (페이지 닫기/새로고침)
+    // beforeunload 이벤트 (페이지 닫기/새로고침) - 시청자만 처리
     const handleBeforeUnload = () => {
       // 비동기 처리가 완료되기 전에 페이지가 닫힐 수 있으므로
       // navigator.sendBeacon 사용 고려 (단, API 엔드포인트가 이를 지원해야 함)
@@ -116,14 +130,14 @@ export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPa
     window.addEventListener('popstate', handlePopState)
     window.addEventListener('beforeunload', handleBeforeUnload)
 
-    // cleanup: 컴포넌트 언마운트 시
+    // cleanup: 컴포넌트 언마운트 시 - 시청자만 처리
     return () => {
       window.removeEventListener('popstate', handlePopState)
       window.removeEventListener('beforeunload', handleBeforeUnload)
       // 컴포넌트 언마운트 시 처리
       handleLeave()
     }
-  }, [liveSeq])
+  }, [liveSeq, isHost])
 
   useEffect(() => {
     if (!user?.userSeq) return

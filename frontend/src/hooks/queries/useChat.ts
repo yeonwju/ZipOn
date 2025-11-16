@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 
 import { chatQueryKeys } from '@/constants'
 import {
-  checkChatRoomRead,
   createChatRoom,
   getChatRoomHistory,
   getChatRoomList,
@@ -88,28 +87,6 @@ export function useLeaveChatRoom() {
       })
       // 채팅방 목록으로 이동
       router.push('/chat')
-    },
-  })
-}
-
-/**
- * 채팅방 읽음 처리 Mutation
- */
-export function useCheckChatRoomRead() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (roomSeq: number) => checkChatRoomRead(roomSeq),
-
-    onSuccess: (_data, roomSeq) => {
-      // 채팅방 목록 캐시 무효화 (읽지 않은 메시지 수 업데이트)
-      queryClient.invalidateQueries({
-        queryKey: chatQueryKeys.rooms(),
-      })
-      // 해당 채팅방 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: chatQueryKeys.room(roomSeq),
-      })
     },
   })
 }

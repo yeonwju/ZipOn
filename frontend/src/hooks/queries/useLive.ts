@@ -59,6 +59,9 @@ export function useGetLiveList({ status, sortType }: { status: string; sortType:
       }
       return result.data ?? []
     },
+    // 포커스 시 자동 재요청 (페이지로 돌아올 때마다 최신 데이터 가져오기)
+    refetchOnWindowFocus: true,
+    staleTime: 0, // 데이터를 항상 stale로 취급하여 재요청 허용
   })
 }
 
@@ -71,6 +74,7 @@ export function useGetLiveList({ status, sortType }: { status: string; sortType:
  * - liveQueryKeys.detail(liveSeq) 사용: 특정 라이브의 상세 정보
  * - 라이브 방송 페이지에서 사용
  * - enabled로 liveSeq가 있을 때만 실행
+ * - refetchOnWindowFocus: 페이지로 돌아올 때마다 최신 데이터 가져오기 (좋아요 상태 등)
  */
 export function useGetLiveInfo(liveSeq: number) {
   return useQuery({
@@ -83,6 +87,8 @@ export function useGetLiveInfo(liveSeq: number) {
       return result.data
     },
     enabled: !!liveSeq,
+    refetchOnWindowFocus: true, // 페이지로 돌아올 때마다 최신 데이터 가져오기
+    staleTime: 0, // 데이터를 항상 stale로 취급하여 재요청 허용
   })
 }
 
@@ -155,7 +161,8 @@ export function useStartLive() {
  *
  * @description
  * - 좋아요 토글 시 해당 라이브의 상세 정보 캐시 업데이트
- * - 좋아요 수가 변경되므로 상세 정보를 무효화하여 재조회
+ * - 좋아요 수와 상태가 변경되므로 상세 정보를 무효화하여 재조회
+ * - 라이브 목록 캐시도 무효화 (목록에서 좋아요 수와 상태 표시)
  */
 export function useLikeLive() {
   const queryClient = useQueryClient()
@@ -165,9 +172,14 @@ export function useLikeLive() {
 
     onSuccess: (data, liveSeq) => {
       if (data.success) {
-        // 해당 라이브의 상세 정보 캐시 무효화 (좋아요 수 업데이트)
+        // 해당 라이브의 상세 정보 캐시 무효화 (좋아요 수와 상태 업데이트)
         queryClient.invalidateQueries({
           queryKey: liveQueryKeys.detail(liveSeq),
+        })
+
+        // 라이브 목록 캐시도 무효화 (목록에서 좋아요 수와 상태 표시)
+        queryClient.invalidateQueries({
+          queryKey: liveQueryKeys.lives(),
         })
       }
     },

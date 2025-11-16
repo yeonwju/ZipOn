@@ -3,7 +3,7 @@
 import { Eye, Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { likeLive } from '@/services/liveService'
+import { useLikeLive } from '@/hooks/queries/useLive'
 import { LiveStatsUpdate } from '@/lib/socket/types'
 
 interface LiveInteractionProps {
@@ -31,12 +31,15 @@ export default function LiveInteraction({
   const [isLiked, setIsLiked] = useState(likedProp)
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
 
-  // 좋아요 상태 동기화
+  // 좋아요 Mutation
+  const likeLiveMutation = useLikeLive()
+
+  // 좋아요 상태 동기화 (props가 변경될 때마다 업데이트)
   useEffect(() => {
     setIsLiked(likedProp)
   }, [likedProp])
 
-  const handleLike = async () => {
+  const handleLike = () => {
     // 좋아요 상태만 즉시 토글 (UX 개선)
     const newLikedState = !isLiked
     setIsLiked(newLikedState)
@@ -48,21 +51,26 @@ export default function LiveInteraction({
       }, 1000)
     }
 
-    try {
-      // REST API로 좋아요 토글 (authFetch가 쿠키를 자동으로 포함시킴)
-      const result = await likeLive(liveSeq)
-      if (result.success) {
-        // WebSocket으로 LIKE_COUNT_UPDATE를 받아서 실제 수를 업데이트
-        // 여기서는 좋아요 상태만 로컬에서 즉시 토글
-      } else {
+    // Mutation으로 좋아요 토글
+    likeLiveMutation.mutate(liveSeq, {
+      onSuccess: result => {
+        if (result.success) {
+          // API 응답의 실제 상태로 업데이트 (서버가 반환한 최종 상태)
+          console.log('[LiveInteraction] 좋아요 토글 성공, 서버 상태:', result.data)
+          setIsLiked(result.data)
+          // WebSocket으로 LIKE_COUNT_UPDATE를 받아서 실제 수를 업데이트
+        } else {
+          // 실패 시 상태 롤백
+          console.log('[LiveInteraction] 좋아요 토글 실패, 상태 롤백')
+          setIsLiked(!newLikedState)
+        }
+      },
+      onError: error => {
+        console.error('[LiveInteraction] 좋아요 토글 오류:', error)
         // 실패 시 상태 롤백
         setIsLiked(!newLikedState)
-      }
-    } catch (error) {
-      console.error('좋아요 토글 실패:', error)
-      // 실패 시 상태 롤백
-      setIsLiked(!newLikedState)
-    }
+      },
+    })
   }
 
   return (

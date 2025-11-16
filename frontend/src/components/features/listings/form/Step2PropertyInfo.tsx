@@ -231,7 +231,13 @@ export default function Step2PropertyInfo({
               className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
             />
           </div>
-          <SelectPicker title={'방향'} description={'방향 목록'} auctionItems={mockAuctionItems} />
+          <SelectPicker
+            title={'방향'}
+            description={'방향 목록'}
+            facingItems={mockAuctionItems}
+            value={listingInfo.facing}
+            onSelect={value => updateField('facing', value)}
+          />
         </div>
 
         {/* 매물 이미지 업로드 */}

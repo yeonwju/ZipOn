@@ -4,6 +4,7 @@ import { MessageCircle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
+import { useEndLive } from '@/hooks/queries/useLive'
 import { connectWS, sendLiveChat, subscribeLive, unsubscribeLive } from '@/lib/socket'
 import { LiveChatMessage, LiveStatsUpdate } from '@/lib/socket/types'
 import { liveChatList } from '@/services/liveService'
@@ -41,6 +42,9 @@ export default function LiveChatContainer({
   const router = useRouter()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isConnected, setIsConnected] = useState(false)
+
+  // 방송 종료 Mutation
+  const endLiveMutation = useEndLive()
 
   // 채팅 기록 불러오기
   useEffect(() => {
@@ -111,23 +115,28 @@ export default function LiveChatContainer({
 
             console.log('[LiveChatContainer] 채팅 메시지 수신:', chatMessage)
 
-            const newMessage: ChatMessage = {
-              id: `${chatMessage.liveSeq}-${chatMessage.senderSeq}-${chatMessage.sentAt}`,
-              userName: chatMessage.senderName,
-              message: chatMessage.content,
-              timestamp: new Date(chatMessage.sentAt),
-              isHost: chatMessage.senderSeq === hostSeq,
-            }
-
-            setMessages(prev => {
-              // 중복 메시지 방지
-              const exists = prev.some(msg => msg.id === newMessage.id)
-              if (exists) {
-                console.log('[LiveChatContainer] 중복 메시지 무시:', newMessage.id)
-                return prev
+            try {
+              const newMessage: ChatMessage = {
+                id: `${chatMessage.liveSeq}-${chatMessage.senderSeq}-${chatMessage.sentAt}`,
+                userName: chatMessage.senderName,
+                message: chatMessage.content,
+                timestamp: new Date(chatMessage.sentAt),
+                isHost: chatMessage.senderSeq === hostSeq,
               }
-              return [...prev, newMessage]
-            })
+
+              setMessages(prev => {
+                // 중복 메시지 방지
+                const exists = prev.some(msg => msg.id === newMessage.id)
+                if (exists) {
+                  console.log('[LiveChatContainer] 중복 메시지 무시:', newMessage.id)
+                  return prev
+                }
+                console.log('[LiveChatContainer] 새 메시지 추가:', newMessage.id)
+                return [...prev, newMessage]
+              })
+            } catch (error) {
+              console.error('[LiveChatContainer] 채팅 메시지 처리 오류:', error)
+            }
           },
           // 통계 업데이트 콜백
           (update: LiveStatsUpdate) => {
@@ -139,7 +148,12 @@ export default function LiveChatContainer({
             console.log('[LiveChatContainer] 통계 업데이트 수신:', update)
             // 통계 업데이트를 상위 컴포넌트로 전달 (ref를 통해 최신 콜백 사용)
             if (onStatsUpdateRef.current) {
-              onStatsUpdateRef.current(update)
+              console.log('[LiveChatContainer] onStatsUpdate 콜백 호출:', update)
+              try {
+                onStatsUpdateRef.current(update)
+              } catch (error) {
+                console.error('[LiveChatContainer] onStatsUpdate 콜백 실행 오류:', error)
+              }
             } else {
               console.warn('[LiveChatContainer] onStatsUpdate 콜백이 없습니다.')
             }
@@ -172,9 +186,22 @@ export default function LiveChatContainer({
   }, [liveSeq, hostSeq, initialAuthToken])
 
   const handleEndBroadcast = () => {
-    // TODO: 방송 종료 API 호출
-    alert('방송이 종료되었습니다.')
-    router.push('/live')
+    if (!isHost) {
+      console.warn('[LiveChatContainer] 호스트가 아닌 사용자는 방송을 종료할 수 없습니다.')
+      return
+    }
+
+    // 방송 종료 API 호출
+    endLiveMutation.mutate(liveSeq, {
+      onSuccess: () => {
+        console.log('[LiveChatContainer] 방송 종료 성공')
+        // useEndLive의 onSuccess에서 이미 /live/list로 이동 처리됨
+      },
+      onError: error => {
+        console.error('[LiveChatContainer] 방송 종료 실패:', error)
+        alert('방송 종료에 실패했습니다. 다시 시도해주세요.')
+      },
+    })
   }
 
   const handleSendMessage = async (message: string) => {
@@ -223,11 +250,6 @@ export default function LiveChatContainer({
           >
             <MessageCircle size={20} />
             <span className="text-sm font-medium">채팅 열기</span>
-            {messages.length > 0 && (
-              <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold">
-                {messages.length}
-              </span>
-            )}
           </button>
         </div>
         {isHost && (
@@ -245,9 +267,7 @@ export default function LiveChatContainer({
       <div className="flex items-center justify-between bg-black/60 px-3 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <MessageCircle size={18} className="text-white" />
-          <span className="text-sm font-semibold text-white">
-            채팅 {messages.length > 0 && `(${messages.length})`}
-          </span>
+          <span className="text-sm font-semibold text-white">채팅</span>
         </div>
         <button
           onClick={() => setIsOpen(false)}

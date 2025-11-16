@@ -20,7 +20,7 @@
 
 import { API_ENDPOINTS } from '@/constants'
 import { BuildingData } from '@/data/BuildingDummy'
-import { authFetch, publicFetch } from '@/lib/fetch'
+import { authFetch } from '@/lib/fetch'
 import {
   ListingDetailDataResponse,
   ListingDetailResponse,
@@ -208,43 +208,4 @@ export async function getListings(): Promise<ListingData[]> {
 
   // 현재는 샘플 데이터 반환
   return Promise.resolve(BuildingData)
-}
-
-/**
- * 필터링된 매물 목록 가져오기
- *
- * 서버에서 필터링을 처리하고 싶을 때 사용합니다.
- * 클라이언트에서 필터링이 충분하다면 이 함수는 필요 없습니다.
- *
- * @param filters - 필터 옵션
- * @returns 필터링된 매물 목록 배열
- */
-export async function getFilteredListings(filters?: {
-  price?: { deposit?: { min?: number; max?: number }; rent?: { min?: number; max?: number } }
-  roomCount?: number | '3+'
-  area?: { min?: number; max?: number }
-  floor?: number | 'B1' | '2+'
-  direction?: 'east' | 'west' | 'south' | 'north' | 'northwest'
-  buildingType?: 'ROOM' | 'APARTMENT' | 'HOUSE' | 'OFFICETEL'
-  isAuction?: boolean
-}): Promise<ListingData[]> {
-  // TODO: 실제 API 연동 시 아래 코드로 교체
-  // try {
-  //   const response = await fetch('/api/listings', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({ filters }),
-  //   })
-  //   if (!response.ok) {
-  //     throw new Error('Failed to fetch filtered listings')
-  //   }
-  //   const data = await response.json()
-  //   return data.listings
-  // } catch (error) {
-  //   console.error('Failed to fetch filtered listings:', error)
-  //   return []
-  // }
-
-  // 현재는 전체 목록 반환 (필터링은 클라이언트에서 처리)
-  return getListings()
 }

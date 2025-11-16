@@ -9,10 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { SelectItem as SelectItemType } from '@/types'
 import { LiveAuctionData } from '@/types/api/live'
 
 interface LiveAuctionPickerProps {
-  auctionItems: LiveAuctionData[] | null
+  auctionItems?: LiveAuctionData[] | null
+  facingItems?: SelectItemType[] | null
+  value?: string
   onSelect?: (value: string) => void
   title: string
   description: string
@@ -28,6 +31,8 @@ export default function SelectPicker({
   onSelect,
   title,
   description,
+  facingItems,
+  value,
 }: LiveAuctionPickerProps) {
   return (
     <div className="bg-white px-4 pb-4">
@@ -35,7 +40,7 @@ export default function SelectPicker({
         {title} <span className="text-red-500">*</span>
       </label>
 
-      <Select onValueChange={onSelect}>
+      <Select value={value} onValueChange={onSelect}>
         <SelectTrigger className="w-full flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-500 transition-colors outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
           <SelectValue placeholder="선택" />
         </SelectTrigger>
@@ -51,17 +56,33 @@ export default function SelectPicker({
           </SelectGroup>
 
           {/* 실제 아이템들 */}
-          <SelectGroup className="w-full">
-            {auctionItems?.map(item => (
-              <SelectItem
-                key={item.propertySeq}
-                value={item.auctionSeq.toLocaleString()}
-                className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-50"
-              >
-                {item.propertyNm}
-              </SelectItem>
-            ))}
-          </SelectGroup>
+          {auctionItems && (
+            <SelectGroup className="w-full">
+              {auctionItems?.map(item => (
+                <SelectItem
+                  key={item.propertySeq}
+                  value={item.auctionSeq.toLocaleString()}
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-50"
+                >
+                  {item.propertyNm}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          )}
+
+          {facingItems && (
+            <SelectGroup className="w-full">
+              {facingItems.map(item => (
+                <SelectItem
+                  key={item.value}
+                  value={item.value}
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-50"
+                >
+                  {item.title}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          )}
         </SelectContent>
       </Select>
     </div>

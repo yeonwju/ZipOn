@@ -5,8 +5,8 @@ import {
   ChatMessage,
   ChatNotification,
   LiveChatMessage,
-  LiveStatsUpdate,
   LiveStartNotification,
+  LiveStatsUpdate,
 } from './types'
 
 /**
@@ -165,12 +165,14 @@ export function subscribeLive(
   }
 
   const subscription = stompClient.subscribe(`/sub/live/${liveSeq}`, (message: IMessage) => {
-    let body: LiveChatMessage | LiveStatsUpdate
+    let body: any
 
     try {
       body = JSON.parse(message.body)
+      console.log('📥 라이브 방송 메시지 수신 (raw):', message.body)
+      console.log('📥 라이브 방송 메시지 수신 (parsed):', body)
     } catch (err) {
-      console.error('❌ 라이브 방송 JSON 파싱 오류:', message.body)
+      console.error('❌ 라이브 방송 JSON 파싱 오류:', message.body, err)
       return
     }
 
@@ -178,12 +180,20 @@ export function subscribeLive(
     if (!('type' in body)) {
       const chatMessage = body as LiveChatMessage
       console.log('💬 라이브 채팅 메시지 수신:', chatMessage)
-      onChatMessage(chatMessage)
+      try {
+        onChatMessage(chatMessage)
+      } catch (error) {
+        console.error('❌ 채팅 메시지 콜백 처리 오류:', error)
+      }
     } else {
       // type 필드가 있으면 통계 업데이트
       const statsUpdate = body as LiveStatsUpdate
       console.log('📊 라이브 통계 업데이트 수신:', statsUpdate)
-      onStatsUpdate(statsUpdate)
+      try {
+        onStatsUpdate(statsUpdate)
+      } catch (error) {
+        console.error('❌ 통계 업데이트 콜백 처리 오류:', error)
+      }
     }
   })
 

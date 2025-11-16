@@ -1,7 +1,6 @@
 import { API_ENDPOINTS } from '@/constants'
 import { authFetch } from '@/lib/fetch'
 import {
-  ChatReadCheckResponse,
   ChatRoomHistoryResponse,
   ChatRoomHistoryResponseData,
   ChatRoomListResponse,
@@ -95,25 +94,6 @@ export async function leaveChatRoom(roomId: number): Promise<{ success: boolean 
     }
   } catch (error) {
     console.error('채팅방 나가기 실패:', error)
-    return { success: false }
-  }
-}
-
-export async function checkChatRoomRead(roomSeq: number): Promise<{ success: boolean }> {
-  try {
-    const result = await authFetch.post<ChatReadCheckResponse>(
-      API_ENDPOINTS.CHAT_MESSAGE_READ_CHECK(roomSeq)
-    )
-
-    if (result.status === 200) {
-      console.log('채팅방 읽음처리 성공')
-      return { success: true }
-    } else {
-      console.error('채팅방 읽음처리 실패:')
-      return { success: false }
-    }
-  } catch (error) {
-    console.error('채팅방 읽음처리 실패:', error)
     return { success: false }
   }
 }

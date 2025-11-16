@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import SubHeader from '@/components/layout/header/SubHeader'
 import { chatQueryKeys } from '@/constants'
-import { useCheckChatRoomRead, useLeaveChatRoom } from '@/hooks/queries/useChat'
+import { useLeaveChatRoom } from '@/hooks/queries/useChat'
 import { useUser } from '@/hooks/queries/useUser'
 import { ChatMessage, connectWS, sendChat, subscribeChat, unsubscribeChat } from '@/lib/socket'
 import { useChatStore } from '@/store/chatStore'
@@ -54,9 +54,6 @@ export default function ChatRoom({
   const { data: user } = useUser()
   const queryClient = useQueryClient()
   const prevRoomSeqRef = useRef<number | null>(null)
-
-  // 채팅방 읽음 처리 Mutation
-  const { mutate: checkChatRoomRead } = useCheckChatRoomRead()
 
   // 채팅방 나가기 Mutation
   const { mutate: leaveChatRoom, isPending: isLeaving } = useLeaveChatRoom()
@@ -120,24 +117,14 @@ export default function ChatRoom({
     }
   }, [roomSeq, initialMessages, setMessages, queryClient])
 
-  // 채팅방 진입 시 읽음 처리 및 Zustand unreadCount 초기화
+  // 채팅방 진입 시 Zustand unreadCount 초기화
   useEffect(() => {
     if (roomSeq) {
-      // 채팅방에 들어왔을 때 읽음 처리
-      checkChatRoomRead(roomSeq)
-      // Zustand의 unreadCount도 초기화 (즉시 뱃지 제거)
+      // Zustand의 unreadCount 초기화 (즉시 뱃지 제거)
       clearUnreadCount(roomSeq)
-      console.log('✅ 채팅방 진입: 읽음 처리 실행', roomSeq)
+      console.log('✅ 채팅방 진입: unreadCount 초기화', roomSeq)
     }
-
-    // 채팅방 나갈 때 읽음 처리 (cleanup)
-    return () => {
-      if (roomSeq) {
-        checkChatRoomRead(roomSeq)
-        console.log('✅ 채팅방 나감: 읽음 처리 실행', roomSeq)
-      }
-    }
-  }, [roomSeq, checkChatRoomRead, clearUnreadCount])
+  }, [roomSeq, clearUnreadCount])
 
   // 실시간 메시지 수신 처리 (useCallback으로 메모이제이션하여 중복 구독 방지)
   const handleReceiveMessage = useCallback(
