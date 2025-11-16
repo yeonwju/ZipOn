@@ -1,5 +1,6 @@
 package ssafy.a303.backend.contract.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,17 +20,24 @@ import ssafy.a303.backend.contract.repository.VirtualAccountRepository;
 import java.util.HashMap;
 import java.util.Map;
 
-@Value("${ssafy.api.account-type-unique-no}")
-private String accountTypeUniqueNo;
-
 @Service
 @RequiredArgsConstructor
 public class ContractService {
+
+    @Value("${ssafy.api.account-type-unique-no}")
+    private String accountTypeUniqueNo;
 
     private final ContractRepository contractRepository;
     private final VirtualAccountRepository virtualAccountRepository;
     private final SSAFYAPI ssafyapi;
 
+    /**
+     * 계약 진행 단계로 넘어감
+     * 가상계좌 생성
+     * @param contractSeq
+     * @param userKey
+     * @return
+     */
     public CreateVirtualAccountResponseDto startContractAndCreateVA(Integer contractSeq, String userKey) {
 
         /** 1. 계약 조회 */
