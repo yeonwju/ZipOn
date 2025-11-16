@@ -151,20 +151,6 @@ export function useStartLive() {
 }
 
 /**
- * 라이브 방 입장 토큰 발급 Mutation
- *
- * @description
- * - 라이브 방 입장 시 토큰을 발급받음
- * - 토큰 발급 후 해당 라이브의 상세 정보 캐시 업데이트 (토큰 정보 포함)
- * - liveSeq를 기반으로 캐시 관리
- */
-export function useGetLiveEnterToken() {
-  return useMutation({
-    mutationFn: (params: { liveSeq: number; isHost: boolean }) => getLiveEnterToken(params),
-  })
-}
-
-/**
  * 라이브 좋아요 Mutation
  *
  * @description
