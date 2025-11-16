@@ -131,6 +131,10 @@ public enum ErrorCode {
     AI_CONTRACT_ERROR(500, HttpStatus.BAD_GATEWAY, "AI 서버 응답 없음"),
     AI_EMPTY_RESPONSE(400, HttpStatus.BAD_REQUEST, "AI 서버에서 빈 응답이 돌아왔습니다."),
 
+    // 낙찰 관련
+    BID_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 입찰 정보를 찾을 수 없습니다."),
+    FORBIDDEN(403, HttpStatus.FORBIDDEN, "권한이 없습니다."),
+
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),
     INVALID_DESTINATION(400, HttpStatus.BAD_REQUEST, "STOMP 구독 경로(destination)가 누락되었거나 올바르지 않습니다. (예: /sub/chat/{roomId})"),

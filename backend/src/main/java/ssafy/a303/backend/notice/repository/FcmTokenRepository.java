@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
     Optional<FcmToken> findByToken(String token);
+
+    Optional<FcmToken> findTopByUserOrderByCreatedAtDesc(User user);
 }
