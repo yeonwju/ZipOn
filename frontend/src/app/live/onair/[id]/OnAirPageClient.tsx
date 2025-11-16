@@ -1,0 +1,242 @@
+'use client'
+
+import { useParams, useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { AuthGuard } from '@/components/auth'
+import {
+  LiveBroadcast,
+  LiveChatContainer,
+  LiveHeader,
+  LiveHostInfo,
+  LiveInteraction,
+} from '@/components/features/live'
+import { useGetLiveInfo } from '@/hooks/queries/useLive'
+import { useUser } from '@/hooks/queries/useUser'
+import { LiveStatsUpdate } from '@/lib/socket/types'
+import { getLiveEnterToken, leaveLive } from '@/services/liveService'
+import { useMiniPlayerStore } from '@/store/miniPlayer'
+
+interface OnAirPageClientProps {
+  authToken: string | null
+}
+
+export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPageClientProps) {
+  const router = useRouter()
+  const { activateMiniPlayer } = useMiniPlayerStore()
+
+  const { id } = useParams()
+  const liveSeq = Number(id)
+
+  const tokenRequestedRef = useRef(false)
+  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [tokenLoading, setTokenLoading] = useState(false)
+  const [tokenError, setTokenError] = useState(false)
+
+  // 통계 상태 관리
+  const [viewers, setViewers] = useState(0)
+  const [likes, setLikes] = useState(0)
+
+  // 1) 기본 데이터
+  const { data: user, isLoading: userLoading } = useUser()
+  const {
+    data: liveInfo,
+    isLoading: liveInfoLoading,
+    isError: liveInfoError,
+  } = useGetLiveInfo(liveSeq)
+
+  // 2) isHost 계산
+  const isHost = !!(user?.userSeq && liveInfo?.host?.userSeq === user?.userSeq)
+
+  // 통계 상태 초기화
+  useEffect(() => {
+    if (liveInfo) {
+      setViewers(liveInfo.viewerCount)
+      setLikes(liveInfo.likeCount)
+    }
+  }, [liveInfo])
+
+  // 통계 업데이트 핸들러
+  const handleStatsUpdate = useCallback(
+    (update: LiveStatsUpdate) => {
+      switch (update.type) {
+        case 'VIEWER_COUNT_UPDATE':
+          if (update.count !== undefined) {
+            setViewers(update.count)
+          }
+          break
+        case 'CHAT_COUNT_UPDATE':
+          // 채팅 수는 LiveChatContainer에서 처리 (여기서는 처리하지 않음)
+          break
+        case 'LIKE_COUNT_UPDATE':
+          if (update.count !== undefined) {
+            setLikes(update.count)
+          }
+          break
+        case 'LIVE_ENDED':
+          // 방송 종료 처리
+          alert('방송이 종료되었습니다.')
+          router.push('/live')
+          break
+      }
+    },
+    [router]
+  )
+
+  // 뒤로가기 및 페이지 언마운트 시 구독 해제 및 퇴장 처리
+  useEffect(() => {
+    let isLeaving = false
+
+    const handleLeave = async () => {
+      if (isLeaving || !liveSeq) return
+      isLeaving = true
+
+      try {
+        await leaveLive(liveSeq)
+        console.log('[OnAirPage] 라이브 퇴장 처리 완료')
+      } catch (error) {
+        console.error('[OnAirPage] 라이브 퇴장 처리 실패:', error)
+      }
+    }
+
+    // popstate 이벤트 (뒤로가기/앞으로가기)
+    const handlePopState = () => {
+      handleLeave()
+    }
+
+    // beforeunload 이벤트 (페이지 닫기/새로고침)
+    const handleBeforeUnload = () => {
+      // 비동기 처리가 완료되기 전에 페이지가 닫힐 수 있으므로
+      // navigator.sendBeacon 사용 고려 (단, API 엔드포인트가 이를 지원해야 함)
+      handleLeave()
+    }
+
+    // 이벤트 리스너 등록
+    window.addEventListener('popstate', handlePopState)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // cleanup: 컴포넌트 언마운트 시
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      // 컴포넌트 언마운트 시 처리
+      handleLeave()
+    }
+  }, [liveSeq])
+
+  useEffect(() => {
+    if (!user?.userSeq) return
+    if (!liveInfo) return
+    if (tokenRequestedRef.current) return
+    if (tokenLoading) return
+    if (token) return // 이미 토큰이 있으면 요청하지 않음
+
+    const fetchToken = async () => {
+      tokenRequestedRef.current = true
+      setTokenLoading(true)
+      setTokenError(false)
+
+      try {
+        const response = await getLiveEnterToken({ liveSeq, isHost })
+        if (response.success && response.data?.token) {
+          setToken(response.data.token)
+        } else {
+          setTokenError(true)
+        }
+      } catch (error) {
+        console.error('토큰 발급 실패:', error)
+        setTokenError(true)
+      } finally {
+        setTokenLoading(false)
+      }
+    }
+
+    fetchToken()
+  }, [user?.userSeq, liveInfo, isHost, liveSeq, tokenLoading, token])
+
+  // 5) 콜백
+  const handleStreamReady = (stream: MediaStream) => {
+    setCurrentStream(stream)
+  }
+
+  const handleMinimize = () => {
+    if (currentStream) {
+      activateMiniPlayer(currentStream.clone())
+      router.push('/home')
+    }
+  }
+
+  // 6) 렌더링
+
+  // 기본 로딩
+  if (userLoading || liveInfoLoading) {
+    return loadingScreen('방송 정보를 불러오는 중...')
+  }
+
+  // live 정보 없음
+  if (liveInfoError || !liveInfo) {
+    return loadingScreen('방송 정보를 불러올 수 없습니다.')
+  }
+
+  // 토큰 요청했지만 아직 안 옴
+  if (tokenRequestedRef.current && tokenLoading && !token) {
+    return loadingScreen('방송 연결 중...')
+  }
+
+  // 토큰 요청 끝났는데 token이 없음 → 실패
+  if (tokenRequestedRef.current && !token && !tokenLoading && tokenError) {
+    return loadingScreen('토큰 발급에 실패했습니다.')
+  }
+
+  // 🔥 방송 화면 렌더링
+  if (token) {
+    return (
+      <AuthGuard>
+        <main className="relative h-screen overflow-hidden bg-black">
+          <LiveBroadcast token={token} isHost={!!isHost} onStreamReady={handleStreamReady} />
+
+          <LiveHeader onMinimize={handleMinimize} />
+
+          <LiveHostInfo
+            title={liveInfo.title}
+            hostName={liveInfo.host.name}
+            hostProfileImage={liveInfo.host.profileImg}
+            interaction={
+              <LiveInteraction
+                viewers={viewers}
+                likes={likes}
+                liveSeq={liveSeq}
+                liked={liveInfo.liked}
+                onStatsUpdate={handleStatsUpdate}
+              />
+            }
+          />
+
+          <LiveChatContainer
+            isHost={!!isHost}
+            userName={user?.name ?? '사용자'}
+            liveSeq={liveSeq}
+            hostSeq={liveInfo.host.userSeq}
+            authToken={initialAuthToken}
+            onStatsUpdate={handleStatsUpdate}
+          />
+        </main>
+      </AuthGuard>
+    )
+  }
+
+  // fallback
+  return loadingScreen('방송 준비 중...')
+}
+
+function loadingScreen(text: string) {
+  return (
+    <AuthGuard>
+      <div className="flex h-screen w-screen items-center justify-center bg-black">
+        <p className="text-white">{text}</p>
+      </div>
+    </AuthGuard>
+  )
+}
+

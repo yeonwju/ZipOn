@@ -89,7 +89,12 @@ export function connectWS(authToken: string | null): Promise<void> {
  * WebSocket 연결 종료
  */
 export function disconnectWS() {
-  const { stompClient, activeSubscriptions, activeChatSubscriptions } = StompClientState
+  const {
+    stompClient,
+    activeSubscriptions,
+    activeChatSubscriptions,
+    activeLiveSubscriptions,
+  } = StompClientState
 
   try {
     // 모든 구독 해제
@@ -102,6 +107,11 @@ export function disconnectWS() {
       subscription.unsubscribe()
     })
     activeChatSubscriptions.clear()
+
+    activeLiveSubscriptions.forEach(subscription => {
+      subscription.unsubscribe()
+    })
+    activeLiveSubscriptions.clear()
 
     stompClient?.deactivate()
   } finally {

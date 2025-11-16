@@ -1,42 +1,67 @@
 'use client'
 
 import { Eye, Heart } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import { likeLive } from '@/services/liveService'
+import { LiveStatsUpdate } from '@/lib/socket/types'
 
 interface LiveInteractionProps {
-  initialViewers?: number
-  initialLikes?: number
+  viewers?: number
+  likes?: number
+  liveSeq: number
+  liked?: boolean
+  onStatsUpdate?: (update: LiveStatsUpdate) => void
 }
 
 /**
  * 라이브 인터랙션 컴포넌트
  * - 실시간 시청자 수
  * - 좋아요 버튼 및 수
+ * - WebSocket 통계 업데이트 처리
  */
 export default function LiveInteraction({
-  initialViewers = 0,
-  initialLikes = 0,
+  viewers: viewersProp = 0,
+  likes: likesProp = 0,
+  liveSeq,
+  liked: likedProp = false,
+  onStatsUpdate,
 }: LiveInteractionProps) {
-  const [viewers] = useState(initialViewers)
-  const [likes, setLikes] = useState(initialLikes)
-  const [isLiked, setIsLiked] = useState(false)
+  // 통계는 props로 받되, 좋아요 상태만 로컬에서 관리 (UX 개선)
+  const [isLiked, setIsLiked] = useState(likedProp)
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
 
-  const handleLike = () => {
-    if (isLiked) {
-      // 좋아요 취소 (즉시)
-      setLikes(prev => prev - 1)
-      setIsLiked(false)
-    } else {
-      // 좋아요 추가
-      setLikes(prev => prev + 1)
-      setIsLiked(true)
-      setShowHeartAnimation(true)
+  // 좋아요 상태 동기화
+  useEffect(() => {
+    setIsLiked(likedProp)
+  }, [likedProp])
 
-      // 애니메이션 후 초기화
+  const handleLike = async () => {
+    // 좋아요 상태만 즉시 토글 (UX 개선)
+    const newLikedState = !isLiked
+    setIsLiked(newLikedState)
+
+    if (newLikedState) {
+      setShowHeartAnimation(true)
       setTimeout(() => {
         setShowHeartAnimation(false)
       }, 1000)
+    }
+
+    try {
+      // REST API로 좋아요 토글 (authFetch가 쿠키를 자동으로 포함시킴)
+      const result = await likeLive(liveSeq)
+      if (result.success) {
+        // WebSocket으로 LIKE_COUNT_UPDATE를 받아서 실제 수를 업데이트
+        // 여기서는 좋아요 상태만 로컬에서 즉시 토글
+      } else {
+        // 실패 시 상태 롤백
+        setIsLiked(!newLikedState)
+      }
+    } catch (error) {
+      console.error('좋아요 토글 실패:', error)
+      // 실패 시 상태 롤백
+      setIsLiked(!newLikedState)
     }
   }
 
@@ -46,7 +71,7 @@ export default function LiveInteraction({
       <div className="flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 backdrop-blur-sm">
         <Eye size={14} className="text-white" />
         <span className="text-xs font-semibold text-white">
-          {viewers.toLocaleString()}
+          {viewersProp.toLocaleString()}
         </span>
       </div>
 
@@ -64,7 +89,7 @@ export default function LiveInteraction({
             }`}
           />
           <span className="text-xs font-semibold text-white">
-            {likes.toLocaleString()}
+            {likesProp.toLocaleString()}
           </span>
         </button>
 

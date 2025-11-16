@@ -5,7 +5,15 @@
  */
 
 // 타입 export
-export type { ChatMessage, ChatMessageRequest, ChatNotification } from './types'
+export type {
+  ChatMessage,
+  ChatMessageRequest,
+  ChatNotification,
+  LiveChatMessage,
+  LiveChatMessageRequest,
+  LiveStatsUpdate,
+  LiveStartNotification,
+} from './types'
 
 // 연결 관련 export
 export { connectWS, disconnectWS } from './connection'
@@ -16,8 +24,12 @@ export {
   subscribeNotifications,
   unsubscribeChat,
   unsubscribeNotifications,
+  subscribeLive,
+  unsubscribeLive,
+  subscribeLiveBroadcastStart,
+  unsubscribeLiveBroadcastStart,
 } from './subscriptions'
 
 // 메시지 전송 관련 export
-export { sendChat } from './publish'
+export { sendChat, sendLiveChat } from './publish'
 
