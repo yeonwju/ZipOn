@@ -109,7 +109,6 @@ public enum ErrorCode {
 
     NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 
-
     // 매물 사진 S3
     EMPTY_IMG_FILE(400, HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
     ONLY_IMG_ALLOWED(400, HttpStatus.BAD_REQUEST, "이미지 파일만 업로드 가능합니다."),
@@ -130,6 +129,9 @@ public enum ErrorCode {
     //계약 관련
     AI_CONTRACT_ERROR(500, HttpStatus.BAD_GATEWAY, "AI 서버 응답 없음"),
     AI_EMPTY_RESPONSE(400, HttpStatus.BAD_REQUEST, "AI 서버에서 빈 응답이 돌아왔습니다."),
+    VIRTUAL_ACCOUNT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "존재하지 않는 가상계좌입니다."),
+    REC_ERROR(400, HttpStatus.BAD_REQUEST, "SSAFY 계좌 생성 응답에 REC 필드가 없습니다."),
+    SSAFY_RESPONSE_ERROR(400, HttpStatus.BAD_REQUEST, "ssafy 계좌 생성 응답 필드 없음"),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),

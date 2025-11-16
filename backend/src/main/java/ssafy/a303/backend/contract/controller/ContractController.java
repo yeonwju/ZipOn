@@ -15,7 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.contract.dto.response.AiRawResponseDto;
 import ssafy.a303.backend.contract.dto.response.ContractAiResponseDto;
+import ssafy.a303.backend.contract.dto.response.CreateVirtualAccountResponseDto;
 import ssafy.a303.backend.contract.service.ContractAiService;
+import ssafy.a303.backend.contract.service.ContractService;
 import ssafy.a303.backend.contract.util.ContractTextFormatter;
 import ssafy.a303.backend.property.dto.response.PropertyMapDto;
 
@@ -28,6 +30,16 @@ import java.awt.*;
 public class ContractController {
 
     private final ContractAiService aiService;
+    private final ContractService contractService;
+
+    @PostMapping("/{contractSeq}/init")
+    public ResponseEntity<ResponseDTO<CreateVirtualAccountResponseDto>> initContract(@PathVariable Integer contractSeq,
+                                                                                     @RequestHeader("X-SSAFY-USER-KEY") String userKey)
+    {
+        CreateVirtualAccountResponseDto res = contractService.startContractAndCreateVA(contractSeq, userKey);
+
+        return ResponseDTO.ok(res, "계약 진행 및 가상계좌 생성 완료");
+    }
 
     @Operation(
             summary = "계약서 ai 검증",
