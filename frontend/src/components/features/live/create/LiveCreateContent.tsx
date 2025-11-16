@@ -34,7 +34,7 @@ export default function LiveCreateContent() {
     return calculateDistance(currentLocation, addressCoords)
   }, [currentLocation, addressCoords])
 
-  const isWithinDistance = distance !== null && distance <= 100
+  const isWithinDistance = distance !== null && distance <= 300
   const hasTitleInput = title.trim() !== ''
   const hasSelectedAuction = selectedAuctionSeq !== null
 
