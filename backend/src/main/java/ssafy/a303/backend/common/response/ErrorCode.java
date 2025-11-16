@@ -135,6 +135,8 @@ public enum ErrorCode {
     FINANCE_KEY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 사용자에게 SSAFY API finance key가 등록되어 있지 않습니다."),
     CONTRACT_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 계약을 찾을 수 없습니다."),
     USER_ACCOUNT_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 유저의 계좌가 없습니다."),
+    ONLY_IN_CHARGE(400, HttpStatus.BAD_REQUEST, "해당 계약 관련 임대인, 임차인만 계약 성사를 진행할 수 있습니다."),
+    RENT_PAID_YET(400, HttpStatus.BAD_REQUEST, "첫 월세가 아직 가상계좌에 입금되지 않았습니다."),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),

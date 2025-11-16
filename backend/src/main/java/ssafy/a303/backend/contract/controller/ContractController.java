@@ -115,4 +115,13 @@ public class ContractController {
         return ResponseDTO.ok(null, "첫 월세 이체가 완료되었습니다.");
     }
 
+
+    @PostMapping("/{contractSeq}/settlement")
+    public ResponseEntity<ResponseDTO<Void>> settleContract(@PathVariable Integer contractSeq,
+                                                            @AuthenticationPrincipal Integer userSeq)
+    {
+        contractService.acceptContractAndSettle(contractSeq, userSeq);
+        return ResponseDTO.ok(null, "임대인에게 첫 월세가 전달되었습니다.");
+    }
+
 }

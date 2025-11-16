@@ -204,6 +204,11 @@ public class ContractService {
 
     }
 
+    /**
+     * 첫 월세 임차인이 납부
+     * @param contractSeq
+     * @param userSeq
+     */
     @Transactional
     public void payFirstRent(Integer contractSeq, Integer userSeq) {
 
@@ -245,6 +250,62 @@ public class ContractService {
         );
         va.setStatus(VirtualAccountStatus.PAID);
         contract.setIsFirstPaid(true);
+
+    }
+
+    /**
+     * 계약 확정 되면 가상계좌에서 임대인에게 월세 전달
+     */
+    @Transactional
+    public void acceptContractAndSettle(Integer contractSeq, Integer userSeq) {
+
+        //1. 계약 조회
+        Contract contract = contractRepository.findById(contractSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        // 2. 임차인이 맞는지 확인
+        if(!contract.getLesseeSeq().equals(userSeq)) {
+            throw new CustomException(ErrorCode.ONLY_IN_CHARGE);
+        }
+        //3. 입금이 되었는지 체크
+        if(contract.getIsFirstPaid() == null || !contract.getIsFirstPaid()) {
+            throw new CustomException(ErrorCode.RENT_PAID_YET);
+        }
+        //4. 해당 계약의 가상계좌 조회 (출급 계좌)
+        VirtualAccount va = virtualAccountRepository.findByContractSeq(contractSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND, "해당 계약에 연결된 가상계좌가 없습니다."));
+        String withdrawalAccountNo = va.getAccountNo();
+        //5. 임대인 대표 계좌 조회 (입금 계좌)
+        UserAccount lessorAccount = userAccountRepository.findByUserSeq(contract.getLessorSeq())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_ACCOUNT_NOT_FOUND));
+
+        String depositAccountNo = lessorAccount.getAccountNo();
+
+        //6. 이체 금액 = 낙찰 월세
+        int amount = contract.getAucMnRent();
+
+        //7. 이체를 수행할 userKey (가상계좌 소유자 기준)
+        Integer lesseeSeq = contract.getLesseeSeq();
+        User lessee = userRepository.findById(lesseeSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String lesseeUserKey = lessee.getFinanceKey();
+
+        // 8. 계좌 이체 API 호출
+        transferRent(
+                lesseeUserKey,
+                withdrawalAccountNo,
+                depositAccountNo,
+                amount
+        );
+
+        // 9. 이체 성공 시 상태 업데이터
+        va.setCurrentAmount(0);
+        va.setStatus(VirtualAccountStatus.CLOSED);
+
+        // 계약 상태 : 임대인 수령 완료 + 상태 완료
+        contract.setIsReceived(true);
+        contract.setContractStatus(ContractStatus.COMPLETED);
 
     }
 
