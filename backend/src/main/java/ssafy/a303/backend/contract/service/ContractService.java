@@ -16,6 +16,8 @@ import ssafy.a303.backend.contract.enums.ContractStatus;
 import ssafy.a303.backend.contract.enums.VirtualAccountStatus;
 import ssafy.a303.backend.contract.repository.ContractRepository;
 import ssafy.a303.backend.contract.repository.VirtualAccountRepository;
+import ssafy.a303.backend.user.entity.User;
+import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,47 +31,59 @@ public class ContractService {
 
     private final ContractRepository contractRepository;
     private final VirtualAccountRepository virtualAccountRepository;
+    private final UserRepository userRepository;
     private final SSAFYAPI ssafyapi;
+    private final SSAFYHeaderDTOHelper ssafyHeaderDTOHelper;
 
     /**
      * 계약 진행 단계로 넘어감
      * 가상계좌 생성
      * @param contractSeq
-     * @param userKey
+     * @param userSeq
      * @return
      */
-    public CreateVirtualAccountResponseDto startContractAndCreateVA(Integer contractSeq, String userKey) {
+    @Transactional
+    public CreateVirtualAccountResponseDto startContractAndCreateVA(Integer contractSeq, Integer userSeq) {
+
+        // userSeq로 ssafy api의 userKey 가져오기
+        User user = userRepository.findById(userSeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String userKey = user.getFinanceKey();
+        if (userKey == null || userKey.isBlank()) {
+            throw new CustomException(ErrorCode.FINANCE_KEY_NOT_FOUND);
+        }
 
         /** 1. 계약 조회 */
         Contract contract = contractRepository.findById(contractSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND));
 
         /** 2. SSAFY Header DTO 생성 */
-        SSAFYHeaderDTO headerDto = SSAFYHeaderDTOHelper.buildHeader(
+        SSAFYHeaderDTO headerDto = ssafyHeaderDTOHelper.buildHeader(
                 "createDemandDepositAccount",
                 userKey
         );
 
-//        /** 3. HeaderDTO -> Map<String, Object> 변환 */
-//        Map<String, Object> headerMap = new HashMap<>();
-//        headerMap.put("apiName", headerDto.getApiName());
-//        headerMap.put("transmissionDate", headerDto.getTransmissionDate());
-//        headerMap.put("transmissionTime", headerDto.getTransmissionTime());
-//        headerMap.put("institutionCode", headerDto.getInstitutionCode());
-//        headerMap.put("fintechAppNo", headerDto.getFintechAppNo());
-//        headerMap.put("apiServiceCode", headerDto.getApiServiceCode());
-//        headerMap.put("institutionTransactionUniqueNo", headerDto.getInstitutionTransactionUniqueNo());
-//        headerMap.put("apiKey", headerDto.getApiKey());
-//        headerMap.put("userKey", headerDto.getUserKey());
+        /** 3. HeaderDTO -> Map<String, Object> 변환 */
+        Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put("apiName", headerDto.getApiName());
+        headerMap.put("transmissionDate", headerDto.getTransmissionDate());
+        headerMap.put("transmissionTime", headerDto.getTransmissionTime());
+        headerMap.put("institutionCode", headerDto.getInstitutionCode());
+        headerMap.put("fintechAppNo", headerDto.getFintechAppNo());
+        headerMap.put("apiServiceCode", headerDto.getApiServiceCode());
+        headerMap.put("institutionTransactionUniqueNo", headerDto.getInstitutionTransactionUniqueNo());
+        headerMap.put("apiKey", headerDto.getApiKey());
+        headerMap.put("userKey", headerDto.getUserKey());
 
         /** 3. SSAFYAPI에 보낼 body 구성 */
         Map<String, Object> body = new HashMap<>();
-        body.put("Header", headerDto);
+        body.put("Header", headerMap);
         body.put("accountTypeUniqueNo", accountTypeUniqueNo);
 
         /** 4. SSAFY OpenAPI 호출 */
         Map<String, Object> response = ssafyapi.post(
-                "/demandDeposit/createDemandDepositAccount",
+                "edu/demandDeposit/createDemandDepositAccount",
                 null,
                 body
         );

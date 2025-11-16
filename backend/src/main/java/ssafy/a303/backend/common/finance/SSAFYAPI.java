@@ -1,5 +1,6 @@
 package ssafy.a303.backend.common.finance;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -9,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class SSAFYAPI {
 
@@ -26,8 +28,10 @@ public class SSAFYAPI {
             Map<String, Object> body
     ) {
         Map<String, Object> request = new HashMap<>();
-        if (header != null) request.put("header", header);
+        if (header != null) request.put("header", header); /** Header로 고침 */
         if (body != null) request.putAll(body);
+
+        log.info("[SSAFY-FINANCE] {} {} body={}", method, path, request);
 
         return client.method(method)
                 .uri(path)

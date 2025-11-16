@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.response.ResponseDTO;
@@ -34,9 +35,10 @@ public class ContractController {
 
     @PostMapping("/{contractSeq}/init")
     public ResponseEntity<ResponseDTO<CreateVirtualAccountResponseDto>> initContract(@PathVariable Integer contractSeq,
-                                                                                     @RequestHeader("X-SSAFY-USER-KEY") String userKey)
+                                                                                     @AuthenticationPrincipal Integer userSeq)
     {
-        CreateVirtualAccountResponseDto res = contractService.startContractAndCreateVA(contractSeq, userKey);
+
+        CreateVirtualAccountResponseDto res = contractService.startContractAndCreateVA(contractSeq, userSeq);
 
         return ResponseDTO.ok(res, "계약 진행 및 가상계좌 생성 완료");
     }

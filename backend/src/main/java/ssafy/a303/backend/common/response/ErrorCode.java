@@ -132,6 +132,7 @@ public enum ErrorCode {
     VIRTUAL_ACCOUNT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "존재하지 않는 가상계좌입니다."),
     REC_ERROR(400, HttpStatus.BAD_REQUEST, "SSAFY 계좌 생성 응답에 REC 필드가 없습니다."),
     SSAFY_RESPONSE_ERROR(400, HttpStatus.BAD_REQUEST, "ssafy 계좌 생성 응답 필드 없음"),
+    FINANCE_KEY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 사용자에게 SSAFY API finance key가 등록되어 있지 않습니다."),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),
