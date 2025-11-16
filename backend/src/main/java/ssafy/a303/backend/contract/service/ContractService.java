@@ -83,10 +83,26 @@ public class ContractService {
 
         /** 4. SSAFY OpenAPI 호출 */
         Map<String, Object> response = ssafyapi.post(
-                "edu/demandDeposit/createDemandDepositAccount",
+                "/edu/demandDeposit/createDemandDepositAccount",
                 null,
                 body
         );
+
+        //디버깅
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resHeader = (Map<String, Object>) response.get("Header");
+
+        if (resHeader == null) {
+            throw new IllegalStateException("SSAFY 응답에 Header가 없습니다: " + response);
+        }
+
+        String responseCode = (String) resHeader.get("responseCode");
+        String responseMessage = (String) resHeader.get("responseMessage");
+
+        if (!"H0000".equals(responseCode)) {
+            // SSAFY가 보낸 에러 코드 그대로 보고
+            throw new IllegalStateException("SSAFY 계좌 생성 실패: " + responseCode + " - " + responseMessage);
+        }
 
         /** 5. 응답 파싱 */
         Map<String, Object> rec = (Map<String, Object>) response.get("REC");

@@ -1,5 +1,7 @@
 package ssafy.a303.backend.common.finance;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,7 +38,21 @@ public class SSAFYAPI {
         return client.method(method)
                 .uri(path)
                 .bodyValue(request)
-                .exchangeToMono(resp -> resp.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>(){}))
+                .exchangeToMono(resp -> resp.bodyToMono(String.class)
+                        .doOnNext(bodyStr -> {
+                            log.info("[SSAFY-RES-BODY] {}", bodyStr);
+                        })
+                        .map(bodyStr -> {
+                            try {
+                                // JSON을 Map 으로 변환
+                                ObjectMapper om = new ObjectMapper();
+                                return om.readValue(bodyStr, new TypeReference<Map<String, Object>>() {});
+                            } catch (Exception e) {
+                                log.error("[SSAFY-RES-PARSE-ERROR] bodyStr={}", bodyStr, e);
+                                return Map.<String, Object>of("raw", bodyStr);
+                            }
+                        })
+                )
                 .block();
     }
 
