@@ -53,4 +53,9 @@ public class Contract {
     @Column(name = "created_at")
     private Timestamp createdAt;
 
+    /** 계약 상태 변경 */
+    public void updateStatus (ContractStatus status) {
+        this.contractStatus = status;
+    }
+
 }

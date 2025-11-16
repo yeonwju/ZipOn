@@ -1,6 +1,7 @@
 package ssafy.a303.backend.contract.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
 import ssafy.a303.backend.contract.enums.VirtualAccountStatus;
 
@@ -8,6 +9,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name = "virtual_account")
+@Builder
 public class VirtualAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

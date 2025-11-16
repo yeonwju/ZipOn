@@ -1,7 +1,6 @@
 package ssafy.a303.backend.contract.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.id.IntegralDataTypeHolder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -12,6 +11,7 @@ import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.contract.dto.response.CreateVirtualAccountResponseDto;
 import ssafy.a303.backend.contract.entity.Contract;
 import ssafy.a303.backend.contract.entity.VirtualAccount;
+import ssafy.a303.backend.contract.enums.ContractStatus;
 import ssafy.a303.backend.contract.enums.VirtualAccountStatus;
 import ssafy.a303.backend.contract.repository.ContractRepository;
 import ssafy.a303.backend.contract.repository.VirtualAccountRepository;
@@ -90,7 +90,18 @@ public class ContractService {
                 .expiredAt(null)
                 .build();
 
+        virtualAccountRepository.save(virtualAccount);
 
+        /** 7. 계약 상태를 "진행중"으로 변경 */
+        contract.updateStatus(ContractStatus.WAITING_FIRST_RENT);
+        contractRepository.save(contract);
+
+        /** 8. 프론트에 정보 반환 */
+        return new CreateVirtualAccountResponseDto(
+                bankCode,
+                accountNo,
+                contract.getAucMnRent()
+        );
     }
 
 }
