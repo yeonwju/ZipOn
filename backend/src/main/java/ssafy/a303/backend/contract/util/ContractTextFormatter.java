@@ -11,7 +11,14 @@ public class ContractTextFormatter {
             return new ContractAiResponseDto(List.of());
         }
 
-        List<String> lines = Arrays.stream(raw.split("\\r?\\n"))
+        // 줄바꿈 기준 나누기
+        String[] lineChunks = raw.split("\\r?\\n");
+
+        List<String> lines = Arrays.stream(lineChunks)
+                .flatMap(line -> Arrays.stream(
+                        // 문장부호 기준으로 나누기
+                        line.split("(?<=[.!?])\\s*")
+                ))
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
                 .toList();

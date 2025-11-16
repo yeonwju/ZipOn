@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.contract.dto.response.AiRawResponseDto;
@@ -69,5 +66,15 @@ public class ContractController {
         // 프로트로 배열로 전달
         return ResponseDTO.ok(lines,"계약서 검증 결과입니다.");
 
+    }
+
+    // 문장 split 테스트
+    @GetMapping("/test")
+    public ResponseEntity<ResponseDTO<ContractAiResponseDto>> test() {
+
+        String test = "이것도 분리가 되나요. ai가 되야되는데 말이죠. 왜 안될까요.";
+        ContractAiResponseDto result = ContractTextFormatter.splitToLines(test);
+
+        return ResponseDTO.ok(result, "테스트 결과입니다.");
     }
 }
