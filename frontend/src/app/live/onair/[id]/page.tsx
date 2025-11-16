@@ -97,7 +97,6 @@ export default function OnAirPage() {
   return (
     <AuthGuard>
       <main className="relative h-screen overflow-hidden bg-black">
-        {/* ⭐ 오픈비듀 연결 (token, isHost 넘김) */}
         {token && <LiveBroadcast token={token} isHost={isHost} onStreamReady={handleStreamReady} />}
 
         <LiveHeader onMinimize={handleMinimize} />
