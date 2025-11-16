@@ -116,7 +116,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     List<Integer> findAuctionWhatAreEnd(@Param("now") LocalDateTime now);
 
     @Modifying(clearAutomatically = true)
-    @Query("""
+    @Query(value = """
             update Auction a
             set a.finish = true
             where a.status = 'ACCEPTED'
@@ -124,4 +124,11 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
             """)
     int updateFinishByAuctionSeqIn(@Param("auctionSeqs") List<Integer> auctionSeqs);
 
+    @Query(value = """
+    select a
+    from Auction a
+    where a.property.propertySeq = : propertySeq
+        and a.status = 'ACCEPTED'
+    """)
+    Integer findAuctionSeqByProperty_PropertySeqAndStatus(Integer propertySeq);
 }

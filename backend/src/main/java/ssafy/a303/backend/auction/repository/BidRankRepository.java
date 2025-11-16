@@ -23,7 +23,7 @@ public class BidRankRepository {
         redis.opsForZSet().add(
                 generateKey(message.auctionSeq()),
                 json,
-                message.amount()
+                message.amount().doubleValue()
         );
     }
 
