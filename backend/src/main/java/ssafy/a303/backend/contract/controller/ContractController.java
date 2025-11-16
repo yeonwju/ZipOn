@@ -33,6 +33,12 @@ public class ContractController {
     private final ContractAiService aiService;
     private final ContractService contractService;
 
+    /**
+     * 계약 진행 시작 -> 가상계좌 생성
+     * @param contractSeq
+     * @param userSeq
+     * @return
+     */
     @PostMapping("/{contractSeq}/init")
     public ResponseEntity<ResponseDTO<CreateVirtualAccountResponseDto>> initContract(@PathVariable Integer contractSeq,
                                                                                      @AuthenticationPrincipal Integer userSeq)
@@ -71,6 +77,9 @@ public class ContractController {
             )
     })
     @PostMapping(value = "/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    /**
+     * 계약서 AI 검증
+     */
     public ResponseEntity<ResponseDTO<ContractAiResponseDto>> verifyContract(@RequestPart("file") MultipartFile file)
     {
         // AI 평가 받기
@@ -91,4 +100,19 @@ public class ContractController {
 
         return ResponseDTO.ok(result, "테스트 결과입니다.");
     }
+
+    /**
+     * 첫 달 월세 납부
+     * @param contractSeq
+     * @param userSeq
+     * @return
+     */
+    @PostMapping("/{contractSeq}/first-rent")
+    public ResponseEntity<ResponseDTO<Void>> payFirstRent(@PathVariable Integer contractSeq,
+                                                          @AuthenticationPrincipal Integer userSeq)
+    {
+        contractService.payFirstRent(contractSeq, userSeq);
+        return ResponseDTO.ok(null, "첫 월세 이체가 완료되었습니다.");
+    }
+
 }

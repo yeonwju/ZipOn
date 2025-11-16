@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import ssafy.a303.backend.contract.enums.ContractStatus;
 
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "contract")
 @Getter
+@Setter
 public class Contract {
 
     @Id
