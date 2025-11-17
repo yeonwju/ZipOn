@@ -55,7 +55,7 @@ public class BidRankService {
     }
 
     private void saveDB(Set<String> data, Auction auction, boolean isRanker) {
-        int rank = 1;
+        int rank = 0;
         List<Bid> bids = new ArrayList<>();
         for (String json : data) {
             BidEventMessage msg = DataSerializer.deserialize(json, BidEventMessage.class);
@@ -66,7 +66,7 @@ public class BidRankService {
 
             if (isRanker) {
                 finalRank = rank++;
-                status = (finalRank == 1) ? BidStatus.OFFERED : BidStatus.WAITING;
+                status = (finalRank == 0) ? BidStatus.OFFERED : BidStatus.WAITING;
             } else {
                 finalRank = 999;
                 status = BidStatus.LOST;

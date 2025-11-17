@@ -39,8 +39,13 @@ public class AuctionService {
     private final UserRepository userRepository;
     private final PropertySearchService searchService;
 
+    public Auction getAuction(int auctionSeq) {
+        return auctionRepository.findById(auctionSeq).orElseThrow(() -> new CustomException(ErrorCode.AUCTION_NOT_FOUND));
+    }
+
     /**
      * 중개 및 경매 신청 (중개인 -> 매물)
+     *
      * @param propertySeq
      * @param userSeq
      * @param req
@@ -71,7 +76,7 @@ public class AuctionService {
                 .intro(req.intro());
 
         /** 중개만 신청 */
-        if(!wantStrm) {
+        if (!wantStrm) {
             Auction saved = auctionRepository.save(b.build());
             return BrkApplyResponseDto.of(saved);
         }
@@ -82,18 +87,18 @@ public class AuctionService {
         LocalTime end = req.strmEndTm();
 
         // 시작, 종료 시간 전후 검증
-        if(!end.isAfter(start)) {
+        if (!end.isAfter(start)) {
             throw new CustomException(ErrorCode.TIME_NOT_ALLOWED);
         }
 
         // 날짜가 현재보다 미래 시점인지 검증
-        if(LocalDate.now().isAfter(date)) {
+        if (LocalDate.now().isAfter(date)) {
             throw new CustomException(ErrorCode.DATE_NOT_ALLOWED);
         }
 
         /** 경매종료 시점 설정 (방송 다음날 오후 12시) */
         LocalDateTime auctionStartAt = date.atTime(end);
-        LocalDateTime auctionEndAt = date.plusDays(1).atTime(12,0);
+        LocalDateTime auctionEndAt = date.plusDays(1).atTime(12, 0);
 
         Auction saved = auctionRepository.save(
                 b.strmDate(date)
@@ -107,33 +112,37 @@ public class AuctionService {
         return BrkApplyResponseDto.of(saved);
     }
 
-    /** 중개인이 신청 취소 */
+    /**
+     * 중개인이 신청 취소
+     */
     public BrkCancelResponseDto cancelMyApply(Integer aucSeq, Integer userSeq, BrkCancelRequestDto req) {
 
         /** 본인이 신청한건지 확인 */
         Auction a = auctionRepository.findByAuctionSeqAndUser_UserSeq(aucSeq, userSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.CANCEL_NO_AUTH));
 
-        if(a.getStatus() != AuctionStatus.REQUESTED) {
-            throw new CustomException(ErrorCode.CANCEL_IMPOSSIBLE, "현재상태("+ a.getStatus()+")에서는 취소할 수 없습니다. (REQUESTED만 가능)");
+        if (a.getStatus() != AuctionStatus.REQUESTED) {
+            throw new CustomException(ErrorCode.CANCEL_IMPOSSIBLE, "현재상태(" + a.getStatus() + ")에서는 취소할 수 없습니다. (REQUESTED만 가능)");
         }
 
         a.setStatus(AuctionStatus.CANCELED);
         a.setCancelAt(LocalDateTime.now());
         a.setCancelBy(AuctionCancler.BROKER);
-        a.setCancelReason(req != null ? req.reason() : null) ;
+        a.setCancelReason(req != null ? req.reason() : null);
 
         return BrkCancelResponseDto.of(a);
     }
 
-    /** REQUESTED, ACCEPTED 상태의 신청 리스트 조회 */
+    /**
+     * REQUESTED, ACCEPTED 상태의 신청 리스트 조회
+     */
     public Page<BrkApplicantResponseDto> listApplicants(Integer propertySeq,
                                                         Integer userSeq,
-                                                        Pageable pageable){
+                                                        Pageable pageable) {
         Property p = propertyRepository.findById(propertySeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
 
-        if(!Objects.equals(p.getLessor().getUserSeq(), userSeq)) {
+        if (!Objects.equals(p.getLessor().getUserSeq(), userSeq)) {
             throw new CustomException(ErrorCode.READ_NO_AUTH);
         }
 
@@ -156,11 +165,11 @@ public class AuctionService {
 
         Property property = auction.getProperty();
         // 2. 현재 로그인한 사람이 이 매물의 임대인인지 확인
-        if(!property.getLessor().getUserSeq().equals(userSeq)) {
+        if (!property.getLessor().getUserSeq().equals(userSeq)) {
             throw new CustomException(ErrorCode.ACCEPT_NO_AUTH);
         }
         //3. 이미 처리된 신청인지 확인
-        if(auction.getStatus() != AuctionStatus.REQUESTED) {
+        if (auction.getStatus() != AuctionStatus.REQUESTED) {
             throw new CustomException(ErrorCode.ALREADY_PROCESSED);
         }
 

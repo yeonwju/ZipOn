@@ -83,7 +83,7 @@ public class SmsService {
     public MeResponseDTO verify(int userSeq, String code) {
         SmsVerificationData data = smsCodeRepository.read(userSeq);
         if (data == null) throw new CustomException(ErrorCode.SMS_NOT_SENDED);
-        if (!data.getCode().equals(code)) throw new CustomException(ErrorCode.CODE_NOT_VALID);
+        if (!data.getCode().equalsIgnoreCase(code)) throw new CustomException(ErrorCode.CODE_NOT_VALID);
         Optional<User> opt = userRepository.findById(userSeq);
         if (opt.isEmpty()) throw new CustomException(ErrorCode.USER_NOT_FOUND);
         User user = opt.get();
