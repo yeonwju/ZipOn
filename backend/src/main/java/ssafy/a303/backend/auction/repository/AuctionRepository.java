@@ -124,6 +124,14 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
             """)
     int updateFinishByAuctionSeqIn(@Param("auctionSeqs") List<Integer> auctionSeqs);
 
+    @Query("""
+        select a
+        from Auction a
+        where a.finish = true
+          and a.winnerSeq is null
+        """)
+    List<Auction> findFinishedWithoutWinner();
+
     /**
      * 나의 경매 참여 내역 + 각 경매에서의 실제 순위까지 한 번에 조회하는 쿼리
      * <p>

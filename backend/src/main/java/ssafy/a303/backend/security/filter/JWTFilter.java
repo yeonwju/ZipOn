@@ -34,7 +34,7 @@ public class JWTFilter extends OncePerRequestFilter {
             ip = request.getRemoteAddr();
         }
 
-        log.info("URI: {}, IP: {}", request.getRequestURI(), ip);
+//        log.info("URI: {}, IP: {}", request.getRequestURI(), ip);
 
         // 퍼블릭/인증 시작 경로는 스킵
         String uri = request.getRequestURI();
