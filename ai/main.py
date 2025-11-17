@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form, File
 from app.schemas.verify_state import VerifyState
 from app.agent.verify_agent import create_pdf_verifier_graph
 from app.schemas.contract_state import ContractState
@@ -61,7 +61,7 @@ async def verify_endpoint(
 
 @app.post("/review")
 async def review_endpoint(
-   file: UploadFile = Form(...) 
+   file: UploadFile = File(...) 
 ):
    pdf_bytes = await file.read()
 
