@@ -145,6 +145,7 @@ public enum ErrorCode {
     VIRTUAL_ACCOUNT_ALREADY_EXISTS(400, HttpStatus.BAD_REQUEST, "해당 계약에 대한 가상계좌가 이미 존재합니다."),
     ONLY_LESSEE(400, HttpStatus.BAD_REQUEST, "해당 계약의 임차인만 첫 월세를 납부할 수 있습니다."),
     VIRTUAL_ACCOUNT_AMOUNT_EXCEED(400, HttpStatus.BAD_REQUEST, "납부 금액이 목표 금액을 초과할 수 없습니다."),
+    CONTRACT_ALREADY_COMPLETED(400, HttpStatus.BAD_REQUEST, "계약이 이미 완료되었습니다."),
 
     // 낙찰 관련
     BID_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 입찰 정보를 찾을 수 없습니다."),

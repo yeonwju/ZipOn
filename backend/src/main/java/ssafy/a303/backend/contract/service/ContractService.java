@@ -296,6 +296,13 @@ public class ContractService {
         Contract contract = contractRepository.findById(contractSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
+        /**
+         * 이미 완료된 계약 예외처리
+         */
+        if(contract.getContractStatus() == ContractStatus.COMPLETED || Boolean.TRUE.equals(contract.getIsReceived())) {
+            throw new CustomException(ErrorCode.CONTRACT_ALREADY_COMPLETED);
+        }
+
         // 2. 임차인이 맞는지 확인
         if(!contract.getLesseeSeq().equals(userSeq)) {
             throw new CustomException(ErrorCode.ONLY_IN_CHARGE);
