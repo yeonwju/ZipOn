@@ -39,16 +39,49 @@ public class ContractController {
      * @param userSeq
      * @return
      */
+    @Operation(
+            summary = "계약 진행 시작 -> 가상계좌 생성",
+            description = "낙찰된 임차인이 계약 진행을 선택하면 가상계좌가 생성됩니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "가상계좌 생성 완료",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CreateVirtualAccountResponseDto.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            {
+                                                    "data": {
+                                                         "bankCode": "001",
+                                                         "accountNo": "0014017728828339",
+                                                         "targetAmount": 60000
+                                                   },
+                                                   "message": "계약 진행 및 가상계좌 생성 완료",
+                                                   "status": 200,
+                                                   "timestamp": 1763341593738
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
     @PostMapping("/{contractSeq}/init")
     public ResponseEntity<ResponseDTO<CreateVirtualAccountResponseDto>> initContract(@PathVariable Integer contractSeq,
                                                                                      @AuthenticationPrincipal Integer userSeq)
     {
-
         CreateVirtualAccountResponseDto res = contractService.startContractAndCreateVA(contractSeq, userSeq);
 
         return ResponseDTO.ok(res, "계약 진행 및 가상계좌 생성 완료");
     }
 
+    /**
+     * 계약서 AI 검증
+     * @param file
+     * @return
+     */
     @Operation(
             summary = "계약서 ai 검증",
             description = "계약서의 독소조항 여부를 ai로 검증합니다."
@@ -77,15 +110,12 @@ public class ContractController {
             )
     })
     @PostMapping(value = "/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    /**
-     * 계약서 AI 검증
-     */
     public ResponseEntity<ResponseDTO<ContractAiResponseDto>> verifyContract(@RequestPart("file") MultipartFile file)
     {
         // AI 평가 받기
-        AiRawResponseDto rawResult = aiService.verifyByAi(file);
+        AiRawResponseDto raw = aiService.verifyByAi(file);
         // 문단을 문장 단위로 나누기
-        ContractAiResponseDto lines = ContractTextFormatter.splitToLines(rawResult.getRawLine());
+        ContractAiResponseDto lines = ContractTextFormatter.splitToLines(raw.getReviews());
         // 프로트로 배열로 전달
         return ResponseDTO.ok(lines,"계약서 검증 결과입니다.");
 
@@ -94,10 +124,8 @@ public class ContractController {
     // 문장 split 테스트
     @GetMapping("/test")
     public ResponseEntity<ResponseDTO<ContractAiResponseDto>> test() {
-
         String test = "이것도 분리가 되나요. ai가 되야되는데 말이죠. 왜 안될까요.";
         ContractAiResponseDto result = ContractTextFormatter.splitToLines(test);
-
         return ResponseDTO.ok(result, "테스트 결과입니다.");
     }
 
@@ -107,6 +135,35 @@ public class ContractController {
      * @param userSeq
      * @return
      */
+    @Operation(
+            summary = "첫 달 월세 납부",
+            description = "생성된 가상계좌로 첫달 월세를 납부합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "첫 월세 납부 완료",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Void.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            {
+                                                    "data": {
+                                                         "bankCode": "001",
+                                                         "accountNo": "0014017728828339",
+                                                         "targetAmount": 60000
+                                                   },
+                                                   "message": "계약 진행 및 가상계좌 생성 완료",
+                                                   "status": 200,
+                                                   "timestamp": 1763341593738
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
     @PostMapping("/{contractSeq}/first-rent")
     public ResponseEntity<ResponseDTO<Void>> payFirstRent(@PathVariable Integer contractSeq,
                                                           @AuthenticationPrincipal Integer userSeq)
