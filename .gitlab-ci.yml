@@ -1,0 +1,90 @@
+image: curlimages/curl:8.10.1
+
+stages:
+  - trigger_jenkins
+
+# DEV
+trigger-dev:
+  stage: trigger_jenkins
+  only:
+    - dev
+  tags:
+    - zipon
+  script:
+    - echo "🚀 Trigger Jenkins (DEV job)"
+
+    # 1) Jenkins Crumb 가져오기
+    - |
+      CRUMB=$(curl -s \
+        --user "$JENKINS_USER:$JENKINS_TOKEN" \
+        "http://k13a303.p.ssafy.io:8888/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
+      echo "✓ CRUMB = $CRUMB"
+
+    # 2) Jenkins DEV Job 빌드 시작
+    - |
+      curl -X POST \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/dev/build" \
+        -H "$CRUMB" \
+        --user "$JENKINS_USER:$JENKINS_TOKEN"
+
+    - echo "⏳ Waiting for Jenkins to start build..."
+    - sleep 3
+
+    # 3) 가장 최근 빌드 번호 조회
+    - |
+      BUILD_NUMBER=$(curl -s \
+        --user "$JENKINS_USER:$JENKINS_TOKEN" \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/dev/lastBuild/buildNumber")
+      echo "🔢 Jenkins BUILD_NUMBER = $BUILD_NUMBER"
+
+    # 4) 콘솔 출력 조회
+    - |
+      echo "📜 Fetching Jenkins Console Output..."
+      curl -s \
+        --user "$JENKINS_USER:$JENKINS_TOKEN" \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/dev/$BUILD_NUMBER/consoleText"
+
+    - echo "✅ DEV pipeline Done."
+
+# MASTER
+trigger-master:
+  stage: trigger_jenkins
+  only:
+    - master
+  tags:
+    - zipon
+  script:
+    - echo "🚀 Trigger Jenkins (MASTER job)"
+
+    # 1) Jenkins Crumb 가져오기
+    - |
+      CRUMB=$(curl -s \
+        --user "$JENKINS_USER:$JENKINS_TOKEN" \
+        "http://k13a303.p.ssafy.io:8888/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
+      echo "✓ CRUMB = $CRUMB"
+
+    # 2) Jenkins MASTER Job 빌드 시작
+    - |
+      curl -X POST \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/master/build" \
+        -H "$CRUMB" \
+        --user "$JENKINS_USER:$JENKINS_TOKEN"
+
+    - echo "⏳ Waiting for Jenkins to start build..."
+    - sleep 3
+
+    # 3) 가장 최근 빌드 번호 조회
+    - |
+      BUILD_NUMBER=$(curl -s \
+        --user "$JENKINS_USER:$JENKINS_TOKEN" \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/master/lastBuild/buildNumber")
+      echo "🔢 Jenkins BUILD_NUMBER = $BUILD_NUMBER"
+
+    # 4) 콘솔 출력 조회
+    - |
+      echo "📜 Fetching Jenkins Console Output..."
+      curl -s \
+        --user "$JENKINS_USER:$JENKINS_TOKEN" \
+        "http://k13a303.p.ssafy.io:8888/job/zipon-app/job/master/$BUILD_NUMBER/consoleText"
+
+    - echo "✅ MASTER pipeline Done."

@@ -1,0 +1,82 @@
+# ==============================
+# Python / FastAPI Project Ignore
+# ==============================
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.*
+
+# Dependency lock files
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
+notebooks/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE configs
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+uploads/
+temp/
+tmp/
+
+# uv
+uv.lock
+
+# Keep only template env files
+!.env.example
+
+# ==============================
+# LangChain / AI Project-specific
+# ==============================
+
+# Vector DBs (Chroma)
+chroma_db/
+chroma/
+index/
+*.sqlite3
+*.bin
+
+# AI preprocessed data
+data/
+raw_laws/
+processed/
+outputs/
+cache/
+__cache__/
+
+# AI project subfolders
+ai/uploads/
+ai/data/
+ai/notebooks/chroma_db/

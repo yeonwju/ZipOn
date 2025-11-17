@@ -1,7 +1,6 @@
 package ssafy.a303.backend.security.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,7 +27,6 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService; // KKAKO 등 비표준
     private final CustomOidcUserService customOidcUserService; // GOOGLE, NAVER 표준
     private final GoogleOAuthSuccessHandler googleOAuthSuccessHandler;
-    private @Value("${frontUrl}") String frontUrl;
 
     @Bean
     public RequestCache requestCache() {
@@ -42,10 +40,11 @@ public class SecurityConfig {
         // ┌─── 설정 ───┐
         List<String> methods = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
         List<String> headers = List.of("*");
+        List<String> origins = List.of("http://localhost:3000", "https://dev-zipon.duckdns.org", "https://zipon.duckdns.org/");
         // └─── 설정 ───┘
         // 어떤 config인지 설정
         CorsConfiguration ccf = new CorsConfiguration();
-        ccf.addAllowedOrigin(frontUrl);
+        ccf.setAllowedOrigins(origins);
         ccf.setAllowedMethods(methods);
         ccf.setAllowedHeaders(headers);
         ccf.setAllowCredentials(true);

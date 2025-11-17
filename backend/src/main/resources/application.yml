@@ -1,3 +1,7 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: a303-backend
@@ -49,17 +53,12 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-server:
-  port: 8080
-
 jwt:
   secret: ${JWT_SECRET:dev-secret-key-dev-secret-key-dev-secret-key}
   access-token-hours: 24
   refresh-token-days: 14
 
 instant-minute: 15
-
-frontUrl: ${FRONT_URL:http://localhost:3000}
 
 ssafy:
   api:
