@@ -1,7 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ROUTES } from '@/constants'
+import { bidAccept, bidReject } from '@/services/bidService'
 import { MyAuctionsData } from '@/types/api/mypage'
 
 interface AuctionHistoryCardProps {
@@ -30,6 +32,8 @@ function getBidStatusBadge(status: string) {
 }
 
 export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardProps) {
+  const { showSuccess, showError, AlertDialog } = useAlertDialog()
+
   return (
     <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-row items-center gap-2.5">
@@ -77,18 +81,29 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
             {auctionData.bidStatus === 'OFFERED' && (
               <>
                 <button
-                  onClick={() => {
-                    // TODO: 수락 API 호출
-                    console.log('수락:', auctionData.auctionSeq)
+                  onClick={async () => {
+                    const result = await bidAccept(auctionData.auctionSeq)
+
+                    if (result.success) {
+                      showSuccess('입찰을 수락했습니다.')
+                    } else {
+                      showError('입찰 수락 실패')
+                    }
                   }}
                   className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs font-medium text-green-600 hover:bg-green-50"
                 >
                   수락
                 </button>
+
                 <button
-                  onClick={() => {
-                    // TODO: 거절 API 호출
-                    console.log('거절:', auctionData.auctionSeq)
+                  onClick={async () => {
+                    const result = await bidReject(auctionData.auctionSeq)
+
+                    if (result.success) {
+                      showSuccess('입찰을 거절했습니다.')
+                    } else {
+                      showError('입찰 거절 실패')
+                    }
                   }}
                   className="flex-1 rounded border border-red-300 bg-white px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
                 >
@@ -126,16 +141,17 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
             {(auctionData.bidStatus === 'REJECTED' ||
               auctionData.bidStatus === 'LOST' ||
               auctionData.bidStatus === 'TIMEOUT') && (
-                <Link
-                  href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
-                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  상세
-                </Link>
-              )}
+              <Link
+                href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
+                className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+              >
+                상세
+              </Link>
+            )}
           </div>
         </div>
       </div>
+      <AlertDialog />
     </div>
   )
 }

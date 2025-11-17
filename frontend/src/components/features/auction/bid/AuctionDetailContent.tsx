@@ -81,8 +81,8 @@ export default function AuctionDetailContent() {
   const data = response.data
   const auctionEndTime = new Date('2025-11-20T24:00:00')
 
-  const handleBid = (_amount: number) => {
-    const result = bid(auctionSeqParam, _amount)
+  const handleBid = async (_amount: number) => {
+    const result = await bid(Number(auctionSeqParam), _amount)
     if (result.success) {
       showSuccess('입찰 완료')
     } else {
