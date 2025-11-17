@@ -5,10 +5,11 @@ import ssafy.a303.backend.notice.entity.FcmToken;
 import ssafy.a303.backend.user.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface FcmTokenRepository extends JpaRepository<FcmToken, Integer> {
+public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
-    List<FcmToken> findByUser(User user);
+    Optional<FcmToken> findByToken(String token);
 
-    boolean existsByToken(String token);
+    Optional<FcmToken> findTopByUserOrderByCreatedAtDesc(User user);
 }

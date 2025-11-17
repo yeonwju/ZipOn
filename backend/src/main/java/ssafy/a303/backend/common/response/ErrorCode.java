@@ -1,9 +1,7 @@
 package ssafy.a303.backend.common.response;
 
-import co.elastic.clients.elasticsearch.nodes.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -30,10 +28,17 @@ public enum ErrorCode {
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
 
     // JSON
-    JSON_ERROR(400,HttpStatus.BAD_REQUEST, "직렬화 또는 역직렬화를 실패하였습니다."),
+    JSON_SERIALIZE_ERROR(400, HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+    JSON_DESERIALIZE_ERROR(400, HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+
 
     // 경매
     AUCTION_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 경매가 존재하지 않습니다."),
+    AUCTION_NOT_IN_PROGRESS(404, HttpStatus.NOT_FOUND, "해당 경매가 진행중이지 않습니다."),
+    AUCTION_UNABLE_TO_START(404, HttpStatus.NOT_FOUND, "해당 경매가 진행 가능한 시간이 아닙니다."),
+    AMOUNT_MAX_VALUE(400,HttpStatus.BAD_REQUEST,"21억 이상 입찰할 수 없습니다."),
+    ALREADY_BID(409, HttpStatus.CONFLICT, "이미 입찰하였습니다."),
+
     // 경매/방송 알람
     ALARM_ALREADY_EXIST(406, HttpStatus.NOT_ACCEPTABLE, "이미 알람이 저장되었습니다."),
 
@@ -42,8 +47,6 @@ public enum ErrorCode {
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),
     INVALID_PAGINATION(400, HttpStatus.BAD_REQUEST, "잘못된 페이지네이션 값입니다."),
     INVALID_REQUEST_PARAM(400, HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
-
-
 
 
     // 403 FORBIDDEN
@@ -109,7 +112,6 @@ public enum ErrorCode {
 
     NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 
-
     // 매물 사진 S3
     EMPTY_IMG_FILE(400, HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
     ONLY_IMG_ALLOWED(400, HttpStatus.BAD_REQUEST, "이미지 파일만 업로드 가능합니다."),
@@ -130,6 +132,18 @@ public enum ErrorCode {
     //계약 관련
     AI_CONTRACT_ERROR(500, HttpStatus.BAD_GATEWAY, "AI 서버 응답 없음"),
     AI_EMPTY_RESPONSE(400, HttpStatus.BAD_REQUEST, "AI 서버에서 빈 응답이 돌아왔습니다."),
+    VIRTUAL_ACCOUNT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "존재하지 않는 가상계좌입니다."),
+    REC_ERROR(400, HttpStatus.BAD_REQUEST, "SSAFY 계좌 생성 응답에 REC 필드가 없습니다."),
+    SSAFY_RESPONSE_ERROR(400, HttpStatus.BAD_REQUEST, "ssafy 계좌 생성 응답 필드 없음"),
+    FINANCE_KEY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 사용자에게 SSAFY API finance key가 등록되어 있지 않습니다."),
+    CONTRACT_NOT_FOUND(404, HttpStatus.BAD_REQUEST, "해당 계약을 찾을 수 없습니다."),
+    USER_ACCOUNT_NOT_FOUND(404, HttpStatus.BAD_REQUEST, "해당 유저의 계좌가 없습니다."),
+    ONLY_IN_CHARGE(400, HttpStatus.BAD_REQUEST, "해당 계약 관련 임대인, 임차인만 계약 성사를 진행할 수 있습니다."),
+    RENT_PAID_YET(400, HttpStatus.BAD_REQUEST, "첫 월세가 아직 가상계좌에 입금되지 않았습니다."),
+
+    // 낙찰 관련
+    BID_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 입찰 정보를 찾을 수 없습니다."),
+    FORBIDDEN(403, HttpStatus.FORBIDDEN, "권한이 없습니다."),
 
     // STOMP 관련
     INVALID_AUTH_HEADER(401, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 형식이 올바르지 않습니다. (예: Bearer <JWT>)"),

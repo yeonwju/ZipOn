@@ -57,18 +57,22 @@ public class LiveStream extends BaseTimeEntity {
 
     /** vwr_cnt INT NOT NULL DEFAULT 0 : 누적 시청자 수(종료 시 기록) */
     @Column(name = "vwr_cnt", nullable = false)
+    @Builder.Default
     private Integer viewerCount = 0;
 
     /** chat_cnt INT NOT NULL DEFAULT 0 : 채팅 메시지 총합(종료 시 반영) */
     @Column(name = "chat_cnt", nullable = false)
+    @Builder.Default
     private Integer chatCount = 0;
 
     /** like_cnt INT NOT NULL DEFAULT 0 : 방송 중 받은 좋아요 수 */
     @Column(name = "like_cnt", nullable = false)
+    @Builder.Default
     private Integer likeCount = 0;
 
     /** is_rec BOOLEAN NOT NULL DEFAULT false : 녹화본 저장 여부 */
     @Column(name = "is_rec", nullable = false)
+    @Builder.Default
     private Boolean recorded = Boolean.FALSE;
 
     /** start_at / end_at : 방송 시작/종료 시각 */

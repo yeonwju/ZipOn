@@ -1,6 +1,5 @@
 package ssafy.a303.backend.auction.service;
 
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,7 +13,7 @@ import ssafy.a303.backend.auction.dto.response.BrkApplyResponseDto;
 import ssafy.a303.backend.auction.dto.response.BrkCancelResponseDto;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
-import ssafy.a303.backend.auction.entity.Canceler;
+import ssafy.a303.backend.auction.entity.AuctionCancler;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
@@ -27,7 +26,6 @@ import ssafy.a303.backend.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,14 +92,16 @@ public class AuctionService {
         }
 
         /** 경매종료 시점 설정 (방송 다음날 오후 12시) */
+        LocalDateTime auctionStartAt = date.atTime(end);
         LocalDateTime auctionEndAt = date.plusDays(1).atTime(12,0);
 
         Auction saved = auctionRepository.save(
-                    b.strmDate(date)
+                b.strmDate(date)
                         .strmStartTm(start)
                         .strmEndTm(end)
+                        .auctionStartAt(auctionStartAt)
                         .auctionEndAt(auctionEndAt)
-                            .intro(req.intro())
+                        .intro(req.intro())
                         .build()
         );
         return BrkApplyResponseDto.of(saved);
@@ -120,7 +120,7 @@ public class AuctionService {
 
         a.setStatus(AuctionStatus.CANCELED);
         a.setCancelAt(LocalDateTime.now());
-        a.setCancelBy(Canceler.BROKER);
+        a.setCancelBy(AuctionCancler.BROKER);
         a.setCancelReason(req != null ? req.reason() : null) ;
 
         return BrkCancelResponseDto.of(a);

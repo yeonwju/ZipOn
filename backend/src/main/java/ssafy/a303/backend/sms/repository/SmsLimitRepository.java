@@ -3,6 +3,7 @@ package ssafy.a303.backend.sms.repository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
+import ssafy.a303.backend.common.helper.KoreaClock;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -36,8 +37,8 @@ public class SmsLimitRepository {
     }
 
     private Duration life() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
+        LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(KoreaClock.getClock()), LocalTime.of(23, 59, 59));
         return Duration.between(now, end);
     }
 }

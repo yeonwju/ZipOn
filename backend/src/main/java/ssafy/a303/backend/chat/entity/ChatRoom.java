@@ -43,6 +43,7 @@ public class ChatRoom extends BaseTimeEntity {
      * - orphanRemoval=false: 다른 곳에서 직접 제거할 케이스가 드묾
      */
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE)
+    @Builder.Default
     private List<ChatParticipant> participants = new ArrayList<>();
 
     /**
@@ -51,5 +52,6 @@ public class ChatRoom extends BaseTimeEntity {
      * - CascadeType.REMOVE: 방 삭제 시 메시지도 함께 삭제
      */
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE)
+    @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>();
 }

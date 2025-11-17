@@ -86,7 +86,6 @@ public class AiClient {
                         new CustomException(ErrorCode.AI_EMPTY_RESPONSE)
                 ))
                 .block();
-
     }
 
 }

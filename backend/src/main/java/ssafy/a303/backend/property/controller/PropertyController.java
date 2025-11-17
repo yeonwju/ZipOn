@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import ssafy.a303.backend.property.service.VerificationService;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name="매물")
 @RestController
 @RequestMapping("/api/v1/properties")
@@ -53,8 +55,8 @@ public class PropertyController {
             description = "매물의 주소를 입력하고 등기부등본을 검증합니다.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(type = "object", implementation = MultiPartRequest.class)
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
+//                            schema = @Schema(type = "object", implementation = MultiPartRequest.class)
                     )
             )
     )
@@ -141,6 +143,7 @@ public class PropertyController {
             PropertyRegiResponseDto res = propertyService.submitDetail(userSeq, req, images);
             return ResponseDTO.created(res, "매물 등록 완료");
         } catch (JsonProcessingException e) {
+            log.error("[PROPERTY] JSON 파싱 실패. reqJson={}", reqJson, e);
             throw new CustomException(ErrorCode.JSON_TYPE_ERROR, e);
         }
     }
