@@ -28,7 +28,7 @@ public class Bid {
     @Column(nullable = false)
     private int bidAmount;
     @Column
-    private int rank;
+    private Integer rank;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BidStatus status;

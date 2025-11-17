@@ -1,6 +1,7 @@
 package ssafy.a303.backend.common.finance;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,12 +12,18 @@ import java.util.Random;
  * - 날짜/시간/고유번호 생성
  * - Header DTO 생성
  */
+@Component
 public class SSAFYHeaderDTOHelper {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HHmmss");
+
     @Value("${ssafy.api.key}")
-    private static String apiKey;
+    private final String apiKey;
+
+    public SSAFYHeaderDTOHelper(@Value("${ssafy.api.key}") String apiKey) {
+        this.apiKey = apiKey;
+    }
 
     /**
      * SSAFY OpenAPI Header 생성
@@ -24,7 +31,7 @@ public class SSAFYHeaderDTOHelper {
      * @param userKey 사용자 키 (선택, 없는 경우 null)
      * @return SSAFY OpenAPI Header DTO
      */
-    public static SSAFYHeaderDTO buildHeader(String apiName, String userKey) {
+    public SSAFYHeaderDTO buildHeader(String apiName, String userKey) {
         LocalDateTime now = LocalDateTime.now();
         String date = now.format(DATE_FORMAT);
         String time = now.format(TIME_FORMAT);

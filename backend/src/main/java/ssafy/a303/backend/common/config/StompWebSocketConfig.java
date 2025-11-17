@@ -1,6 +1,7 @@
 package ssafy.a303.backend.common.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -23,6 +24,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompHandler stompHandler;
+    private @Value("${frontUrl}") String frontUrl;
 
     /**
      * [1] WebSocket 엔드포인트 등록
@@ -39,12 +41,7 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 // ⚠️ 보안: 프로덕션 배포 시 반드시 실제 도메인으로 변경!
                 // 개발 환경:
-                .setAllowedOriginPatterns(
-                        "http://localhost:3000",
-                        "http://127.0.0.1:3000"
-                )
-                // 프로덕션 환경 (배포 시 위 개발 환경을 주석 처리하고 아래 사용):
-                // .setAllowedOriginPatterns("https://your-domain.com")
+                .setAllowedOriginPatterns(frontUrl)
                 .withSockJS(); // SockJS fallback 허용 (HTTP로 대체 연결)
     }
 

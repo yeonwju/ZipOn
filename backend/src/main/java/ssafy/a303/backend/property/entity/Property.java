@@ -100,7 +100,7 @@ public class Property {
     @Column(name = "bathroom_cnt")
     private Byte bathroomCnt;
 
-    @Column(name = "construction_date", length = 10)
+    @Column(name = "construction_date", length = 20)
     private String constructionDate;
 
     @Column(name = "parking_cnt")

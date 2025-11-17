@@ -8,25 +8,30 @@ import ssafy.a303.backend.user.entity.User;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "fcm_token")
+@Table(
+        name = "fcm_token",
+        indexes = {
+                @Index(name = "uk_fcm_token", columnList = "token", unique = true),
+                @Index(name = "idx_fcm_user_seq", columnList = "user_seq")
+        }
+)
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class FcmToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer tokenseq;
+    private Long tokenSeq;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_seq", nullable = false)
     private User user;
 
-    @Column(name = "token", nullable = false, length = 1000)
+    @Column(nullable = false, length = 500)
     private String token;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

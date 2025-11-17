@@ -65,6 +65,7 @@ ssafy:
   api:
     url: ${SSAFY_API_URL}
     key: ${SSAFY_API_KEY}
+    account-type-unique-no: 001-1-ffae7419fac343
 gov:
   api:
     url: http://api.odcloud.kr/api/nts-businessman/v1
