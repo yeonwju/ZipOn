@@ -34,6 +34,10 @@ pipeline {
     OPENVIDU_URL    = credentials('OPENVIDU_URL')
     OPENVIDU_SECRET = credentials('OPENVIDU_SECRET')
 
+    // --- Kafka ---
+    KAFKA_SERVER = 'zipondev-kafka:9092'
+
+
     // --- Frontend ---
     NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
     NEXT_PUBLIC_PWA_ENABLE        = '1'
@@ -148,6 +152,8 @@ AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 FRONT_URL=$FRONT_URL
 FAST_API=http://zipondev-ai:8000
 ELASTICSEARCH_INDEX=zipon_properties
+KAFKA_SERVER=$KAFKA_SERVER
+
 
 # --- AI Environment ---
 GMS_KEY=$GMS_KEY
