@@ -51,6 +51,17 @@ export const listingQueryKeys = {
 } as const
 
 /**
+ * 검색 관련 Query Keys
+ */
+export const searchQueryKeys = {
+  all: ['search'] as const,
+  /**
+   * 검색 결과
+   */
+  results: (params?: Record<string, unknown>) => [...searchQueryKeys.all, 'results', params] as const,
+} as const
+
+/**
  * 브로커 관련 Query Keys
  */
 export const brokerQueryKeys = {
@@ -107,6 +118,7 @@ export const notificationQueryKeys = {
 export const queryKeys = {
   user: userQueryKeys,
   listing: listingQueryKeys,
+  search: searchQueryKeys,
   auction: auctionQueryKeys,
   live: liveQueryKeys,
   chat: chatQueryKeys,

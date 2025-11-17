@@ -94,6 +94,7 @@ const getDefaultIcons = (
 
 const rightIconsMap: Record<string, (hasChatNotification: boolean) => IconAction[]> = {
   default: (hasChatNotification: boolean) => getDefaultIcons(hasChatNotification),
+  '/search/filter': () => [],
   '/listings/new': () => [],
   '/auction/payment': () => [],
   '/auction/bid': (hasChatNotification: boolean) => [
@@ -145,6 +146,7 @@ const rightIconsMap: Record<string, (hasChatNotification: boolean) => IconAction
  * 4 기본 타이틀 매핑
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
+  '/search/filter': '필터',
   '/listings/new': '매물 등록',
   '/auction/payment': '결제',
   '/auction/bid': '경매 입찰',

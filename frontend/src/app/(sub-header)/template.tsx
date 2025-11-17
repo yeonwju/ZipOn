@@ -1,4 +1,7 @@
-import React from 'react'
+'use client'
+
+import { AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 
 import PageTransition from '@/components/common/PageTransition'
 
@@ -9,5 +12,11 @@ import PageTransition from '@/components/common/PageTransition'
  * template.tsx는 페이지 전환마다 새로 마운트되어 애니메이션이 작동합니다.
  */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <PageTransition>{children}</PageTransition>
+  const pathname = usePathname()
+  
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <PageTransition key={pathname}>{children}</PageTransition>
+    </AnimatePresence>
+  )
 }

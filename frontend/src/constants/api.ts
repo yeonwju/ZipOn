@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   LISTINGS_CREATE: '/api/v1/properties/detail',
   LISTINGS_DETAIL: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
   LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
+  LISTINGS_SEARCH: '/api/v1/properties/search',
   LISTINGS_DELETE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
   LISTINGS_AUCTION: `/api/v1/properties/search?isAuc=true`,
   LISTINGS_GENERAL: `/api/v1/properties/search?isAuc=false&isBrk=false`,
