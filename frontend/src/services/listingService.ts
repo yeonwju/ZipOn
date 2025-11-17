@@ -296,3 +296,18 @@ export async function getBrkListings(): Promise<{
     }
   }
 }
+
+export async function deleteListing(propertySeq: number): Promise<{ success: boolean }> {
+  try {
+    const result = await authFetch.delete<ResponseS<string>>(
+      API_ENDPOINTS.LISTINGS_DELETE(propertySeq)
+    )
+    if (result.status === 200) {
+      return { success: true }
+    } else {
+      return { success: false }
+    }
+  } catch (error) {
+    return { success: false }
+  }
+}

@@ -1,5 +1,8 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { useUser } from '@/hooks/queries'
 import { useCreateChatRoom } from '@/hooks/queries/useChat'
 import { useSearchListingDetail } from '@/hooks/queries/useListing'
@@ -26,6 +29,8 @@ interface ListingDetailProps {
  * - 하단 액션 버튼
  */
 export default function ListingDetail({ propertySeq }: ListingDetailProps) {
+  const router = useRouter()
+  const { showSuccess, showError, showConfirm, AlertDialog } = useAlertDialog()
   const { data: response, isLoading, isError } = useSearchListingDetail(propertySeq)
   const { data: user } = useUser()
   const { mutate: createChatRoom } = useCreateChatRoom()
@@ -64,6 +69,10 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
         user?.userSeq,
         result.auctionSeq,
         propertySeq,
+        showSuccess,
+        showError,
+        showConfirm,
+        router,
         createChatRoom
       )
   console.log('buttonConfig:', buttonConfig)
@@ -77,73 +86,76 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
   if (result.isBrkPref) features.push('중개 선호')
 
   return (
-    <div className="h-full pb-20">
-      {/* 컨텐츠 */}
-      <main>
-        {/* 이미지 갤러리 */}
-        <ListingImageGallery images={result.images} />
-        {/* 기본 정보 */}
-        <ListingInfo
-          name={result.propertyNm}
-          deposit={result.deposit}
-          rent={result.mnRent}
-          type={result.buildingType}
-          area={result.area}
-          floor={String(result.floor)}
-          totalFloor={String(result.floor)}
-          availableDate={String(result.period)}
-          address={result.address}
-        />
+    <>
+      <div className="h-full pb-20">
+        {/* 컨텐츠 */}
+        <main>
+          {/* 이미지 갤러리 */}
+          <ListingImageGallery images={result.images} />
+          {/* 기본 정보 */}
+          <ListingInfo
+            name={result.propertyNm}
+            deposit={result.deposit}
+            rent={result.mnRent}
+            type={result.buildingType}
+            area={result.area}
+            floor={String(result.floor)}
+            totalFloor={String(result.floor)}
+            availableDate={String(result.period)}
+            address={result.address}
+          />
 
-        {/* 특징/옵션 */}
-        <ListingFeatures features={features} />
+          {/* 특징/옵션 */}
+          <ListingFeatures features={features} />
 
-        {/* 상세 설명 */}
-        <ListingDescription description={result.content} />
+          {/* 상세 설명 */}
+          <ListingDescription description={result.content} />
 
-        {/* AI 분석 */}
-        <ListingAIAnalysis riskScore={result.riskScore} riskReason={result.riskReason} />
-      </main>
+          {/* AI 분석 */}
+          <ListingAIAnalysis riskScore={result.riskScore} riskReason={result.riskReason} />
+        </main>
 
-      {/* 고정 하단 버튼 - liveAt 지나면 표시 안 함 */}
-      {buttonConfig && (
-        <footer
-          className="fixed right-0 bottom-0 left-0 z-50 bg-white px-4 py-3 shadow-lg"
-          style={{
-            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-          }}
-        >
-          <div className="flex gap-2">
-            {/* 주 버튼 */}
-            <button
-              onClick={buttonConfig.primary.action}
-              className="flex-1 rounded-lg bg-blue-500 py-4 font-semibold text-white transition-colors hover:bg-blue-600"
-            >
-              {buttonConfig.primary.text}
-            </button>
-
-            {/* 수정 버튼 (있을 경우) */}
-            {buttonConfig.secondary && (
+        {/* 고정 하단 버튼 - liveAt 지나면 표시 안 함 */}
+        {buttonConfig && (
+          <footer
+            className="fixed right-0 bottom-0 left-0 z-50 bg-white px-4 py-3 shadow-lg"
+            style={{
+              paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+            }}
+          >
+            <div className="flex gap-2">
+              {/* 주 버튼 */}
               <button
-                onClick={buttonConfig.secondary.action}
-                className="w-20 rounded-lg border-2 border-blue-500 bg-white py-4 font-semibold text-blue-500 transition-colors hover:bg-blue-50"
+                onClick={buttonConfig.primary.action}
+                className="flex-1 rounded-lg bg-blue-500 py-4 font-semibold text-white transition-colors hover:bg-blue-600"
               >
-                {buttonConfig.secondary.text}
+                {buttonConfig.primary.text}
               </button>
-            )}
 
-            {/* 삭제 버튼 (있을 경우) */}
-            {buttonConfig.delete && (
-              <button
-                onClick={buttonConfig.delete.action}
-                className="w-20 rounded-lg border-2 border-red-500 bg-white py-4 font-semibold text-red-500 transition-colors hover:bg-red-50"
-              >
-                {buttonConfig.delete.text}
-              </button>
-            )}
-          </div>
-        </footer>
-      )}
-    </div>
+              {/* 수정 버튼 (있을 경우) */}
+              {buttonConfig.secondary && (
+                <button
+                  onClick={buttonConfig.secondary.action}
+                  className="w-20 rounded-lg border-2 border-blue-500 bg-white py-4 font-semibold text-blue-500 transition-colors hover:bg-blue-50"
+                >
+                  {buttonConfig.secondary.text}
+                </button>
+              )}
+
+              {/* 삭제 버튼 (있을 경우) */}
+              {buttonConfig.delete && (
+                <button
+                  onClick={buttonConfig.delete.action}
+                  className="w-20 rounded-lg border-2 border-red-500 bg-white py-4 font-semibold text-red-500 transition-colors hover:bg-red-50"
+                >
+                  {buttonConfig.delete.text}
+                </button>
+              )}
+            </div>
+          </footer>
+        )}
+      </div>
+      <AlertDialog />
+    </>
   )
 }
