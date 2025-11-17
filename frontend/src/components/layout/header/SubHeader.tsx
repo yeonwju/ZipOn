@@ -67,8 +67,8 @@ const BASE_ICONS = {
  * --------------------------------------------------- */
 const ICONS = {
   search: BASE_ICONS.search,
-  notification: createBadgeIcon(<BellRing size={17} />, '/notification', null),
-  chat: createBadgeIcon(<MessageCircle size={17} />, '/chat', null),
+  notification: BASE_ICONS.notification,
+  chat: BASE_ICONS.chat,
   settings: BASE_ICONS.settings,
   calendar: BASE_ICONS.calendar,
   like: BASE_ICONS.like,

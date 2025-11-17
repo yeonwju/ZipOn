@@ -22,12 +22,14 @@ import { API_ENDPOINTS } from '@/constants'
 import { BuildingData } from '@/data/BuildingDummy'
 import { authFetch } from '@/lib/fetch'
 import {
+  ListingAuctions,
   ListingDetailDataResponse,
   ListingDetailResponse,
   ListingsRegVerifyResponse,
   RegListingRequest,
   RegListingResponse,
 } from '@/types/api/listings'
+import { ResponseS } from '@/types/api/live'
 import type { ListingData } from '@/types/models/listing'
 
 /**
@@ -191,7 +193,7 @@ export async function getListingDetail(
  *
  * @returns 매물 목록 배열
  */
-export async function getListings(): Promise<ListingData[]> {
+export async function getListingsMap(): Promise<ListingData[]> {
   // TODO: 실제 API 연동 시 아래 코드로 교체
   // try {
   //   const response = await fetch('/api/listings')
@@ -208,4 +210,89 @@ export async function getListings(): Promise<ListingData[]> {
 
   // 현재는 샘플 데이터 반환
   return Promise.resolve(BuildingData)
+}
+
+// isAuc = true,
+export async function getAuctionListings(): Promise<{
+  success: boolean
+  data: ListingAuctions | null
+}> {
+  try {
+    const result = await authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_AUCTION)
+
+    if (result.status === 200) {
+      return {
+        success: true,
+        data: result.data,
+      }
+    } else {
+      return {
+        success: false,
+        data: null,
+      }
+    }
+  } catch (error) {
+    console.error('=== 매물 경매 목록 조회 중 에러 발생 ===')
+    console.error('에러:', error)
+    return {
+      success: false,
+      data: null,
+    }
+  }
+}
+
+export async function getGeneralListings(): Promise<{
+  success: boolean
+  data: ListingAuctions | null
+}> {
+  try {
+    const result = await authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_GENERAL)
+
+    if (result.status === 200) {
+      return {
+        success: true,
+        data: result.data,
+      }
+    } else {
+      return {
+        success: false,
+        data: null,
+      }
+    }
+  } catch (error) {
+    console.error('=== 매물 경매 목록 조회 중 에러 발생 ===')
+    console.error('에러:', error)
+    return {
+      success: false,
+      data: null,
+    }
+  }
+}
+
+export async function getBrkListings(): Promise<{
+  success: boolean
+  data: ListingAuctions | null
+}> {
+  try {
+    const result = await authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_BRK)
+
+    if (result.status === 200) {
+      return {
+        success: true,
+        data: result.data,
+      }
+    } else {
+      return {
+        success: false,
+        data: null,
+      }
+    }
+  } catch (error) {
+    console.error('=== 매물 경매 목록 조회 중 에러 발생 ===')
+    console.error('에러:', error)
+    return {
+      success: false,
+      data: null,
+    }
+  }
 }
