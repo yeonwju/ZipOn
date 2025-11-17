@@ -94,7 +94,7 @@ def reasoning_node(state: ContractState) -> ContractState:
         # 상태 반환
         return {
             **state,
-            "unfair_clauses": [full_report],  # 최종 보고서 전체를 하나의 문자열로 저장
+            "unfair_clauses": full_report,  # 최종 보고서 전체를 하나의 문자열로 저장
             "error": None,
         }
 
