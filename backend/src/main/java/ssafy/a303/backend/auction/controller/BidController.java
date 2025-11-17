@@ -8,13 +8,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 import ssafy.a303.backend.auction.dto.request.BidRequestDTO;
 import ssafy.a303.backend.auction.kafka.BidEventProducer;
+import ssafy.a303.backend.auction.service.BidService;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.common.response.ResponseDTO;
@@ -26,6 +24,7 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 public class BidController {
 
     private final BidEventProducer producer;
+    private final BidService bidService;
 
     @PostMapping
     @Operation(
@@ -79,4 +78,59 @@ public class BidController {
         return ResponseDTO.ok(null, "전송됨");
     }
 
+    /* 낙찰 수락 거절 */
+    @Operation(
+            summary = "낙찰 수락",
+            description = "사용자가 본인에게 제안된 낙찰을 수락합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "낙찰 수락 처리되었습니다.",
+                    content = @Content()
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 입찰 정보를 찾을 수 없습니다. (BID_NOT_FOUND)",
+                    content = @Content()
+            ),
+    })
+    @PostMapping("/{auctionSeq}/accept")
+    public ResponseEntity<ResponseDTO<Void>> accept(
+            @AuthenticationPrincipal Integer userSeq,
+            @PathVariable int auctionSeq
+    ){
+        bidService.acceptOffer(userSeq, auctionSeq);
+        return ResponseDTO.ok(null, "처리되었습니다.");
+    }
+
+    @Operation(
+            summary = "낙찰 거절",
+            description = "사용자가 본인에게 제안된 낙찰을 거절합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "낙찰 거절 처리되었습니다.",
+                    content = @Content()
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 입찰 정보를 찾을 수 없습니다. (BID_NOT_FOUND)",
+                    content = @Content()
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 사용자입니다.",
+                    content = @Content()
+            )
+    })
+    @PostMapping("/{auctionSeq}/reject")
+    public ResponseEntity<ResponseDTO<Void>> reject(
+            @AuthenticationPrincipal Integer userSeq,
+            @PathVariable int auctionSeq
+    ){
+        bidService.rejectOffer(userSeq, auctionSeq);
+        return ResponseDTO.ok(null, "처리되었습니다.");
+    }
 }

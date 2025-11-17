@@ -90,7 +90,6 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         log.info(String.format("frontUrl : %s", frontUrl));
         SavedRequest saved = requestCache.getRequest(request, response);
         if (saved != null) {
-            log.info("저장된 캐시 있음");
             String[] param = saved.getParameterValues("redirect_url");
             if (param != null && param.length > 0) {
                 log.info(String.format("frontUrl: %s, redirect_url: %s",frontUrl, param[0]));
@@ -98,7 +97,6 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
         }
-        log.info("여기 왜 옴?");
         delegate.onAuthenticationSuccess(request, response, authentication);
     }
 }

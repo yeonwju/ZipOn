@@ -13,7 +13,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
   servlet:
     multipart:
@@ -38,7 +38,7 @@ app:
 
 logging:
   level:
-    org.hibernate.SQL: debug
+    org.hibernate.SQL: info
     org.hibernate.orm.jdbc.bind: trace
 #    org.springframework.web: DEBUG
 #    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE

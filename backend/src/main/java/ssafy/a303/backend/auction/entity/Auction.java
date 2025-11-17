@@ -64,6 +64,9 @@ public class Auction {
     @Column
     private boolean finish = false; // status 가 ACCEPTED 일 때, 경매 자동 시작 등록하기 위해 사용
 
+    @Column
+    private Integer winnerSeq;
+
     // 취소
     @Column
     private LocalDateTime cancelAt;
