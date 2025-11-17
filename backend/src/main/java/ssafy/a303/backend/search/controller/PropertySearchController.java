@@ -79,13 +79,83 @@ public class PropertySearchController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                              "data": {
-                                                "lines": []
-                                              },
-                                              "message": "계약서 검증 결과입니다.",
-                                              "status": 200,
-                                              "timestamp": 1763130506609
-                                            }
+                                                         "data": {
+                                                             "total": 23,
+                                                             "page": 0,
+                                                             "size": 10,
+                                                             "items": [
+                                                                 {
+                                                                     "propertySeq": 2,
+                                                                     "latitdue": null,
+                                                                     "longitude": null,
+                                                                     "lessorNm": "김싸피",
+                                                                     "thumbnail": null,
+                                                                     "title": "멀티캠퍼스",
+                                                                     "description": "이 집은 아주 좋습니다.",
+                                                                     "buildingType": "OFFICE",
+                                                                     "address": null,
+                                                                     "deposit": 10000000,
+                                                                     "mnRent": 800000,
+                                                                     "fee": 50000,
+                                                                     "area": 84.8,
+                                                                     "areaP": 32,
+                                                                     "roomCnt": 2,
+                                                                     "floor": 5,
+                                                                     "isAuc": true,
+                                                                     "isBrk": true,
+                                                                     "hasBrk": false,
+                                                                     "createdAt": "2025-11-10T13:08:22.512304+09:00"
+                                                                 },
+                                                                 {
+                                                                     "propertySeq": 1,
+                                                                     "latitdue": null,
+                                                                     "longitude": null,
+                                                                     "lessorNm": "김싸피",
+                                                                     "thumbnail": null,
+                                                                     "title": "멀티캠퍼스",
+                                                                     "description": "이 집은 아주 좋습니다.",
+                                                                     "buildingType": "OFFICE",
+                                                                     "address": null,
+                                                                     "deposit": 10000000,
+                                                                     "mnRent": 800000,
+                                                                     "fee": 50000,
+                                                                     "area": 84.8,
+                                                                     "areaP": 32,
+                                                                     "roomCnt": 2,
+                                                                     "floor": 5,
+                                                                     "isAuc": true,
+                                                                     "isBrk": true,
+                                                                     "hasBrk": null,
+                                                                     "createdAt": "2025-11-10T12:44:46.862177+09:00"
+                                                                 },
+                                                                 {
+                                                                     "propertySeq": 3,
+                                                                     "latitdue": null,
+                                                                     "longitude": null,
+                                                                     "lessorNm": "김싸피",
+                                                                     "thumbnail": null,
+                                                                     "title": "멀티캠퍼스",
+                                                                     "description": "이 집은 아주 좋습니다.",
+                                                                     "buildingType": "OFFICE",
+                                                                     "address": null,
+                                                                     "deposit": 10000000,
+                                                                     "mnRent": 800000,
+                                                                     "fee": 50000,
+                                                                     "area": 84.8,
+                                                                     "areaP": 32,
+                                                                     "roomCnt": 2,
+                                                                     "floor": 5,
+                                                                     "isAuc": true,
+                                                                     "isBrk": true,
+                                                                     "hasBrk": false,
+                                                                     "createdAt": "2025-11-10T13:09:14.619036+09:00"
+                                                                 }
+                                                     	]
+                                                         },
+                                                         "message": "검색 성공",
+                                                         "status": 200,
+                                                         "timestamp": 1763337986551
+                                                     }
                                     """
                             )
                     )

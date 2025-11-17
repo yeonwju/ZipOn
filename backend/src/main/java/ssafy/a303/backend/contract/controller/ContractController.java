@@ -65,7 +65,7 @@ public class ContractController {
                                     value = """
                                             {
                                               "data": {
-                                                "lines": []
+                                                "lines": ["첫번째 문장.", "두번째 문장", "세번째 문장"]
                                               },
                                               "message": "계약서 검증 결과입니다.",
                                               "status": 200,
