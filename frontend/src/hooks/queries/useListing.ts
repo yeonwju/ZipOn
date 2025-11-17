@@ -27,10 +27,14 @@ export function useCreateListing() {
   })
 }
 
-export function useSearchListingDetail(seq: number) {
+export function useSearchListingDetail(
+  seq: number,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: listingQueryKeys.detail(seq),
     queryFn: () => getListingDetail(seq),
+    enabled: options?.enabled !== false && !!seq,
   })
 }
 

@@ -1,6 +1,6 @@
 import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
 import ListingImageGallery from '@/components/features/listings/detail/ListingImageGallery'
-import type { ListingDetailData } from '@/types/models/listing'
+import { ListingDetailDataResponse } from '@/types/api/listings'
 
 import AuctionBidSection from './AuctionBidSection'
 import AuctionDetailHeader from './AuctionDetailHeader'
@@ -8,7 +8,7 @@ import AuctionInfo from './AuctionInfo'
 import AuctionTimer from './AuctionTimer'
 
 interface AuctionDetailProps {
-  data: ListingDetailData
+  data: ListingDetailDataResponse
   auctionEndTime: Date
   minimumBid: number
   deposit: number

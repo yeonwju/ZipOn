@@ -154,7 +154,7 @@ export default function SearchPageClient() {
   }, [filters])
 
   return (
-    <div className="flex flex-col bg-gray-50">
+    <div className="flex flex-col">
       {/* 검색 바 */}
       <div className="sticky top-0 z-40 bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center gap-2">
