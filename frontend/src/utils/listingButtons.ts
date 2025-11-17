@@ -55,6 +55,21 @@ export function getListingButtonConfig(
 ): ButtonConfig | null {
   const isOwner = lessorSeq === currentUserSeq
   const isBroker = brkSeq === currentUserSeq
+  
+  // auctionSeq가 있고 소유자가 아닌 경우 입찰하기 버튼 우선 표시
+  if (auctionSeq && !isOwner && !isBroker) {
+    return {
+      primary: {
+        text: '입찰하기',
+        action: () => {
+          const params = new URLSearchParams({
+            propertySeq: String(propertySeq || ''),
+          })
+          window.location.href = `/auction/${auctionSeq}?${params.toString()}`
+        },
+      },
+    }
+  }
 
   // ========== 경매 O, 중개 O, 중개인 배정 O ==========
   if (isAucPref && isBrkPref && hasBrk) {

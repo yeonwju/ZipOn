@@ -10,9 +10,11 @@ export const API_ENDPOINTS = {
   LISTINGS_CREATE: '/api/v1/properties/detail',
   LISTINGS_DETAIL: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
   LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
-  LISTINGS_UPDATE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
-  LISTINGS_AUCTION_STATE_UPDATE: (propertySeq: number) => `/api/v1/properties/auc/${propertySeq}`,
+  LISTINGS_SEARCH: '/api/v1/properties/search',
   LISTINGS_DELETE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
+  LISTINGS_AUCTION: `/api/v1/properties/search?isAuc=true`,
+  LISTINGS_GENERAL: `/api/v1/properties/search?isAuc=false&isBrk=false`,
+  LISTINGS_BRK: `/api/v1/properties/search?isAuc=true&isBrk=true&hasBrk=false`,
 
   // 사용자
   ACCESS_TOKEN_REFRESH: '/api/v1/jwt/refresh',
@@ -34,6 +36,11 @@ export const API_ENDPOINTS = {
   CHAT_ROOM_HISTORY: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/history`,
   CHAT_ROOM_LIST: `/api/v1/chat/my/rooms`,
   CHAT_ROOM_LEAVE: (roomId: number) => `/api/v1/chat/room/${roomId}/leave`,
+
+  // 경매
+  BID: '/api/v1/auction/bid',
+  BID_ACCEPT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/accept`,
+  BID_REJECT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/reject`,
 
   // 라이브
   CAN_LIVE_AUCTION: '/api/v1/live/auctions',

@@ -36,6 +36,29 @@ export const listingQueryKeys = {
   list: (filters?: Record<string, unknown>) => [...listingQueryKeys.lists(), filters] as const,
   details: () => [...listingQueryKeys.all, 'detail'] as const,
   detail: (id: number) => [...listingQueryKeys.details(), id] as const,
+  /**
+   * 경매 매물 목록
+   */
+  auction: () => [...listingQueryKeys.all, 'auction'] as const,
+  /**
+   * 일반 매물 목록
+   */
+  general: () => [...listingQueryKeys.all, 'general'] as const,
+  /**
+   * 중개 매물 목록
+   */
+  broker: () => [...listingQueryKeys.all, 'broker'] as const,
+} as const
+
+/**
+ * 검색 관련 Query Keys
+ */
+export const searchQueryKeys = {
+  all: ['search'] as const,
+  /**
+   * 검색 결과
+   */
+  results: (params?: Record<string, unknown>) => [...searchQueryKeys.all, 'results', params] as const,
 } as const
 
 /**
@@ -95,6 +118,7 @@ export const notificationQueryKeys = {
 export const queryKeys = {
   user: userQueryKeys,
   listing: listingQueryKeys,
+  search: searchQueryKeys,
   auction: auctionQueryKeys,
   live: liveQueryKeys,
   chat: chatQueryKeys,

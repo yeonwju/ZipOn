@@ -7,13 +7,13 @@ interface ListingAIAnalysisProps {
 
 /**
  * AI 위험도 평가 섹션
- * 
+ *
  * 등기부등본 분석 결과를 시각적으로 표시합니다.
  */
 export default function ListingAIAnalysis({ riskScore, riskReason }: ListingAIAnalysisProps) {
   // 위험도에 따른 색상 및 아이콘
   const getRiskLevel = (score: number) => {
-    if (score >= 80) {
+    if (score >= 4) {
       return {
         level: '안전',
         color: 'text-green-600',
@@ -22,7 +22,7 @@ export default function ListingAIAnalysis({ riskScore, riskReason }: ListingAIAn
         icon: CheckCircle,
         progressColor: 'bg-green-500',
       }
-    } else if (score >= 50) {
+    } else if (score === 3) {
       return {
         level: '보통',
         color: 'text-yellow-600',
@@ -65,7 +65,10 @@ export default function ListingAIAnalysis({ riskScore, riskReason }: ListingAIAn
         </div>
         <div className="text-right">
           <p className="text-xs text-gray-500">안전도 점수</p>
-          <p className={`text-2xl font-bold ${risk.color}`}>{riskScore}<span className="text-sm text-gray-400">/100</span></p>
+          <p className={`text-2xl font-bold ${risk.color}`}>
+            {riskScore}
+            <span className="text-sm text-gray-400">/5</span>
+          </p>
         </div>
       </div>
 
@@ -80,7 +83,7 @@ export default function ListingAIAnalysis({ riskScore, riskReason }: ListingAIAn
       {/* 분석 이유 */}
       <div className={`rounded-lg border ${risk.borderColor} ${risk.bgColor} p-4`}>
         <p className="mb-2 text-xs font-semibold text-gray-600">분석 상세 내용</p>
-        <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{riskReason}</p>
+        <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">{riskReason}</p>
       </div>
 
       {/* 안내 문구 */}
@@ -90,4 +93,3 @@ export default function ListingAIAnalysis({ riskScore, riskReason }: ListingAIAn
     </section>
   )
 }
-

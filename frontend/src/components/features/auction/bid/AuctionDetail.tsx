@@ -1,6 +1,6 @@
 import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
 import ListingImageGallery from '@/components/features/listings/detail/ListingImageGallery'
-import type { ListingDetailData } from '@/types/models/listing'
+import { ListingDetailDataResponse } from '@/types/api/listings'
 
 import AuctionBidSection from './AuctionBidSection'
 import AuctionDetailHeader from './AuctionDetailHeader'
@@ -8,7 +8,7 @@ import AuctionInfo from './AuctionInfo'
 import AuctionTimer from './AuctionTimer'
 
 interface AuctionDetailProps {
-  data: ListingDetailData
+  data: ListingDetailDataResponse
   auctionEndTime: Date
   minimumBid: number
   deposit: number
@@ -41,7 +41,6 @@ export default function AuctionDetail({
           <AuctionTimer endTime={auctionEndTime} />
         </div>
         {/* 상세정보 + 입찰 */}
-        {/* TODO 추후 특약 사항 첨부*/}
         <section className="mt-4 flex flex-col gap-6">
           <AuctionInfo deposit={deposit} fee={data.fee} />
           <AuctionBidSection minimumBid={minimumBid} onBid={onBid} />

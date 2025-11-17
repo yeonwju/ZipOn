@@ -3,5 +3,4 @@
  */
 
 export { default as BuildingTypeQuickFilter } from './BuildingTypeQuickFilter'
-export { default as ListingItem } from './ListingItem'
-export { default as RecommendLiveItem } from './RecommendLiveItem'
+export { default as HeroSection } from './HeroSection'
