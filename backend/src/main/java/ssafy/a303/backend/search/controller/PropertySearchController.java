@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -73,9 +74,93 @@ public class PropertySearchController {
                     description = "매물 검색 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = SearchResponseDto.class)
+                            schema = @Schema(implementation = SearchResponseDto.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            {
+                                                         "data": {
+                                                             "total": 23,
+                                                             "page": 0,
+                                                             "size": 10,
+                                                             "items": [
+                                                                 {
+                                                                     "propertySeq": 2,
+                                                                     "latitdue": null,
+                                                                     "longitude": null,
+                                                                     "lessorNm": "김싸피",
+                                                                     "thumbnail": null,
+                                                                     "title": "멀티캠퍼스",
+                                                                     "description": "이 집은 아주 좋습니다.",
+                                                                     "buildingType": "OFFICE",
+                                                                     "address": null,
+                                                                     "deposit": 10000000,
+                                                                     "mnRent": 800000,
+                                                                     "fee": 50000,
+                                                                     "area": 84.8,
+                                                                     "areaP": 32,
+                                                                     "roomCnt": 2,
+                                                                     "floor": 5,
+                                                                     "isAuc": true,
+                                                                     "isBrk": true,
+                                                                     "hasBrk": false,
+                                                                     "createdAt": "2025-11-10T13:08:22.512304+09:00"
+                                                                 },
+                                                                 {
+                                                                     "propertySeq": 1,
+                                                                     "latitdue": null,
+                                                                     "longitude": null,
+                                                                     "lessorNm": "김싸피",
+                                                                     "thumbnail": null,
+                                                                     "title": "멀티캠퍼스",
+                                                                     "description": "이 집은 아주 좋습니다.",
+                                                                     "buildingType": "OFFICE",
+                                                                     "address": null,
+                                                                     "deposit": 10000000,
+                                                                     "mnRent": 800000,
+                                                                     "fee": 50000,
+                                                                     "area": 84.8,
+                                                                     "areaP": 32,
+                                                                     "roomCnt": 2,
+                                                                     "floor": 5,
+                                                                     "isAuc": true,
+                                                                     "isBrk": true,
+                                                                     "hasBrk": null,
+                                                                     "createdAt": "2025-11-10T12:44:46.862177+09:00"
+                                                                 },
+                                                                 {
+                                                                     "propertySeq": 3,
+                                                                     "latitdue": null,
+                                                                     "longitude": null,
+                                                                     "lessorNm": "김싸피",
+                                                                     "thumbnail": null,
+                                                                     "title": "멀티캠퍼스",
+                                                                     "description": "이 집은 아주 좋습니다.",
+                                                                     "buildingType": "OFFICE",
+                                                                     "address": null,
+                                                                     "deposit": 10000000,
+                                                                     "mnRent": 800000,
+                                                                     "fee": 50000,
+                                                                     "area": 84.8,
+                                                                     "areaP": 32,
+                                                                     "roomCnt": 2,
+                                                                     "floor": 5,
+                                                                     "isAuc": true,
+                                                                     "isBrk": true,
+                                                                     "hasBrk": false,
+                                                                     "createdAt": "2025-11-10T13:09:14.619036+09:00"
+                                                                 }
+                                                     	]
+                                                         },
+                                                         "message": "검색 성공",
+                                                         "status": 200,
+                                                         "timestamp": 1763337986551
+                                                     }
+                                    """
+                            )
                     )
             )
+
     })
     @GetMapping("")
     public ResponseEntity<ResponseDTO<PageResponseDto<SearchResponseDto>>> search(
@@ -107,8 +192,8 @@ public class PropertySearchController {
 
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String sortField,
-            @RequestParam(required = false) String sortOrder
+            @RequestParam(defaultValue = "deposit") String sortField,
+            @RequestParam(defaultValue = "desc") String sortOrder
     ) throws IOException {
 
         SearchRequestDto req = new SearchRequestDto(
