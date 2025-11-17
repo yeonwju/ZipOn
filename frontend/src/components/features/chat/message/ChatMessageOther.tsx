@@ -1,8 +1,8 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import type { ChatHistory } from '@/types'
+import { ChatRoomHistoryResponseData } from '@/types/api/chat'
 
 interface ChatMessageOtherProps {
-  message: ChatHistory
+  message: ChatRoomHistoryResponseData
   showProfile?: boolean
   showTime?: boolean
   profileImageSrc?: string
@@ -28,7 +28,7 @@ export default function ChatMessageOther({
       {/* 프로필 이미지 */}
       {showProfile ? (
         <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarImage src={profileImageSrc} alt={message.senderName} />
+          <AvatarImage src={profileImageSrc} alt={message.sender.name} />
         </Avatar>
       ) : (
         <div className="h-10 w-10 flex-shrink-0" />
@@ -37,19 +37,19 @@ export default function ChatMessageOther({
       <div className="flex flex-col gap-1">
         {/* 이름 */}
         {showProfile && (
-          <div className="px-1 text-xs font-medium text-gray-700">{message.senderName}</div>
+          <div className="px-1 text-xs font-medium text-gray-700">{message.sender.name}</div>
         )}
 
         {/* 메시지와 시간 */}
         <div className="flex items-end gap-1">
           {/* 메시지 말풍선 */}
-          <div className="max-w-[70vw] break-words rounded-2xl bg-gray-200 px-3 py-2 text-sm">
+          <div className="max-w-[70vw] rounded-2xl bg-gray-200 px-3 py-2 text-sm break-words">
             {message.content}
           </div>
 
           {/* 시간 */}
           {showTime && (
-            <div className="mb-1 whitespace-nowrap text-xs text-gray-400">
+            <div className="mb-1 text-xs whitespace-nowrap text-gray-400">
               {formatTime(message.sentAt)}
             </div>
           )}
@@ -58,4 +58,3 @@ export default function ChatMessageOther({
     </div>
   )
 }
-

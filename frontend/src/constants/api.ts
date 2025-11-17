@@ -25,12 +25,28 @@ export const API_ENDPOINTS = {
   BUSSINESS_REGISTER: '/api/v1/broker',
 
   // 브로커
-  REQUEST_BORKER_LIST: (
-    propertySeq: number,
-    pageable: { page: number; size: number; sort: string }
-  ) => `/api/v1/auctions/${propertySeq}/applicants`,
-
+  REQUEST_BORKER_LIST: (propertySeq: number) => `/api/v1/auctions/${propertySeq}/applicants`,
+  REQUEST_BROKER: (propertySeq: number) => `/api/v1/auctions/applications/${propertySeq}`,
   SELECT_BROKER: (auctionSeq: number) => `/api/v1/auctions/${auctionSeq}/accept`,
+
+  // 채팅
+  CREATE_CHAT: '/api/v1/chat/room',
+  CHAT_ROOM_HISTORY: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/history`,
+  CHAT_ROOM_LIST: `/api/v1/chat/my/rooms`,
+  CHAT_ROOM_LEAVE: (roomId: number) => `/api/v1/chat/room/${roomId}/leave`,
+
+  // 라이브
+  CAN_LIVE_AUCTION: '/api/v1/live/auctions',
+  START_LIVE: '/api/v1/live',
+  LIVE_LIST: (status: string, sortType: string) =>
+    `/api/v1/live?status=${status}&sortType=${sortType}`,
+  LIVE_ENTER_TOKEN: (liveSeq: number, isHost: boolean) =>
+    `/api/v1/live/${liveSeq}/token?isHost=${isHost}`,
+  LIVE_LIKE: (liveSeq: number) => `/api/v1/live/${liveSeq}/like`,
+  LIVE_EXIT: (liveSeq: number) => `/api/v1/live/${liveSeq}/leave`,
+  LIVE_END: (liveSeq: number) => `/api/v1/live/${liveSeq}/end`,
+  LIVE_INFO_SEARCH: (liveSeq: number) => `/api/v1/live/${liveSeq}`,
+  LIVE_CHAT_HISTORY: (liveSeq: number) => `/api/v1/live/${liveSeq}/chat`,
 } as const
 
 export const API_TIMEOUT = 10000 // 10초

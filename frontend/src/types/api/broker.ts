@@ -52,3 +52,8 @@ export interface SelectBrokerResponseDTO {
   status: number
   timestamp?: string | null
 }
+
+export interface RequestBrokerResponseDTO {
+  message: string
+  status: number
+}

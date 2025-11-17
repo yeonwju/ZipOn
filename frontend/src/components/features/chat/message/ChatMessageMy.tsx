@@ -1,7 +1,7 @@
-import type { ChatHistory } from '@/types'
+import { ChatRoomHistoryResponseData } from '@/types/api/chat'
 
 interface ChatMessageMyProps {
-  message: ChatHistory
+  message: ChatRoomHistoryResponseData
   showTime?: boolean
 }
 
@@ -18,12 +18,10 @@ export default function ChatMessageMy({ message, showTime = true }: ChatMessageM
   return (
     <div className="flex items-end justify-end gap-1 px-4 py-1">
       {/* 시간 */}
-      {showTime && (
-        <div className="mb-1 text-xs text-gray-400">{formatTime(message.sentAt)}</div>
-      )}
+      {showTime && <div className="mb-1 text-xs text-gray-400">{formatTime(message.sentAt)}</div>}
 
       {/* 메시지 말풍선 */}
-      <div className="max-w-[70%] break-words rounded-2xl bg-yellow-300 px-3 py-2 text-sm">
+      <div className="max-w-[70%] rounded-2xl bg-yellow-300 px-3 py-2 text-sm break-words">
         {message.content}
       </div>
     </div>

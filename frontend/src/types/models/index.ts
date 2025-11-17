@@ -3,7 +3,6 @@
  */
 
 export * from './auction'
-export * from './chat'
 export * from './listing'
 export * from './live'
 export * from './user'

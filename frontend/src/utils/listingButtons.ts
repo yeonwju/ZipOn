@@ -25,6 +25,7 @@ export interface ButtonConfig {
  */
 export function isLiveTimePassed(liveAt: string | undefined): boolean {
   if (!liveAt) return false
+  console.log(liveAt)
   return new Date(liveAt) < new Date()
 }
 
@@ -38,6 +39,7 @@ export function isLiveTimePassed(liveAt: string | undefined): boolean {
  * @param brkSeq 중개인 Seq
  * @param currentUserSeq 현재 로그인한 사용자 Seq
  * @param propertySeq 매물 Seq
+ * @param onCreateChatRoom 채팅방 생성 함수
  * @returns 버튼 설정 객체 또는 null (버튼 표시 안 함)
  */
 export function getListingButtonConfig(
@@ -48,7 +50,8 @@ export function getListingButtonConfig(
   brkSeq: number | undefined,
   currentUserSeq: number | undefined,
   auctionSeq: number | undefined,
-  propertySeq: number | undefined
+  propertySeq: number | undefined,
+  onCreateChatRoom?: (params: { propertySeq: number; isBrkPref: boolean }) => void
 ): ButtonConfig | null {
   const isOwner = lessorSeq === currentUserSeq
   const isBroker = brkSeq === currentUserSeq
@@ -61,7 +64,7 @@ export function getListingButtonConfig(
         primary: {
           text: '라이브 시작',
           action: () => {
-            window.location.href = `/live/create?auctionSeq=${auctionSeq}`
+            window.location.href = `/live/create`
           },
         },
         secondary: {
@@ -127,7 +130,9 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '라이브 시작',
-          action: () => console.log('라이브 시작'),
+          action: () => {
+            window.location.href = `/live/create`
+          },
         },
         secondary: {
           text: '매물 수정',
@@ -168,7 +173,11 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '중개인 1대1 대화',
-          action: () => console.log('중개인 1대1 대화'),
+          action: () => {
+            if (onCreateChatRoom && propertySeq) {
+              onCreateChatRoom({ propertySeq, isBrkPref })
+            }
+          },
         },
       }
     }
@@ -181,7 +190,7 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '중개인 신청 현황',
-          action: () => console.log('중개인 신청 현황'),
+          action: () => (window.location.href = `/listings/${propertySeq}/brokers/apply`),
         },
         secondary: {
           text: '매물 수정',
@@ -197,7 +206,7 @@ export function getListingButtonConfig(
       return {
         primary: {
           text: '중개 신청',
-          action: () => console.log('중개 신청'),
+          action: () => (window.location.href = `/listings/${propertySeq}/brokers`),
         },
       }
     }
@@ -221,7 +230,11 @@ export function getListingButtonConfig(
     return {
       primary: {
         text: '집주인 1대1 대화',
-        action: () => console.log('집주인 1대1 대화'),
+        action: () => {
+          if (onCreateChatRoom && propertySeq) {
+            onCreateChatRoom({ propertySeq, isBrkPref })
+          }
+        },
       },
     }
   }
