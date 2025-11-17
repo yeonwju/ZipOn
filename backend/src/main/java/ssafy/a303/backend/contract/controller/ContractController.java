@@ -20,9 +20,6 @@ import ssafy.a303.backend.contract.dto.response.CreateVirtualAccountResponseDto;
 import ssafy.a303.backend.contract.service.ContractAiService;
 import ssafy.a303.backend.contract.service.ContractService;
 import ssafy.a303.backend.contract.util.ContractTextFormatter;
-import ssafy.a303.backend.property.dto.response.PropertyMapDto;
-
-import java.awt.*;
 
 @Tag(name = "계약")
 @RestController
@@ -35,6 +32,7 @@ public class ContractController {
 
     /**
      * 계약 진행 시작 -> 가상계좌 생성
+     *
      * @param contractSeq
      * @param userSeq
      * @return
@@ -53,25 +51,24 @@ public class ContractController {
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
-                                            {
-                                                    "data": {
-                                                         "bankCode": "001",
-                                                         "accountNo": "0014017728828339",
-                                                         "targetAmount": 60000
-                                                   },
-                                                   "message": "계약 진행 및 가상계좌 생성 완료",
-                                                   "status": 200,
-                                                   "timestamp": 1763341593738
-                                            }
-                                    """
+                                                    {
+                                                            "data": {
+                                                                 "bankCode": "001",
+                                                                 "accountNo": "0014017728828339",
+                                                                 "targetAmount": 60000
+                                                           },
+                                                           "message": "계약 진행 및 가상계좌 생성 완료",
+                                                           "status": 200,
+                                                           "timestamp": 1763341593738
+                                                    }
+                                            """
                             )
                     )
             )
     })
     @PostMapping("/{contractSeq}/init")
     public ResponseEntity<ResponseDTO<CreateVirtualAccountResponseDto>> initContract(@PathVariable Integer contractSeq,
-                                                                                     @AuthenticationPrincipal Integer userSeq)
-    {
+                                                                                     @AuthenticationPrincipal Integer userSeq) {
         CreateVirtualAccountResponseDto res = contractService.startContractAndCreateVA(contractSeq, userSeq);
 
         return ResponseDTO.ok(res, "계약 진행 및 가상계좌 생성 완료");
@@ -79,6 +76,7 @@ public class ContractController {
 
     /**
      * 계약서 AI 검증
+     *
      * @param file
      * @return
      */
@@ -96,28 +94,27 @@ public class ContractController {
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
-                                            {
-                                              "data": {
-                                                "lines": ["첫번째 문장.", "두번째 문장", "세번째 문장"]
-                                              },
-                                              "message": "계약서 검증 결과입니다.",
-                                              "status": 200,
-                                              "timestamp": 1763130506609
-                                            }
-                                    """
+                                                    {
+                                                      "data": {
+                                                        "lines": ["첫번째 문장.", "두번째 문장", "세번째 문장"]
+                                                      },
+                                                      "message": "계약서 검증 결과입니다.",
+                                                      "status": 200,
+                                                      "timestamp": 1763130506609
+                                                    }
+                                            """
                             )
                     )
             )
     })
     @PostMapping(value = "/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO<ContractAiResponseDto>> verifyContract(@RequestPart("file") MultipartFile file)
-    {
+    public ResponseEntity<ResponseDTO<ContractAiResponseDto>> verifyContract(@RequestPart("file") MultipartFile file) {
         // AI 평가 받기
         AiRawResponseDto raw = aiService.verifyByAi(file);
         // 문단을 문장 단위로 나누기
         ContractAiResponseDto lines = ContractTextFormatter.splitToLines(raw.getReviews());
         // 프로트로 배열로 전달
-        return ResponseDTO.ok(lines,"계약서 검증 결과입니다.");
+        return ResponseDTO.ok(lines, "계약서 검증 결과입니다.");
 
     }
 
@@ -131,6 +128,7 @@ public class ContractController {
 
     /**
      * 첫 달 월세 납부
+     *
      * @param contractSeq
      * @param userSeq
      * @return
@@ -149,25 +147,19 @@ public class ContractController {
                             examples = @ExampleObject(
                                     name = "성공 응답 예시",
                                     value = """
-                                            {
-                                                    "data": {
-                                                         "bankCode": "001",
-                                                         "accountNo": "0014017728828339",
-                                                         "targetAmount": 60000
-                                                   },
-                                                   "message": "계약 진행 및 가상계좌 생성 완료",
-                                                   "status": 200,
-                                                   "timestamp": 1763341593738
-                                            }
-                                    """
+                                                    {
+                                                            "message": "첫 월세 이체가 완료되었습니다.",
+                                                            "status": 200,
+                                                            "timestamp": 1763343554518
+                                                    }
+                                            """
                             )
                     )
             )
     })
     @PostMapping("/{contractSeq}/first-rent")
     public ResponseEntity<ResponseDTO<Void>> payFirstRent(@PathVariable Integer contractSeq,
-                                                          @AuthenticationPrincipal Integer userSeq)
-    {
+                                                          @AuthenticationPrincipal Integer userSeq) {
         contractService.payFirstRent(contractSeq, userSeq);
         return ResponseDTO.ok(null, "첫 월세 이체가 완료되었습니다.");
     }
@@ -175,8 +167,7 @@ public class ContractController {
 
     @PostMapping("/{contractSeq}/settlement")
     public ResponseEntity<ResponseDTO<Void>> settleContract(@PathVariable Integer contractSeq,
-                                                            @AuthenticationPrincipal Integer userSeq)
-    {
+                                                            @AuthenticationPrincipal Integer userSeq) {
         contractService.acceptContractAndSettle(contractSeq, userSeq);
         return ResponseDTO.ok(null, "임대인에게 첫 월세가 전달되었습니다.");
     }
