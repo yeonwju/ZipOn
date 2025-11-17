@@ -59,7 +59,7 @@ export default function Step3AdditionalInfo({
   const handleConstructionDateChange = (date: Date | undefined) => {
     setSelectedConstructionDate(date)
     if (date) {
-      updateField('constructionDate', date.toISOString().split('T')[0])
+      updateField('constructionDate', date.toISOString().slice(0, 19))
     } else {
       updateField('constructionDate', '')
     }
