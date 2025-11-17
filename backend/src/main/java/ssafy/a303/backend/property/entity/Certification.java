@@ -28,7 +28,7 @@ public class Certification {
     private String pdfCode;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "verificaton_status")
+    @Column(name = "verification_status")
     private VerificationStatus verificationStatus;
 
     @Column(name = "risk_score")
