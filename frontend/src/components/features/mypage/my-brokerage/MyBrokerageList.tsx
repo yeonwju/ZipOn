@@ -4,65 +4,69 @@ import { SearchX } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import MyListingCard from '@/components/features/mypage/my-listings/MyListingCard'
-import MyListingListSkeleton from '@/components/skeleton/mypage/MyListingListSkeleton'
+import MyBrokerageCard from '@/components/features/mypage/my-brokerage/MyBrokerageCard'
 import { ROUTES } from '@/constants'
-import { myPropertiseInfo } from '@/services/mypageService'
-import { MyPropertiesData } from '@/types/api/mypage'
+import { myBrokerageInfo } from '@/services/mypageService'
+import { MyBrokerageData } from '@/types/api/mypage'
 
-interface MyListingListProps {
+import MyListingListSkeleton from '../../../skeleton/mypage/MyListingListSkeleton'
+
+interface MyBrokerageListProps {
   className?: string
 }
 const INITIAL_DISPLAY_COUNT = 2
 
-export default function MyListingList({ className }: MyListingListProps) {
-  const [myListings, setMyListings] = useState<MyPropertiesData[]>([])
+export default function MyBrokerageList({ className }: MyBrokerageListProps) {
+  const [myBrokerage, setMyBrokerage] = useState<MyBrokerageData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchMyListing = async () => {
+    const fetchMyBrokerage = async () => {
       try {
         setIsLoading(true)
 
-        const result = await myPropertiseInfo()
+        const result = await myBrokerageInfo()
         if (result.success && result.data) {
-          setMyListings(result.data)
+          setMyBrokerage(result.data)
         } else {
-          setMyListings([])
+          setMyBrokerage([])
         }
       } catch (error) {
-        console.error('Failed to fetch my listings:', error)
-        setMyListings([])
+        console.error('Failed to fetch my brokerage:', error)
+        setMyBrokerage([])
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchMyListing()
+    fetchMyBrokerage()
   }, [])
 
   if (isLoading) {
     return <MyListingListSkeleton className={className} />
   }
 
-  if (!myListings || myListings.length === 0) {
+  if (!myBrokerage || myBrokerage.length === 0) {
     return (
       <div className={className}>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">
           <SearchX size={40} className="text-gray-400" />
-          <p className="text-sm text-gray-500">본인 소유 등록된 매물이 없습니다.</p>
+          <p className="text-sm text-gray-500">중개 내역이 없습니다.</p>
         </div>
       </div>
     )
   }
-  const displayedItems = myListings.slice(0, INITIAL_DISPLAY_COUNT)
-  const hasMore = myListings.length > INITIAL_DISPLAY_COUNT
+  const displayedItems = myBrokerage.slice(0, INITIAL_DISPLAY_COUNT)
+  const hasMore = myBrokerage.length > INITIAL_DISPLAY_COUNT
 
   return (
     <div className="flex flex-col">
       <div className={className}>
-        {displayedItems.map(property => (
-          <MyListingCard key={property.propertySeq} propertyData={property} />
+        {displayedItems.map(brokerage => (
+          <MyBrokerageCard
+            key={`${brokerage.auctionSeq}-${brokerage.propertySeq}`}
+            brokerageData={brokerage}
+          />
         ))}
       </div>
 
@@ -77,3 +81,4 @@ export default function MyListingList({ className }: MyListingListProps) {
     </div>
   )
 }
+

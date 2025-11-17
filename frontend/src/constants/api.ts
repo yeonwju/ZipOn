@@ -47,6 +47,11 @@ export const API_ENDPOINTS = {
   LIVE_END: (liveSeq: number) => `/api/v1/live/${liveSeq}/end`,
   LIVE_INFO_SEARCH: (liveSeq: number) => `/api/v1/live/${liveSeq}`,
   LIVE_CHAT_HISTORY: (liveSeq: number) => `/api/v1/live/${liveSeq}/chat`,
+
+  //마이페이지
+  MYPAGE_PROPERTY: '/api/v1/my/properties',
+  MYPAGE_BROKERAGE: '/api/v1/my/brokerage',
+  MYPAGE_AUCTION: '/api/v1/my/auctions',
 } as const
 
 export const API_TIMEOUT = 10000 // 10초

@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import { ROUTES } from '@/constants'
-import { mockAuctionHistories } from '@/data/AuctionHistoryDummy'
-import { AuctionHistory } from '@/types/models/auction'
+import { myAuctionInfo } from '@/services/mypageService'
+import { MyAuctionsData } from '@/types/api/mypage'
 
 import AuctionHistoryListSkeleton from '../../../skeleton/mypage/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
@@ -19,30 +19,22 @@ const INITIAL_DISPLAY_COUNT = 2
 
 /**
  * 경매 내역 리스트
- *
- * 향후 실제 API 연동 시 fetchAuctionHistory 함수만 수정하면 됩니다.
  */
 export default function AuctionHistoryList({ className }: AuctionHistoryListProps) {
-  const [auctionHistory, setAuctionHistory] = useState<AuctionHistory[]>([])
+  const [auctionHistory, setAuctionHistory] = useState<MyAuctionsData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // 실제 API 호출 시뮬레이션
     const fetchAuctionHistory = async () => {
       try {
         setIsLoading(true)
 
-        // 👇 실제 API 호출로 교체될 부분
-        // const response = await fetch('/api/auction/history', { credentials: 'include' })
-        // const data = await response.json()
-        // setAuctionHistory(data.data)
-
-        // 시뮬레이션 딜레이
-        await new Promise(resolve => setTimeout(resolve, 2000))
-
-        // 💡 테스트: Empty State 확인용 (데이터 있는 상태로 되돌리려면 아래 두 줄 바꾸기)
-        // setAuctionHistory([]) // ← Empty State 테스트
-        setAuctionHistory(mockAuctionHistories) // ← 정상 데이터
+        const result = await myAuctionInfo()
+        if (result.success && result.data) {
+          setAuctionHistory(result.data)
+        } else {
+          setAuctionHistory([])
+        }
       } catch (error) {
         console.error('Failed to fetch auction history:', error)
         setAuctionHistory([])
@@ -78,7 +70,7 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
     <div className="flex flex-col">
       <div className={className}>
         {displayedItems.map(auction => (
-          <AuctionHistoryCard key={auction.id} auctionHistory={auction} />
+          <AuctionHistoryCard key={`${auction.auctionSeq}-${auction.propertySeq}`} auctionData={auction} />
         ))}
       </div>
 
