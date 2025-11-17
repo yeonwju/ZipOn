@@ -3,12 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { queryKeys } from '@/constants/queryKeys'
-import {
-  convertFiltersToSearchParams,
-  searchListings,
-  type SearchParams,
-} from '@/services/searchService'
-import { ListingAuctions } from '@/types/api/listings'
+import { convertFiltersToSearchParams, searchListings } from '@/services/searchService'
 import type {
   AreaFilter,
   DirectionFilter,
@@ -44,7 +39,7 @@ export function useSearchListings(filters: SearchFilters, enabled: boolean = tru
   const searchParams = convertFiltersToSearchParams(filters)
 
   return useQuery({
-    queryKey: queryKeys.search.results(searchParams),
+    queryKey: queryKeys.search.results(searchParams as Record<string, unknown>),
     queryFn: async () => {
       const result = await searchListings(searchParams)
       if (!result.success || !result.data) {
@@ -56,4 +51,3 @@ export function useSearchListings(filters: SearchFilters, enabled: boolean = tru
     staleTime: 30 * 1000, // 30초간 캐시 유지
   })
 }
-

@@ -88,7 +88,7 @@ export type ListingAuctions = {
       propertySeq: number
       latitdue: number
       longitude: number
-      lessorNm: number
+      lessorNm: string
       thumbnail: string
       title: string
       description: string
@@ -113,7 +113,7 @@ export type ListingData = {
   propertySeq: number
   latitdue: number
   longitude: number
-  lessorNm: number
+  lessorNm: string
   thumbnail: string
   title: string
   description: string

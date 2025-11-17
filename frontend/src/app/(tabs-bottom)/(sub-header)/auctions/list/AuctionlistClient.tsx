@@ -14,7 +14,9 @@ export default function AuctionlistClient() {
     )
   }
 
-  if (!data?.items || data.items.length === 0) {
+  const items = Array.isArray(data?.items) ? data.items : []
+
+  if (items.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-gray-500">경매 매물이 없습니다.</div>
@@ -24,7 +26,7 @@ export default function AuctionlistClient() {
 
   return (
     <div>
-      {data.items.map(item => (
+      {items.map(item => (
         <AucListingCard key={item.propertySeq} listing={item} />
       ))}
     </div>

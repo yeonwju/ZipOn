@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
 
 import FirebaseInit from '@/components/common/FirebaseInit'
-import {
-  BuildingTypeQuickFilter,
-  HeroSection,
-  PopularLiveSection,
-  RecommendedListingsSection,
-} from '@/components/features/home'
+import { BuildingTypeQuickFilter, HeroSection } from '@/components/features/home'
 
 export const metadata: Metadata = {
   title: 'HomeOn - 홈',

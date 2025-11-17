@@ -2,9 +2,5 @@
  * 홈 컴포넌트 Barrel Export
  */
 
-export { default as AIRobot } from './AIRobot'
 export { default as BuildingTypeQuickFilter } from './BuildingTypeQuickFilter'
 export { default as HeroSection } from './HeroSection'
-export { PopularLiveSection, RecommendedListingsSection } from './HomeSection'
-export { default as ListingItem } from './ListingItem'
-export { default as RecommendLiveItem } from './RecommendLiveItem'

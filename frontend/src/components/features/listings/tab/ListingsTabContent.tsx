@@ -8,8 +8,8 @@ import AucListingCard from '@/components/features/listings/AucListingCard'
 import ListingTopTabs from '@/components/layout/header/ListingsTopTabs'
 import FabDial from '@/components/ui/FabDial'
 import { ROUTES } from '@/constants'
-import { useUser } from '@/hooks/queries/useUser'
 import { useBrkListings, useGeneralListings } from '@/hooks/queries/useListing'
+import { useUser } from '@/hooks/queries/useUser'
 
 export default function ListingsTabContent() {
   const [activeTab, setActiveTab] = useState<'general' | 'broker'>('general')
