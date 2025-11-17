@@ -192,8 +192,8 @@ public class PropertySearchController {
 
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String sortField,
-            @RequestParam(required = false) String sortOrder
+            @RequestParam(defaultValue = "deposit") String sortField,
+            @RequestParam(defaultValue = "desc") String sortOrder
     ) throws IOException {
 
         SearchRequestDto req = new SearchRequestDto(
