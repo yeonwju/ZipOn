@@ -155,6 +155,11 @@ public class ContractController {
                                             """
                             )
                     )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자 계좌나 가상 계좌를 찾을 수 없습니다.",
+                    content = @Content()
             )
     })
     @PostMapping("/{contractSeq}/first-rent")
@@ -164,7 +169,41 @@ public class ContractController {
         return ResponseDTO.ok(null, "첫 월세 이체가 완료되었습니다.");
     }
 
-
+    /**
+     * 임대인에게 첫월세 전달 -> 계약 성사
+     * @param contractSeq
+     * @param userSeq
+     * @return
+     */
+    @Operation(
+            summary = "임대인에게 첫월세 전달 -> 계약 성사",
+            description = "임대인에게 가상계좌 속 첫 월세를 전달합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "첫월세 임대인에게 전달 완료",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Void.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                                    {
+                                                         "message": "임대인에게 첫 월세가 전달되었습니다.",
+                                                         "status": 200,
+                                                         "timestamp": 1763344376379
+                                                     }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "db에서 관련 정보를 찾을 수 없습니다",
+                    content = @Content()
+            )
+    })
     @PostMapping("/{contractSeq}/settlement")
     public ResponseEntity<ResponseDTO<Void>> settleContract(@PathVariable Integer contractSeq,
                                                             @AuthenticationPrincipal Integer userSeq) {
