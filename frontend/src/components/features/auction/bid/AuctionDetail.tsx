@@ -41,7 +41,6 @@ export default function AuctionDetail({
           <AuctionTimer endTime={auctionEndTime} />
         </div>
         {/* 상세정보 + 입찰 */}
-        {/* TODO 추후 특약 사항 첨부*/}
         <section className="mt-4 flex flex-col gap-6">
           <AuctionInfo deposit={deposit} fee={data.fee} />
           <AuctionBidSection minimumBid={minimumBid} onBid={onBid} />

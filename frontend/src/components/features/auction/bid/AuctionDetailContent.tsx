@@ -4,26 +4,30 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 
 import { AuctionDetail } from '@/components/features/auction'
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { listingQueryKeys } from '@/constants'
 import { useSearchListingDetail } from '@/hooks/queries/useListing'
+import { bid } from '@/services/bidService'
 import { ListingDetailDataResponse } from '@/types/api/listings'
 
 export default function AuctionDetailContent() {
   // 매물 seq 값 가져오기 (쿼리 파라미터에서)
   const searchParams = useSearchParams()
   const propertySeqParam = searchParams.get('propertySeq')
+  const auctionSeqParam = searchParams.get('id')
   const propertySeq = propertySeqParam ? Number(propertySeqParam) : null
-  
-  // 매물 seq 캐싱된 정보값 가져오기 (hooks는 항상 최상위에서 호출)
+
   const queryClient = useQueryClient()
   const queryKey = propertySeq ? listingQueryKeys.detail(propertySeq) : null
-  
+
+  const { showSuccess, showError, AlertDialog } = useAlertDialog()
+
   // 캐시가 없으면 useQuery로 가져오기 (캐시에 저장됨)
   // propertySeq가 없어도 hook은 호출해야 하므로 조건부로 enabled 사용
   const { data: queryData, isLoading } = useSearchListingDetail(propertySeq || 0, {
     enabled: !!propertySeq,
   } as { enabled?: boolean })
-  
+
   // 먼저 캐시에서 가져오기
   const cachedData = queryKey
     ? queryClient.getQueryData<{
@@ -31,18 +35,24 @@ export default function AuctionDetailContent() {
         data?: ListingDetailDataResponse
       }>(queryKey)
     : null
-  
+
   // 디버깅: 캐시 키 확인
   console.log('=== 경매 상세 페이지 캐시 확인 ===')
   console.log('propertySeq:', propertySeq)
   console.log('queryKey:', queryKey)
   console.log('cachedData:', cachedData)
-  
+
   // 캐시된 데이터가 있으면 사용, 없으면 queryData 사용
   const response = cachedData || queryData
-  
+
   console.log('queryData:', queryData)
-  console.log('전체 캐시:', queryClient.getQueryCache().getAll().map(q => ({ queryKey: q.queryKey, state: q.state })))
+  console.log(
+    '전체 캐시:',
+    queryClient
+      .getQueryCache()
+      .getAll()
+      .map(q => ({ queryKey: q.queryKey, state: q.state }))
+  )
   console.log('==========================')
 
   // 로딩 중
@@ -72,18 +82,26 @@ export default function AuctionDetailContent() {
   const auctionEndTime = new Date('2025-11-20T24:00:00')
 
   const handleBid = (_amount: number) => {
-    // TODO: 실제 입찰 API 호출
+    const result = bid(auctionSeqParam, _amount)
+    if (result.success) {
+      showSuccess('입찰 완료')
+    } else {
+      showError('입찰 실패')
+    }
   }
 
   return (
-    <AuctionDetail
-      data={data}
-      auctionEndTime={auctionEndTime}
-      minimumBid={50000}
-      deposit={data.deposit || 20000000}
-      lessorName={data.lessorNm || '변가원'}
-      lessorImage={data.lessorProfileImg || '/profile.svg'}
-      onBid={handleBid}
-    />
+    <>
+      <AuctionDetail
+        data={data}
+        auctionEndTime={auctionEndTime}
+        minimumBid={50000}
+        deposit={data.deposit}
+        lessorName={data.lessorNm}
+        lessorImage={data.lessorProfileImg}
+        onBid={handleBid}
+      />
+      <AlertDialog />
+    </>
   )
 }

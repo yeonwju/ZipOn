@@ -37,6 +37,11 @@ export const API_ENDPOINTS = {
   CHAT_ROOM_LIST: `/api/v1/chat/my/rooms`,
   CHAT_ROOM_LEAVE: (roomId: number) => `/api/v1/chat/room/${roomId}/leave`,
 
+  // 경매
+  BID: '/api/v1/auction/bid',
+  BID_ACCEPT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/accept`,
+  BID_REJECT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/reject`,
+
   // 라이브
   CAN_LIVE_AUCTION: '/api/v1/live/auctions',
   START_LIVE: '/api/v1/live',
