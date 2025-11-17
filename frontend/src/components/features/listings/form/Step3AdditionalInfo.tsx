@@ -233,7 +233,7 @@ export default function Step3AdditionalInfo({
                       className="h-[36px] w-full justify-between border border-gray-300 font-normal"
                     >
                       {selectedAuctionDate
-                        ? selectedAuctionDate.toLocaleDateString('ko-KR')
+                        ? selectedAuctionDate.toISOString().slice(0, 10) + 'T12:00:00'
                         : '날짜 선택'}
                       <ChevronDownIcon size={16} />
                     </Button>
@@ -255,7 +255,7 @@ export default function Step3AdditionalInfo({
                 <label className="mb-2 block text-sm font-medium text-gray-900">
                   실시간 방송 가능 날짜 및 시간
                 </label>
-                
+
                 {/* 날짜 선택 */}
                 <div className="mb-3">
                   <Popover open={liveTimeDatePickerOpen} onOpenChange={setLiveTimeDatePickerOpen}>
@@ -291,7 +291,9 @@ export default function Step3AdditionalInfo({
                     <label className="mb-1 block text-xs text-gray-600">시</label>
                     <select
                       value={selectedLiveTime.hour}
-                      onChange={e => handleLiveTimeChange(Number(e.target.value), selectedLiveTime.minute)}
+                      onChange={e =>
+                        handleLiveTimeChange(Number(e.target.value), selectedLiveTime.minute)
+                      }
                       className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
                     >
                       {Array.from({ length: 24 }, (_, i) => (
@@ -305,7 +307,9 @@ export default function Step3AdditionalInfo({
                     <label className="mb-1 block text-xs text-gray-600">분</label>
                     <select
                       value={selectedLiveTime.minute}
-                      onChange={e => handleLiveTimeChange(selectedLiveTime.hour, Number(e.target.value))}
+                      onChange={e =>
+                        handleLiveTimeChange(selectedLiveTime.hour, Number(e.target.value))
+                      }
                       className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
                     >
                       {[0, 10, 20, 30, 40, 50].map(min => (
