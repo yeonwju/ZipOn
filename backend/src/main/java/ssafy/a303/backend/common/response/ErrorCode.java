@@ -1,5 +1,6 @@
 package ssafy.a303.backend.common.response;
 
+import co.elastic.clients.elasticsearch.nodes.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -140,6 +141,10 @@ public enum ErrorCode {
     USER_ACCOUNT_NOT_FOUND(404, HttpStatus.BAD_REQUEST, "해당 유저의 계좌가 없습니다."),
     ONLY_IN_CHARGE(400, HttpStatus.BAD_REQUEST, "해당 계약 관련 임대인, 임차인만 계약 성사를 진행할 수 있습니다."),
     RENT_PAID_YET(400, HttpStatus.BAD_REQUEST, "첫 월세가 아직 가상계좌에 입금되지 않았습니다."),
+    RENT_ALREADY_PAID(400, HttpStatus.BAD_REQUEST, "해당 계약에 대한 첫월세가 이미 납부되었습니다."),
+    VIRTUAL_ACCOUNT_ALREADY_EXISTS(400, HttpStatus.BAD_REQUEST, "해당 계약에 대한 가상계좌가 이미 존재합니다."),
+    ONLY_LESSEE(400, HttpStatus.BAD_REQUEST, "해당 계약의 임차인만 첫 월세를 납부할 수 있습니다."),
+    VIRTUAL_ACCOUNT_AMOUNT_EXCEED(400, HttpStatus.BAD_REQUEST, "납부 금액이 목표 금액을 초과할 수 없습니다."),
 
     // 낙찰 관련
     BID_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 입찰 정보를 찾을 수 없습니다."),

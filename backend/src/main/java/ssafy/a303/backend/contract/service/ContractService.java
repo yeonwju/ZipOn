@@ -2,6 +2,7 @@ package ssafy.a303.backend.contract.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -60,7 +61,19 @@ public class ContractService {
 
         /** 1. 계약 조회 */
         Contract contract = contractRepository.findById(contractSeq)
-                .orElseThrow(() -> new CustomException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        /** 해당 계약의 임차인인지 확인 */
+        if(!contract.getLesseeSeq().equals(userSeq)) {
+            throw new CustomException(ErrorCode.ONLY_IN_CHARGE);
+        }
+
+        /** 해당 계약에 대한 가상계좌는 1개만 만들어질 수 있음.
+         *  이미 가상계좌가 존재하는 지 체크
+         */
+        if(virtualAccountRepository.findByContractSeq(contractSeq).isPresent()) {
+            throw new CustomException(ErrorCode.VIRTUAL_ACCOUNT_ALREADY_EXISTS);
+        }
 
         /** 2. SSAFY Header DTO 생성 */
         SSAFYHeaderDTO headerDto = ssafyHeaderDTOHelper.buildHeader(
@@ -153,6 +166,7 @@ public class ContractService {
      * @param depositAccountNo 입금 계좌번호 (가상계좌)
      * @param amount 이체 금액 (첫달 월세)
      */
+    @Transactional
     public void transferRent(String userKey, String withdrawalAccountNo, String depositAccountNo, int amount) {
 
         // 1. 헤더 생성
@@ -215,16 +229,24 @@ public class ContractService {
         Contract contract = contractRepository.findById(contractSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTRACT_NOT_FOUND));
 
+        /**
+         * 이미 해당 계약에 대한 첫월세를 입금했을 경우.
+         */
+        if(Boolean.TRUE.equals(contract.getIsFirstPaid())) {
+            throw new CustomException(ErrorCode.RENT_ALREADY_PAID);
+        }
+
+        /** 해당 계약의 임차인만 월세 납부할 수 있음 */
         if (!contract.getLesseeSeq().equals(userSeq)) {
-            throw new IllegalStateException("해당 계약의 임차인만 첫 월세를 납부할 수 있습니다.");
+            throw new CustomException(ErrorCode.ONLY_LESSEE);
         }
 
         User lessee = userRepository.findById(userSeq)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String userKey = lessee.getFinanceKey();
         if (userKey == null || userKey.isBlank()) {
-            throw new IllegalStateException("임차인의 SSAFY userKey가 등록되어 있지 않습니다.");
+            throw new CustomException(ErrorCode.FINANCE_KEY_NOT_FOUND);
         }
 
         UserAccount account = userAccountRepository.findByUserSeq(userSeq)
@@ -236,7 +258,17 @@ public class ContractService {
                 .orElseThrow(() -> new CustomException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND));
 
         String depositAccountNo = va.getAccountNo();
+
+        /** 가상계좌 목표 금액 달성 여부 */
+        int current = (va.getCurrentAmount() == null ? 0 : va.getCurrentAmount());
+        int target = (va.getTargetAmount() == null ? 0 : va.getTargetAmount());
+
         int amount = contract.getAucMnRent();
+
+        // targetAmount를 초과하는 납부 방지
+        if (current + amount > target) {
+            throw new CustomException(ErrorCode.VIRTUAL_ACCOUNT_AMOUNT_EXCEED);
+        }
 
         transferRent(
                 userKey,
@@ -245,12 +277,13 @@ public class ContractService {
                 amount
         );
 
-        va.setCurrentAmount(
-                (va.getCurrentAmount() == null ? 0 : va.getCurrentAmount()) + amount
-        );
-        va.setStatus(VirtualAccountStatus.PAID);
-        contract.setIsFirstPaid(true);
-
+        // 가상계좌 현재 금액 업데이트
+        va.setCurrentAmount(current + amount);
+        // targetAmount와 같아지면 상태 변경
+        if(current + amount == target) {
+            va.setStatus(VirtualAccountStatus.PAID);
+            contract.setIsFirstPaid(true);
+        }
     }
 
     /**
