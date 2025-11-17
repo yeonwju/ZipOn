@@ -81,7 +81,7 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
 
     requestBrokerMutation.mutate(requestData, {
       onSuccess: result => {
-        showSuccess(result.data?.message || '중개 신청이 완료되었습니다!', () => {
+        showSuccess(result?.message || '중개 신청이 완료되었습니다!', () => {
           router.replace(`/listings/${params.id}`)
         })
       },

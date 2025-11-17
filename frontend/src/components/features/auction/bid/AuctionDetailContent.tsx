@@ -30,9 +30,7 @@ export default function AuctionDetailContent() {
   } as { enabled?: boolean })
 
   // 먼저 캐시에서 가져오기
-  const cachedData = queryKey
-    ? queryClient.getQueryData<ListingDetailDataResponse>(queryKey)
-    : null
+  const cachedData = queryKey ? queryClient.getQueryData<ListingDetailDataResponse>(queryKey) : null
 
   // 디버깅: 캐시 키 확인
   console.log('=== 경매 상세 페이지 캐시 확인 ===')
@@ -84,7 +82,7 @@ export default function AuctionDetailContent() {
       { auctionSeq: Number(auctionSeqParam), amount: _amount },
       {
         onSuccess: result => {
-          showSuccess(result.data?.message || '입찰 완료')
+          showSuccess(result?.message || '입찰 완료')
         },
         onError: error => {
           showError(

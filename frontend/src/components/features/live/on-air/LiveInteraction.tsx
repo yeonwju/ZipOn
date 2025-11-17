@@ -3,8 +3,8 @@
 import { Eye, Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { useLikeLive } from '@/queries/useLive'
 import { LiveStatsUpdate } from '@/lib/socket/types'
+import { useLikeLive } from '@/queries/useLive'
 
 interface LiveInteractionProps {
   viewers?: number

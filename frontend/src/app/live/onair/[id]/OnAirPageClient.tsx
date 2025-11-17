@@ -11,9 +11,9 @@ import {
   LiveHostInfo,
   LiveInteraction,
 } from '@/components/features/live'
+import { LiveStatsUpdate } from '@/lib/socket/types'
 import { useGetLiveInfo } from '@/queries/useLive'
 import { useUser } from '@/queries/useUser'
-import { LiveStatsUpdate } from '@/lib/socket/types'
 import { getLiveEnterToken, leaveLive } from '@/services/liveService'
 import { useMiniPlayerStore } from '@/store/miniPlayer'
 

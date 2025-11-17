@@ -4,9 +4,9 @@ import { MessageCircle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-import { useEndLive } from '@/queries/useLive'
 import { connectWS, sendLiveChat, subscribeLive, unsubscribeLive } from '@/lib/socket'
 import { LiveChatMessage, LiveStatsUpdate } from '@/lib/socket/types'
+import { useEndLive } from '@/queries/useLive'
 import { liveChatList } from '@/services/liveService'
 import { getAccessTokenFromCookie } from '@/utils/token'
 
@@ -32,14 +32,12 @@ interface LiveChatContainerProps {
  */
 export default function LiveChatContainer({
   isHost,
-  userName,
   liveSeq,
   hostSeq,
   authToken: initialAuthToken,
   onStatsUpdate,
 }: LiveChatContainerProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const router = useRouter()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isConnected, setIsConnected] = useState(false)
 

@@ -6,14 +6,14 @@ import { useShallow } from 'zustand/react/shallow'
 
 import ChatRoomList from '@/components/features/chat/room/ChatRoomList'
 import { chatQueryKeys } from '@/constants'
-import { useGetChatRoomList } from '@/queries/useChat'
-import { useUser } from '@/queries/useUser'
 import {
   ChatNotification,
   connectWS,
   subscribeNotifications,
   unsubscribeNotifications,
 } from '@/lib/socket'
+import { useGetChatRoomList } from '@/queries/useChat'
+import { useUser } from '@/queries/useUser'
 import { useChatStore } from '@/store/chatStore'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 

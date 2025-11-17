@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useUser, useVerifyBusiness } from '@/queries'
-import { useAlertDialog } from '@/components/ui/alert-dialog'
 
 export default function BusinessVerificationForm() {
   const { data, refetch } = useUser()
@@ -46,7 +46,7 @@ export default function BusinessVerificationForm() {
         onSuccess: result => {
           setIsVerified(true)
           refetch()
-          showSuccess(result.data?.message || '사업자 인증이 완료되었습니다.')
+          showSuccess(result?.message || '사업자 인증이 완료되었습니다.')
         },
         onError: error => {
           showError(

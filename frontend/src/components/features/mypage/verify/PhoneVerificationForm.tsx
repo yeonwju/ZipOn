@@ -3,15 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAlertDialog } from '@/components/ui/alert-dialog'
-import {
-  useRequestPhoneVerification,
-  useUser,
-  useVerifyPhoneCode,
-} from '@/queries'
+import { useRequestPhoneVerification, useUser, useVerifyPhoneCode } from '@/queries'
 
 export default function PhoneVerificationForm() {
   const [name, setName] = useState('')
@@ -27,11 +23,10 @@ export default function PhoneVerificationForm() {
   const { refetch } = useUser()
   const { mutate: requestPhoneVerificationMutation, isPending: isRequesting } =
     useRequestPhoneVerification()
-  const { mutate: verifyPhoneCodeMutation, isPending: isVerifying } =
-    useVerifyPhoneCode()
+  const { mutate: verifyPhoneCodeMutation, isPending: isVerifying } = useVerifyPhoneCode()
   const { showSuccess, showError, AlertDialog } = useAlertDialog()
 
-  const [timer, setTimer] = useState(180)
+  const [timer] = useState(180)
 
   const genderInputRef = useRef<HTMLInputElement>(null)
 
@@ -80,7 +75,7 @@ export default function PhoneVerificationForm() {
       {
         onSuccess: result => {
           setIsCodeSent(true)
-          showSuccess(result.data?.message || '인증번호가 발송되었습니다.')
+          showSuccess(result?.message || '인증번호가 발송되었습니다.')
         },
         onError: error => {
           showError(
@@ -103,7 +98,7 @@ export default function PhoneVerificationForm() {
         onSuccess: result => {
           setIsVerified(true)
           refetch()
-          showSuccess(result.data?.message || '휴대폰 인증이 완료되었습니다.')
+          showSuccess(result?.message || '휴대폰 인증이 완료되었습니다.')
         },
         onError: error => {
           showError(

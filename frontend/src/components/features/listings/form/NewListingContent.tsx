@@ -14,10 +14,7 @@ import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import useUserLocation from '@/hooks/map/useUserLocation'
 import { useUser } from '@/queries'
-import {
-  useCreateListing,
-  useRegisterListingVerification,
-} from '@/queries/useListing'
+import { useCreateListing, useRegisterListingVerification } from '@/queries/useListing'
 
 export default function NewListingContent() {
   const { refresh: refreshLocation, isRefreshing } = useUserLocation()
@@ -253,7 +250,6 @@ export default function NewListingContent() {
             onVerify={handleVerify}
             refreshLocation={refreshLocation}
             isRefreshing={isRefreshing}
-            isVerifying={isVerifying || registerVerification.isPending}
           />
 
           <Step2PropertyInfo

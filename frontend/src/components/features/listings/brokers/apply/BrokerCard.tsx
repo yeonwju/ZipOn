@@ -4,9 +4,9 @@ import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { useSelectBroker } from '@/queries/useBroker'
 import { BrokerInfo } from '@/types/api/broker'
 
@@ -26,15 +26,13 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
   const handleSubmit = () => {
     selectBrokerMutation.mutate(undefined, {
       onSuccess: result => {
-        showSuccess(result.data?.message || `${broker.brkNm} 중개인을 선택하셨습니다!`, () => {
+        showSuccess(result?.message || `${broker.brkNm} 중개인을 선택하셨습니다!`, () => {
           onSelect?.(broker.brkUserSeq)
         })
       },
       onError: error => {
         showError(
-          error instanceof Error
-            ? error.message
-            : '중개인 선택에 실패했습니다. 다시 시도해주세요.'
+          error instanceof Error ? error.message : '중개인 선택에 실패했습니다. 다시 시도해주세요.'
         )
       },
     })

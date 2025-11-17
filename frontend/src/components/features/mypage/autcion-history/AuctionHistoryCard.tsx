@@ -86,7 +86,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   onClick={() => {
                     acceptBid(auctionData.auctionSeq, {
                       onSuccess: result => {
-                        showSuccess(result.data?.message || '입찰을 수락했습니다.')
+                        showSuccess(result?.message || '입찰을 수락했습니다.')
                       },
                       onError: error => {
                         showError(

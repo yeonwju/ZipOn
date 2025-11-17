@@ -7,9 +7,9 @@ import { useShallow } from 'zustand/react/shallow'
 
 import SubHeader from '@/components/layout/header/SubHeader'
 import { chatQueryKeys } from '@/constants'
+import { ChatMessage, connectWS, sendChat, subscribeChat, unsubscribeChat } from '@/lib/socket'
 import { useLeaveChatRoom } from '@/queries/useChat'
 import { useUser } from '@/queries/useUser'
-import { ChatMessage, connectWS, sendChat, subscribeChat, unsubscribeChat } from '@/lib/socket'
 import { useChatStore } from '@/store/chatStore'
 import { ChatRoomHistoryResponseData } from '@/types/api/chat'
 
