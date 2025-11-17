@@ -2,6 +2,8 @@ package ssafy.a303.backend.auction.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 import ssafy.a303.backend.auction.dto.request.BidRequestDTO;
+import ssafy.a303.backend.auction.dto.response.WinnerAcceptDTO;
 import ssafy.a303.backend.auction.kafka.BidEventProducer;
 import ssafy.a303.backend.auction.service.BidService;
 import ssafy.a303.backend.common.exception.CustomException;
@@ -87,7 +90,10 @@ public class BidController {
             @ApiResponse(
                     responseCode = "200",
                     description = "낙찰 수락 처리되었습니다.",
-                    content = @Content()
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = WinnerAcceptDTO.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -96,12 +102,15 @@ public class BidController {
             ),
     })
     @PostMapping("/{auctionSeq}/accept")
-    public ResponseEntity<ResponseDTO<Void>> accept(
+    public ResponseEntity<ResponseDTO<WinnerAcceptDTO>> accept(
             @AuthenticationPrincipal Integer userSeq,
             @PathVariable int auctionSeq
     ){
-        bidService.acceptOffer(userSeq, auctionSeq);
-        return ResponseDTO.ok(null, "처리되었습니다.");
+        int contractSeq = bidService.acceptOffer(userSeq, auctionSeq);
+
+        WinnerAcceptDTO dto = new WinnerAcceptDTO(contractSeq);
+
+        return ResponseDTO.ok(dto, "처리되었습니다.");
     }
 
     @Operation(

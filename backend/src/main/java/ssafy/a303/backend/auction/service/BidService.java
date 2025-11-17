@@ -11,6 +11,9 @@ import ssafy.a303.backend.auction.repository.BidRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
+import ssafy.a303.backend.contract.entity.Contract;
+import ssafy.a303.backend.contract.repository.ContractRepository;
+import ssafy.a303.backend.property.entity.Property;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,9 +23,10 @@ import java.util.List;
 public class BidService {
 
     private final BidRepository bidRepository;
+    private final ContractRepository contractRepository;
 
     @Transactional
-    public void acceptOffer(int userSeq, int auctionSeq) {
+    public int acceptOffer(int userSeq, int auctionSeq) {
         LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
 
         // 1. 이 유저에게 현재 OFFERED 상태인 입찰 찾기
@@ -59,6 +63,18 @@ public class BidService {
         // 4. 경매에 winnerSeq 설정
         auction.setWinnerSeq(userSeq);
 
+        // 5. 계약서 테이블 삽입
+        Property p = auction.getProperty();
+        Contract contract = new Contract();
+        contract.setPropertySeq(p.getPropertySeq());
+        contract.setAucMnRent(myBid.getBidAmount());
+        contract.setLessorSeq(p.getLessor().getUserSeq());
+        contract.setLesseeSeq(userSeq);
+        contract.setBrkSeq(auction.getUser().getUserSeq());
+        contract.setIsAgree(false);
+
+        contractRepository.save(contract);
+        return contract.getContractSeq();
     }
 
     @Transactional
