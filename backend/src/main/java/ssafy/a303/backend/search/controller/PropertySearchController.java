@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -73,9 +74,23 @@ public class PropertySearchController {
                     description = "매물 검색 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = SearchResponseDto.class)
+                            schema = @Schema(implementation = SearchResponseDto.class),
+                            examples = @ExampleObject(
+                                    name = "성공 응답 예시",
+                                    value = """
+                                            {
+                                              "data": {
+                                                "lines": []
+                                              },
+                                              "message": "계약서 검증 결과입니다.",
+                                              "status": 200,
+                                              "timestamp": 1763130506609
+                                            }
+                                    """
+                            )
                     )
             )
+
     })
     @GetMapping("")
     public ResponseEntity<ResponseDTO<PageResponseDto<SearchResponseDto>>> search(
