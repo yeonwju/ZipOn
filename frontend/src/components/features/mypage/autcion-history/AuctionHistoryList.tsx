@@ -2,11 +2,9 @@
 
 import { SearchX } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 import { ROUTES } from '@/constants'
-import { myAuctionInfo } from '@/services/mypageService'
-import { MyAuctionsData } from '@/types/api/mypage'
+import { useMyAuctions } from '@/queries/useMypage'
 
 import AuctionHistoryListSkeleton from '../../../skeleton/mypage/AuctionHistoryListSkeleton'
 import AuctionHistoryCard from './AuctionHistoryCard'
@@ -21,30 +19,7 @@ const INITIAL_DISPLAY_COUNT = 2
  * 경매 내역 리스트
  */
 export default function AuctionHistoryList({ className }: AuctionHistoryListProps) {
-  const [auctionHistory, setAuctionHistory] = useState<MyAuctionsData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchAuctionHistory = async () => {
-      try {
-        setIsLoading(true)
-
-        const result = await myAuctionInfo()
-        if (result.success && result.data) {
-          setAuctionHistory(result.data)
-        } else {
-          setAuctionHistory([])
-        }
-      } catch (error) {
-        console.error('Failed to fetch auction history:', error)
-        setAuctionHistory([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchAuctionHistory()
-  }, [])
+  const { data: auctionHistory, isLoading, isError } = useMyAuctions()
 
   // 로딩 중일 때 스켈레톤 표시
   if (isLoading) {
@@ -52,7 +27,7 @@ export default function AuctionHistoryList({ className }: AuctionHistoryListProp
   }
 
   // 데이터가 없거나 null일 때
-  if (!auctionHistory || auctionHistory.length === 0) {
+  if (isError || !auctionHistory || auctionHistory.length === 0) {
     return (
       <div className={className}>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">

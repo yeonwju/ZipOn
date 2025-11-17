@@ -16,7 +16,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useGetChatRoomList } from '@/hooks/queries/useChat'
+import { useGetChatRoomList } from '@/queries/useChat'
 import { useChatStore } from '@/store/chatStore'
 
 type IconAction = {

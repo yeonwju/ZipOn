@@ -3,7 +3,7 @@
 import { Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 
-import { useLeaveChatRoom } from '@/hooks/queries/useChat'
+import { useLeaveChatRoom } from '@/queries/useChat'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 
 import ChatRoomCard from './ChatRoomCard'

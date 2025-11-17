@@ -6,8 +6,8 @@ import { useShallow } from 'zustand/react/shallow'
 
 import ChatRoomList from '@/components/features/chat/room/ChatRoomList'
 import { chatQueryKeys } from '@/constants'
-import { useGetChatRoomList } from '@/hooks/queries/useChat'
-import { useUser } from '@/hooks/queries/useUser'
+import { useGetChatRoomList } from '@/queries/useChat'
+import { useUser } from '@/queries/useUser'
 import {
   ChatNotification,
   connectWS,

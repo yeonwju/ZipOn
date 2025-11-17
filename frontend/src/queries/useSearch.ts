@@ -42,8 +42,8 @@ export function useSearchListings(filters: SearchFilters, enabled: boolean = tru
     queryKey: queryKeys.search.results(searchParams as Record<string, unknown>),
     queryFn: async () => {
       const result = await searchListings(searchParams)
-      if (!result.success || !result.data) {
-        throw new Error('매물 검색 실패')
+      if (!result.data) {
+        throw new Error('매물 검색 결과를 찾을 수 없습니다.')
       }
       return result.data
     },

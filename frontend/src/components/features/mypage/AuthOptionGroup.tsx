@@ -3,7 +3,7 @@
 import { ShieldAlert, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
-import { useUser } from '@/hooks/queries/useUser'
+import { useUser } from '@/queries/useUser'
 
 export default function AuthOptionGroup() {
   const { data: user } = useUser()

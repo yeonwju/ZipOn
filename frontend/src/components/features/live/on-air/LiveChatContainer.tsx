@@ -4,7 +4,7 @@ import { MessageCircle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-import { useEndLive } from '@/hooks/queries/useLive'
+import { useEndLive } from '@/queries/useLive'
 import { connectWS, sendLiveChat, subscribeLive, unsubscribeLive } from '@/lib/socket'
 import { LiveChatMessage, LiveStatsUpdate } from '@/lib/socket/types'
 import { liveChatList } from '@/services/liveService'
@@ -51,7 +51,7 @@ export default function LiveChatContainer({
     const loadChatHistory = async () => {
       try {
         const result = await liveChatList(liveSeq)
-        if (result.success && result.data) {
+        if (result.data) {
           const chatMessages: ChatMessage[] = result.data.map(msg => ({
             id: `${msg.liveSeq}-${msg.senderSeq}-${msg.sentAt}`,
             userName: msg.senderName,

@@ -3,7 +3,7 @@
 import { Eye, Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { useLikeLive } from '@/hooks/queries/useLive'
+import { useLikeLive } from '@/queries/useLive'
 import { LiveStatsUpdate } from '@/lib/socket/types'
 
 interface LiveInteractionProps {
@@ -54,16 +54,12 @@ export default function LiveInteraction({
     // Mutation으로 좋아요 토글
     likeLiveMutation.mutate(liveSeq, {
       onSuccess: result => {
-        if (result.success) {
-          // API 응답의 실제 상태로 업데이트 (서버가 반환한 최종 상태)
-          console.log('[LiveInteraction] 좋아요 토글 성공, 서버 상태:', result.data)
+        // API 응답의 실제 상태로 업데이트 (서버가 반환한 최종 상태)
+        console.log('[LiveInteraction] 좋아요 토글 성공, 서버 상태:', result.data)
+        if (result.data !== undefined) {
           setIsLiked(result.data)
-          // WebSocket으로 LIKE_COUNT_UPDATE를 받아서 실제 수를 업데이트
-        } else {
-          // 실패 시 상태 롤백
-          console.log('[LiveInteraction] 좋아요 토글 실패, 상태 롤백')
-          setIsLiked(!newLikedState)
         }
+        // WebSocket으로 LIKE_COUNT_UPDATE를 받아서 실제 수를 업데이트
       },
       onError: error => {
         console.error('[LiveInteraction] 좋아요 토글 오류:', error)
@@ -78,9 +74,7 @@ export default function LiveInteraction({
       {/* 시청자 수 */}
       <div className="flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 backdrop-blur-sm">
         <Eye size={14} className="text-white" />
-        <span className="text-xs font-semibold text-white">
-          {viewersProp.toLocaleString()}
-        </span>
+        <span className="text-xs font-semibold text-white">{viewersProp.toLocaleString()}</span>
       </div>
 
       {/* 좋아요 버튼 */}
@@ -92,18 +86,14 @@ export default function LiveInteraction({
         >
           <Heart
             size={14}
-            className={`transition-all ${
-              isLiked ? 'fill-red-500 text-red-500' : 'text-white'
-            }`}
+            className={`transition-all ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`}
           />
-          <span className="text-xs font-semibold text-white">
-            {likesProp.toLocaleString()}
-          </span>
+          <span className="text-xs font-semibold text-white">{likesProp.toLocaleString()}</span>
         </button>
 
         {/* 좋아요 애니메이션 */}
         {showHeartAnimation && (
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 animate-float-up">
+          <div className="animate-float-up absolute -top-2 left-1/2 -translate-x-1/2">
             <Heart size={24} className="fill-red-500 text-red-500 drop-shadow-lg" />
           </div>
         )}
@@ -111,4 +101,3 @@ export default function LiveInteraction({
     </div>
   )
 }
-

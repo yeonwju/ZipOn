@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import ListingTopTabs from '@/components/layout/header/ListingsTopTabs'
-import { useUser } from '@/hooks/queries/useUser'
+import { useUser } from '@/queries/useUser'
 
 export default function MyListingsContent() {
   const [activeTab, setActiveTab] = useState<'auction' | 'general'>('auction')
@@ -27,4 +27,3 @@ export default function MyListingsContent() {
     </section>
   )
 }
-

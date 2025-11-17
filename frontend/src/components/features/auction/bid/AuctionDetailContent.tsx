@@ -6,8 +6,8 @@ import { useSearchParams } from 'next/navigation'
 import { AuctionDetail } from '@/components/features/auction'
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { listingQueryKeys } from '@/constants'
-import { useSearchListingDetail } from '@/hooks/queries/useListing'
-import { bid } from '@/services/bidService'
+import { useBid } from '@/queries/useBid'
+import { useSearchListingDetail } from '@/queries/useListing'
 import { ListingDetailDataResponse } from '@/types/api/listings'
 
 export default function AuctionDetailContent() {
@@ -21,6 +21,7 @@ export default function AuctionDetailContent() {
   const queryKey = propertySeq ? listingQueryKeys.detail(propertySeq) : null
 
   const { showSuccess, showError, AlertDialog } = useAlertDialog()
+  const { mutate: bidMutation } = useBid()
 
   // 캐시가 없으면 useQuery로 가져오기 (캐시에 저장됨)
   // propertySeq가 없어도 hook은 호출해야 하므로 조건부로 enabled 사용
@@ -30,10 +31,7 @@ export default function AuctionDetailContent() {
 
   // 먼저 캐시에서 가져오기
   const cachedData = queryKey
-    ? queryClient.getQueryData<{
-        success: boolean
-        data?: ListingDetailDataResponse
-      }>(queryKey)
+    ? queryClient.getQueryData<ListingDetailDataResponse>(queryKey)
     : null
 
   // 디버깅: 캐시 키 확인
@@ -43,7 +41,7 @@ export default function AuctionDetailContent() {
   console.log('cachedData:', cachedData)
 
   // 캐시된 데이터가 있으면 사용, 없으면 queryData 사용
-  const response = cachedData || queryData
+  const data = cachedData || queryData
 
   console.log('queryData:', queryData)
   console.log(
@@ -64,8 +62,8 @@ export default function AuctionDetailContent() {
     )
   }
 
-  // 캐싱된 데이터가 없으면 에러 처리
-  if (!response || !response.success || !response.data) {
+  // 데이터가 없으면 에러 처리
+  if (!data) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
@@ -77,17 +75,24 @@ export default function AuctionDetailContent() {
       </div>
     )
   }
-
-  const data = response.data
   const auctionEndTime = new Date('2025-11-20T24:00:00')
 
-  const handleBid = async (_amount: number) => {
-    const result = await bid(Number(auctionSeqParam), _amount)
-    if (result.success) {
-      showSuccess('입찰 완료')
-    } else {
-      showError('입찰 실패')
-    }
+  const handleBid = (_amount: number) => {
+    if (!auctionSeqParam) return
+
+    bidMutation(
+      { auctionSeq: Number(auctionSeqParam), amount: _amount },
+      {
+        onSuccess: result => {
+          showSuccess(result.data?.message || '입찰 완료')
+        },
+        onError: error => {
+          showError(
+            error instanceof Error ? error.message : '입찰 실패했습니다. 다시 시도해주세요.'
+          )
+        },
+      }
+    )
   }
 
   return (

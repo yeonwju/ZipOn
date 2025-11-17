@@ -7,7 +7,7 @@ import AuctionHistoryList from '@/components/features/mypage/autcion-history/Auc
 import MyBrokerageList from '@/components/features/mypage/my-brokerage/MyBrokerageList'
 import MyListingList from '@/components/features/mypage/my-listings/MyListingList'
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs'
-import { useUser } from '@/hooks/queries/useUser'
+import { useUser } from '@/queries/useUser'
 
 interface ListingTapsProps {
   className?: string

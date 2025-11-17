@@ -2,13 +2,11 @@
 
 import { SearchX } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 import MyListingCard from '@/components/features/mypage/my-listings/MyListingCard'
 import MyListingListSkeleton from '@/components/skeleton/mypage/MyListingListSkeleton'
 import { ROUTES } from '@/constants'
-import { myPropertiseInfo } from '@/services/mypageService'
-import { MyPropertiesData } from '@/types/api/mypage'
+import { useMyProperties } from '@/queries/useMypage'
 
 interface MyListingListProps {
   className?: string
@@ -16,36 +14,13 @@ interface MyListingListProps {
 const INITIAL_DISPLAY_COUNT = 2
 
 export default function MyListingList({ className }: MyListingListProps) {
-  const [myListings, setMyListings] = useState<MyPropertiesData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchMyListing = async () => {
-      try {
-        setIsLoading(true)
-
-        const result = await myPropertiseInfo()
-        if (result.success && result.data) {
-          setMyListings(result.data)
-        } else {
-          setMyListings([])
-        }
-      } catch (error) {
-        console.error('Failed to fetch my listings:', error)
-        setMyListings([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchMyListing()
-  }, [])
+  const { data: myListings, isLoading, isError } = useMyProperties()
 
   if (isLoading) {
     return <MyListingListSkeleton className={className} />
   }
 
-  if (!myListings || myListings.length === 0) {
+  if (isError || !myListings || myListings.length === 0) {
     return (
       <div className={className}>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">

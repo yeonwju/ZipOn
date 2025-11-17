@@ -42,6 +42,12 @@ export const API_ENDPOINTS = {
   BID_ACCEPT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/accept`,
   BID_REJECT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/reject`,
 
+  // 계약
+  CONTRACT_SUCCESS: (contractSeq: number) => `/api/v1/contracts/${contractSeq}/settlement`,
+  CONTRACT_PROXY_ACCOUNT: (contractSeq: number) => `/api/v1/contracts/${contractSeq}/init`,
+  CONTRACT_PAYMENT: (contractSeq: number) => `/api/v1/contracts/${contractSeq}/first-rent`,
+  CONTRACT_AI_VERIFY: `/api/v1/contracts/verify`,
+
   // 라이브
   CAN_LIVE_AUCTION: '/api/v1/live/auctions',
   START_LIVE: '/api/v1/live',

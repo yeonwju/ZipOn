@@ -76,7 +76,7 @@ export function convertFiltersToSearchParams(filters: {
 }): SearchParams {
   console.log('=== 필터를 검색 파라미터로 변환 ===')
   console.log('입력 필터:', filters)
-  
+
   const params: SearchParams = {
     page: 0,
     size: 10,
@@ -184,55 +184,22 @@ export function convertFiltersToSearchParams(filters: {
 /**
  * 매물 검색
  */
-export async function searchListings(
-  params: SearchParams
-): Promise<{
-  success: boolean
-  data: ListingAuctions | null
-}> {
-  try {
-    console.log('=== 매물 검색 요청 ===')
-    console.log('원본 파라미터:', params)
-    
-    // 배열 파라미터를 올바르게 처리하기 위해 URLSearchParams 직접 생성
-    const searchParams = new URLSearchParams()
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === undefined || value === null) return
-      
-      if (Array.isArray(value)) {
-        // 배열인 경우 각 값을 개별 파라미터로 추가
-        value.forEach(v => searchParams.append(key, String(v)))
-      } else {
-        searchParams.append(key, String(value))
-      }
-    })
-    
-    const url = `${API_ENDPOINTS.LISTINGS_SEARCH}?${searchParams.toString()}`
-    console.log('최종 요청 URL:', url)
-    console.log('쿼리 파라미터:', Object.fromEntries(searchParams.entries()))
-    console.log('==================')
-    
-    const result = await authFetch.get<ResponseS<ListingAuctions>>(url)
+export async function searchListings(params: SearchParams) {
+  // 배열 파라미터를 올바르게 처리하기 위해 URLSearchParams 직접 생성
+  const searchParams = new URLSearchParams()
 
-    if (result.status === 200) {
-      return {
-        success: true,
-        data: result.data,
-      }
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) return
+
+    if (Array.isArray(value)) {
+      // 배열인 경우 각 값을 개별 파라미터로 추가
+      value.forEach(v => searchParams.append(key, String(v)))
     } else {
-      return {
-        success: false,
-        data: null,
-      }
+      searchParams.append(key, String(value))
     }
-  } catch (error) {
-    console.error('=== 매물 검색 중 에러 발생 ===')
-    console.error('에러:', error)
-    return {
-      success: false,
-      data: null,
-    }
-  }
-}
+  })
 
+  const url = `${API_ENDPOINTS.LISTINGS_SEARCH}?${searchParams.toString()}`
+
+  return authFetch.get<ResponseS<ListingAuctions>>(url)
+}

@@ -16,8 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useRequestBroker } from '@/hooks/queries/useBroker'
 import { cn } from '@/lib/utils'
+import { useRequestBroker } from '@/queries/useBroker'
 
 interface BrokerApplicationFormProps {
   className?: string
@@ -50,7 +50,7 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
 
   const router = useRouter()
   const params = useParams()
-  const { showSuccess, AlertDialog } = useAlertDialog()
+  const { showSuccess, showError, AlertDialog } = useAlertDialog()
   const timeOptions = generateTimeOptions()
 
   const handleStartTimeChange = (value: string) => {
@@ -69,7 +69,7 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
 
   const requestBrokerMutation = useRequestBroker(Number(params.id))
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!strmDate || !strmStartTm || !intro.trim()) return
 
     const requestData = {
@@ -79,16 +79,18 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
       intro: intro.trim(),
     }
 
-    console.log('중개 신청 데이터:', requestData)
-
-    try {
-      await requestBrokerMutation.mutateAsync(requestData)
-      showSuccess('중개 신청이 완료되었습니다!', () => {
-        router.replace(`/listings/${params.id}`)
-      })
-    } catch (error) {
-      console.error('중개 신청 실패:', error)
-    }
+    requestBrokerMutation.mutate(requestData, {
+      onSuccess: result => {
+        showSuccess(result.data?.message || '중개 신청이 완료되었습니다!', () => {
+          router.replace(`/listings/${params.id}`)
+        })
+      },
+      onError: error => {
+        showError(
+          error instanceof Error ? error.message : '중개 신청에 실패했습니다. 다시 시도해주세요.'
+        )
+      },
+    })
   }
 
   return (

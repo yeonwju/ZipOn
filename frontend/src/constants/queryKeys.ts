@@ -113,6 +113,16 @@ export const notificationQueryKeys = {
 } as const
 
 /**
+ * 마이페이지 관련 Query Keys
+ */
+export const mypageQueryKeys = {
+  all: ['mypage'] as const,
+  properties: () => [...mypageQueryKeys.all, 'properties'] as const,
+  brokerage: () => [...mypageQueryKeys.all, 'brokerage'] as const,
+  auctions: () => [...mypageQueryKeys.all, 'auctions'] as const,
+} as const
+
+/**
  * 전체 Query Keys Export
  */
 export const queryKeys = {
@@ -123,4 +133,5 @@ export const queryKeys = {
   live: liveQueryKeys,
   chat: chatQueryKeys,
   notification: notificationQueryKeys,
+  mypage: mypageQueryKeys,
 } as const

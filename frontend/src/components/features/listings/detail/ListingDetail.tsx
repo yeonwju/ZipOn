@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation'
 
 import { useAlertDialog } from '@/components/ui/alert-dialog'
-import { useUser } from '@/hooks/queries'
-import { useCreateChatRoom } from '@/hooks/queries/useChat'
-import { useSearchListingDetail } from '@/hooks/queries/useListing'
+import { useUser } from '@/queries'
+import { useCreateChatRoom } from '@/queries/useChat'
+import { useDeleteListing, useSearchListingDetail } from '@/queries/useListing'
 import { getListingButtonConfig, isLiveTimePassed } from '@/utils/listingButtons'
 
 import ListingAIAnalysis from './ListingAIAnalysis'
@@ -31,9 +31,24 @@ interface ListingDetailProps {
 export default function ListingDetail({ propertySeq }: ListingDetailProps) {
   const router = useRouter()
   const { showSuccess, showError, showConfirm, AlertDialog } = useAlertDialog()
-  const { data: response, isLoading, isError } = useSearchListingDetail(propertySeq)
+  const { data: result, isLoading, isError } = useSearchListingDetail(propertySeq)
   const { data: user } = useUser()
   const { mutate: createChatRoom } = useCreateChatRoom()
+  const { mutate: deleteListing } = useDeleteListing()
+
+  const handleDeleteListing = (
+    seq: number,
+    options?: { onSuccess?: () => void; onError?: (error: unknown) => void }
+  ) => {
+    deleteListing(seq, {
+      onSuccess: () => {
+        options?.onSuccess?.()
+      },
+      onError: error => {
+        options?.onError?.(error)
+      },
+    })
+  }
 
   // 로딩 중
   if (isLoading) {
@@ -44,18 +59,14 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
     )
   }
 
-  // 에러 또는 데이터 없음
-  if (isError || !response?.success) {
-    const errorMessage =
-      response && !response.success ? response.message : '매물 정보를 불러올 수 없습니다.'
+  // 에러 처리
+  if (isError || !result) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-red-500">{errorMessage || '매물 정보를 불러올 수 없습니다.'}</p>
+        <p className="text-red-500">매물 정보를 불러올 수 없습니다.</p>
       </div>
     )
   }
-
-  const result = response.data
 
   // 버튼 설정 가져오기
   const buttonConfig = isLiveTimePassed(result.liveAt)
@@ -73,6 +84,7 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
         showError,
         showConfirm,
         router,
+        handleDeleteListing,
         createChatRoom
       )
   console.log('buttonConfig:', buttonConfig)

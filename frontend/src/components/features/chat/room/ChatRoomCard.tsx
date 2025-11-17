@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import { useUser } from '@/hooks/queries/useUser'
+import { useUser } from '@/queries/useUser'
 import { ChatRoomListResponseData } from '@/types/api/chat'
 
 interface ChatRoomCardProps {

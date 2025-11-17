@@ -1,7 +1,7 @@
 'use client'
 
 import AucListingCard from '@/components/features/listings/AucListingCard'
-import { useAuctionListings } from '@/hooks/queries/useListing'
+import { useAuctionListings } from '@/queries/useListing'
 
 export default function AuctionlistClient() {
   const { data, isLoading } = useAuctionListings()

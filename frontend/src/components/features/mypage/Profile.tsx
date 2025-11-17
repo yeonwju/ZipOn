@@ -6,7 +6,7 @@ import Image from 'next/image'
 import AuthOptionGroup from '@/components/features/mypage/AuthOptionGroup'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useUser } from '@/hooks/queries/useUser'
+import { useUser } from '@/queries/useUser'
 
 export default function Profile() {
   const { data: user } = useUser()

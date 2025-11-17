@@ -2,12 +2,10 @@
 
 import { SearchX } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 import MyBrokerageCard from '@/components/features/mypage/my-brokerage/MyBrokerageCard'
 import { ROUTES } from '@/constants'
-import { myBrokerageInfo } from '@/services/mypageService'
-import { MyBrokerageData } from '@/types/api/mypage'
+import { useMyBrokerage } from '@/queries/useMypage'
 
 import MyListingListSkeleton from '../../../skeleton/mypage/MyListingListSkeleton'
 
@@ -17,36 +15,13 @@ interface MyBrokerageListProps {
 const INITIAL_DISPLAY_COUNT = 2
 
 export default function MyBrokerageList({ className }: MyBrokerageListProps) {
-  const [myBrokerage, setMyBrokerage] = useState<MyBrokerageData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchMyBrokerage = async () => {
-      try {
-        setIsLoading(true)
-
-        const result = await myBrokerageInfo()
-        if (result.success && result.data) {
-          setMyBrokerage(result.data)
-        } else {
-          setMyBrokerage([])
-        }
-      } catch (error) {
-        console.error('Failed to fetch my brokerage:', error)
-        setMyBrokerage([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchMyBrokerage()
-  }, [])
+  const { data: myBrokerage, isLoading, isError } = useMyBrokerage()
 
   if (isLoading) {
     return <MyListingListSkeleton className={className} />
   }
 
-  if (!myBrokerage || myBrokerage.length === 0) {
+  if (isError || !myBrokerage || myBrokerage.length === 0) {
     return (
       <div className={className}>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">

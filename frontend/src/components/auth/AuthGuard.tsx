@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
 
-import { useUser } from '@/hooks/queries/useUser'
+import { useUser } from '@/queries/useUser'
 
 interface AuthGuardProps {
   /**

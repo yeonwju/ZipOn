@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import AucListingCard from '@/components/features/listings/AucListingCard'
-import { type SearchFilters, useSearchListings } from '@/hooks/queries/useSearch'
+import { type SearchFilters, useSearchListings } from '@/queries/useSearch'
 import type {
   AreaFilter,
   DirectionFilter,
