@@ -10,7 +10,7 @@ import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 public class BidEventProducer {
 
     private static final String TOPIC = "auction-bid";
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, BidEventMessage> kafkaTemplate;
 
     public void sendBid(BidEventMessage message){
         String key = String.valueOf(message.auctionSeq());

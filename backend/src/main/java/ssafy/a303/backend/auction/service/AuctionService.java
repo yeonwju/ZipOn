@@ -92,14 +92,16 @@ public class AuctionService {
         }
 
         /** 경매종료 시점 설정 (방송 다음날 오후 12시) */
+        LocalDateTime auctionStartAt = date.atTime(end);
         LocalDateTime auctionEndAt = date.plusDays(1).atTime(12,0);
 
         Auction saved = auctionRepository.save(
-                    b.strmDate(date)
+                b.strmDate(date)
                         .strmStartTm(start)
                         .strmEndTm(end)
+                        .auctionStartAt(auctionStartAt)
                         .auctionEndAt(auctionEndAt)
-                            .intro(req.intro())
+                        .intro(req.intro())
                         .build()
         );
         return BrkApplyResponseDto.of(saved);

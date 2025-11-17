@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BidRepository extends JpaRepository<Bid, Integer> {
-
     /**
      * 특정 경매에서 상위 입찰자 N명 가져오기
      * (높은 금액 우선, 동일 금액이면 먼저 입찰한 사람)

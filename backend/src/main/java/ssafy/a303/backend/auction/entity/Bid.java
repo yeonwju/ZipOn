@@ -31,8 +31,7 @@ public class Bid {
     private Integer rank;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
-    private BidStatus status = BidStatus.WAITING;
+    private BidStatus status;
     @Column
     private LocalDateTime decidedAt;
 }

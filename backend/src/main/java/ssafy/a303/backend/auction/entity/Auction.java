@@ -49,6 +49,9 @@ public class Auction {
     private LocalTime strmEndTm;
 
     @Column
+    private LocalDateTime auctionStartAt;
+
+    @Column
     private LocalDateTime auctionEndAt;
 
     // 상태
@@ -56,6 +59,10 @@ public class Auction {
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private AuctionStatus status = AuctionStatus.REQUESTED;
+
+    @Builder.Default
+    @Column
+    private boolean finish = false; // status 가 ACCEPTED 일 때, 경매 자동 시작 등록하기 위해 사용
 
     // 취소
     @Column

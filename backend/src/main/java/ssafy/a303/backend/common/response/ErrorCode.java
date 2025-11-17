@@ -1,9 +1,7 @@
 package ssafy.a303.backend.common.response;
 
-import co.elastic.clients.elasticsearch.nodes.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -30,10 +28,19 @@ public enum ErrorCode {
     INVALID_TAX_SEQ(404, HttpStatus.NOT_FOUND, "해당 사업자 등록 번호는 운영 중이지 않습니다."),
 
     // JSON
-    JSON_ERROR(400,HttpStatus.BAD_REQUEST, "직렬화 또는 역직렬화를 실패하였습니다."),
+    JSON_SERIALIZE_ERROR(400, HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+    JSON_DESERIALIZE_ERROR(400, HttpStatus.BAD_REQUEST, "역직렬화를 실패하였습니다."),
+
 
     // 경매
     AUCTION_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 경매가 존재하지 않습니다."),
+    AUCTION_NOT_IN_PROGRESS(404, HttpStatus.NOT_FOUND, "해당 경매가 진행중이지 않습니다."),
+    AUCTION_UNABLE_TO_START(404, HttpStatus.NOT_FOUND, "해당 경매가 진행 가능한 시간이 아닙니다."),
+    AMOUNT_MAX_VALUE(400,HttpStatus.BAD_REQUEST,"21억 이상 입찰할 수 없습니다."),
+    ALREADY_BID(409, HttpStatus.CONFLICT, "이미 입찰하였습니다."),
+
+    BID_NOT_FOUND(404, HttpStatus.NOT_FOUND, "해당 데이터의 경매 기록이 없습니다."),
+
     // 경매/방송 알람
     ALARM_ALREADY_EXIST(406, HttpStatus.NOT_ACCEPTABLE, "이미 알람이 저장되었습니다."),
 
@@ -42,8 +49,6 @@ public enum ErrorCode {
     BAD_REQUEST(400, HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),
     INVALID_PAGINATION(400, HttpStatus.BAD_REQUEST, "잘못된 페이지네이션 값입니다."),
     INVALID_REQUEST_PARAM(400, HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
-
-
 
 
     // 403 FORBIDDEN
