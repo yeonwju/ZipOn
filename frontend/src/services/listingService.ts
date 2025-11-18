@@ -97,21 +97,57 @@ export async function getListingDetail(seq: number) {
  * 경매 매물 목록 조회
  */
 export async function getAuctionListings() {
-  return authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_AUCTION)
+  console.log('[listingService] 경매 매물 목록 조회 시작:', API_ENDPOINTS.LISTINGS_AUCTION)
+  const response = await authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_AUCTION)
+  console.log('[listingService] 경매 매물 목록 응답:', {
+    hasData: !!response.data,
+    itemsCount: response.data?.items?.length || 0,
+    items: response.data?.items?.map(item => ({
+      propertySeq: item.propertySeq,
+      title: item.title,
+      thumbnail: item.thumbnail,
+      thumbnailType: typeof item.thumbnail,
+    })),
+  })
+  return response
 }
 
 /**
  * 일반 매물 목록 조회
  */
 export async function getGeneralListings() {
-  return authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_GENERAL)
+  console.log('[listingService] 일반 매물 목록 조회 시작:', API_ENDPOINTS.LISTINGS_GENERAL)
+  const response = await authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_GENERAL)
+  console.log('[listingService] 일반 매물 목록 응답:', {
+    hasData: !!response.data,
+    itemsCount: response.data?.items?.length || 0,
+    items: response.data?.items?.map(item => ({
+      propertySeq: item.propertySeq,
+      title: item.title,
+      thumbnail: item.thumbnail,
+      thumbnailType: typeof item.thumbnail,
+    })),
+  })
+  return response
 }
 
 /**
  * 중개 매물 목록 조회
  */
 export async function getBrkListings() {
-  return authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_BRK)
+  console.log('[listingService] 중개 매물 목록 조회 시작:', API_ENDPOINTS.LISTINGS_BRK)
+  const response = await authFetch.get<ResponseS<ListingAuctions>>(API_ENDPOINTS.LISTINGS_BRK)
+  console.log('[listingService] 중개 매물 목록 응답:', {
+    hasData: !!response.data,
+    itemsCount: response.data?.items?.length || 0,
+    items: response.data?.items?.map(item => ({
+      propertySeq: item.propertySeq,
+      title: item.title,
+      thumbnail: item.thumbnail,
+      thumbnailType: typeof item.thumbnail,
+    })),
+  })
+  return response
 }
 
 /**

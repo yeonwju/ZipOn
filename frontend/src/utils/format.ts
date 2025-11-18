@@ -109,19 +109,39 @@ export const normalizeThumbnailUrl = (
   imageUrl: string | null | undefined,
   fallback: string = '/listing.svg'
 ): string => {
-  if (!imageUrl || imageUrl.trim() === '') return fallback
+  console.log('[normalizeThumbnailUrl] 입력값:', {
+    imageUrl,
+    imageUrlType: typeof imageUrl,
+    isNull: imageUrl === null,
+    isUndefined: imageUrl === undefined,
+    isEmpty: imageUrl === '',
+    trimmed: imageUrl?.trim(),
+    fallback,
+  })
+
+  if (!imageUrl || imageUrl.trim() === '') {
+    console.log('[normalizeThumbnailUrl] 빈 값, fallback 반환:', fallback)
+    return fallback
+  }
   
   // 이미 절대 URL인 경우 (http:// 또는 https://로 시작)
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    console.log('[normalizeThumbnailUrl] 절대 URL, 그대로 반환:', imageUrl)
     return imageUrl
   }
   
   // 상대 경로인 경우 (/, /listing.svg 같은 경우는 그대로 반환)
   if (imageUrl.startsWith('/')) {
+    console.log('[normalizeThumbnailUrl] 상대 경로(루트), 그대로 반환:', imageUrl)
     return imageUrl
   }
   
   // 상대 경로인 경우 (dev/uploads/... 같은 경우) S3 URL로 변환
   const S3_BASE_URL = 'https://zipon-media.s3.ap-northeast-2.amazonaws.com'
-  return `${S3_BASE_URL}/${imageUrl}`
+  const s3Url = `${S3_BASE_URL}/${imageUrl}`
+  console.log('[normalizeThumbnailUrl] S3 URL로 변환:', {
+    original: imageUrl,
+    converted: s3Url,
+  })
+  return s3Url
 }

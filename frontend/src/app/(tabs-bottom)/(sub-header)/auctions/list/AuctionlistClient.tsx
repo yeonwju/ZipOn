@@ -8,6 +8,18 @@ export default function AuctionlistClient() {
 
   const items = Array.isArray(data?.items) ? data.items : []
 
+  // API 응답 데이터 로그
+  console.log('[AuctionlistClient] API 응답 데이터:', {
+    hasData: !!data,
+    itemsCount: items.length,
+    items: items.map(item => ({
+      propertySeq: item.propertySeq,
+      title: item.title,
+      thumbnail: item.thumbnail,
+      thumbnailType: typeof item.thumbnail,
+    })),
+  })
+
   if (items.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
