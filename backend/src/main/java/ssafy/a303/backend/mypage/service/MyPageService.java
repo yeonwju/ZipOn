@@ -8,6 +8,8 @@ import ssafy.a303.backend.auction.entity.BidStatus;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
+import ssafy.a303.backend.contract.entity.Contract;
+import ssafy.a303.backend.contract.repository.ContractRepository;
 import ssafy.a303.backend.mypage.dto.MyAuctionResponseDto;
 import ssafy.a303.backend.mypage.dto.MyBrokerResponseDto;
 import ssafy.a303.backend.mypage.dto.MyPropertyResponseDto;
@@ -18,6 +20,8 @@ import ssafy.a303.backend.user.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ssafy.a303.backend.auction.entity.BidStatus.ACCEPTED;
+
 @Service
 @Transactional
 @Log4j2
@@ -26,11 +30,13 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
     private final PropertyRepository propertyRepository;
+    private final ContractRepository contractRepository;
 
-    public MyPageService(UserRepository userRepository, AuctionRepository auctionRepository, PropertyRepository propertyRepository) {
+    public MyPageService(UserRepository userRepository, AuctionRepository auctionRepository, PropertyRepository propertyRepository, ContractRepository contractRepository) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.propertyRepository = propertyRepository;
+        this.contractRepository = contractRepository;
     }
 
     /**
@@ -46,16 +52,32 @@ public class MyPageService {
         List<Object[]> results = auctionRepository.getMyAuctionsWithRank(userSeq);
 
         return results.stream().map(row -> {
-            // Object[] 매핑
-            // 0: thumbnail, 1: auctionSeq, 2: propertySeq, 3: status, 4: address, 5: bidAmount, 6: bidRank
+            String thumbnail = (String) row[0];
+            Integer auctionSeq = ((Integer) row[1]);
+            Integer propertySeq = (Integer) row[2];
+            BidStatus bidStatus = (BidStatus) row[3];
+            String address = (String) row[4];
+            Integer bidAmount = (Integer) row[5];
+            int bidRank = ((Long) row[6]).intValue();
+
+            // 계약 seq 조회
+            Integer contractSeq = null;
+            if (bidStatus.equals(ACCEPTED)) {
+                contractSeq = contractRepository
+                        .findTopByPropertySeqOrderByCreatedAtDesc(propertySeq)
+                        .map(Contract::getContractSeq)
+                        .orElse(null);
+            }
+
             return MyAuctionResponseDto.builder()
-                    .thumbnail((String) row[0])
-                    .auctionSeq(((Integer) row[1]).longValue())
-                    .propertySeq(((Integer) row[2]).longValue())
-                    .bidStatus((BidStatus) row[3])
-                    .address((String) row[4])
-                    .bidAmount((Integer) row[5])
-                    .bidRank(((Long) row[6]).intValue()) // COUNT 결과는 Long
+                    .thumbnail(thumbnail)
+                    .auctionSeq(auctionSeq)
+                    .propertySeq(propertySeq)
+                    .contractSeq(contractSeq)
+                    .bidStatus(bidStatus)
+                    .address(address)
+                    .bidAmount(bidAmount)
+                    .bidRank(bidRank)
                     .build();
         }).collect(Collectors.toList());
     }

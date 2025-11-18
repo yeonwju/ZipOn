@@ -9,5 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Integer> {
-
+    
+    //매물에 관한 계약 seq seq 값 조회
+    Optional<Contract> findTopByPropertySeqOrderByCreatedAtDesc(Integer propertySeq);
+    
 }
