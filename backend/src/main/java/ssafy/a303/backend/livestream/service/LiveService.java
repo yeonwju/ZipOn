@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
+import ssafy.a303.backend.common.config.OpenViduConfig;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
@@ -43,6 +44,7 @@ public class LiveService {
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
     private final StringRedisTemplate liveRedisTemplate;
     private final RedisTemplate<String, Object> liveRedisObjectTemplate;
+    private final OpenViduConfig openViduConfig;
 
     public LiveService(
             AuctionRepository auctionRepository,
@@ -51,7 +53,8 @@ public class LiveService {
             OpenVidu openVidu,
             LiveStartNotificationPubSubService liveStartNotificationPubSubService,
             @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
-            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate
+            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
+            OpenViduConfig openViduConfig
     ) {
         this.auctionRepository = auctionRepository;
         this.liveStreamRepository = liveStreamRepository;
@@ -60,6 +63,7 @@ public class LiveService {
         this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
         this.liveRedisTemplate = liveRedisTemplate;
         this.liveRedisObjectTemplate = liveRedisObjectTemplate;
+        this.openViduConfig = openViduConfig;
     }
 
     /**라이브 방송 시작*/
@@ -214,10 +218,14 @@ public class LiveService {
             log.info("[LIVE] Token 발급 성공: liveSeq={}, userSeq={}, role={}", liveSeq, userSeq, role);
 
             // 10. 토큰 정보 DTO로 반환
+            String finalTokenUrl = openViduConfig.getPublicWssUrl()
+                    + "?sessionId=" + session.getSessionId()
+                    + "&token=" + connection.getToken();
+
             //Session  = 방송 방 자체
             //Token    = 그 방송 방에 "들어가기 위한 입장권"
             return LiveTokenResponseDto.builder()
-                    .token(connection.getToken())  // WebRTC 접속 토큰
+                    .token(finalTokenUrl)  // WebRTC 접속 토큰
                     .sessionId(session.getSessionId()) // 연결된 세션 ID
                     .role(role.name())  // 역할 정보
                     .build();
