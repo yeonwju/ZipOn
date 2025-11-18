@@ -16,6 +16,7 @@ import ssafy.a303.backend.chat.repository.MessageReadStatusRepository;
 import ssafy.a303.backend.chat.service.ChatRedisPubSubService;
 import ssafy.a303.backend.chat.service.ChatService;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveChatMessageRequestDto;
 import ssafy.a303.backend.livestream.dto.response.LiveChatMessageResponseDto;
@@ -208,7 +209,7 @@ public class StompController {
                 .senderSeq(userSeq)
                 .senderName(sender.getName())
                 .content(requestDto.getContent())
-                .sentAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now(KoreaClock.getClock()))
                 .build();
 
         log.info("[STOMP][LIVE] 💾 Saving to Redis...");

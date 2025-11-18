@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.livestream.entity.LiveStream;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
@@ -33,7 +34,7 @@ public class LiveStreamScheduler {
     public void autoCloseLongRunningLives() {
         try {
             // 1시간 전 시간 계산
-            LocalDateTime oneHourAgo = LocalDateTime.now().minusMinutes(1);
+            LocalDateTime oneHourAgo = LocalDateTime.now(KoreaClock.getClock()).minusHours(1);
 
             // LIVE 상태이면서 시작 시간이 1시간 이상 지난 방송 조회
             List<LiveStream> expiredLives = liveStreamRepository
@@ -53,7 +54,7 @@ public class LiveStreamScheduler {
                     log.info("[SCHEDULER] 라이브 자동 종료 성공: liveSeq={}, title={}, 방송 시간={} 분", 
                             live.getId(), 
                             live.getTitle(),
-                            java.time.Duration.between(live.getStartAt(), LocalDateTime.now()).toMinutes());
+                            java.time.Duration.between(live.getStartAt(), LocalDateTime.now(KoreaClock.getClock())).toMinutes());
                 } catch (Exception e) {
                     log.error("[SCHEDULER] 라이브 자동 종료 실패: liveSeq={}, error={}", 
                             live.getId(), e.getMessage(), e);
