@@ -7,9 +7,7 @@ import org.springframework.stereotype.Repository;
 import ssafy.a303.backend.common.helper.KoreaClock;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Slf4j
 @Repository
@@ -22,8 +20,8 @@ public class AuctionInProgressRepository {
     }
 
     public void enrollAuctionInProgress(int auctionSeq, LocalDateTime auctionEndAt) {
-        if(redis.opsForValue().get(generateKey(auctionSeq)) != null)
-        redis.opsForValue().setIfAbsent(generateKey(auctionSeq), String.valueOf(auctionSeq), life(auctionEndAt));
+        if (redis.opsForValue().get(generateKey(auctionSeq)) != null)
+            redis.opsForValue().setIfAbsent(generateKey(auctionSeq), String.valueOf(auctionSeq), life(auctionEndAt));
     }
 
     public boolean checkAuctionInProgress(int auctionSeq) {
@@ -40,7 +38,7 @@ public class AuctionInProgressRepository {
         return KEY_FORMAT.formatted(auctionSeq);
     }
 
-    public void deleteKey(int auctionSeq){
+    public void deleteKey(int auctionSeq) {
         redis.delete(generateKey(auctionSeq));
     }
 }

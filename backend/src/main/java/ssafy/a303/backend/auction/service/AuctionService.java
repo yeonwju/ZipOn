@@ -40,10 +40,6 @@ public class AuctionService {
     private final UserRepository userRepository;
     private final PropertySearchService searchService;
 
-    public Auction getAuction(int auctionSeq) {
-        return auctionRepository.findById(auctionSeq).orElseThrow(() -> new CustomException(ErrorCode.AUCTION_NOT_FOUND));
-    }
-
     /**
      * 중개 및 경매 신청 (중개인 -> 매물)
      *
