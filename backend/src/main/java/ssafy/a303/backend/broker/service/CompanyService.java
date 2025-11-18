@@ -14,7 +14,6 @@ import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,12 +96,12 @@ public class CompanyService {
         return Company
                 .builder()
                 .name(item.company())
-                .taxSeq(item.bno().replaceAll("-",""))
+                .taxSeq(item.bno().replaceAll("-", ""))
                 .status("01".equals(item.bsttcd()))
                 .build();
     }
 
-    public boolean searchAtGov(String bNo){
+    public boolean searchAtGov(String bNo) {
         CompanyStatusRequest request = new CompanyStatusRequest(List.of(bNo));
         CompanyStatusResponse response = gWebClient.post()
                 .uri(uri -> uri

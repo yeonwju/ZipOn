@@ -2,7 +2,6 @@ package ssafy.a303.backend.auction.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,15 +14,11 @@ import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 import ssafy.a303.backend.auction.dto.request.BidRequestDTO;
 import ssafy.a303.backend.auction.dto.response.BidAmountDTO;
 import ssafy.a303.backend.auction.dto.response.WinnerAcceptDTO;
-import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.kafka.BidEventProducer;
 import ssafy.a303.backend.auction.service.BidService;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.common.response.ResponseDTO;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -110,7 +105,7 @@ public class BidController {
     public ResponseEntity<ResponseDTO<WinnerAcceptDTO>> accept(
             @AuthenticationPrincipal Integer userSeq,
             @PathVariable int auctionSeq
-    ){
+    ) {
         int contractSeq = bidService.acceptOffer(userSeq, auctionSeq);
 
         WinnerAcceptDTO dto = new WinnerAcceptDTO(contractSeq);
@@ -143,7 +138,7 @@ public class BidController {
     public ResponseEntity<ResponseDTO<Void>> reject(
             @AuthenticationPrincipal Integer userSeq,
             @PathVariable int auctionSeq
-    ){
+    ) {
         bidService.rejectOffer(userSeq, auctionSeq);
         return ResponseDTO.ok(null, "처리되었습니다.");
     }
