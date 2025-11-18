@@ -20,6 +20,7 @@ import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
+import ssafy.a303.backend.property.util.S3Uploader;
 import ssafy.a303.backend.search.dto.AddressParts;
 import ssafy.a303.backend.search.dto.PropertyDocument;
 import ssafy.a303.backend.search.dto.SearchRequestDto;
