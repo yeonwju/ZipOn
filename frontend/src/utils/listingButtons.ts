@@ -53,6 +53,7 @@ export function isLiveTimePassed(liveAt: string | undefined): boolean {
 export function getListingButtonConfig(
   isAucPref: boolean,
   isBrkPref: boolean,
+  isLiveDone: boolean,
   hasBrk: boolean,
   lessorSeq: number | undefined,
   brkSeq: number | undefined,
@@ -78,7 +79,7 @@ export function getListingButtonConfig(
   const isBroker = brkSeq === currentUserSeq
 
   // auctionSeq가 있고 소유자가 아닌 경우 입찰하기 버튼 우선 표시
-  if (auctionSeq && !isOwner && !isBroker) {
+  if (auctionSeq && !isOwner && !isBroker && isLiveDone) {
     return {
       primary: {
         text: '입찰하기',

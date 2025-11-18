@@ -74,6 +74,7 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
     : getListingButtonConfig(
         result.isAucPref,
         result.isBrkPref,
+        result.isLiveDone,
         result.hasBrk,
         result.lessorSeq,
         result.brkSeq,

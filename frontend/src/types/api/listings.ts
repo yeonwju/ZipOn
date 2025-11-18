@@ -74,6 +74,7 @@ export interface ListingDetailDataResponse {
   isCertificated: boolean
   riskScore: number
   riskReason: string
+  isLiveDone: boolean
 }
 
 export type ListingDetailResponse = {
