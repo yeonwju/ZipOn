@@ -26,7 +26,6 @@ ai:
 openvidu:
   url: ${OPENVIDU_URL}
   secret: ${OPENVIDU_SECRET}
-  public-wss-url: ${OPENVIDU_PUBLIC_WSS_URL}
 
 cloud:
   aws:
