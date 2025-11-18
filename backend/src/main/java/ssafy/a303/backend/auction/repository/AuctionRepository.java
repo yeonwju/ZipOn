@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ssafy.a303.backend.auction.dto.projection.AuctionStartProjection;
 import ssafy.a303.backend.auction.dto.response.BrkApplicantResponseDto;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
@@ -94,7 +95,8 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
 
 
     @Query(value = """
-            select a.auctionSeq
+            select a.auctionSeq as auctionSeq,
+            a.auctionEndAt as auctionEndAt
             from Auction a
             where
                 a.status = 'ACCEPTED'
@@ -102,7 +104,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                 and a.auctionEndAt > :now
             """
     )
-    List<Integer> findAuctionWhatToStart(@Param("now") LocalDateTime now);
+    List<AuctionStartProjection> findAuctionWhatToStart(@Param("now") LocalDateTime now);
 
     @Query(value = """
             select a.auctionSeq

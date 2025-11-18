@@ -84,11 +84,12 @@ public class AuctionService {
 
         /** 경매도 신청 */
         LocalDate date = req.strmDate();
-        LocalTime start = req.strmStartTm();
-        LocalTime end = req.strmEndTm();
+        LocalTime strmStart = req.strmStartTm();
+        LocalTime strmEnd = req.strmEndTm();
+        LocalTime auctionEnd = req.auctionEndAt();
 
         // 시작, 종료 시간 전후 검증
-        if (!end.isAfter(start)) {
+        if (!strmEnd.isAfter(strmStart)) {
             throw new CustomException(ErrorCode.TIME_NOT_ALLOWED);
         }
 
@@ -98,13 +99,13 @@ public class AuctionService {
         }
 
         /** 경매종료 시점 설정 (방송 다음날 오후 12시) */
-        LocalDateTime auctionStartAt = date.atTime(end);
-        LocalDateTime auctionEndAt = date.plusDays(1).atTime(12, 0);
+        LocalDateTime auctionStartAt = date.atTime(strmEnd);
+        LocalDateTime auctionEndAt = date.plusDays(1).atTime(auctionEnd);
 
         Auction saved = auctionRepository.save(
                 b.strmDate(date)
-                        .strmStartTm(start)
-                        .strmEndTm(end)
+                        .strmStartTm(strmStart)
+                        .strmEndTm(strmEnd)
                         .auctionStartAt(auctionStartAt)
                         .auctionEndAt(auctionEndAt)
                         .intro(req.intro())

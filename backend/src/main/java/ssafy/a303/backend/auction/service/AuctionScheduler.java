@@ -1,9 +1,11 @@
 package ssafy.a303.backend.auction.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ssafy.a303.backend.auction.dto.projection.AuctionStartProjection;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.Bid;
 import ssafy.a303.backend.auction.entity.BidStatus;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuctionScheduler {
@@ -29,15 +32,18 @@ public class AuctionScheduler {
     @Transactional
     public void enrollAuctionInProgress() {
         LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
-        List<Integer> auctionSeqs = auctionRepository.findAuctionWhatToStart(now);
+        List<AuctionStartProjection> list = auctionRepository.findAuctionWhatToStart(now);
+        if(list.isEmpty()) return;
 
-        for (Integer auctionSeq : auctionSeqs) {
-            auctionInProgressRepository.enrollAuctionInProgress(auctionSeq);
+        log.info(String.format(">>>>>>>>>>>> 경매 시작 %s", list));
+        for (AuctionStartProjection a : list) {
+            auctionInProgressRepository.enrollAuctionInProgress(a.getAuctionSeq(), a.getAuctionEndAt());
         }
     }
 
     /* 종료되어야할 경매 처리 */
-    @Scheduled(cron = "0 0 12 * * *", zone = "Asia/Seoul")
+    // @Scheduled(cron = "0 0 12 * * *", zone = "Asia/Seoul")
+    @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.SECONDS)
     @Transactional
     public void endAuctionProcess() {
         LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
@@ -45,6 +51,7 @@ public class AuctionScheduler {
         List<Integer> auctionSeqs = auctionRepository.findAuctionWhatAreEnd(now);
         if (auctionSeqs.isEmpty()) return;
 
+        log.info(String.format(">>>>>>>>>>>> 경매 종료 %s", auctionSeqs));
         for (Integer auctionSeq : auctionSeqs) {
             bidRankService.saveRedisToDataBase(auctionSeq);
         }
@@ -62,7 +69,6 @@ public class AuctionScheduler {
 
         // 1. 끝났지만 winnerSeq가 아직 정해지지 않은 경매들
         List<Auction> auctions = auctionRepository.findFinishedWithoutWinner();
-
         for (Auction auction : auctions) {
             processSingleAuction(auction, now);
         }
