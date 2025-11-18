@@ -2,12 +2,12 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
-import { normalizeImageUrl } from '@/utils/format'
 import { PaymentDetail } from '@/components/features/auction'
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { useBidAmount } from '@/queries/useBid'
 import { useContractProxyAccount } from '@/queries/useContract'
 import { useSearchListingDetail } from '@/queries/useListing'
+import { normalizeImageUrl } from '@/utils/format'
 
 export default function PaymentDetailContent() {
   const router = useRouter()

@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 
-import { normalizeImageUrl } from '@/utils/format'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { useUser } from '@/queries/useUser'
 import { ChatRoomListResponseData } from '@/types/api/chat'
+import { normalizeImageUrl } from '@/utils/format'
 
 interface ChatRoomCardProps {
   className?: string

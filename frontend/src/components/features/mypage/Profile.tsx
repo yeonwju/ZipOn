@@ -4,10 +4,10 @@ import { Camera } from 'lucide-react'
 import Image from 'next/image'
 
 import AuthOptionGroup from '@/components/features/mypage/AuthOptionGroup'
-import { normalizeImageUrl } from '@/utils/format'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/queries/useUser'
+import { normalizeImageUrl } from '@/utils/format'
 
 export default function Profile() {
   const { data: user } = useUser()

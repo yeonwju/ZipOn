@@ -1,5 +1,5 @@
-import { normalizeImageUrl } from '@/utils/format'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { normalizeImageUrl } from '@/utils/format'
 
 interface ListingDetailProfileProps {
   imgSrc: string
