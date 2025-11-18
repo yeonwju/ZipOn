@@ -17,6 +17,7 @@ import ssafy.a303.backend.property.entity.Property;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -93,5 +94,12 @@ public class BidService {
         // 2. 상태를 REJECTED로 변경
         bid.setStatus(BidStatus.REJECTED);
         bid.setDecidedAt(now);
+    }
+
+    public int getBidAmount(int userSeq, int auctionSeq){
+        Bid bid = bidRepository.findBidByUser_UserSeqAndAuction_AuctionSeqAndStatus(userSeq,auctionSeq, BidStatus.ACCEPTED).orElseThrow(
+                () -> new CustomException(ErrorCode.BID_NOT_FOUND)
+        );
+        return bid.getBidAmount();
     }
 }

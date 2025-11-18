@@ -10,6 +10,7 @@ import ssafy.a303.backend.broker.dto.response.CompanyStatusResponse;
 import ssafy.a303.backend.broker.entity.Company;
 import ssafy.a303.backend.broker.repository.CompanyRepository;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 
 import java.time.LocalDate;
@@ -39,8 +40,7 @@ public class CompanyService {
 
     public Company checkCompany(String bNo) {
         Optional<Company> opt = companyRepository.findCompanyByTaxSeq(bNo);
-        ZoneId zone = ZoneId.of("Asia/Seoul");
-        LocalDate today = LocalDate.now(zone);
+        LocalDate today = LocalDate.now(KoreaClock.getClock());
 
         // 오늘 이미 검색 된 경우
         if (opt.isPresent()) {
