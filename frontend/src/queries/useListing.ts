@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 
 import { listingQueryKeys } from '@/constants'
 import {
@@ -84,10 +84,10 @@ export function useSearchListingDetail(
 }
 
 /**
- * 경매 매물 목록 조회 Hook
+ * 경매 매물 목록 조회 Hook (Suspense 지원)
  */
 export function useAuctionListings() {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: listingQueryKeys.auction(),
     queryFn: async () => {
       const result = await getAuctionListings()

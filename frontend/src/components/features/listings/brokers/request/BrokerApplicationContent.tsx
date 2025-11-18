@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation'
 
+import { normalizeImageUrl } from '@/utils/format'
 import { BrokerApplicationDetail } from '@/components/features/listings/brokers'
 import { useSearchListingDetail } from '@/queries/useListing'
 
@@ -23,7 +24,7 @@ export default function BrokerApplicationContent() {
     <BrokerApplicationDetail
       listing={listing}
       ownerName={listing.lessorNm}
-      ownerImage={listing.lessorProfileImg}
+      ownerImage={normalizeImageUrl(listing.lessorProfileImg)}
       preferredTime={listing.aucAvailable}
       ownerDescription={listing.content}
     />

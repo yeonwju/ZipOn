@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { normalizeImageUrl } from '@/utils/format'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { useUser } from '@/queries/useUser'
 import { ChatRoomListResponseData } from '@/types/api/chat'
@@ -43,7 +44,7 @@ export default function ChatRoomCard({ className, chatRoom }: ChatRoomCardProps)
     >
       <Avatar>
         <AvatarImage
-          src={chatRoom.partner?.profileImg ?? '/default-profile.svg'}
+          src={normalizeImageUrl(chatRoom.partner?.profileImg)}
           alt="프로필 이미지"
           className={'h-13 w-13 rounded-full'}
         />

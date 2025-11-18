@@ -4,15 +4,7 @@ import AucListingCard from '@/components/features/listings/AucListingCard'
 import { useAuctionListings } from '@/queries/useListing'
 
 export default function AuctionlistClient() {
-  const { data, isLoading } = useAuctionListings()
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-gray-500">로딩 중...</div>
-      </div>
-    )
-  }
+  const { data } = useAuctionListings()
 
   const items = Array.isArray(data?.items) ? data.items : []
 

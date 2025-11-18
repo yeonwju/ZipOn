@@ -6,7 +6,7 @@ import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ROUTES } from '@/constants'
 import { useBidAccept, useBidReject } from '@/queries/useBid'
 import { MyAuctionsData } from '@/types/api/mypage'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, normalizeImageUrl } from '@/utils/format'
 
 interface AuctionHistoryCardProps {
   auctionData: MyAuctionsData
@@ -45,7 +45,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
         {/* 이미지 */}
         <div className="relative w-24 flex-shrink-0">
           <Image
-            src={auctionData.thumbnail || '/live-room.svg'}
+            src={normalizeImageUrl(auctionData.thumbnail) || '/live-room.svg'}
             alt="매물 이미지"
             width={96}
             height={96}

@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import AucListingCard from '@/components/features/listings/AucListingCard'
 import ListingTopTabs from '@/components/layout/header/ListingsTopTabs'
+import { AuctionListSkeleton } from '@/components/skeleton/listings'
 import FabDial from '@/components/ui/FabDial'
 import { ROUTES } from '@/constants'
 import { useBrkListings, useGeneralListings } from '@/queries/useListing'
@@ -40,9 +41,7 @@ export default function ListingsTabContent() {
 
       <div className="min-h-[400px]">
         {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="text-gray-500">로딩 중...</div>
-          </div>
+          <AuctionListSkeleton />
         ) : (
           <>
             {activeTab === 'general' && (

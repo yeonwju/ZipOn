@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { ROUTES } from '@/constants'
 import { MyBrokerageData } from '@/types/api/mypage'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, normalizeImageUrl } from '@/utils/format'
 
 interface MyBrokerageCardProps {
   className?: string
@@ -52,7 +52,7 @@ export default function MyBrokerageCard({ className, brokerageData }: MyBrokerag
         {/* 이미지 */}
         <div className="relative w-24 flex-shrink-0">
           <Image
-            src={brokerageData.thumbnail || '/listing.svg'}
+            src={normalizeImageUrl(brokerageData.thumbnail) || '/listing.svg'}
             alt="매물 이미지"
             width={96}
             height={96}

@@ -4,6 +4,7 @@ import { Eye, Heart, MessageCircle } from 'lucide-react'
 import Image from 'next/image'
 import React from 'react'
 
+import { normalizeImageUrl } from '@/utils/format'
 import { LiveItemData } from '@/types'
 export type LiveItemProps = LiveItemData
 
@@ -20,7 +21,7 @@ export default function LiveItem({
       {/* 썸네일 */}
       <div className="w-full max-w-full flex-shrink-0 overflow-hidden rounded-t-2xl">
         <Image
-          src={imgSrc}
+          src={normalizeImageUrl(imgSrc) || '/live-room.svg'}
           alt="라이브 방 이미지"
           width={400}
           height={400}
@@ -39,7 +40,7 @@ export default function LiveItem({
         <div className={'flex w-full min-w-0 justify-between gap-2'}>
           <div className="sm:text-md mb-0.5 flex min-w-0 flex-row items-center gap-1 text-[11px] text-gray-500 sm:gap-2 lg:text-lg">
             <Image
-              src={brokerImgSrc}
+              src={normalizeImageUrl(brokerImgSrc) || '/default-profile.svg'}
               alt="브로커 이미지"
               width={18}
               height={18}

@@ -4,6 +4,7 @@ import { Camera } from 'lucide-react'
 import Image from 'next/image'
 
 import AuthOptionGroup from '@/components/features/mypage/AuthOptionGroup'
+import { normalizeImageUrl } from '@/utils/format'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/queries/useUser'
@@ -24,7 +25,7 @@ export default function Profile() {
       <div className={'relative'}>
         <Avatar className="h-20 w-20 rounded-3xl border-3 border-gray-100 shadow-lg">
           <AvatarImage
-            src={user?.profileImg || '/default-profile.svg'}
+            src={normalizeImageUrl(user?.profileImg)}
             alt="Profile"
             className="rounded-2xl object-cover"
             onError={e => {

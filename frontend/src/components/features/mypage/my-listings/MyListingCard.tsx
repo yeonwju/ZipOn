@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 import { MyPropertiesData } from '@/types/api/mypage'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, normalizeImageUrl } from '@/utils/format'
 
 interface MyListingCardProps {
   className?: string
@@ -31,7 +31,7 @@ export default function MyListingCard({ className, propertyData }: MyListingCard
         {/* 이미지 */}
         <div className="relative w-24 flex-shrink-0">
           <Image
-            src={propertyData.thumbnail || '/listing.svg'}
+            src={normalizeImageUrl(propertyData.thumbnail) || '/listing.svg'}
             alt="매물 이미지"
             width={96}
             height={96}

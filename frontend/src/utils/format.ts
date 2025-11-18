@@ -73,3 +73,28 @@ export const pyeongToSquareMeter = (pyeong: number): number => {
 export const squareMeterToPyeong = (squareMeter: number): number => {
   return Math.round((squareMeter / 3.3058) * 10) / 10
 }
+
+/**
+ * 이미지 URL을 절대 URL로 변환
+ * 상대 경로인 경우 S3 URL로 변환
+ * @param imageUrl - 이미지 URL (상대 경로 또는 절대 URL)
+ * @returns 절대 URL
+ */
+export const normalizeImageUrl = (imageUrl: string | null | undefined): string => {
+  if (!imageUrl) return '/default-profile.svg'
+  
+  // 이미 절대 URL인 경우 (http:// 또는 https://로 시작)
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl
+  }
+  
+  // 상대 경로인 경우 (/, /default-profile.svg 같은 경우는 그대로 반환)
+  if (imageUrl.startsWith('/')) {
+    return imageUrl
+  }
+  
+  // 상대 경로인 경우 (dev/uploads/... 같은 경우) S3 URL로 변환
+  // S3 버킷 URL: https://zipon-media.s3.ap-northeast-2.amazonaws.com/
+  const S3_BASE_URL = 'https://zipon-media.s3.ap-northeast-2.amazonaws.com'
+  return `${S3_BASE_URL}/${imageUrl}`
+}

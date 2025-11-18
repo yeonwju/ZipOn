@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { ListingData } from '@/types/api/listings'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, normalizeImageUrl } from '@/utils/format'
 
 interface AucListingCardProps {
   listing: ListingData
@@ -19,7 +19,12 @@ export default function AucListingCard({ listing, className }: AucListingCardPro
       <div className="flex h-[130px] w-full border-b border-gray-200 bg-white">
         {/* Left Image */}
         <div className="relative h-full w-[150px] flex-shrink-0">
-          <Image src="/listing.svg" alt="매물 이미지" fill className="object-cover" />
+          <Image
+            src={normalizeImageUrl(listing.thumbnail) || '/listing.svg'}
+            alt="매물 이미지"
+            fill
+            className="object-cover"
+          />
         </div>
 
         {/* Right */}

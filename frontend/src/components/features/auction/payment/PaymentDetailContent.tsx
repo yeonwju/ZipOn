@@ -2,6 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
+import { normalizeImageUrl } from '@/utils/format'
 import { PaymentDetail } from '@/components/features/auction'
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { useBidAmount } from '@/queries/useBid'
@@ -64,7 +65,7 @@ export default function PaymentDetailContent() {
           deposit={propertyData.deposit}
           monthlyRent={propertyData.mnRent}
           lessorName={propertyData.lessorNm}
-          lessorImage={propertyData.lessorProfileImg}
+          lessorImage={normalizeImageUrl(propertyData.lessorProfileImg)}
           onPayment={handlePayment}
         />
       ) : (
