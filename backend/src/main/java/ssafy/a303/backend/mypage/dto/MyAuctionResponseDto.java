@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ssafy.a303.backend.auction.entity.BidStatus;
+import ssafy.a303.backend.contract.enums.ContractStatus;
 
 /**
  * 경매 참여 내역 응답 DTO
@@ -27,6 +28,9 @@ public class MyAuctionResponseDto {
 
     @Schema(description = "계약 식별자", example="1")
     private Integer contractSeq;
+
+    @Schema(description = "계약 상태", example="WAITING_AI_REVIEW")
+    private ContractStatus contractStatus;
 
     @Schema(description = "경매 진행 상태", example = "WAITING")
     private BidStatus bidStatus;
