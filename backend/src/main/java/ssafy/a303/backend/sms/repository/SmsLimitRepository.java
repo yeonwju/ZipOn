@@ -32,7 +32,7 @@ public class SmsLimitRepository {
 
 
     private String generateKey(int userSeq) {
-        String today = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        String today = LocalDate.now(KoreaClock.getClock()).format(DateTimeFormatter.BASIC_ISO_DATE);
         return KEY_FORMAT.formatted(userSeq, today);
     }
 

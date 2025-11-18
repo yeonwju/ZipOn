@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import ssafy.a303.backend.property.enums.Building;
 import ssafy.a303.backend.property.enums.Facing;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
