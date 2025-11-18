@@ -59,7 +59,9 @@ public class MyPageController {
                           "thumbnail": "https://picsum.photos/seed/property1/800/600",
                           "auctionSeq": 1,
                           "propertySeq": 1,
-                          "attendanceStatus": "WAITING",
+                          "contractSeq": 1,
+                          "contractStatus": "WAITING_AI_REVIEW",
+                          "bidStatus": "WAITING",
                           "address": "서울특별시 강남구 강남대로 396",
                           "bidAmount": 4800000,
                           "bidRank": 1
@@ -68,7 +70,9 @@ public class MyPageController {
                           "thumbnail": "https://picsum.photos/seed/property2/800/600",
                           "auctionSeq": 2,
                           "propertySeq": 2,
-                          "attendanceStatus": "ACCEPTED",
+                          "contractSeq": 1,
+                          "contractStatus": "WAITING_AI_REVIEW",
+                          "bidStatus": "ACCEPTED",
                           "address": "서울특별시 강남구 테헤란로 123",
                           "bidAmount": 9500000,
                           "bidRank": 1
