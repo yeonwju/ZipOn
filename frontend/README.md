@@ -57,4 +57,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - 중개인 선택화면 : /listings/[id]/brokers/apply
 - 경매 입찰 화면 : /auction/[id]
 - 경매 가상계좌 발급화면 : /auction/[id]/payment/pending
-- 경매 입금,결제 완료화면 : /auction/[id]/payment/complete
+- 경매 입금,결제 완료화면 : /auction/[id]/payment/complete  

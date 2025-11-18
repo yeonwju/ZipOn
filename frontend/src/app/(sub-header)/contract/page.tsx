@@ -1,5 +1,10 @@
+import { Suspense } from 'react'
 import ContractClient from '@/app/(sub-header)/contract/ContractClient'
 
 export default function ContractPage() {
-  return <ContractClient />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ContractClient />
+    </Suspense>
+  )
 }
