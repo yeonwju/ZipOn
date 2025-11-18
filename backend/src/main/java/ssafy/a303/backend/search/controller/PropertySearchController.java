@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.a303.backend.common.response.ResponseDTO;
+import ssafy.a303.backend.property.util.S3Uploader;
 import ssafy.a303.backend.search.dto.PageResponseDto;
 import ssafy.a303.backend.search.dto.PropertyDocument;
 import ssafy.a303.backend.search.dto.SearchRequestDto;
@@ -26,6 +27,7 @@ import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.search.service.PropertySearchService;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,6 +40,7 @@ public class PropertySearchController {
 
     private final PropertySearchService propertySearchService;
     private final PropertyRepository propertyRepository;
+    private final S3Uploader s3Uploader;
 
     /**
      * 검색 조회 api
@@ -256,13 +259,18 @@ public class PropertySearchController {
         Double latitude = (p != null) ? p.getLatitude() : null;
         Double longitude  = (p != null) ? p.getLongitude() : null;
 
+        String thumbnailUrl = null;
+        if (thumbnail != null && !thumbnail.isBlank()) {
+            thumbnailUrl = s3Uploader.presignedGetUrl(thumbnail, Duration.ofHours(12));
+        }
+
         return new SearchResponseDto(
 
                 toIntOrNull(hit.id()), // propertySeq
                 latitude,
                 longitude,
                 src.getLessorNm(), // lessorNm
-                thumbnail, // thumbnail
+                thumbnailUrl, // thumbnail
                 src.getTitle(), // title
                 src.getDescription(), // snippet (하이라이트나 요약)
                 src.getBuildingType(), // buildingType (Enum Building)
