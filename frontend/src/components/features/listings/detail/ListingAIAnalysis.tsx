@@ -76,7 +76,7 @@ export default function ListingAIAnalysis({ riskScore, riskReason }: ListingAIAn
       <div className="mb-4 h-2.5 overflow-hidden rounded-full bg-gray-200">
         <div
           className={`h-full ${risk.progressColor} transition-all duration-700 ease-out`}
-          style={{ width: `${riskScore}%` }}
+          style={{ width: `${riskScore * 20}%` }}
         />
       </div>
 

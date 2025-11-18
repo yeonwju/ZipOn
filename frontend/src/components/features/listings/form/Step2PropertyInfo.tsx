@@ -76,7 +76,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.lessorNm}
                 onChange={e => updateField('lessorNm', e.target.value)}
                 placeholder="ex: 김싸피"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -88,7 +88,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.propertyNm}
                 onChange={e => updateField('propertyNm', e.target.value)}
                 placeholder="ex: 멀티캠퍼스"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function Step2PropertyInfo({
             onChange={e => updateField('content', e.target.value)}
             placeholder="이 집은 아주 좋습니다."
             rows={4}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
           />
         </div>
 
@@ -122,7 +122,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.area}
                 onChange={e => updateField('area', e.target.value)}
                 placeholder="ex: 84.8"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -132,7 +132,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.areaP}
                 onChange={e => updateField('areaP', e.target.value)}
                 placeholder="ex: 32"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.deposit}
                 onChange={e => updateField('deposit', e.target.value)}
                 placeholder="ex: 10000000"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -163,7 +163,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.mnRent}
                 onChange={e => updateField('mnRent', e.target.value)}
                 placeholder="ex: 800000"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.fee}
                 onChange={e => updateField('fee', e.target.value)}
                 placeholder="ex: 50000"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.roomCnt}
                 onChange={e => updateField('roomCnt', e.target.value)}
                 placeholder="ex: 2"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -203,7 +203,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.bathroomCnt}
                 onChange={e => updateField('bathroomCnt', e.target.value)}
                 placeholder="ex: 1"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
             <div>
@@ -213,7 +213,7 @@ export default function Step2PropertyInfo({
                 value={listingInfo.floor}
                 onChange={e => updateField('floor', e.target.value)}
                 placeholder="ex: 5"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
           </div>

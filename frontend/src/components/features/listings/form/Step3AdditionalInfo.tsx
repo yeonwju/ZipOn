@@ -135,7 +135,7 @@ export default function Step3AdditionalInfo({
                 value={additionalInfo.parkingCnt}
                 onChange={e => updateField('parkingCnt', e.target.value)}
                 placeholder="예: 1"
-                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
 
@@ -292,7 +292,7 @@ export default function Step3AdditionalInfo({
                       onChange={e =>
                         handleLiveTimeChange(Number(e.target.value), selectedLiveTime.minute)
                       }
-                      className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                      className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
                     >
                       {Array.from({ length: 24 }, (_, i) => (
                         <option key={i} value={i}>
@@ -308,7 +308,7 @@ export default function Step3AdditionalInfo({
                       onChange={e =>
                         handleLiveTimeChange(selectedLiveTime.hour, Number(e.target.value))
                       }
-                      className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                      className="h-[36px] w-full rounded-lg border border-gray-300 px-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
                     >
                       {[0, 10, 20, 30, 40, 50].map(min => (
                         <option key={min} value={min}>
@@ -340,7 +340,7 @@ export default function Step3AdditionalInfo({
             onChange={e => updateField('notes', e.target.value)}
             placeholder="추가로 전달하고 싶은 내용을 입력해주세요 (선택사항)"
             rows={5}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
           />
         </div>
       </AccordionContent>

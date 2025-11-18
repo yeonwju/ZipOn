@@ -34,7 +34,7 @@ export default function LiveChatInput({ onSendMessage, disabled }: LiveChatInput
         onChange={e => setMessage(e.target.value)}
         placeholder="메시지를 입력하세요..."
         disabled={disabled}
-        className="flex-1 rounded-full bg-black/40 px-4 py-2 text-sm text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
+        className="flex-1 rounded-full bg-black/40 px-4 py-2 text-base text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
         maxLength={200}
       />
       <button

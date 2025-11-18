@@ -4,7 +4,8 @@ import { Eye, Heart, MessageCircle } from 'lucide-react'
 import Image from 'next/image'
 import React from 'react'
 
-import { LiveItemProps } from '@/data/LiveItemDummy'
+import { LiveItemData } from '@/types'
+export type LiveItemProps = LiveItemData
 
 export default function LiveItem({
   imgSrc,

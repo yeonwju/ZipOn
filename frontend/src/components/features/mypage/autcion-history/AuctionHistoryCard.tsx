@@ -123,15 +123,33 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 >
                   거절
                 </button>
+                <button
+                  onClick={() => {
+                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                  }}
+                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  더보기
+                </button>
               </>
             )}
             {auctionData.bidStatus === 'WAITING' && (
-              <Link
-                href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
-                className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
-              >
-                상세
-              </Link>
+              <>
+                <Link
+                  href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
+                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  상세
+                </Link>
+                <button
+                  onClick={() => {
+                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                  }}
+                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  더보기
+                </button>
+              </>
             )}
             {/* contractStatus가 WAITING_AI_REVIEW일 때 */}
             {auctionData.contractStatus && auctionData.contractStatus === 'WAITING_AI_REVIEW' && (
@@ -149,6 +167,14 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   className="flex-1 rounded border border-blue-300 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
                 >
                   계약하기
+                </button>
+                <button
+                  onClick={() => {
+                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                  }}
+                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  더보기
                 </button>
               </>
             )}
@@ -172,17 +198,35 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   >
                     결제
                   </button>
+                  <button
+                    onClick={() => {
+                      router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                    }}
+                    className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    더보기
+                  </button>
                 </>
               )}
             {(auctionData.bidStatus === 'REJECTED' ||
               auctionData.bidStatus === 'LOST' ||
               auctionData.bidStatus === 'TIMEOUT') && (
-              <Link
-                href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
-                className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
-              >
-                상세
-              </Link>
+              <>
+                <Link
+                  href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
+                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  상세
+                </Link>
+                <button
+                  onClick={() => {
+                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                  }}
+                  className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  더보기
+                </button>
+              </>
             )}
           </div>
         </div>
