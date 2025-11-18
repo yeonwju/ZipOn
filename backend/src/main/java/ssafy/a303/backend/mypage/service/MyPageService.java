@@ -9,6 +9,7 @@ import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.contract.entity.Contract;
+import ssafy.a303.backend.contract.enums.ContractStatus;
 import ssafy.a303.backend.contract.repository.ContractRepository;
 import ssafy.a303.backend.mypage.dto.MyAuctionResponseDto;
 import ssafy.a303.backend.mypage.dto.MyBrokerResponseDto;
@@ -18,6 +19,7 @@ import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ssafy.a303.backend.auction.entity.BidStatus.ACCEPTED;
@@ -62,11 +64,18 @@ public class MyPageService {
 
             // 계약 seq 조회
             Integer contractSeq = null;
+            //계약 상태 조회
+            ContractStatus contractStatus = null;
+
             if (bidStatus.equals(ACCEPTED)) {
-                contractSeq = contractRepository
-                        .findTopByPropertySeqOrderByCreatedAtDesc(propertySeq)
-                        .map(Contract::getContractSeq)
-                        .orElse(null);
+                Optional<Contract> contractOpt = contractRepository
+                        .findTopByPropertySeqOrderByCreatedAtDesc(propertySeq);
+
+                if (contractOpt.isPresent()) {
+                    Contract contract = contractOpt.get();
+                    contractSeq = contract.getContractSeq();
+                    contractStatus = contract.getContractStatus();
+                }
             }
 
             return MyAuctionResponseDto.builder()
@@ -74,6 +83,7 @@ public class MyPageService {
                     .auctionSeq(auctionSeq)
                     .propertySeq(propertySeq)
                     .contractSeq(contractSeq)
+                    .contractStatus(contractStatus)
                     .bidStatus(bidStatus)
                     .address(address)
                     .bidAmount(bidAmount)
