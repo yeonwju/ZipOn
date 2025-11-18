@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.security.jwt.entity.TokenPair;
 import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
@@ -37,8 +38,6 @@ public class JWTProvider {
     private long accessHours;
     @Value("${jwt.refresh-token-days}")
     private long refreshDays;
-    @Value("${instant-minute}")
-    private int instantMinute;
     private final TokenPairRepository tokenPairRepository;
 
     @PostConstruct
@@ -71,20 +70,6 @@ public class JWTProvider {
                 .setIssuedAt(Date.from(now))
                 .setExpiration(expiry)
                 .claim("tokenType", TokenType.REFRESH.name())
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public String generateInstantToken(InstantData instantData){
-        Instant now = instantData.getIssueTime();
-        Duration life = Duration.ofMinutes(instantMinute);
-        Date expiry = Date.from(now.plus(life));
-        return Jwts.builder()
-                .setSubject(String.valueOf(instantData.getUserSeq()))
-                .setIssuedAt(Date.from(now))
-                .setExpiration(expiry)
-                .claim("taxSeq", instantData.getTaxSeq())
-                .claim("ceo",instantData.getCeo())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -149,7 +134,7 @@ public class JWTProvider {
         String nRefreshJti = UUID.randomUUID().toString();
         aTokenData.setJti(nAccessJti);
         rTokenData.setJti(nRefreshJti);
-        Instant now = Instant.now();
+        Instant now = Instant.now(KoreaClock.getClock());
         aTokenData.setIssueTime(now);
         rTokenData.setIssueTime(now);
 

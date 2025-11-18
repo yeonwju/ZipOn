@@ -2,6 +2,7 @@ package ssafy.a303.backend.common.finance;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ssafy.a303.backend.common.helper.KoreaClock;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +33,7 @@ public class SSAFYHeaderDTOHelper {
      * @return SSAFY OpenAPI Header DTO
      */
     public SSAFYHeaderDTO buildHeader(String apiName, String userKey) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
         String date = now.format(DATE_FORMAT);
         String time = now.format(TIME_FORMAT);
         String uniqueNo = date + time + String.format("%06d", new Random().nextInt(999999));

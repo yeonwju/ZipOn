@@ -16,6 +16,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.security.jwt.entity.TokenPair;
 import ssafy.a303.backend.security.jwt.repository.TokenPairRepository;
 import ssafy.a303.backend.security.jwt.service.JWTProvider;
@@ -62,7 +63,7 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         TokenData tokenData = TokenData.builder()
                 .userSeq(userSeq)
                 .role(role)
-                .issueTime(Instant.now())
+                .issueTime(Instant.now(KoreaClock.getClock()))
                 .build();
 
         String accessJti = UUID.randomUUID().toString();
