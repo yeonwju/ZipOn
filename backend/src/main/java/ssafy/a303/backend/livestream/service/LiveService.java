@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
-import ssafy.a303.backend.common.config.OpenViduConfig;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
@@ -44,7 +43,6 @@ public class LiveService {
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
     private final StringRedisTemplate liveRedisTemplate;
     private final RedisTemplate<String, Object> liveRedisObjectTemplate;
-    private final OpenViduConfig openViduConfig;
 
     public LiveService(
             AuctionRepository auctionRepository,
@@ -53,8 +51,7 @@ public class LiveService {
             OpenVidu openVidu,
             LiveStartNotificationPubSubService liveStartNotificationPubSubService,
             @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
-            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
-            OpenViduConfig openViduConfig
+            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate
     ) {
         this.auctionRepository = auctionRepository;
         this.liveStreamRepository = liveStreamRepository;
@@ -63,7 +60,6 @@ public class LiveService {
         this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
         this.liveRedisTemplate = liveRedisTemplate;
         this.liveRedisObjectTemplate = liveRedisObjectTemplate;
-        this.openViduConfig = openViduConfig;
     }
 
     /**라이브 방송 시작*/
@@ -142,9 +138,9 @@ public class LiveService {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
             String payload = objectMapper.writeValueAsString(notification);
-            
+
             liveStartNotificationPubSubService.publish("live:new:broadcast", payload);
-            
+
             log.info("[LIVE] 새 방송 시작 알림 발행: liveSeq={}, title={}", liveStream.getId(), liveStream.getTitle());
         } catch (Exception e) {
             log.error("[LIVE] 새 방송 알림 발행 실패: {}", e.getMessage(), e);
@@ -218,14 +214,10 @@ public class LiveService {
             log.info("[LIVE] Token 발급 성공: liveSeq={}, userSeq={}, role={}", liveSeq, userSeq, role);
 
             // 10. 토큰 정보 DTO로 반환
-            String finalTokenUrl = openViduConfig.getPublicWssUrl()
-                    + "?sessionId=" + session.getSessionId()
-                    + "&token=" + connection.getToken();
-
             //Session  = 방송 방 자체
             //Token    = 그 방송 방에 "들어가기 위한 입장권"
             return LiveTokenResponseDto.builder()
-                    .token(finalTokenUrl)  // WebRTC 접속 토큰
+                    .token(connection.getToken())  // WebRTC 접속 토큰
                     .sessionId(session.getSessionId()) // 연결된 세션 ID
                     .role(role.name())  // 역할 정보
                     .build();
@@ -238,22 +230,22 @@ public class LiveService {
 
     /* 라이브 방송 퇴장 */
     public void leaveLive(Integer liveSeq, Integer userSeq) {
-        
+
         // 1. 라이브 방송 존재 여부 확인
         liveStreamRepository.findById(liveSeq)
                 .orElseThrow(() -> new CustomException(ErrorCode.LIVE_STREAM_NOT_FOUND));
-        
+
         // 2. Redis에서 시청자 제거
         String viewerKey = "live:viewers:" + liveSeq;
         liveRedisObjectTemplate.opsForSet().remove(viewerKey, userSeq);
-        
+
         // 3. 현재 시청자 수를 Pub/Sub 로 전송 (라이브 방송 내부용)
         long viewerCount = Optional.ofNullable(liveRedisObjectTemplate.opsForSet().size(viewerKey)).orElse(0L);
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
-                    "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
+                "{\"type\":\"VIEWER_COUNT_UPDATE\",\"count\":" + viewerCount + "}"
         );
-        
+
         log.info("[LIVE] 시청자 퇴장: liveSeq={}, userSeq={}, 남은 시청자={}", liveSeq, userSeq, viewerCount);
     }
 
@@ -308,7 +300,7 @@ public class LiveService {
                 "live:" + liveSeq,
                 "{\"type\":\"LIVE_ENDED\"}"
         );
-        
+
         log.info("[LIVE] 방송 종료 이벤트 발행: liveSeq={}", liveSeq);
 
         // 8. 모든 시청자 강제 퇴장 처리 (Redis에서 제거)
@@ -373,7 +365,7 @@ public class LiveService {
 
         Long chatCountFromRedis = liveRedisObjectTemplate.opsForList().size(chatKey);
         //log.info("[LIVE][INFO] 🔍 채팅 수 조회: chatKey={}, Redis에서 조회한 값={}", chatKey, chatCountFromRedis);
-        
+
         long chatCount = isEnded
                 ? liveStream.getChatCount()
                 : Optional.ofNullable(chatCountFromRedis).orElse(0L);
@@ -441,8 +433,8 @@ public class LiveService {
 
                     Long chatCountFromRedis = liveRedisObjectTemplate.opsForList().size(chatKey);
                     //log.info("[LIVE][LIST] 🔍 채팅 수 조회: liveSeq={}, chatKey={}, Redis에서 조회한 값={}",
-                            //liveStream.getId(), chatKey, chatCountFromRedis);
-                    
+                    //liveStream.getId(), chatKey, chatCountFromRedis);
+
                     int chatCount = isEnded
                             ? liveStream.getChatCount()
                             : Optional.ofNullable(chatCountFromRedis)
@@ -530,7 +522,7 @@ public class LiveService {
         // 실시간 좋아요 수 갱신 전송 (기존 라이브 방송 내부용)
         liveRedisTemplate.convertAndSend(
                 "live:" + liveSeq,
-                    "{\"type\":\"LIKE_COUNT_UPDATE\",\"count\":" + likeCount + "}"
+                "{\"type\":\"LIKE_COUNT_UPDATE\",\"count\":" + likeCount + "}"
         );
 
         // true = 좋아요 상태 유지, false = 취소 상태 유지
@@ -565,4 +557,3 @@ public class LiveService {
     }
 
 }
-

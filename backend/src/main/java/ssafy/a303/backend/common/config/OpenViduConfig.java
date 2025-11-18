@@ -17,9 +17,6 @@ public class OpenViduConfig {
     @Value("${openvidu.secret}")
     private String openviduSecret;
 
-    @Value("${openvidu.public-wss-url}")
-    private String publicWssUrl;
-
     @Bean
     public OpenVidu openVidu() {
         return new OpenVidu(openviduUrl, openviduSecret);
