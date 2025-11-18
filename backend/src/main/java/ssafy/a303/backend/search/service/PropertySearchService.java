@@ -19,6 +19,7 @@ import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.entity.PropertyAucInfo;
 import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
+import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.search.dto.AddressParts;
 import ssafy.a303.backend.search.dto.PropertyDocument;
 import ssafy.a303.backend.search.dto.SearchRequestDto;
@@ -40,6 +41,7 @@ public class PropertySearchService {
     /** ES Java API Client)*/
     private final ElasticsearchClient es;
     private final PropertyAucInfoRepository aucInfoRepository;
+    private final PropertyRepository propertyRepository;
 
     // 검색 대상 인덱스명
     @Value("${ELASTICSEARCH_INDEX}")
@@ -154,6 +156,7 @@ public class PropertySearchService {
         }
     }
 
+    /** 색인 삭제 */
     public void deleteIndex(Integer propertySeq) {
         try {
             es.delete(d -> d
@@ -163,6 +166,33 @@ public class PropertySearchService {
             log.info("[ES] 삭제된 매물 {}", propertySeq);
         } catch (Exception e) {
             log.error("[ES] 해당 매물에 대한 삭제가 실패되었습니다. = {}", propertySeq, e);
+        }
+    }
+
+    /** DB에 있는 전체 정보 재색인 */
+    public void reindexAllProperties() {
+        List<Property> properties = propertyRepository.findAll();
+
+        for (Property p : properties) {
+            try {
+                setIndex(p);
+            } catch (Exception e) {
+                // 에러에서 전체 중단되지 않게 로그만 남김
+                log.error("[ES] 재색인 실패 - propertySeq={}", p.getPropertySeq(), e);
+            }
+        }
+    }
+
+    /** 특정 property_seq 목록만 선택해서 재색인 */
+    public void reindexPropertiesBySeq(List<Integer> propertySeqs) {
+        List<Property> properties = propertyRepository.findAllById(propertySeqs);
+
+        for (Property p : properties) {
+            try {
+                setIndex(p);
+            } catch (Exception e) {
+                log.error("[ES] 재색인 실패 - propertySeq={}", p.getPropertySeq(), e);
+            }
         }
     }
 
