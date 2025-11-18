@@ -97,6 +97,8 @@ public record DetailResponseDto(
         LocalDateTime aucAt,
         @Schema(description = "경매 가능 일시", example = "2025-12-12")
         String aucAvailable,
+        @Schema(description = "라이브의 종료 여부", example = "true")
+        Boolean isLiveDone,
 
         //ai 관련
         @Schema(description = "pdf 코드", example = "sfdsfsf")

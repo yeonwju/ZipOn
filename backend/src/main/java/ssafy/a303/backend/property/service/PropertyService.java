@@ -10,6 +10,7 @@ import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.dto.request.PropertyAddressRequestDto;
 import ssafy.a303.backend.property.dto.request.PropertyDetailRequestDto;
@@ -242,6 +243,13 @@ public class PropertyService {
             auctionSeq = auction.getAuctionSeq();
         }
 
+        /** 라이브가 끝난 상태인지 */
+        Boolean isLiveDone = false;
+        if(auction != null) {
+            LocalDateTime liveEndAt = LocalDateTime.of(auction.getStrmDate(), auction.getStrmEndTm());
+            isLiveDone = LocalDateTime.now(KoreaClock.getClock()).isAfter(liveEndAt);
+        }
+
         DetailResponseDto detail = new DetailResponseDto(
                 p.getLessor().getUserSeq(), p.getLessor().getProfileImg(), liveAt, p.getBrkSeq(), auctionSeq, p.getPropertySeq(), p.getLessorNm(), p.getPropertyNm(), p.getContent(),
                 p.getAddress(), p.getLatitude(), p.getLongitude(), p.getBuildingType(),
@@ -252,7 +260,7 @@ public class PropertyService {
                 p.getParkingCnt(), p.getHasElevator(), p.getPetAvailable(),
                 aucInfo.getIsAucPref(), aucInfo.getIsBrkPref(),
                 p.getHasBrk(),
-                aucInfo.getAucAt(), aucInfo.getAucAvailable(),
+                aucInfo.getAucAt(), aucInfo.getAucAvailable(), isLiveDone,
                 cert.getPdfCode(), p.getIsCertificated(), cert.getRiskScore(), cert.getRiskReason()
         );
         return detail;
