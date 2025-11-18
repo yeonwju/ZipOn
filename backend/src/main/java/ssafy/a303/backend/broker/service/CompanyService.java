@@ -10,10 +10,10 @@ import ssafy.a303.backend.broker.dto.response.CompanyStatusResponse;
 import ssafy.a303.backend.broker.entity.Company;
 import ssafy.a303.backend.broker.repository.CompanyRepository;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +39,7 @@ public class CompanyService {
 
     public Company checkCompany(String bNo) {
         Optional<Company> opt = companyRepository.findCompanyByTaxSeq(bNo);
-        ZoneId zone = ZoneId.of("Asia/Seoul");
-        LocalDate today = LocalDate.now(zone);
+        LocalDate today = LocalDate.now(KoreaClock.getClock());
 
         // 오늘 이미 검색 된 경우
         if (opt.isPresent()) {
@@ -97,12 +96,12 @@ public class CompanyService {
         return Company
                 .builder()
                 .name(item.company())
-                .taxSeq(item.bno().replaceAll("-",""))
+                .taxSeq(item.bno().replaceAll("-", ""))
                 .status("01".equals(item.bsttcd()))
                 .build();
     }
 
-    public boolean searchAtGov(String bNo){
+    public boolean searchAtGov(String bNo) {
         CompanyStatusRequest request = new CompanyStatusRequest(List.of(bNo));
         CompanyStatusResponse response = gWebClient.post()
                 .uri(uri -> uri

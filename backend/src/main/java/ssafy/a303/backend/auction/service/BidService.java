@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.Bid;
 import ssafy.a303.backend.auction.entity.BidStatus;
-import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.auction.repository.BidRepository;
 import ssafy.a303.backend.common.exception.CustomException;
 import ssafy.a303.backend.common.helper.KoreaClock;
@@ -54,7 +53,7 @@ public class BidService {
             }
 
             // 아직 결과가 안 난 상태들만 LOST 처리
-            if (bid.getStatus() != BidStatus.ACCEPTED){
+            if (bid.getStatus() != BidStatus.ACCEPTED) {
                 bid.setStatus(BidStatus.LOST);
                 bid.setDecidedAt(now);
             }
@@ -93,5 +92,12 @@ public class BidService {
         // 2. 상태를 REJECTED로 변경
         bid.setStatus(BidStatus.REJECTED);
         bid.setDecidedAt(now);
+    }
+
+    public int getBidAmount(int userSeq, int auctionSeq) {
+        Bid bid = bidRepository.findBidByUser_UserSeqAndAuction_AuctionSeqAndStatus(userSeq, auctionSeq, BidStatus.ACCEPTED).orElseThrow(
+                () -> new CustomException(ErrorCode.BID_NOT_FOUND)
+        );
+        return bid.getBidAmount();
     }
 }
