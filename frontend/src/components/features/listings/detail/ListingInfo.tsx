@@ -1,6 +1,7 @@
 import { CalendarDays, Grid3x3, House, Layers, MapPin } from 'lucide-react'
 
 import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
+import { formatCurrency } from '@/utils/format'
 
 import ListingInfoItem from './ListingInfoItem'
 
@@ -46,16 +47,12 @@ export default function ListingInfo({
       <div className="mb-3">
         <div className="flex items-baseline gap-2">
           {/* 보증금 */}
-          <span className="text-md font-bold text-gray-900">
-            {deposit >= 100000000
-              ? `보증금 ${(deposit / 100000000).toFixed(deposit % 100000000 === 0 ? 0 : 1)}억`
-              : `보증금 ${(deposit / 10000).toLocaleString()}만원`}
-          </span>
+          <span className="text-md font-bold text-gray-900">보증금 {formatCurrency(deposit)}</span>
 
           {/* 월세 */}
           {rent > 0 && (
             <span className="text-md font-semibold text-blue-400">
-              / 월세 {rent.toLocaleString()}만원
+              / 월세 {formatCurrency(rent)}
             </span>
           )}
         </div>

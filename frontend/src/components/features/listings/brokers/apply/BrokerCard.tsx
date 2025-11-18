@@ -44,7 +44,7 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={broker.brkProfileImg || '/profile.svg'} alt={broker.brkNm} />
+            <AvatarImage src={broker.brkProfileImg || '/default-profile.svg'} alt={broker.brkNm} />
           </Avatar>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">

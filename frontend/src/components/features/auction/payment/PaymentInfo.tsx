@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/utils/format'
+
 interface PaymentInfoProps {
   deposit: number
   monthlyRent: number
@@ -13,15 +15,15 @@ export default function PaymentInfo({ deposit, monthlyRent, bidAmount }: Payment
       <div className="flex flex-col divide-y divide-gray-200">
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">보증금</span>
-          <span className="font-medium text-gray-900">{deposit.toLocaleString()}원</span>
+          <span className="font-medium text-gray-900">{formatCurrency(deposit)}</span>
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">낙찰금액</span>
-          <span className="font-medium text-gray-900">{bidAmount.toLocaleString()}원</span>
+          <span className="font-medium text-gray-900">{formatCurrency(bidAmount)}</span>
         </div>
         <div className="flex justify-between py-3 text-base">
           <span className="font-semibold text-gray-900">결제금액</span>
-          <span className="font-bold text-blue-600">{bidAmount.toLocaleString()}원</span>
+          <span className="font-bold text-blue-600">{formatCurrency(bidAmount)}</span>
         </div>
       </div>
     </div>

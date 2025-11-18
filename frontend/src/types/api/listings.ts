@@ -50,7 +50,11 @@ export interface ListingDetailDataResponse {
   deposit: number
   mnRent: number
   fee: number
-  images: string[]
+  images: Array<{
+    s3key: string
+    url: string
+    order: number
+  }> | string[]
   period: number
   floor: number
   facing: string

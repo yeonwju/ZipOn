@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import type { ListingData } from '@/types/models/listing'
+import { formatCurrency } from '@/utils/format'
 
 interface ListingCardProps {
   listing: ListingData
@@ -45,12 +46,10 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
         <p className="mb-2 text-sm text-gray-600">{listing.address}</p>
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-blue-600">
-            보증금 {listing.deposit.toLocaleString()}만원
+            보증금 {formatCurrency(listing.deposit)}
           </span>
           <span className="text-gray-400">|</span>
-          <span className="font-medium text-blue-600">
-            월세 {listing.mnRent.toLocaleString()}만원
-          </span>
+          <span className="font-medium text-blue-600">월세 {formatCurrency(listing.mnRent)}</span>
         </div>
       </div>
     </div>

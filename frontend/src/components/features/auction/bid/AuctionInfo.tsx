@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/utils/format'
+
 interface AuctionInfoProps {
   deposit: number
   fee: number
@@ -10,11 +12,11 @@ export default function AuctionInfo({ deposit, fee }: AuctionInfoProps) {
       <div className="flex flex-col divide-y divide-gray-200">
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">보증금</span>
-          <span className="font-medium text-gray-900">{deposit.toLocaleString()}원</span>
+          <span className="font-medium text-gray-900">{formatCurrency(deposit)}</span>
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">월세</span>
-          <span className="font-medium text-gray-900">{fee}만원</span>
+          <span className="font-medium text-gray-900">{formatCurrency(fee)}</span>
         </div>
       </div>
     </div>
