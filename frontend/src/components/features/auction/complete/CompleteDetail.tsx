@@ -1,38 +1,27 @@
 'use client'
 
-import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
-import type { ListingDetailData } from '@/types/models/listing'
+import { ListingDetailDataResponse } from '@/types/api/listings'
 
 import CompleteAccountInfo from './CompleteAccountInfo'
 import CompleteHeader from './CompleteHeader'
 import CompletePaymentInfo from './CompletePaymentInfo'
 
 interface CompleteDetailProps {
-  data: ListingDetailData
+  data: ListingDetailDataResponse
   bidAmount: number
-  deposit: number
-  monthlyRent: number
-  paymentDate: string
-  bankName: string
   accountNumber: string
   accountHolder: string
-  dueDate: string
   onConfirm?: () => void
 }
 
 export default function CompleteDetail({
   data,
   bidAmount,
-  deposit,
-  monthlyRent,
-  paymentDate,
-  bankName,
   accountNumber,
   accountHolder,
-  dueDate,
   onConfirm,
 }: CompleteDetailProps) {
-  const totalAmount = deposit + bidAmount
+  const totalAmount = bidAmount
 
   return (
     <div className="flex flex-col bg-gray-50 px-5 pt-2 pb-4">
@@ -43,16 +32,13 @@ export default function CompleteDetail({
         {/* 결제 내역 & 계좌 정보 */}
         <section className="mt-6 flex flex-col gap-4">
           <CompletePaymentInfo
-            deposit={deposit}
-            monthlyRent={monthlyRent}
+            deposit={data.deposit}
+            monthlyRent={data.mnRent}
             bidAmount={bidAmount}
-            paymentDate={paymentDate}
           />
           <CompleteAccountInfo
-            bankName={bankName}
             accountNumber={accountNumber}
             accountHolder={accountHolder}
-            dueDate={dueDate}
             totalAmount={totalAmount}
           />
         </section>

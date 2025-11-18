@@ -78,3 +78,56 @@ export type ListingDetailResponse = {
   status: number
   timestamp: number
 }
+
+export type ListingAuctions = {
+  total: number
+  page: number
+  size: number
+  items: [
+    {
+      propertySeq: number
+      latitdue: number
+      longitude: number
+      lessorNm: string
+      thumbnail: string
+      title: string
+      description: string
+      buildingType: string
+      address: string
+      deposit: number
+      mnRent: number
+      fee: number
+      area: number
+      areaP: number
+      roomCnt: number
+      floor: number
+      isAuc: boolean
+      isBrk: boolean
+      hasBrk: boolean
+      createdAt: string
+    },
+  ]
+}
+
+export type ListingData = {
+  propertySeq: number
+  latitdue: number
+  longitude: number
+  lessorNm: string
+  thumbnail: string
+  title: string
+  description: string
+  buildingType: string
+  address: string
+  deposit: number
+  mnRent: number
+  fee: number
+  area: number
+  areaP: number
+  roomCnt: number
+  floor: number
+  isAuc: boolean
+  isBrk: boolean
+  hasBrk: boolean
+  createdAt: string
+}

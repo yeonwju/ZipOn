@@ -16,7 +16,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useGetChatRoomList } from '@/hooks/queries/useChat'
+import { useGetChatRoomList } from '@/queries/useChat'
 import { useChatStore } from '@/store/chatStore'
 
 type IconAction = {
@@ -67,8 +67,8 @@ const BASE_ICONS = {
  * --------------------------------------------------- */
 const ICONS = {
   search: BASE_ICONS.search,
-  notification: createBadgeIcon(<BellRing size={17} />, '/notification', null),
-  chat: createBadgeIcon(<MessageCircle size={17} />, '/chat', null),
+  notification: BASE_ICONS.notification,
+  chat: BASE_ICONS.chat,
   settings: BASE_ICONS.settings,
   calendar: BASE_ICONS.calendar,
   like: BASE_ICONS.like,
@@ -94,6 +94,7 @@ const getDefaultIcons = (
 
 const rightIconsMap: Record<string, (hasChatNotification: boolean) => IconAction[]> = {
   default: (hasChatNotification: boolean) => getDefaultIcons(hasChatNotification),
+  '/search/filter': () => [],
   '/listings/new': () => [],
   '/auction/payment': () => [],
   '/auction/bid': (hasChatNotification: boolean) => [
@@ -145,6 +146,7 @@ const rightIconsMap: Record<string, (hasChatNotification: boolean) => IconAction
  * 4 기본 타이틀 매핑
  * --------------------------------------------------- */
 const pageTitleMap: Record<string, string> = {
+  '/search/filter': '필터',
   '/listings/new': '매물 등록',
   '/auction/payment': '결제',
   '/auction/bid': '경매 입찰',

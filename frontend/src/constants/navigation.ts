@@ -2,7 +2,7 @@
  * 하단 네비게이션 설정
  */
 
-import { Building2, Home, MapPin, TvMinimalPlay, User } from 'lucide-react'
+import { Building2, Hammer, Home, MapPin, TvMinimalPlay, User } from 'lucide-react'
 
 import { ROUTES } from './routes'
 
@@ -13,9 +13,9 @@ export const NAV_ITEMS = [
     icon: TvMinimalPlay,
   },
   {
-    href: ROUTES.MAP,
-    label: '지도',
-    icon: MapPin,
+    href: ROUTES.AUCTION_LIST,
+    label: '경매',
+    icon: Hammer,
   },
   {
     href: ROUTES.HOME,

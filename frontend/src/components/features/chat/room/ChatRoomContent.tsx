@@ -6,8 +6,8 @@ import { useEffect } from 'react'
 
 import ChatRoom from '@/components/features/chat/room/ChatRoom'
 import { chatQueryKeys } from '@/constants'
-import { useGetChatRoomHistory, useGetChatRoomList } from '@/hooks/queries/useChat'
-import { useUser } from '@/hooks/queries/useUser'
+import { useGetChatRoomHistory, useGetChatRoomList } from '@/queries/useChat'
+import { useUser } from '@/queries/useUser'
 
 interface ChatRoomContentProps {
   authToken: string | null

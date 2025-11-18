@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
 
 import FirebaseInit from '@/components/common/FirebaseInit'
-import { BuildingTypeQuickFilter, ListingItem, RecommendLiveItem } from '@/components/features/home'
-import SideScrollCardSection from '@/components/layout/SideScrollCardSection'
+import { BuildingTypeQuickFilter, HeroSection } from '@/components/features/home'
 
 export const metadata: Metadata = {
   title: 'HomeOn - 홈',
-  description: '실시간 인기 방송과 추천 매물을 확인하세요',
+  description: 'AI 검증 기반 실시간 부동산 안심 거래 플랫폼',
 }
 
 export const dynamic = 'force-dynamic'
@@ -14,53 +13,21 @@ export const dynamic = 'force-dynamic'
 /**
  * 홈 페이지 (Server Component)
  *
- * 실시간 인기 방송, 추천 매물, 경매 임박 매물을 표시합니다.
- * 향후 API 연결 시 서버에서 데이터를 페칭하여 표시합니다.
+ * AI 검증 기반 실시간 부동산 안심 거래 플랫폼의 메인 화면입니다.
+ * - 히어로 섹션: 서비스 소개 및 AI 로봇
+ * - 매물 유형별 빠른 필터
+ * - 인기 라이브 방송
+ * - AI 추천 매물
  */
 export default function HomePage() {
   return (
     <>
       <FirebaseInit />
 
-      <section className="flex flex-col gap-5 p-2">
-        {/* 매물 유형별 바로보기 */}
+      <section className="flex flex-col gap-6 p-4 pb-6">
+        {/* 히어로 섹션: AI 로봇과 서비스 소개 */}
         <BuildingTypeQuickFilter />
-        <SideScrollCardSection title="실시간 인기 방송" cardMinWidth="220px">
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-          <RecommendLiveItem />
-        </SideScrollCardSection>
-
-        <SideScrollCardSection title="추천 매물">
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-        </SideScrollCardSection>
-
-        <SideScrollCardSection title="경매 임박 매물">
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-          <ListingItem />
-        </SideScrollCardSection>
+        <HeroSection />
       </section>
     </>
   )

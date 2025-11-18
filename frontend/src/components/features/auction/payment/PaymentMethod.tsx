@@ -27,7 +27,7 @@ export default function PaymentMethod({ onPayment, className }: PaymentMethodPro
           onClick={handlePayment}
           className="mt-2 w-full rounded-full bg-blue-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 active:bg-blue-700"
         >
-          결제하기
+          가상계좌 발급받기
         </button>
       </div>
     </div>

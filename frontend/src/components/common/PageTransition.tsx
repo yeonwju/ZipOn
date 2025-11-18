@@ -18,8 +18,9 @@ export default function PageTransition({ children }: PageTransitionProps) {
 
   // verify 페이지인지 확인
   const isVerifyPage = pathname.startsWith('/verify/')
+  const isSlideUpPage = isVerifyPage
 
-  // 아래에서 위로 - 모달 스타일 (verify 페이지용)
+  // 아래에서 위로 - 모달 스타일 (verify, filter 페이지용)
   const slideUpVariants = {
     initial: { y: '100%', opacity: 0 },
     animate: { y: 0, opacity: 1 },
@@ -34,28 +35,27 @@ export default function PageTransition({ children }: PageTransitionProps) {
   }
 
   // 조건부로 애니메이션 variants 선택
-  const variants = isVerifyPage ? slideUpVariants : fadeVariants
+  const variants = isSlideUpPage ? slideUpVariants : fadeVariants
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={pathname}
-        variants={variants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        transition={{
-          duration: isVerifyPage ? 0.3 : 0.2,
-          ease: isVerifyPage ? 'easeInOut' : 'easeOut',
-        }}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={pathname}
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={{
+        duration: isSlideUpPage ? 0.3 : 0.2,
+        ease: isSlideUpPage ? 'easeInOut' : 'easeOut',
+      }}
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+      }}
+    >
+      {children}
+    </motion.div>
   )
 }
 

@@ -11,7 +11,7 @@ import {
 } from '@/components/features/live'
 import useKakaoLoader from '@/hooks/map/useKakaoLoader'
 import useUserLocation from '@/hooks/map/useUserLocation'
-import { useGetCanLiveAuctionList, useStartLive } from '@/hooks/queries/useLive'
+import { useGetCanLiveAuctionList, useStartLive } from '@/queries/useLive'
 import { calculateDistance } from '@/utils/distance'
 
 export default function LiveCreateContent() {

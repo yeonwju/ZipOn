@@ -3,21 +3,29 @@
 import { useParams } from 'next/navigation'
 
 import { BrokerApplicationDetail } from '@/components/features/listings/brokers'
-import { useSearchListingDetail } from '@/hooks/queries/useListing'
+import { useSearchListingDetail } from '@/queries/useListing'
 
 export default function BrokerApplicationContent() {
   const params = useParams()
 
   // TODO: React Query useSuspenseQuery로 교체
-  const listing = useSearchListingDetail(Number(params.id))
+  const { data: listing, isLoading, isError } = useSearchListingDetail(Number(params.id))
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center p-8">로딩 중...</div>
+  }
+
+  if (isError || !listing) {
+    return <div className="flex items-center justify-center p-8 text-red-500">매물 정보를 불러올 수 없습니다.</div>
+  }
 
   return (
     <BrokerApplicationDetail
-      listing={listing.data?.success === true ? listing.data.data : undefined}
-      ownerName={listing.data?.success === true ? listing.data.data.lessorNm : ''}
-      ownerImage={listing.data?.success === true ? listing.data.data.lessorProfileImg : ''}
-      preferredTime={listing.data?.success === true ? listing.data.data.aucAvailable : ''}
-      ownerDescription={listing.data?.success === true ? listing.data.data.content : ''}
+      listing={listing}
+      ownerName={listing.lessorNm}
+      ownerImage={listing.lessorProfileImg}
+      preferredTime={listing.aucAvailable}
+      ownerDescription={listing.content}
     />
   )
 }

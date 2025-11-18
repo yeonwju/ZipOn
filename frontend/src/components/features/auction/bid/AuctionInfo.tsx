@@ -14,7 +14,7 @@ export default function AuctionInfo({ deposit, fee }: AuctionInfoProps) {
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">월세</span>
-          <span className="font-medium text-gray-900">{fee}</span>
+          <span className="font-medium text-gray-900">{fee}만원</span>
         </div>
       </div>
     </div>

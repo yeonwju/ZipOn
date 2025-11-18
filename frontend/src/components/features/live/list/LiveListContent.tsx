@@ -14,8 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ROUTES } from '@/constants'
-import { useGetLiveList } from '@/hooks/queries/useLive'
-import { useUser } from '@/hooks/queries/useUser'
+import { useGetLiveList } from '@/queries/useLive'
+import { useUser } from '@/queries/useUser'
 
 type LiveStatus = 'LIVE' | 'ENDED'
 type SortType = 'LATEST' | 'POPULAR'

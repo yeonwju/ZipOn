@@ -21,14 +21,18 @@ export function useCreateChatRoom() {
   return useMutation({
     mutationFn: (params: { propertySeq: number; isBrkPref: boolean }) =>
       createChatRoom(params.propertySeq, params.isBrkPref),
-
-    onSuccess: data => {
+    onSuccess: result => {
       // 채팅방 목록 캐시 무효화
       queryClient.invalidateQueries({
         queryKey: chatQueryKeys.rooms(),
       })
       // 해당 채팅방으로 이동
-      router.push(`/chat/${data?.data?.roomSeq}`)
+      if (result.data?.roomSeq) {
+        router.push(`/chat/${result.data.roomSeq}`)
+      }
+    },
+    onError: error => {
+      console.error('채팅방 생성 실패:', error)
     },
   })
 }
@@ -41,8 +45,8 @@ export function useGetChatRoomList() {
     queryKey: chatQueryKeys.rooms(),
     queryFn: async () => {
       const result = await getChatRoomList()
-      if (!result.success) {
-        throw new Error('채팅방 목록 조회 실패')
+      if (!result.data) {
+        throw new Error('채팅방 목록을 찾을 수 없습니다.')
       }
       return result.data
     },
@@ -57,8 +61,8 @@ export function useGetChatRoomHistory(roomSeq: number) {
     queryKey: chatQueryKeys.room(roomSeq),
     queryFn: async () => {
       const result = await getChatRoomHistory(roomSeq)
-      if (!result.success) {
-        throw new Error('채팅방 히스토리 조회 실패')
+      if (!result.data) {
+        throw new Error('채팅방 히스토리를 찾을 수 없습니다.')
       }
       return result.data
     },
@@ -75,8 +79,7 @@ export function useLeaveChatRoom() {
 
   return useMutation({
     mutationFn: (roomId: number) => leaveChatRoom(roomId),
-
-    onSuccess: (_data, roomId) => {
+    onSuccess: (_result, roomId) => {
       // 채팅방 목록 캐시 무효화
       queryClient.invalidateQueries({
         queryKey: chatQueryKeys.rooms(),
@@ -87,6 +90,9 @@ export function useLeaveChatRoom() {
       })
       // 채팅방 목록으로 이동
       router.push('/chat')
+    },
+    onError: error => {
+      console.error('채팅방 나가기 실패:', error)
     },
   })
 }

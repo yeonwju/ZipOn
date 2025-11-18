@@ -4,6 +4,8 @@
  * 모든 경우의 수에 따른 버튼 구성을 결정하는 유틸리티
  */
 
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
+
 // 버튼 설정 타입
 export interface ButtonConfig {
   primary: {
@@ -38,7 +40,13 @@ export function isLiveTimePassed(liveAt: string | undefined): boolean {
  * @param lessorSeq 집주인(매물 등록자) Seq
  * @param brkSeq 중개인 Seq
  * @param currentUserSeq 현재 로그인한 사용자 Seq
+ * @param auctionSeq 경매 Seq
  * @param propertySeq 매물 Seq
+ * @param showSuccess 성공 알림 함수
+ * @param showError 에러 알림 함수
+ * @param showConfirm 확인 다이얼로그 함수
+ * @param router Next.js 라우터 인스턴스
+ * @param onDeleteListing 매물 삭제 함수 (React Query mutation)
  * @param onCreateChatRoom 채팅방 생성 함수
  * @returns 버튼 설정 객체 또는 null (버튼 표시 안 함)
  */
@@ -51,10 +59,38 @@ export function getListingButtonConfig(
   currentUserSeq: number | undefined,
   auctionSeq: number | undefined,
   propertySeq: number | undefined,
+  showSuccess: (description: string, onConfirm?: () => void) => void,
+  showError: (description: string, onConfirm?: () => void) => void,
+  showConfirm: (
+    description: string,
+    onConfirm?: () => void,
+    onCancel?: () => void,
+    options?: { confirmText?: string; cancelText?: string }
+  ) => void,
+  router: AppRouterInstance,
+  onDeleteListing: (
+    propertySeq: number,
+    options?: { onSuccess?: () => void; onError?: (error: unknown) => void }
+  ) => void,
   onCreateChatRoom?: (params: { propertySeq: number; isBrkPref: boolean }) => void
 ): ButtonConfig | null {
   const isOwner = lessorSeq === currentUserSeq
   const isBroker = brkSeq === currentUserSeq
+
+  // auctionSeq가 있고 소유자가 아닌 경우 입찰하기 버튼 우선 표시
+  if (auctionSeq && !isOwner && !isBroker) {
+    return {
+      primary: {
+        text: '입찰하기',
+        action: () => {
+          const params = new URLSearchParams({
+            propertySeq: String(propertySeq || ''),
+          })
+          window.location.href = `/auction/${auctionSeq}?${params.toString()}`
+        },
+      },
+    }
+  }
 
   // ========== 경매 O, 중개 O, 중개인 배정 O ==========
   if (isAucPref && isBrkPref && hasBrk) {
@@ -76,10 +112,19 @@ export function getListingButtonConfig(
         delete: {
           text: '매물 삭제',
           action: () => {
-            if (confirm('정말 삭제하시겠습니까?')) {
-              console.log('매물 삭제:', propertySeq)
-              // TODO: 삭제 API 호출
-            }
+            if (!propertySeq) return
+            showConfirm('정말 삭제하시겠습니까?', () => {
+              onDeleteListing(Number(propertySeq), {
+                onSuccess: () => {
+                  showSuccess('매물이 삭제되었습니다.', () => {
+                    router.replace('/listings')
+                  })
+                },
+                onError: () => {
+                  showError('매물 삭제에 실패했습니다.')
+                },
+              })
+            })
           },
         },
       }
@@ -109,7 +154,21 @@ export function getListingButtonConfig(
         },
         delete: {
           text: '매물 삭제',
-          action: () => console.log('매물 삭제'),
+          action: () => {
+            if (!propertySeq) return
+            showConfirm('정말 삭제하시겠습니까?', () => {
+              onDeleteListing(Number(propertySeq), {
+                onSuccess: () => {
+                  showSuccess('매물이 삭제되었습니다.', () => {
+                    router.replace('/listings')
+                  })
+                },
+                onError: () => {
+                  showError('매물 삭제에 실패했습니다.')
+                },
+              })
+            })
+          },
         },
       }
     } else {
@@ -140,7 +199,21 @@ export function getListingButtonConfig(
         },
         delete: {
           text: '매물 삭제',
-          action: () => console.log('매물 삭제'),
+          action: () => {
+            if (!propertySeq) return
+            showConfirm('정말 삭제하시겠습니까?', () => {
+              onDeleteListing(Number(propertySeq), {
+                onSuccess: () => {
+                  showSuccess('매물이 삭제되었습니다.', () => {
+                    router.replace('/listings')
+                  })
+                },
+                onError: () => {
+                  showError('매물 삭제에 실패했습니다.')
+                },
+              })
+            })
+          },
         },
       }
     } else {
@@ -165,7 +238,21 @@ export function getListingButtonConfig(
         },
         delete: {
           text: '매물 삭제',
-          action: () => console.log('매물 삭제'),
+          action: () => {
+            if (!propertySeq) return
+            showConfirm('정말 삭제하시겠습니까?', () => {
+              onDeleteListing(Number(propertySeq), {
+                onSuccess: () => {
+                  showSuccess('매물이 삭제되었습니다.', () => {
+                    router.replace('/listings')
+                  })
+                },
+                onError: () => {
+                  showError('매물 삭제에 실패했습니다.')
+                },
+              })
+            })
+          },
         },
       }
     } else {
@@ -198,7 +285,21 @@ export function getListingButtonConfig(
         },
         delete: {
           text: '매물 삭제',
-          action: () => console.log('매물 삭제'),
+          action: () => {
+            if (!propertySeq) return
+            showConfirm('정말 삭제하시겠습니까?', () => {
+              onDeleteListing(Number(propertySeq), {
+                onSuccess: () => {
+                  showSuccess('매물이 삭제되었습니다.', () => {
+                    router.replace('/listings')
+                  })
+                },
+                onError: () => {
+                  showError('매물 삭제에 실패했습니다.')
+                },
+              })
+            })
+          },
         },
       }
     } else {
@@ -222,7 +323,21 @@ export function getListingButtonConfig(
       },
       delete: {
         text: '매물 삭제',
-        action: () => console.log('매물 삭제'),
+        action: () => {
+          if (!propertySeq) return
+          showConfirm('정말 삭제하시겠습니까?', () => {
+            onDeleteListing(Number(propertySeq), {
+              onSuccess: () => {
+                showSuccess('매물이 삭제되었습니다.', () => {
+                  router.replace('/listings')
+                })
+              },
+              onError: () => {
+                showError('매물 삭제에 실패했습니다.')
+              },
+            })
+          })
+        },
       },
     }
   } else {

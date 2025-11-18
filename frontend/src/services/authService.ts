@@ -17,14 +17,6 @@ interface ApiResponse<T> {
 }
 
 /**
- * 에러 응답 타입
- */
-interface ErrorResponse {
-  message: string
-  status: number
-}
-
-/**
  * 휴대폰 인증 요청 파라미터
  */
 export interface PhoneVerificationRequest {
@@ -49,6 +41,9 @@ export interface BusinessVerificationRequest {
 
 /**
  * 현재 로그인한 사용자 정보 가져오기
+ *
+ * React Query에서 사용되므로 에러 발생 시 null 반환
+ * (로그아웃 상태로 처리됨)
  */
 export async function fetchCurrentUser(): Promise<User | null> {
   try {
@@ -72,107 +67,21 @@ export async function fetchCurrentUser(): Promise<User | null> {
 
 /**
  * 휴대폰 인증번호 요청
- * @param params 이름, 생년월일, 휴대폰 번호
- * @returns 성공 여부
- * @throws Error 인증번호 발송 실패 시
  */
-export async function requestPhoneVerification(
-  params: PhoneVerificationRequest
-): Promise<{ success: boolean; message?: string }> {
-  try {
-    console.log('=== 휴대폰 인증번호 요청 ===')
-    console.log('파라미터:', params)
-
-    const result = await authFetch.post<UserVerifyResponse>(API_ENDPOINTS.PHONE_VERIFY, params)
-
-    console.log('=== 휴대폰 인증번호 요청 성공 ===')
-    console.log('응답:', result)
-
-    return {
-      success: true,
-      message: '인증번호가 발송되었습니다.',
-    }
-  } catch (error) {
-    console.error('=== 휴대폰 인증번호 요청 실패 ===')
-    console.error('에러:', error)
-
-    const errorMessage =
-      error instanceof Error ? error.message : '인증번호 발송에 실패했습니다.'
-
-    throw new Error(errorMessage)
-  }
+export async function requestPhoneVerification(params: PhoneVerificationRequest) {
+  return authFetch.post<UserVerifyResponse>(API_ENDPOINTS.PHONE_VERIFY, params)
 }
 
 /**
  * 휴대폰 인증번호 확인
- * @param params 인증번호
- * @returns 성공 여부
- * @throws Error 인증번호 확인 실패 시
  */
-export async function verifyPhoneCode(
-  params: PhoneVerificationCodeRequest
-): Promise<{ success: boolean; message?: string }> {
-  try {
-    console.log('=== 휴대폰 인증번호 확인 ===')
-    console.log('인증번호:', params.code)
-
-    const result = await authFetch.post<UserVerifyResponse>(
-      API_ENDPOINTS.PHONE_VERIFY_CHECK,
-      params
-    )
-
-    console.log('=== 휴대폰 인증번호 확인 성공 ===')
-    console.log('응답:', result)
-
-    return {
-      success: true,
-      message: '휴대폰 인증이 완료되었습니다.',
-    }
-  } catch (error) {
-    console.error('=== 휴대폰 인증번호 확인 실패 ===')
-    console.error('에러:', error)
-
-    const errorMessage =
-      error instanceof Error ? error.message : '인증번호가 일치하지 않습니다.'
-
-    throw new Error(errorMessage)
-  }
+export async function verifyPhoneCode(params: PhoneVerificationCodeRequest) {
+  return authFetch.post<UserVerifyResponse>(API_ENDPOINTS.PHONE_VERIFY_CHECK, params)
 }
 
 /**
  * 사업자 인증
- * @param params 사업자등록번호
- * @returns 성공 여부
- * @throws Error 사업자 인증 실패 시
  */
-export async function verifyBusiness(
-  params: BusinessVerificationRequest
-): Promise<{ success: boolean; message?: string }> {
-  try {
-    console.log('=== 사업자 인증 요청 ===')
-    console.log('엔드포인트:', API_ENDPOINTS.BUSSINESS_REGISTER)
-    console.log('사업자번호:', params.taxSeq)
-    console.log('사업자번호 길이:', params.taxSeq.length)
-
-    const result = await authFetch.post<UserVerifyResponse>(
-      API_ENDPOINTS.BUSSINESS_REGISTER,
-      params
-    )
-
-    console.log('=== 사업자 인증 성공 ===')
-    console.log('응답:', result)
-
-    return {
-      success: true,
-      message: '사업자 인증이 완료되었습니다.',
-    }
-  } catch (error) {
-    console.error('=== 사업자 인증 실패 ===')
-    console.error('에러:', error)
-
-    const errorMessage =
-      error instanceof Error ? error.message : '사업자 인증 중 오류가 발생했습니다.'
-
-    throw new Error(errorMessage)
-  }
+export async function verifyBusiness(params: BusinessVerificationRequest) {
+  return authFetch.post<UserVerifyResponse>(API_ENDPOINTS.BUSSINESS_REGISTER, params)
 }

@@ -7,7 +7,6 @@ import { liveQueryKeys } from '@/constants'
 import {
   endLive,
   getCanLiveAuctionList,
-  getLiveEnterToken,
   getLiveList,
   leaveLive,
   likeLive,
@@ -15,7 +14,6 @@ import {
   searchLiveInfo,
   startLive,
 } from '@/services/liveService'
-import { LiveEnterTokenData, LiveInfoData } from '@/types/api/live'
 
 /**
  * 라이브 가능한 경매 목록 조회 Query
@@ -29,8 +27,8 @@ export function useGetCanLiveAuctionList() {
     queryKey: liveQueryKeys.auctions(),
     queryFn: async () => {
       const result = await getCanLiveAuctionList()
-      if (!result.success) {
-        throw new Error('라이브 가능한 경매 목록 조회 실패')
+      if (!result.data) {
+        throw new Error('라이브 가능한 경매 목록을 찾을 수 없습니다.')
       }
       return result.data
     },
@@ -54,10 +52,10 @@ export function useGetLiveList({ status, sortType }: { status: string; sortType:
     queryKey: liveQueryKeys.live({ status, sortType }),
     queryFn: async () => {
       const result = await getLiveList({ status, sortType })
-      if (!result.success) {
-        throw new Error('라이브 목록 조회 실패')
+      if (!result.data) {
+        throw new Error('라이브 목록을 찾을 수 없습니다.')
       }
-      return result.data ?? []
+      return result.data
     },
     // 포커스 시 자동 재요청 (페이지로 돌아올 때마다 최신 데이터 가져오기)
     refetchOnWindowFocus: true,
@@ -81,8 +79,8 @@ export function useGetLiveInfo(liveSeq: number) {
     queryKey: liveQueryKeys.detail(liveSeq),
     queryFn: async () => {
       const result = await searchLiveInfo(liveSeq)
-      if (!result.success) {
-        throw new Error('라이브 방송 정보 조회 실패')
+      if (!result.data) {
+        throw new Error('라이브 방송 정보를 찾을 수 없습니다.')
       }
       return result.data
     },
@@ -108,8 +106,8 @@ export function useGetLiveChatHistory(liveSeq: number) {
     queryKey: [...liveQueryKeys.detail(liveSeq), 'chat'], // detail 키에 'chat' 추가
     queryFn: async () => {
       const result = await liveChatList(liveSeq)
-      if (!result.success) {
-        throw new Error('라이브 채팅 내역 조회 실패')
+      if (!result.data) {
+        throw new Error('라이브 채팅 내역을 찾을 수 없습니다.')
       }
       return result.data
     },
@@ -133,9 +131,8 @@ export function useStartLive() {
 
   return useMutation({
     mutationFn: (params: { auctionSeq: number; title: string }) => startLive(params),
-
-    onSuccess: data => {
-      if (data.success && data.data) {
+    onSuccess: result => {
+      if (result.data) {
         // 라이브 목록 캐시 무효화 (새 라이브가 추가됨)
         queryClient.invalidateQueries({
           queryKey: liveQueryKeys.lives(),
@@ -147,11 +144,14 @@ export function useStartLive() {
         })
 
         // 생성된 라이브 상세 정보 캐시에 저장 (즉시 사용 가능)
-        queryClient.setQueryData(liveQueryKeys.detail(data.data.liveSeq), data.data)
+        queryClient.setQueryData(liveQueryKeys.detail(result.data.liveSeq), result.data)
 
         // 라이브 방송 페이지로 이동
-        router.push(`/live/onair/${data.data.liveSeq}`)
+        router.push(`/live/onair/${result.data.liveSeq}`)
       }
+    },
+    onError: error => {
+      console.error('라이브 방송 시작 실패:', error)
     },
   })
 }
@@ -169,19 +169,19 @@ export function useLikeLive() {
 
   return useMutation({
     mutationFn: (liveSeq: number) => likeLive(liveSeq),
+    onSuccess: (_result, liveSeq) => {
+      // 해당 라이브의 상세 정보 캐시 무효화 (좋아요 수와 상태 업데이트)
+      queryClient.invalidateQueries({
+        queryKey: liveQueryKeys.detail(liveSeq),
+      })
 
-    onSuccess: (data, liveSeq) => {
-      if (data.success) {
-        // 해당 라이브의 상세 정보 캐시 무효화 (좋아요 수와 상태 업데이트)
-        queryClient.invalidateQueries({
-          queryKey: liveQueryKeys.detail(liveSeq),
-        })
-
-        // 라이브 목록 캐시도 무효화 (목록에서 좋아요 수와 상태 표시)
-        queryClient.invalidateQueries({
-          queryKey: liveQueryKeys.lives(),
-        })
-      }
+      // 라이브 목록 캐시도 무효화 (목록에서 좋아요 수와 상태 표시)
+      queryClient.invalidateQueries({
+        queryKey: liveQueryKeys.lives(),
+      })
+    },
+    onError: error => {
+      console.error('라이브 좋아요 실패:', error)
     },
   })
 }
@@ -198,14 +198,14 @@ export function useLeaveLive() {
 
   return useMutation({
     mutationFn: (liveSeq: number) => leaveLive(liveSeq),
-
-    onSuccess: (data, liveSeq) => {
-      if (data.success) {
-        // 해당 라이브의 상세 정보 캐시 무효화 (시청자 수 등 변경 가능)
-        queryClient.invalidateQueries({
-          queryKey: liveQueryKeys.detail(liveSeq),
-        })
-      }
+    onSuccess: (_result, liveSeq) => {
+      // 해당 라이브의 상세 정보 캐시 무효화 (시청자 수 등 변경 가능)
+      queryClient.invalidateQueries({
+        queryKey: liveQueryKeys.detail(liveSeq),
+      })
+    },
+    onError: error => {
+      console.error('라이브 퇴장 실패:', error)
     },
   })
 }
@@ -226,9 +226,8 @@ export function useEndLive() {
 
   return useMutation({
     mutationFn: (liveSeq: number) => endLive(liveSeq),
-
-    onSuccess: (data, liveSeq) => {
-      if (data.success && data.data) {
+    onSuccess: (result, liveSeq) => {
+      if (result.data) {
         // 해당 라이브의 상세 정보 캐시 무효화 (상태가 ENDED로 변경)
         queryClient.invalidateQueries({
           queryKey: liveQueryKeys.detail(liveSeq),
@@ -245,11 +244,14 @@ export function useEndLive() {
         })
 
         // 종료된 라이브 상세 정보를 캐시에 저장
-        queryClient.setQueryData(liveQueryKeys.detail(liveSeq), data.data)
+        queryClient.setQueryData(liveQueryKeys.detail(liveSeq), result.data)
 
         // 라이브 목록 페이지로 이동 (또는 다른 페이지)
         router.push('/live/list')
       }
+    },
+    onError: error => {
+      console.error('라이브 방송 종료 실패:', error)
     },
   })
 }

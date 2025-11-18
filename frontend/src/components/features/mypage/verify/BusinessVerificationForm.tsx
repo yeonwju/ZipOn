@@ -3,21 +3,22 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useUser } from '@/hooks/queries'
-import { verifyBusiness } from '@/services/authService'
+import { useUser, useVerifyBusiness } from '@/queries'
 
 export default function BusinessVerificationForm() {
-  const { data } = useUser()
+  const { data, refetch } = useUser()
+  const { mutate: verifyBusinessMutation, isPending } = useVerifyBusiness()
+  const { showSuccess, showError, AlertDialog } = useAlertDialog()
 
   const [businessNumber, setBusinessNumber] = useState('')
   const [businessNumberDisplay, setBusinessNumberDisplay] = useState('')
 
   // 플로우 상태
   const [isVerified, setIsVerified] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   // 입력 검증
   const canVerify = businessNumber.length === 10
@@ -36,26 +37,26 @@ export default function BusinessVerificationForm() {
   }
 
   const router = useRouter()
-  const { refetch } = useUser()
 
   // 사업자 인증 요청
-  const handleVerify = async () => {
-    try {
-      setIsLoading(true)
-
-      await verifyBusiness({
-        taxSeq: businessNumber,
-      })
-
-      setIsVerified(true)
-      refetch()
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : '사업자 인증 중 오류가 발생했습니다.'
-      alert(errorMessage)
-    } finally {
-      setIsLoading(false)
-    }
+  const handleVerify = () => {
+    verifyBusinessMutation(
+      { taxSeq: businessNumber },
+      {
+        onSuccess: result => {
+          setIsVerified(true)
+          refetch()
+          showSuccess(result?.message || '사업자 인증이 완료되었습니다.')
+        },
+        onError: error => {
+          showError(
+            error instanceof Error
+              ? error.message
+              : '사업자 인증에 실패했습니다. 다시 시도해주세요.'
+          )
+        },
+      }
+    )
   }
 
   const handleComplete = () => {
@@ -113,11 +114,11 @@ export default function BusinessVerificationForm() {
             <Button
               type="button"
               onClick={handleVerify}
-              disabled={!canVerify || isLoading || isVerified}
+              disabled={!canVerify || isPending || isVerified}
               variant="secondary"
               className="bg-blue-400 text-white"
             >
-              {isLoading ? '인증 중...' : '인증하기'}
+              {isPending ? '인증 중...' : '인증하기'}
             </Button>
           </div>
           <p className="text-xs text-gray-400">사업자등록번호 10자리를 입력해주세요</p>
@@ -144,6 +145,7 @@ export default function BusinessVerificationForm() {
           </Button>
         </div>
       )}
+      <AlertDialog />
     </div>
   )
 }

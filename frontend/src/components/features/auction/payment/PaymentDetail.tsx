@@ -1,14 +1,14 @@
 'use client'
 
 import ListingDetailProfile from '@/components/features/listings/detail/ListingDetailProfile'
-import type { ListingDetailData } from '@/types/models/listing'
+import { ListingDetailDataResponse } from '@/types/api/listings'
 
 import PaymentHeader from './PaymentHeader'
 import PaymentInfo from './PaymentInfo'
 import PaymentMethod from './PaymentMethod'
 
 interface PaymentDetailProps {
-  data: ListingDetailData
+  data: ListingDetailDataResponse
   bidAmount: number
   deposit: number
   monthlyRent: number

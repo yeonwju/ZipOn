@@ -11,9 +11,9 @@ import {
   LiveHostInfo,
   LiveInteraction,
 } from '@/components/features/live'
-import { useGetLiveInfo } from '@/hooks/queries/useLive'
-import { useUser } from '@/hooks/queries/useUser'
 import { LiveStatsUpdate } from '@/lib/socket/types'
+import { useGetLiveInfo } from '@/queries/useLive'
+import { useUser } from '@/queries/useUser'
 import { getLiveEnterToken, leaveLive } from '@/services/liveService'
 import { useMiniPlayerStore } from '@/store/miniPlayer'
 
@@ -111,6 +111,7 @@ export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPa
         console.log('[OnAirPage] 라이브 퇴장 처리 완료')
       } catch (error) {
         console.error('[OnAirPage] 라이브 퇴장 처리 실패:', error)
+        // 에러가 발생해도 계속 진행 (페이지를 닫을 수 있도록)
       }
     }
 
@@ -152,9 +153,9 @@ export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPa
       setTokenError(false)
 
       try {
-        const response = await getLiveEnterToken({ liveSeq, isHost })
-        if (response.success && response.data?.token) {
-          setToken(response.data.token)
+        const result = await getLiveEnterToken({ liveSeq, isHost })
+        if (result.data?.token) {
+          setToken(result.data.token)
         } else {
           setTokenError(true)
         }
@@ -253,4 +254,3 @@ function loadingScreen(text: string) {
     </AuthGuard>
   )
 }
-

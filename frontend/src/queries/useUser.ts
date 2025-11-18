@@ -1,9 +1,17 @@
 'use client'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { queryKeys } from '@/constants/queryKeys'
-import { fetchCurrentUser } from '@/services/authService'
+import {
+  BusinessVerificationRequest,
+  fetchCurrentUser,
+  PhoneVerificationCodeRequest,
+  PhoneVerificationRequest,
+  requestPhoneVerification,
+  verifyBusiness,
+  verifyPhoneCode,
+} from '@/services/authService'
 import { User } from '@/types/models/user'
 
 /**
@@ -89,3 +97,50 @@ export function updateUserCache(
   queryClient.setQueryData(queryKeys.user.me(), updater)
 }
 
+/**
+ * 휴대폰 인증번호 요청 Mutation Hook
+ */
+export function useRequestPhoneVerification() {
+  return useMutation({
+    mutationFn: (params: PhoneVerificationRequest) => requestPhoneVerification(params),
+    onError: error => {
+      console.error('휴대폰 인증번호 요청 실패:', error)
+    },
+  })
+}
+
+/**
+ * 휴대폰 인증번호 확인 Mutation Hook
+ */
+export function useVerifyPhoneCode() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (params: PhoneVerificationCodeRequest) => verifyPhoneCode(params),
+    onSuccess: () => {
+      // 사용자 정보 갱신
+      queryClient.invalidateQueries({ queryKey: queryKeys.user.me() })
+    },
+    onError: error => {
+      console.error('휴대폰 인증번호 확인 실패:', error)
+    },
+  })
+}
+
+/**
+ * 사업자 인증 Mutation Hook
+ */
+export function useVerifyBusiness() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (params: BusinessVerificationRequest) => verifyBusiness(params),
+    onSuccess: () => {
+      // 사용자 정보 갱신
+      queryClient.invalidateQueries({ queryKey: queryKeys.user.me() })
+    },
+    onError: error => {
+      console.error('사업자 인증 실패:', error)
+    },
+  })
+}

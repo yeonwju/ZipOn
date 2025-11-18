@@ -4,9 +4,10 @@ import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { useSelectBroker } from '@/hooks/queries/useBroker'
+import { useSelectBroker } from '@/queries/useBroker'
 import { BrokerInfo } from '@/types/api/broker'
 
 interface BrokerCardProps {
@@ -18,22 +19,23 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const params = useParams()
   const propertySeq = Number(params.id)
-  
+  const { showSuccess, showError, AlertDialog } = useAlertDialog()
+
   const selectBrokerMutation = useSelectBroker(broker.auctionSeq, propertySeq)
 
-  const handleSubmit = async () => {
-    try {
-      const result = await selectBrokerMutation.mutateAsync()
-      
-      if (result.success) {
-        console.log('✅ 중개인 선택 성공:', result.message)
-        onSelect?.(broker.brkUserSeq)
-      } else {
-        console.error('❌ 중개인 선택 실패:', result.message)
-      }
-    } catch (error) {
-      console.error('중개인 선택 중 오류:', error)
-    }
+  const handleSubmit = () => {
+    selectBrokerMutation.mutate(undefined, {
+      onSuccess: result => {
+        showSuccess(result?.message || `${broker.brkNm} 중개인을 선택하셨습니다!`, () => {
+          onSelect?.(broker.brkUserSeq)
+        })
+      },
+      onError: error => {
+        showError(
+          error instanceof Error ? error.message : '중개인 선택에 실패했습니다. 다시 시도해주세요.'
+        )
+      },
+    })
   }
 
   return (
@@ -91,6 +93,7 @@ export default function BrokerCard({ broker, onSelect }: BrokerCardProps) {
           </Button>
         </div>
       )}
+      <AlertDialog />
     </div>
   )
 }

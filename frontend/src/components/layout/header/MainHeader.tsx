@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useGetChatRoomList } from '@/hooks/queries/useChat'
+import { useGetChatRoomList } from '@/queries/useChat'
 import { useChatStore } from '@/store/chatStore'
 
 export default function MainHeader() {

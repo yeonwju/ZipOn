@@ -41,6 +41,12 @@ export default function Step3AdditionalInfo({
     minute: additionalInfo.aucAvailable ? new Date(additionalInfo.aucAvailable).getMinutes() : 0,
   })
 
+  /** --------------------------------------
+   *  날짜 표시에만 +1일 보정하는 함수
+   --------------------------------------- */
+  const addOneDay = (date?: Date) =>
+    date ? new Date(date.getTime() + 24 * 60 * 60 * 1000) : undefined
+
   const updateField = (field: keyof AdditionalInfo, value: string | boolean) => {
     const newInfo = { ...additionalInfo, [field]: value }
     onAdditionalInfoChange(newInfo)
@@ -49,7 +55,7 @@ export default function Step3AdditionalInfo({
   const handleAuctionDateChange = (date: Date | undefined) => {
     setSelectedAuctionDate(date)
     if (date) {
-      updateField('aucAt', date.toISOString().slice(0, 19))
+      updateField('aucAt', date.toISOString().split('T')[0])
     } else {
       updateField('aucAt', '')
     }
@@ -79,7 +85,6 @@ export default function Step3AdditionalInfo({
 
   const updateLiveDateTime = (date: Date | undefined, hour: number, minute: number) => {
     if (date) {
-      // LocalDateTime 형식으로 변환: "2025-12-10T14:30:00"
       const dateTime = new Date(date)
       dateTime.setHours(hour, minute, 0, 0)
       updateField('aucAvailable', dateTime.toISOString().slice(0, 19)) // "YYYY-MM-DDTHH:mm:ss"
@@ -122,6 +127,7 @@ export default function Step3AdditionalInfo({
         <div>
           <h3 className="mb-4 text-lg font-bold text-gray-900">건물 정보</h3>
           <div className="grid grid-cols-2 gap-4">
+            {/* 주차 */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-900">주차 대수</label>
               <input
@@ -132,6 +138,8 @@ export default function Step3AdditionalInfo({
                 className="h-[36px] w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
+
+            {/* 준공일 */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-900">준공일</label>
               <Popover
@@ -145,15 +153,12 @@ export default function Step3AdditionalInfo({
                     className="h-[36px] w-full justify-between border border-gray-300 font-normal"
                   >
                     {selectedConstructionDate
-                      ? selectedConstructionDate.toLocaleDateString('ko-KR')
+                      ? addOneDay(selectedConstructionDate)?.toLocaleDateString('ko-KR')
                       : '날짜 선택'}
                     <ChevronDownIcon size={16} />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto overflow-hidden border border-gray-300 p-0"
-                  align="start"
-                >
+                <PopoverContent className="w-auto overflow-hidden border border-gray-300 p-0">
                   <Calendar
                     mode="single"
                     selected={selectedConstructionDate}
@@ -175,7 +180,6 @@ export default function Step3AdditionalInfo({
                 id="hasElevator"
                 checked={additionalInfo.hasElevator}
                 onCheckedChange={checked => updateField('hasElevator', checked === true)}
-                className="border border-gray-300 data-[state=checked]:border-blue-400 data-[state=checked]:bg-blue-400 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
               />
               <Label htmlFor="hasElevator">엘리베이터 있음</Label>
             </div>
@@ -184,7 +188,6 @@ export default function Step3AdditionalInfo({
                 id="petAvailable"
                 checked={additionalInfo.petAvailable}
                 onCheckedChange={checked => updateField('petAvailable', checked === true)}
-                className="border border-gray-300 data-[state=checked]:border-blue-400 data-[state=checked]:bg-blue-400 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
               />
               <Label htmlFor="petAvailable">반려동물 가능</Label>
             </div>
@@ -200,7 +203,6 @@ export default function Step3AdditionalInfo({
                 id="isAucPref"
                 checked={additionalInfo.isAucPref}
                 onCheckedChange={checked => updateField('isAucPref', checked === true)}
-                className="border border-gray-300 data-[state=checked]:border-blue-400 data-[state=checked]:bg-blue-400 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
               />
               <Label htmlFor="isAucPref">경매 방식</Label>
             </div>
@@ -209,18 +211,18 @@ export default function Step3AdditionalInfo({
                 id="isBrkPref"
                 checked={additionalInfo.isBrkPref}
                 onCheckedChange={checked => updateField('isBrkPref', checked === true)}
-                className="border border-gray-300 data-[state=checked]:border-blue-400 data-[state=checked]:bg-blue-400 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
               />
               <Label htmlFor="isBrkPref">중개인 원함</Label>
             </div>
           </div>
         </div>
 
-        {/* 경매 정보 (경매 선호 시) */}
+        {/* 경매 정보 */}
         {additionalInfo.isAucPref && (
           <div>
             <h3 className="mb-4 text-lg font-bold text-gray-900">경매 정보</h3>
             <div className="grid grid-cols-1 gap-4">
+              {/* 경매 희망 날짜 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
                   경매 희망 날짜
@@ -233,30 +235,29 @@ export default function Step3AdditionalInfo({
                       className="h-[36px] w-full justify-between border border-gray-300 font-normal"
                     >
                       {selectedAuctionDate
-                        ? selectedAuctionDate.toISOString().slice(0, 10) + 'T12:00:00'
+                        ? addOneDay(selectedAuctionDate)?.toLocaleDateString('ko-KR')
                         : '날짜 선택'}
                       <ChevronDownIcon size={16} />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto overflow-hidden border border-gray-300 p-0"
-                    align="start"
-                  >
+                  <PopoverContent className="w-auto overflow-hidden border border-gray-300 p-0">
                     <Calendar
                       mode="single"
                       selected={selectedAuctionDate}
                       onSelect={handleAuctionDateChange}
-                      className={'bg-white'}
+                      className="bg-white"
                     />
                   </PopoverContent>
                 </Popover>
               </div>
+
+              {/* 방송 날짜 + 시간 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
                   실시간 방송 가능 날짜 및 시간
                 </label>
 
-                {/* 날짜 선택 */}
+                {/* 날짜 */}
                 <div className="mb-3">
                   <Popover open={liveTimeDatePickerOpen} onOpenChange={setLiveTimeDatePickerOpen}>
                     <PopoverTrigger asChild>
@@ -266,26 +267,23 @@ export default function Step3AdditionalInfo({
                         className="h-[36px] w-full justify-between border border-gray-300 font-normal"
                       >
                         {selectedLiveDate
-                          ? selectedLiveDate.toLocaleDateString('ko-KR')
+                          ? addOneDay(selectedLiveDate)?.toLocaleDateString('ko-KR')
                           : '날짜 선택'}
                         <ChevronDownIcon size={16} />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto overflow-hidden border border-gray-300 p-0"
-                      align="start"
-                    >
+                    <PopoverContent className="w-auto overflow-hidden border border-gray-300 p-0">
                       <Calendar
                         mode="single"
                         selected={selectedLiveDate}
                         onSelect={handleLiveDateChange}
-                        className={'bg-white'}
+                        className="bg-white"
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
 
-                {/* 시간 선택 */}
+                {/* 시간 */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="mb-1 block text-xs text-gray-600">시</label>
@@ -324,7 +322,7 @@ export default function Step3AdditionalInfo({
                 {/* 선택된 시간 미리보기 */}
                 {selectedLiveDate && (
                   <p className="mt-2 text-xs text-gray-500">
-                    선택된 시간: {selectedLiveDate.toLocaleDateString('ko-KR')}{' '}
+                    선택된 시간: {addOneDay(selectedLiveDate)?.toLocaleDateString('ko-KR')}{' '}
                     {String(selectedLiveTime.hour).padStart(2, '0')}:
                     {String(selectedLiveTime.minute).padStart(2, '0')}
                   </p>
@@ -334,7 +332,7 @@ export default function Step3AdditionalInfo({
           </div>
         )}
 
-        {/* 기타 특이사항 */}
+        {/* 특이사항 */}
         <div>
           <h3 className="mb-4 text-lg font-bold text-gray-900">기타 특이사항</h3>
           <textarea

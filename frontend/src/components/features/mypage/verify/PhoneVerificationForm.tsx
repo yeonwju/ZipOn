@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useUser } from '@/hooks/queries'
-import { requestPhoneVerification, verifyPhoneCode } from '@/services/authService'
+import { useRequestPhoneVerification, useUser, useVerifyPhoneCode } from '@/queries'
 
 export default function PhoneVerificationForm() {
   const [name, setName] = useState('')
@@ -18,11 +18,15 @@ export default function PhoneVerificationForm() {
 
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   const router = useRouter()
+  const { refetch } = useUser()
+  const { mutate: requestPhoneVerificationMutation, isPending: isRequesting } =
+    useRequestPhoneVerification()
+  const { mutate: verifyPhoneCodeMutation, isPending: isVerifying } = useVerifyPhoneCode()
+  const { showSuccess, showError, AlertDialog } = useAlertDialog()
 
-  const [timer, setTimer] = useState(180)
+  const [timer] = useState(180)
 
   const genderInputRef = useRef<HTMLInputElement>(null)
 
@@ -60,45 +64,51 @@ export default function PhoneVerificationForm() {
     if (value.length <= 6) setVerificationCode(value)
   }
 
-  const { refetch } = useUser()
-
   // 휴대폰 인증번호 요청
-  const handleRequestCode = async () => {
-    try {
-      setIsLoading(true)
-
-      await requestPhoneVerification({
+  const handleRequestCode = () => {
+    requestPhoneVerificationMutation(
+      {
         name,
         birth,
         tel,
-      })
-
-      setIsCodeSent(true)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '인증번호 발송에 실패했습니다.'
-      alert(errorMessage)
-    } finally {
-      setIsLoading(false)
-    }
+      },
+      {
+        onSuccess: result => {
+          setIsCodeSent(true)
+          showSuccess(result?.message || '인증번호가 발송되었습니다.')
+        },
+        onError: error => {
+          showError(
+            error instanceof Error
+              ? error.message
+              : '인증번호 발송에 실패했습니다. 다시 시도해주세요.'
+          )
+        },
+      }
+    )
   }
 
   // 인증번호 확인
-  const handleVerifyCode = async () => {
-    try {
-      setIsLoading(true)
-
-      await verifyPhoneCode({
+  const handleVerifyCode = () => {
+    verifyPhoneCodeMutation(
+      {
         code: verificationCode,
-      })
-
-      setIsVerified(true)
-      refetch()
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '인증번호가 일치하지 않습니다.'
-      alert(errorMessage)
-    } finally {
-      setIsLoading(false)
-    }
+      },
+      {
+        onSuccess: result => {
+          setIsVerified(true)
+          refetch()
+          showSuccess(result?.message || '휴대폰 인증이 완료되었습니다.')
+        },
+        onError: error => {
+          showError(
+            error instanceof Error
+              ? error.message
+              : '인증번호가 일치하지 않습니다. 다시 시도해주세요.'
+          )
+        },
+      }
+    )
   }
 
   const handleComplete = () => {
@@ -182,11 +192,11 @@ export default function PhoneVerificationForm() {
             <Button
               type="button"
               onClick={handleRequestCode}
-              disabled={!canRequestCode || isLoading || isVerified}
+              disabled={!canRequestCode || isRequesting || isVerified}
               variant={'secondary'}
               className={'bg-blue-400 text-white'}
             >
-              {isCodeSent ? '재전송' : '인증번호 받기'}
+              {isRequesting ? '전송 중...' : isCodeSent ? '재전송' : '인증번호 받기'}
             </Button>
           </div>
         </div>
@@ -244,10 +254,10 @@ export default function PhoneVerificationForm() {
                 type="button"
                 variant={'secondary'}
                 onClick={handleVerifyCode}
-                disabled={!canVerify || isLoading}
+                disabled={!canVerify || isVerifying}
                 className={'bg-blue-400 text-white'}
               >
-                인증확인
+                {isVerifying ? '확인 중...' : '인증확인'}
               </Button>
             </div>
           </div>
@@ -296,6 +306,7 @@ export default function PhoneVerificationForm() {
           </Button>
         </div>
       )}
+      <AlertDialog />
     </div>
   )
 }

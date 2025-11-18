@@ -13,9 +13,8 @@ import { Accordion } from '@/components/ui/accordion'
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import useUserLocation from '@/hooks/map/useUserLocation'
-import { useUser } from '@/hooks/queries'
-import { useCreateListing } from '@/hooks/queries/useListing'
-import { registerListingVerification } from '@/services/listingService'
+import { useUser } from '@/queries'
+import { useCreateListing, useRegisterListingVerification } from '@/queries/useListing'
 
 export default function NewListingContent() {
   const { refresh: refreshLocation, isRefreshing } = useUserLocation()
@@ -23,6 +22,9 @@ export default function NewListingContent() {
   // 유저 정보
   const { data: user } = useUser()
   const { AlertDialog, showError } = useAlertDialog()
+
+  // 등기부등본 인증 Mutation
+  const registerVerification = useRegisterListingVerification()
 
   // 매물 등록 Mutation
   const createListing = useCreateListing()
@@ -109,26 +111,33 @@ export default function NewListingContent() {
         regiBirth: user?.birth,
         address: `${baseAddress} ${detailAddress}`,
       }
-      const result = await registerListingVerification(request)
 
-      if (result.success) {
+      const result = await registerVerification.mutateAsync(request)
+
+      // API 응답의 data 필드에서 정보 추출
+      if (result.data) {
         console.log('인증 성공:', result)
-        setPdfCode(result.data?.pdfCode)
-        setVerificationStatus(result.data?.verificationStatus)
-        setIsCertificated(result.data?.isCertificated)
-        setRiskScore(result.data?.riskScore)
-        setRiskReason(result.data?.riskReason)
+        setPdfCode(result.data.pdfCode)
+        setVerificationStatus(result.data.verificationStatus)
+        setIsCertificated(result.data.isCertificated)
+        setRiskScore(result.data.riskScore)
+        setRiskReason(result.data.riskReason)
 
         setIsVerifying(false)
         setStep1Completed(true)
         setCurrentAccordion('item-2')
       } else {
-        showError(`등기부등본과 입력하신 정보가 일치하지 않습니다.`)
+        showError('등기부등본과 입력하신 정보가 일치하지 않습니다.')
         setIsVerifying(false)
-        console.warn('인증 실패:', result)
       }
     } catch (error) {
       console.error('인증 요청 중 오류 발생:', error)
+      showError(
+        error instanceof Error
+          ? error.message
+          : '등기부등본 인증에 실패했습니다. 다시 시도해주세요.'
+      )
+      setIsVerifying(false)
     }
   }
 
@@ -196,16 +205,21 @@ export default function NewListingContent() {
       // React Query Mutation 실행
       const result = await createListing.mutateAsync(requestData)
 
-      if (result.success) {
-        console.log('✅ 매물 등록 성공!', result.data?.propertySeq)
-        router.replace(`/listings/${result.data?.propertySeq}`)
+      // API 응답의 data 필드에서 propertySeq 추출
+      if (result.data && result.data.propertySeq) {
+        console.log('✅ 매물 등록 성공!', result.data.propertySeq)
+        router.replace(`/listings/${result.data.propertySeq}`)
       } else {
-        console.error('❌ 매물 등록 실패:', result.message)
-        showError(result.message || '매물 등록에 실패했습니다. 다시 시도해주세요.')
+        console.error('❌ 매물 등록 실패: 응답 데이터가 없습니다.')
+        showError('매물 등록에 실패했습니다. 다시 시도해주세요.')
       }
     } catch (error) {
       console.error('매물 등록 중 예외 발생:', error)
-      showError('매물 등록 중 오류가 발생했습니다. 다시 시도해주세요.')
+      showError(
+        error instanceof Error
+          ? error.message
+          : '매물 등록 중 오류가 발생했습니다. 다시 시도해주세요.'
+      )
     }
   }
 

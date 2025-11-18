@@ -1,5 +1,5 @@
 import { ClientMapView } from '@/components/layout/map/ClientMapView'
-import { getListings } from '@/services/listingService'
+import { getListingsMap } from '@/services/listingService'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
  * `src/services/listingService.ts`의 `getListings()` 함수만 수정하면 됩니다.
  */
 export default async function MapPage() {
-  const initialListings = await getListings()
+  const initialListings = await getListingsMap()
 
   return <ClientMapView initialListings={initialListings} />
 }
