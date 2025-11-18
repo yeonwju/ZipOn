@@ -1,18 +1,50 @@
 'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 
 import FileUploadArea from '@/components/common/FileUploadArea'
+import { useAlertDialog } from '@/components/ui/alert-dialog'
+import { useContractAiVerify } from '@/queries/useContract'
 
 export default function ContractClient() {
+  const router = useRouter()
   const [files, setFiles] = useState<File[]>([])
-
+  const { showError, AlertDialog } = useAlertDialog()
+  const { mutate: verifyContract, isPending } = useContractAiVerify()
+  const searchParams = useSearchParams()
+  const contractSeq = Number(searchParams.get('contractSeq'))
   const handleFileChange = (newFiles: File[]) => {
     setFiles(newFiles)
   }
 
+  const handleVerify = () => {
+    if (files.length === 0) {
+      showError('계약서 파일을 업로드해주세요.')
+      return
+    }
+
+    // 첫 번째 파일만 사용
+    const file = files[0]
+
+    verifyContract(file, {
+      onSuccess: (data: { lines: string[] }) => {
+        // 검증 결과를 sessionStorage에 저장하고 결과 페이지로 이동
+        if (data && data.lines && Array.isArray(data.lines)) {
+          sessionStorage.setItem('contractVerifyResult', JSON.stringify(data.lines))
+          router.push(`/contract/result?contractSeq=${contractSeq}`)
+        } else {
+          showError('검증 결과를 받아오지 못했습니다.')
+        }
+      },
+      onError: error => {
+        showError('계약서 검증에 실패했습니다. 다시 시도해주세요.')
+      },
+    })
+  }
+
   return (
-    <div className="px-4 py-4">
+    <div className="px-4 py-4 pb-24">
       {/* 상단 제목 */}
       <h2 className="mb-2 text-xl font-semibold">계약서 AI 검증 서비스</h2>
 
@@ -36,10 +68,16 @@ export default function ContractClient() {
       </span>
 
       <div className="fixed right-0 bottom-0 left-0 z-20 bg-white px-4 pt-3 pb-4 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
-        <button className="w-full rounded-md bg-blue-500 py-3 font-bold text-white">
-          검증하기
+        <button
+          onClick={handleVerify}
+          disabled={isPending || files.length === 0}
+          className="w-full rounded-md bg-blue-500 py-3 font-bold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-400"
+        >
+          {isPending ? '검증 중...' : '검증하기'}
         </button>
       </div>
+
+      <AlertDialog />
     </div>
   )
 }

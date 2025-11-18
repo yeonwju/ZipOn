@@ -3,18 +3,14 @@
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 
 interface CompleteAccountInfoProps {
-  bankName: string
   accountNumber: string
   accountHolder: string
-  dueDate: string
   totalAmount: number
 }
 
 export default function CompleteAccountInfo({
-  bankName,
   accountNumber,
   accountHolder,
-  dueDate,
   totalAmount,
 }: CompleteAccountInfoProps) {
   const { showSuccess, AlertDialog } = useAlertDialog()
@@ -31,7 +27,7 @@ export default function CompleteAccountInfo({
         <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
           <div className="flex justify-between">
             <span className="text-sm text-gray-500">은행</span>
-            <span className="text-sm font-medium text-gray-900">{bankName}</span>
+            <span className="text-sm font-medium text-gray-900">싸피은행</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">계좌번호</span>
@@ -54,10 +50,6 @@ export default function CompleteAccountInfo({
             <span className="text-sm font-bold text-blue-600">
               {totalAmount.toLocaleString()}원
             </span>
-          </div>
-          <div className="flex justify-between border-t border-gray-100 pt-3">
-            <span className="text-sm text-gray-500">입금 기한</span>
-            <span className="text-sm font-medium text-red-600">{dueDate}</span>
           </div>
         </div>
         <p className="mt-3 text-xs text-gray-500">

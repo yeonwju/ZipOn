@@ -42,7 +42,7 @@ export default function AuctionDetail({
         </div>
         {/* 상세정보 + 입찰 */}
         <section className="mt-4 flex flex-col gap-6">
-          <AuctionInfo deposit={deposit} fee={data.fee} />
+          <AuctionInfo deposit={deposit} fee={data.mnRent} />
           <AuctionBidSection minimumBid={minimumBid} onBid={onBid} />
         </section>
       </div>

@@ -38,15 +38,15 @@ export default function AuctionBidSection({
     }
 
     showConfirm(
-      `${amount.toLocaleString()}원을 결제하시겠습니까?`,
+      `${amount.toLocaleString()}원으로 입찰하시겠습니까?`,
       () => {
         if (onBid) {
           onBid(amount)
         }
-        router.push(`/auction/1/payment/pending`)
+        router.push(`/mypage`)
       },
       undefined,
-      { confirmText: '결제하기', cancelText: '취소' }
+      { confirmText: '입찰하기', cancelText: '취소' }
     )
   }
 
@@ -57,7 +57,7 @@ export default function AuctionBidSection({
         <div className="flex flex-col divide-y divide-gray-200">
           <div className="flex justify-between py-2 text-sm">
             <span className="text-gray-500">최저 입찰가</span>
-            <span className="font-medium text-gray-900">{minimumBid.toLocaleString()}원</span>
+            <span className="font-medium text-gray-900">{minimumBid.toLocaleString()}만원</span>
           </div>
 
           <div className="flex flex-col gap-2 py-3">

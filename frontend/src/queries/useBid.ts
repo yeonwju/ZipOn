@@ -1,15 +1,13 @@
 'use client'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { bid, bidAccept, bidReject } from '@/services/bidService'
+import { bid, bidAccept, bidReject, getMyBidAmount } from '@/services/bidService'
 
 /**
  * 입찰하기 Mutation Hook
  */
 export function useBid() {
-  const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: ({ auctionSeq, amount }: { auctionSeq: number; amount: number }) =>
       bid(auctionSeq, amount),
@@ -53,6 +51,16 @@ export function useBidReject() {
     },
     onError: error => {
       console.error('입찰 거절 실패:', error)
+    },
+  })
+}
+
+export function useBidAmount(auctionSeq: number) {
+  return useQuery({
+    queryKey: ['bidAmount'],
+    queryFn: async () => {
+      const result = await getMyBidAmount(auctionSeq)
+      return result.amount
     },
   })
 }

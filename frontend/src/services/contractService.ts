@@ -10,9 +10,14 @@ export async function contractPayment(contractSeq: number) {
 }
 
 export async function contractProxyAccount(contractSeq: number) {
-  return authFetch.post(API_ENDPOINTS.CONTRACT_PROXY_ACCOUNT(contractSeq))
+  return authFetch.post<{ targetAccount: number }>(
+    API_ENDPOINTS.CONTRACT_PROXY_ACCOUNT(contractSeq)
+  )
 }
 
-export async function contractAiVerify() {
-  return authFetch.post(API_ENDPOINTS.CONTRACT_AI_VERIFY)
+export async function contractAiVerify(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return authFetch.post<{ lines: string[] }>(API_ENDPOINTS.CONTRACT_AI_VERIFY, formData)
 }

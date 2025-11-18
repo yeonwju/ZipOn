@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
   BID: '/api/v1/auction/bid',
   BID_ACCEPT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/accept`,
   BID_REJECT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}/reject`,
+  BID_AMOUNT: (auctionSeq: number) => `/api/v1/auction/bid/${auctionSeq}`,
 
   // 계약
   CONTRACT_SUCCESS: (contractSeq: number) => `/api/v1/contracts/${contractSeq}/settlement`,

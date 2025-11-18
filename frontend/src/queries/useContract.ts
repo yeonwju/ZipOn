@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
   contractAiVerify,
@@ -12,18 +12,25 @@ import {
 /**
  * 계약 성사
  */
-export function useContractSuccess() {
+export function useContractSuccess(contractSeq: number) {
   return useMutation({
-    mutationFn: (contractSeq: number) => contractSuccess(contractSeq),
+    mutationFn: () => contractSuccess(contractSeq),
   })
 }
 
 /**
  * 첫달 월세 납부
  */
-export function useContractPayment() {
+export function useContractPayment(contractSeq: number) {
+  const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: (contractSeq: number) => contractPayment(contractSeq),
+    mutationFn: () => contractPayment(contractSeq),
+    onSuccess: () => {
+      // 필요시 관련 쿼리 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['auctions'] })
+      queryClient.invalidateQueries({ queryKey: ['mypage'] })
+    },
   })
 }
 
@@ -41,6 +48,6 @@ export function useContractProxyAccount() {
  */
 export function useContractAiVerify() {
   return useMutation({
-    mutationFn: () => contractAiVerify(),
+    mutationFn: (file: File) => contractAiVerify(file),
   })
 }

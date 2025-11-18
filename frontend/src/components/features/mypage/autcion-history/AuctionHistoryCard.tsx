@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ROUTES } from '@/constants'
@@ -35,6 +36,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
   const { showSuccess, showError, AlertDialog } = useAlertDialog()
   const { mutate: acceptBid } = useBidAccept()
   const { mutate: rejectBid } = useBidReject()
+  const router = useRouter()
 
   return (
     <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
@@ -106,7 +108,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   onClick={() => {
                     rejectBid(auctionData.auctionSeq, {
                       onSuccess: result => {
-                        showSuccess('입찰을 거절했습니다.')
+                        showSuccess(result.message || '입찰을 거절했습니다.')
                       },
                       onError: error => {
                         showError(
@@ -131,25 +133,47 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 상세
               </Link>
             )}
-            {auctionData.bidStatus === 'ACCEPTED' && (
+            {/* contractStatus가 WAITING_AI_REVIEW일 때 */}
+            {auctionData.contractStatus && auctionData.contractStatus === 'WAITING_AI_REVIEW' && (
               <>
                 <Link
                   href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
                   className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  상세
+                  상세보기
                 </Link>
                 <button
                   onClick={() => {
-                    // TODO: 결제 페이지로 이동
-                    console.log('결제:', auctionData.auctionSeq)
+                    router.push(`/contract?contractSeq=${auctionData.contractSeq}`)
                   }}
                   className="flex-1 rounded border border-blue-300 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
                 >
-                  결제
+                  계약하기
                 </button>
               </>
             )}
+            {auctionData.bidStatus === 'ACCEPTED' &&
+              auctionData.contractStatus !== 'WAITING_AI_REVIEW' && (
+                <>
+                  <Link
+                    href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
+                    className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    상세
+                  </Link>
+                  <button
+                    onClick={() => {
+                      router.push(
+                        `/auction/${auctionData.auctionSeq}/payment/pending?propertySeq=${auctionData.propertySeq}&contractSeq=${auctionData.contractSeq}`
+                      )
+                      console.log('결제:', auctionData.auctionSeq)
+                    }}
+                    className="flex-1 rounded border border-blue-300 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                  >
+                    결제
+                  </button>
+                </>
+              )}
             {(auctionData.bidStatus === 'REJECTED' ||
               auctionData.bidStatus === 'LOST' ||
               auctionData.bidStatus === 'TIMEOUT') && (

@@ -16,16 +16,12 @@ export default function PaymentInfo({ deposit, monthlyRent, bidAmount }: Payment
           <span className="font-medium text-gray-900">{deposit.toLocaleString()}원</span>
         </div>
         <div className="flex justify-between py-2 text-sm">
-          <span className="text-gray-500">월세</span>
-          <span className="font-medium text-gray-900">{monthlyRent.toLocaleString()}원</span>
-        </div>
-        <div className="flex justify-between py-2 text-sm">
-          <span className="text-gray-500">입찰금액</span>
+          <span className="text-gray-500">낙찰금액</span>
           <span className="font-medium text-gray-900">{bidAmount.toLocaleString()}원</span>
         </div>
         <div className="flex justify-between py-3 text-base">
-          <span className="font-semibold text-gray-900">총 결제금액</span>
-          <span className="font-bold text-blue-600">{totalAmount.toLocaleString()}원</span>
+          <span className="font-semibold text-gray-900">결제금액</span>
+          <span className="font-bold text-blue-600">{bidAmount.toLocaleString()}원</span>
         </div>
       </div>
     </div>

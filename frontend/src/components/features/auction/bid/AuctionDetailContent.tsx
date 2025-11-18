@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { AuctionDetail } from '@/components/features/auction'
 import { useAlertDialog } from '@/components/ui/alert-dialog'
@@ -15,6 +15,7 @@ export default function AuctionDetailContent() {
   const searchParams = useSearchParams()
   const propertySeqParam = searchParams.get('propertySeq')
   const auctionSeqParam = searchParams.get('id')
+
   const propertySeq = propertySeqParam ? Number(propertySeqParam) : null
 
   const queryClient = useQueryClient()
@@ -22,7 +23,7 @@ export default function AuctionDetailContent() {
 
   const { showSuccess, showError, AlertDialog } = useAlertDialog()
   const { mutate: bidMutation } = useBid()
-
+  const router = useRouter()
   // 캐시가 없으면 useQuery로 가져오기 (캐시에 저장됨)
   // propertySeq가 없어도 hook은 호출해야 하므로 조건부로 enabled 사용
   const { data: queryData, isLoading } = useSearchListingDetail(propertySeq || 0, {
@@ -82,7 +83,7 @@ export default function AuctionDetailContent() {
       { auctionSeq: Number(auctionSeqParam), amount: _amount },
       {
         onSuccess: result => {
-          showSuccess(result?.message || '입찰 완료')
+          showSuccess(result?.message || '입찰 완료', () => router.push(`/mypage`))
         },
         onError: error => {
           showError(
@@ -98,7 +99,7 @@ export default function AuctionDetailContent() {
       <AuctionDetail
         data={data}
         auctionEndTime={auctionEndTime}
-        minimumBid={50000}
+        minimumBid={data.mnRent - data.mnRent * 0.1}
         deposit={data.deposit}
         lessorName={data.lessorNm}
         lessorImage={data.lessorProfileImg}

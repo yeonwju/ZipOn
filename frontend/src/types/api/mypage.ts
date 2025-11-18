@@ -13,7 +13,7 @@ export interface MyBrokerageData {
   thumbnail: string
   propertySeq: number
   auctionSeq: number
-  auctionStatus : string
+  auctionStatus: string
   buildingType: string
   address: string
   deposit: number
@@ -25,7 +25,9 @@ export interface MyAuctionsData {
   thumbnail: string
   auctionSeq: number
   propertySeq: number
-  bidStatus : string
+  contractSeq: number | null
+  contractStatus: string | null
+  bidStatus: string
   address: string
   bidAmount: number
   bidRank: number
