@@ -94,7 +94,6 @@ public class AuctionService {
             throw new CustomException(ErrorCode.DATE_NOT_ALLOWED);
         }
 
-        /** 경매종료 시점 설정 (방송 다음날 오후 12시) */
         LocalDateTime auctionStartAt = date.atTime(strmEnd);
         LocalDateTime auctionEndAt = date.plusDays(1).atTime(auctionEnd);
 
