@@ -39,40 +39,34 @@ export default function ListingsTabContent() {
       <ListingTopTabs activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
 
       <div className="min-h-[400px]">
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="text-gray-500">로딩 중...</div>
-          </div>
-        ) : (
-          <>
-            {activeTab === 'general' && (
-              <div>
-                {generalData?.items && generalData.items.length > 0 ? (
-                  generalData.items.map(item => (
-                    <AucListingCard key={item.propertySeq} listing={item} />
-                  ))
-                ) : (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="text-gray-500">일반 매물이 없습니다.</div>
-                  </div>
-                )}
-              </div>
-            )}
-            {activeTab === 'broker' && (
-              <div>
-                {brokerData?.items && brokerData.items.length > 0 ? (
-                  brokerData.items.map(item => (
-                    <AucListingCard key={item.propertySeq} listing={item} />
-                  ))
-                ) : (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="text-gray-500">중개 대기 매물이 없습니다.</div>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+        <>
+          {activeTab === 'general' && (
+            <div>
+              {generalData?.items && generalData.items.length > 0 ? (
+                generalData.items.map(item => (
+                  <AucListingCard key={item.propertySeq} listing={item} />
+                ))
+              ) : (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-gray-500">일반 매물이 없습니다.</div>
+                </div>
+              )}
+            </div>
+          )}
+          {activeTab === 'broker' && (
+            <div>
+              {brokerData?.items && brokerData.items.length > 0 ? (
+                brokerData.items.map(item => (
+                  <AucListingCard key={item.propertySeq} listing={item} />
+                ))
+              ) : (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-gray-500">중개 대기 매물이 없습니다.</div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       </div>
       {user?.isVerified && <FabDial actions={actions} />}
     </section>

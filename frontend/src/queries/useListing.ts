@@ -10,11 +10,9 @@ import {
   getListingDetail,
   registerListingVerification,
 } from '@/services/listingService'
-import { ListingAuctions, RegListingRequest } from '@/types/api/listings'
+import { RegListingRequest } from '@/types/api/listings'
 
-/**
- * 등기부등본 인증 Mutation Hook
- */
+// 1. 등기부등본 인증 Mutation Hook
 export function useRegisterListingVerification() {
   return useMutation({
     mutationFn: (request: {
@@ -29,9 +27,7 @@ export function useRegisterListingVerification() {
   })
 }
 
-/**
- * 매물 등록 Mutation Hook
- */
+// 2. 매물 등록 Mutation Hook
 export function useCreateListing() {
   const queryClient = useQueryClient()
 
@@ -46,9 +42,7 @@ export function useCreateListing() {
   })
 }
 
-/**
- * 매물 삭제 Mutation Hook
- */
+// 3. 매물 삭제 Mutation Hook
 export function useDeleteListing() {
   const queryClient = useQueryClient()
 
@@ -63,13 +57,8 @@ export function useDeleteListing() {
   })
 }
 
-/**
- * 매물 상세 정보 조회 Hook
- */
-export function useSearchListingDetail(
-  seq: number,
-  options?: { enabled?: boolean }
-) {
+// 4. 매물 상세 정보 조회 Hook
+export function useSearchListingDetail(seq: number, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: listingQueryKeys.detail(seq),
     queryFn: async () => {
@@ -80,12 +69,11 @@ export function useSearchListingDetail(
       return result.data
     },
     enabled: options?.enabled !== false && !!seq,
+    staleTime: 1000 * 60 * 10, // ⭐ 상세 데이터는 변화 적으므로 10분
   })
 }
 
-/**
- * 경매 매물 목록 조회 Hook
- */
+// 5. 경매 매물 목록 조회 Hook
 export function useAuctionListings() {
   return useQuery({
     queryKey: listingQueryKeys.auction(),
@@ -96,12 +84,11 @@ export function useAuctionListings() {
       }
       return result.data
     },
+    staleTime: 1000 * 60 * 5,
   })
 }
 
-/**
- * 일반 매물 목록 조회 Hook
- */
+// 6. 일반 매물 목록 조회 Hook
 export function useGeneralListings() {
   return useQuery({
     queryKey: listingQueryKeys.general(),
@@ -112,12 +99,11 @@ export function useGeneralListings() {
       }
       return result.data
     },
+    staleTime: 1000 * 60 * 5,
   })
 }
 
-/**
- * 중개 매물 목록 조회 Hook
- */
+// 7. 중개 매물 목록 조회 Hook
 export function useBrkListings() {
   return useQuery({
     queryKey: listingQueryKeys.broker(),
@@ -128,5 +114,6 @@ export function useBrkListings() {
       }
       return result.data
     },
+    staleTime: 1000 * 60 * 5,
   })
 }
