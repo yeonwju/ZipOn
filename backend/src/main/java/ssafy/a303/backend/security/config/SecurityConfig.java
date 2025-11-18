@@ -74,7 +74,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/actuator/health",
                                 "/api/actuator/health",
-                                "/error"
+                                "/error",
+                                "/api/v1/admin/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
