@@ -25,8 +25,7 @@ public class BidTryCountRepository {
     public boolean hasAlreadyBid(int userSeq, int auctionSeq) {
         String key = generateKey(auctionSeq);
         String member = String.valueOf(userSeq);
-        Boolean isMember = redis.opsForSet().isMember(key, member);
-        return Boolean.TRUE.equals(isMember);
+        return redis.opsForSet().isMember(key, member);
     }
 
     private String generateKey(int auctionSeq) {
