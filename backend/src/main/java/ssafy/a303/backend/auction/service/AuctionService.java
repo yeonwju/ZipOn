@@ -64,7 +64,8 @@ public class AuctionService {
         boolean wantStrm = req != null
                 && req.strmDate() != null
                 && req.strmStartTm() != null
-                && req.strmEndTm() != null;
+                && req.strmEndTm() != null
+                && req.auctionEndAt() != null;
 
         Auction.AuctionBuilder b = Auction.builder()
                 .user(user)

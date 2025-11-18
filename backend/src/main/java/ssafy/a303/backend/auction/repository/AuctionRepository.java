@@ -28,11 +28,11 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
      */
     @Query("""
             SELECT a FROM Auction a
-            JOIN FETCH a.property 
-            WHERE a.user.userSeq = :userSeq 
-            AND a.status = :status 
+            JOIN FETCH a.property
+            WHERE a.user.userSeq = :userSeq
+            AND a.status = :status
             AND NOT EXISTS (
-                SELECT 1 FROM LiveStream ls 
+                SELECT 1 FROM LiveStream ls
                 WHERE ls.auction.auctionSeq = a.auctionSeq
             )
             ORDER BY a.createdAt DESC
