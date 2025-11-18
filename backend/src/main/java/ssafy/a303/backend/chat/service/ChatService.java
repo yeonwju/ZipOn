@@ -3,7 +3,6 @@ package ssafy.a303.backend.chat.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,7 @@ import ssafy.a303.backend.chat.dto.response.MyChatListResponseDto;
 import ssafy.a303.backend.chat.entity.*;
 import ssafy.a303.backend.chat.repository.*;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.repository.PropertyRepository;
@@ -122,7 +122,7 @@ public class ChatService {
                                 .profileImg(requester.getProfileImg())
                                 .build())
                         .content(requester.getNickname() + "님이 채팅을 시작했습니다.")
-                        .sentAt(LocalDateTime.now())
+                        .sentAt(LocalDateTime.now(KoreaClock.getClock()))
                         .unreadCount(0) // 새 채팅방이므로 아직 읽지 않은 메시지 없음
                         .build();
 
@@ -311,7 +311,7 @@ public class ChatService {
                 .chatRoom(chatRoom)
                 .sender(sender)
                 .content(requestDto.getContent())
-                .sentAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now(KoreaClock.getClock()))
                 .build();
         chatMessageRepository.save(message);
 

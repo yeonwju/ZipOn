@@ -16,6 +16,7 @@ import ssafy.a303.backend.auction.entity.AuctionStatus;
 import ssafy.a303.backend.auction.entity.AuctionCancler;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.repository.PropertyRepository;
@@ -126,7 +127,7 @@ public class AuctionService {
         }
 
         a.setStatus(AuctionStatus.CANCELED);
-        a.setCancelAt(LocalDateTime.now());
+        a.setCancelAt(LocalDateTime.now(KoreaClock.getClock()));
         a.setCancelBy(AuctionCancler.BROKER);
         a.setCancelReason(req != null ? req.reason() : null);
 
