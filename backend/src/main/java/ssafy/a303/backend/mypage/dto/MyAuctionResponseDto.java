@@ -20,10 +20,13 @@ public class MyAuctionResponseDto {
     private String thumbnail;
 
     @Schema(description = "경매 식별자", example="1")
-    private Long auctionSeq;
+    private Integer auctionSeq;
 
     @Schema(description = "매물 식별자", example="1")
-    private Long propertySeq;
+    private Integer propertySeq;
+
+    @Schema(description = "계약 식별자", example="1")
+    private Integer contractSeq;
 
     @Schema(description = "경매 진행 상태", example = "WAITING")
     private BidStatus bidStatus;
