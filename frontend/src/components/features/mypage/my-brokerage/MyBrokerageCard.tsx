@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { ROUTES } from '@/constants'
 import { MyBrokerageData } from '@/types/api/mypage'
-import { formatCurrency, normalizeImageUrl } from '@/utils/format'
+import { formatCurrency, normalizeThumbnailUrl } from '@/utils/format'
 
 interface MyBrokerageCardProps {
   className?: string
@@ -46,17 +46,21 @@ export default function MyBrokerageCard({ className, brokerageData }: MyBrokerag
       ? `${formatCurrency(brokerageData.deposit)} / ${formatCurrency(brokerageData.mnRent)}`
       : formatCurrency(brokerageData.deposit)
 
+  const thumbnailUrl = normalizeThumbnailUrl(brokerageData.thumbnail, '/listing.svg')
+  const isExternalUrl = thumbnailUrl.startsWith('https://')
+
   return (
     <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-row items-center gap-2.5">
         {/* 이미지 */}
         <div className="relative w-24 flex-shrink-0">
           <Image
-            src={normalizeImageUrl(brokerageData.thumbnail) || '/listing.svg'}
+            src={thumbnailUrl}
             alt="매물 이미지"
             width={96}
             height={96}
             className="h-24 w-24 rounded-md object-cover"
+            unoptimized={isExternalUrl}
           />
         </div>
 

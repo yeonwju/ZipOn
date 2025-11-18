@@ -81,7 +81,7 @@ export const squareMeterToPyeong = (squareMeter: number): number => {
  * @returns 절대 URL
  */
 export const normalizeImageUrl = (imageUrl: string | null | undefined): string => {
-  if (!imageUrl) return '/default-profile.svg'
+  if (!imageUrl || imageUrl.trim() === '') return '/default-profile.svg'
   
   // 이미 절대 URL인 경우 (http:// 또는 https://로 시작)
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
@@ -95,6 +95,33 @@ export const normalizeImageUrl = (imageUrl: string | null | undefined): string =
   
   // 상대 경로인 경우 (dev/uploads/... 같은 경우) S3 URL로 변환
   // S3 버킷 URL: https://zipon-media.s3.ap-northeast-2.amazonaws.com/
+  const S3_BASE_URL = 'https://zipon-media.s3.ap-northeast-2.amazonaws.com'
+  return `${S3_BASE_URL}/${imageUrl}`
+}
+
+/**
+ * 썸네일 이미지 URL을 절대 URL로 변환 (썸네일 전용)
+ * @param imageUrl - 이미지 URL (상대 경로 또는 절대 URL)
+ * @param fallback - fallback 이미지 경로 (기본값: '/listing.svg')
+ * @returns 절대 URL
+ */
+export const normalizeThumbnailUrl = (
+  imageUrl: string | null | undefined,
+  fallback: string = '/listing.svg'
+): string => {
+  if (!imageUrl || imageUrl.trim() === '') return fallback
+  
+  // 이미 절대 URL인 경우 (http:// 또는 https://로 시작)
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl
+  }
+  
+  // 상대 경로인 경우 (/, /listing.svg 같은 경우는 그대로 반환)
+  if (imageUrl.startsWith('/')) {
+    return imageUrl
+  }
+  
+  // 상대 경로인 경우 (dev/uploads/... 같은 경우) S3 URL로 변환
   const S3_BASE_URL = 'https://zipon-media.s3.ap-northeast-2.amazonaws.com'
   return `${S3_BASE_URL}/${imageUrl}`
 }

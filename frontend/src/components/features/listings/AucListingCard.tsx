@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { ListingData } from '@/types/api/listings'
-import { formatCurrency, normalizeImageUrl } from '@/utils/format'
+import { formatCurrency, normalizeThumbnailUrl } from '@/utils/format'
 
 interface AucListingCardProps {
   listing: ListingData
@@ -14,16 +14,20 @@ function formatKoreanMoney(value: number): string {
 }
 
 export default function AucListingCard({ listing, className }: AucListingCardProps) {
+  const thumbnailUrl = normalizeThumbnailUrl(listing.thumbnail, '/listing.svg')
+  const isExternalUrl = thumbnailUrl.startsWith('https://')
+
   return (
     <Link href={`/listings/${listing.propertySeq}`}>
       <div className="flex h-[130px] w-full border-b border-gray-200 bg-white">
         {/* Left Image */}
         <div className="relative h-full w-[150px] flex-shrink-0">
           <Image
-            src={normalizeImageUrl(listing.thumbnail) || '/listing.svg'}
+            src={thumbnailUrl}
             alt="매물 이미지"
             fill
             className="object-cover"
+            unoptimized={isExternalUrl}
           />
         </div>
 

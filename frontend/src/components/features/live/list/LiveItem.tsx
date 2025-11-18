@@ -4,7 +4,7 @@ import { Eye, Heart, MessageCircle } from 'lucide-react'
 import Image from 'next/image'
 import React from 'react'
 
-import { normalizeImageUrl } from '@/utils/format'
+import { normalizeImageUrl, normalizeThumbnailUrl } from '@/utils/format'
 import { LiveItemData } from '@/types'
 export type LiveItemProps = LiveItemData
 
@@ -16,16 +16,22 @@ export default function LiveItem({
   brokerName,
   brokerImgSrc,
 }: LiveItemProps) {
+  const thumbnailUrl = normalizeThumbnailUrl(imgSrc, '/live-room.svg')
+  const brokerImageUrl = normalizeImageUrl(brokerImgSrc)
+  const isThumbnailExternal = thumbnailUrl.startsWith('https://')
+  const isBrokerImageExternal = brokerImageUrl.startsWith('https://')
+
   return (
     <div className="flex w-full max-w-full cursor-pointer flex-col items-center overflow-hidden rounded-2xl border-1 border-gray-300 transition-all duration-200 hover:bg-gray-50 sm:gap-4 sm:px-4 sm:py-4 lg:gap-6">
       {/* 썸네일 */}
       <div className="w-full max-w-full flex-shrink-0 overflow-hidden rounded-t-2xl">
         <Image
-          src={normalizeImageUrl(imgSrc) || '/live-room.svg'}
+          src={thumbnailUrl}
           alt="라이브 방 이미지"
           width={400}
           height={400}
           className="w-full bg-gray-300 object-cover sm:h-[100px] sm:w-[130px] md:h-[120px] md:w-[175px] lg:h-[145px] lg:w-[280px]"
+          unoptimized={isThumbnailExternal}
         />
       </div>
 
@@ -40,11 +46,12 @@ export default function LiveItem({
         <div className={'flex w-full min-w-0 justify-between gap-2'}>
           <div className="sm:text-md mb-0.5 flex min-w-0 flex-row items-center gap-1 text-[11px] text-gray-500 sm:gap-2 lg:text-lg">
             <Image
-              src={normalizeImageUrl(brokerImgSrc) || '/default-profile.svg'}
+              src={brokerImageUrl}
               alt="브로커 이미지"
               width={18}
               height={18}
               className="flex-shrink-0 rounded-full border border-gray-200 sm:h-[20px] sm:w-[20px] lg:h-[25px] lg:w-[25px]"
+              unoptimized={isBrokerImageExternal}
             />
             <span className="truncate font-normal text-gray-600">{brokerName}</span>
           </div>

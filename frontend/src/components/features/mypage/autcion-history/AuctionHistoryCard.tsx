@@ -6,7 +6,7 @@ import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ROUTES } from '@/constants'
 import { useBidAccept, useBidReject } from '@/queries/useBid'
 import { MyAuctionsData } from '@/types/api/mypage'
-import { formatCurrency, normalizeImageUrl } from '@/utils/format'
+import { formatCurrency, normalizeThumbnailUrl } from '@/utils/format'
 
 interface AuctionHistoryCardProps {
   auctionData: MyAuctionsData
@@ -39,17 +39,21 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
   const { mutate: rejectBid } = useBidReject()
   const router = useRouter()
 
+  const thumbnailUrl = normalizeThumbnailUrl(auctionData.thumbnail, '/live-room.svg')
+  const isExternalUrl = thumbnailUrl.startsWith('https://')
+
   return (
     <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-row items-center gap-2.5">
         {/* 이미지 */}
         <div className="relative w-24 flex-shrink-0">
           <Image
-            src={normalizeImageUrl(auctionData.thumbnail) || '/live-room.svg'}
+            src={thumbnailUrl}
             alt="매물 이미지"
             width={96}
             height={96}
             className="h-24 w-24 rounded-md object-cover"
+            unoptimized={isExternalUrl}
           />
         </div>
 
