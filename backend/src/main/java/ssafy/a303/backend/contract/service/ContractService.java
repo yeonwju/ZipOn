@@ -147,7 +147,7 @@ public class ContractService {
 
         virtualAccountRepository.save(virtualAccount);
 
-        /** 7. 계약 상태를 "진행중"으로 변경 */
+        /** 7. 계약 상태를 "첫월세 납부 대기중"으로 변경 */
         contract.updateStatus(ContractStatus.WAITING_FIRST_RENT);
         contractRepository.save(contract);
 
@@ -160,7 +160,7 @@ public class ContractService {
     }
 
     /**
-     * 계좌이체
+     * 계좌이체 메서드. 입금, 납부에 사용
      * @param userKey 이체를 수행하는 사용자 ssafy userKey
      * @param withdrawalAccountNo 출금 계좌번호 (임차인 메인 계좌)
      * @param depositAccountNo 입금 계좌번호 (가상계좌)
@@ -284,6 +284,10 @@ public class ContractService {
             va.setStatus(VirtualAccountStatus.PAID);
             contract.setIsFirstPaid(true);
         }
+
+        /** 계약 상태를 "AI 계약서 검토 대기중"으로 변경 */
+        contract.updateStatus(ContractStatus.WAITING_AI_REVIEW);
+        contractRepository.save(contract);
     }
 
     /**
