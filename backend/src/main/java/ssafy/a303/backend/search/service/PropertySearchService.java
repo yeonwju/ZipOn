@@ -183,17 +183,15 @@ public class PropertySearchService {
         }
     }
 
-    /** 특정 property_seq 목록만 선택해서 재색인 */
-    public void reindexPropertiesBySeq(List<Integer> propertySeqs) {
-        List<Property> properties = propertyRepository.findAllById(propertySeqs);
-
-        for (Property p : properties) {
+    /** 특정 property_seq만 선택해서 재색인 */
+    public void reindexOne(Integer propertySeq) {
+        Property p = propertyRepository.findById(propertySeq)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
             try {
                 setIndex(p);
             } catch (Exception e) {
                 log.error("[ES] 재색인 실패 - propertySeq={}", p.getPropertySeq(), e);
             }
-        }
     }
 
     private PropertyDocument toDoc(Property p) {
