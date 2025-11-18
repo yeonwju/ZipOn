@@ -2,6 +2,7 @@ package ssafy.a303.backend.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -10,12 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.common.response.ResponseDTO;
 import ssafy.a303.backend.sms.service.SmsService;
 import ssafy.a303.backend.user.dto.request.CodeRequest;
 import ssafy.a303.backend.user.dto.request.VerifyUserRequest;
 import ssafy.a303.backend.user.dto.response.MeResponseDTO;
 import ssafy.a303.backend.user.service.UserService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,4 +74,28 @@ public class UserController {
         return ResponseDTO.ok(smsService.verify(userSeq, request.code()), "인증되었습니다.");
     }
 
+    @Operation(
+            summary = "프로필 이미지 등록",
+            description = "현재 로그인한 사용자의 프로필 이미지를 업로드합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "프로필이 등록되었습니다.",
+                    content = @Content()
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없습니다.",
+                    content = @Content()
+            )
+    })
+    @PostMapping("/profile")
+    public ResponseEntity<ResponseDTO<Void>> profileImg(
+            @AuthenticationPrincipal int userSeq,
+            @RequestPart(value = "image") MultipartFile image
+    ){
+        userService.userProfile(userSeq, image);
+        return ResponseDTO.ok(null, "프로필이 등록되었슶니다.");
+    }
 }
