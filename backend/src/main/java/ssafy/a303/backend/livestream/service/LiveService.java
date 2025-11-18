@@ -22,7 +22,6 @@ import ssafy.a303.backend.livestream.entity.LiveStream;
 import ssafy.a303.backend.livestream.enums.LiveStreamSortType;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
-import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
@@ -502,7 +501,7 @@ public class LiveService {
 
         // 이미 좋아요 되어있는지 확인
         Boolean alreadyLiked = liveRedisObjectTemplate.opsForSet().isMember(likeKey, userSeq);
-        //log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}",liveSeq, userSeq, beforeCount, alreadyLiked);
+        log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}",liveSeq, userSeq, beforeCount, alreadyLiked);
 
         if (Boolean.TRUE.equals(alreadyLiked)) {
             // 좋아요 취소
