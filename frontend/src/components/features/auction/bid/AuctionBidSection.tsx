@@ -71,7 +71,7 @@ export default function AuctionBidSection({
               placeholder="입찰금액을 입력해주세요"
               value={bidAmount}
               onChange={e => setBidAmount(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-right text-gray-900 transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-right text-base text-gray-900 transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
             />
           </div>
         </div>

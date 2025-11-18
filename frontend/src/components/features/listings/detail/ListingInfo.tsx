@@ -6,6 +6,7 @@ import ListingInfoItem from './ListingInfoItem'
 
 interface ListingInfoProps {
   name: string
+  imgSrc: string
   deposit: number
   rent: number
   type: string
@@ -24,6 +25,7 @@ interface ListingInfoProps {
  */
 export default function ListingInfo({
   name,
+  imgSrc,
   deposit,
   rent,
   type,
@@ -37,17 +39,24 @@ export default function ListingInfo({
     <section className="bg-white px-3">
       <div className="text-2xl font-bold">{name}</div>
       <div className={'my-2'}>
-        <ListingDetailProfile imgSrc={'/profile.svg'} name={'김도현'} className={'font-medium'} />
+        <ListingDetailProfile imgSrc={imgSrc} name={name} className={'font-medium'} />
       </div>
 
       {/* 가격 */}
       <div className="mb-3">
         <div className="flex items-baseline gap-2">
+          {/* 보증금 */}
           <span className="text-md font-bold text-gray-900">
-            {deposit >= 10000 ? `보증금 ${(deposit / 10000).toFixed(1)}억` : `월세 ${deposit}만원`}
+            {deposit >= 100000000
+              ? `보증금 ${(deposit / 100000000).toFixed(deposit % 100000000 === 0 ? 0 : 1)}억`
+              : `보증금 ${(deposit / 10000).toLocaleString()}만원`}
           </span>
+
+          {/* 월세 */}
           {rent > 0 && (
-            <span className="text-md font-semibold text-blue-400">/ 월세 {rent}만원</span>
+            <span className="text-md font-semibold text-blue-400">
+              / 월세 {rent.toLocaleString()}만원
+            </span>
           )}
         </div>
       </div>

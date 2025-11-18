@@ -154,7 +154,7 @@ export default function AddressSearch({
             readOnly
             onClick={() => setIsDialogOpen(true)}
             placeholder="클릭하여 주소를 검색하세요 (지번 우선)"
-            className="flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm transition-colors outline-none placeholder:text-gray-400 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-base transition-colors outline-none placeholder:text-gray-400 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </div>
 

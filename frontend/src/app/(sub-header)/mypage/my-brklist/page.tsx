@@ -3,49 +3,47 @@
 import { SearchX } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import AuctionHistoryCard from '@/components/features/mypage/autcion-history/AuctionHistoryCard'
-import AuctionHistoryListSkeleton from '@/components/skeleton/mypage/AuctionHistoryListSkeleton'
-import { useMyAuctions } from '@/queries/useMypage'
+import MyBrokerageCard from '@/components/features/mypage/my-brokerage/MyBrokerageCard'
+import MyListingListSkeleton from '@/components/skeleton/mypage/MyListingListSkeleton'
+import { useMyBrokerage } from '@/queries/useMypage'
 
-type BidStatusFilter = 'all' | 'WAITING' | 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'TIMEOUT' | 'LOST'
+type BrokerageStatusFilter = 'all' | 'REQUESTED' | 'ACCEPTED' | 'CANCELED' | 'EXPIRED'
 
-const FILTER_OPTIONS: { value: BidStatusFilter; label: string }[] = [
+const FILTER_OPTIONS: { value: BrokerageStatusFilter; label: string }[] = [
   { value: 'all', label: '전체' },
-  { value: 'WAITING', label: '대기' },
-  { value: 'OFFERED', label: '제시' },
-  { value: 'ACCEPTED', label: '수락' },
-  { value: 'REJECTED', label: '거절' },
-  { value: 'TIMEOUT', label: '경매 종료' },
-  { value: 'LOST', label: '10위권 밖' },
+  { value: 'REQUESTED', label: '요청됨' },
+  { value: 'ACCEPTED', label: '수락됨' },
+  { value: 'CANCELED', label: '취소됨' },
+  { value: 'EXPIRED', label: '만료됨' },
 ]
 
-export default function MyAuctionPage() {
-  const { data: auctionHistory, isLoading, isError } = useMyAuctions()
-  const [selectedFilter, setSelectedFilter] = useState<BidStatusFilter>('all')
+export default function MyBrkList() {
+  const { data: myBrokerage, isLoading, isError } = useMyBrokerage()
+  const [selectedFilter, setSelectedFilter] = useState<BrokerageStatusFilter>('all')
 
   // 필터링된 데이터
-  const filteredHistory = useMemo(() => {
-    if (!auctionHistory) return []
-    if (selectedFilter === 'all') return auctionHistory
-    return auctionHistory.filter(auction => auction.bidStatus === selectedFilter)
-  }, [auctionHistory, selectedFilter])
+  const filteredBrokerage = useMemo(() => {
+    if (!myBrokerage) return []
+    if (selectedFilter === 'all') return myBrokerage
+    return myBrokerage.filter(brokerage => brokerage.auctionStatus === selectedFilter)
+  }, [myBrokerage, selectedFilter])
 
   // 로딩 중일 때 스켈레톤 표시
   if (isLoading) {
     return (
       <div className="flex flex-col px-4 py-4">
-        <AuctionHistoryListSkeleton />
+        <MyListingListSkeleton />
       </div>
     )
   }
 
   // 데이터가 없거나 null일 때
-  if (isError || !auctionHistory || auctionHistory.length === 0) {
+  if (isError || !myBrokerage || myBrokerage.length === 0) {
     return (
       <div className="flex flex-col px-4 py-4">
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">
           <SearchX size={40} className="text-gray-400" />
-          <p className="text-sm text-gray-500">경매 참여 내역이 없습니다.</p>
+          <p className="text-sm text-gray-500">중개 내역이 없습니다.</p>
         </div>
       </div>
     )
@@ -68,7 +66,7 @@ export default function MyAuctionPage() {
             {filter.label}
             {selectedFilter === filter.value && filter.value !== 'all' && (
               <span className="ml-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-400 px-1.5 text-xs">
-                {filteredHistory.length}
+                {filteredBrokerage.length}
               </span>
             )}
           </button>
@@ -76,12 +74,12 @@ export default function MyAuctionPage() {
       </div>
 
       {/* 필터링된 리스트 */}
-      {filteredHistory.length > 0 ? (
+      {filteredBrokerage.length > 0 ? (
         <div className="flex flex-col gap-3">
-          {filteredHistory.map(auction => (
-            <AuctionHistoryCard
-              key={`${auction.auctionSeq}-${auction.propertySeq}`}
-              auctionData={auction}
+          {filteredBrokerage.map(brokerage => (
+            <MyBrokerageCard
+              key={`${brokerage.auctionSeq}-${brokerage.propertySeq}`}
+              brokerageData={brokerage}
             />
           ))}
         </div>
@@ -89,7 +87,7 @@ export default function MyAuctionPage() {
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-16 text-center">
           <SearchX size={40} className="text-gray-400" />
           <p className="text-sm text-gray-500">
-            {FILTER_OPTIONS.find(f => f.value === selectedFilter)?.label} 상태의 경매 내역이
+            {FILTER_OPTIONS.find(f => f.value === selectedFilter)?.label} 상태의 중개 내역이
             없습니다.
           </p>
         </div>

@@ -16,7 +16,7 @@ export default function SearchBar() {
           value={value}
           onChange={e => setValue(e.target.value)}
           placeholder="지하철, 건물명, 대학교, 아파트"
-          className="border-none pr-10 pl-10 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-0"
+          className="border-none pr-10 pl-10 text-base text-gray-800 placeholder:text-gray-400 focus:ring-0"
         />
       </InputGroup>
 
