@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { MyPropertiesData } from '@/types/api/mypage'
+import { formatCurrency } from '@/utils/format'
 
 interface MyListingCardProps {
   className?: string
@@ -21,8 +22,8 @@ function getBuildingTypeText(buildingType: string): string {
 export default function MyListingCard({ className, propertyData }: MyListingCardProps) {
   const priceText =
     propertyData.mnRent > 0
-      ? `${propertyData.deposit.toLocaleString()} / ${propertyData.mnRent.toLocaleString()}`
-      : `${propertyData.deposit.toLocaleString()}`
+      ? `${formatCurrency(propertyData.deposit)} / ${formatCurrency(propertyData.mnRent)}`
+      : formatCurrency(propertyData.deposit)
 
   return (
     <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
@@ -60,7 +61,6 @@ export default function MyListingCard({ className, propertyData }: MyListingCard
               {propertyData.mnRent > 0 ? '월세' : '전세'}
             </span>
             <span className="text-base font-bold text-blue-600">{priceText}</span>
-            <span className="text-xs text-gray-500">만원</span>
           </div>
 
           {/* 버튼 영역 */}

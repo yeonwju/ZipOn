@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 
 import { useAlertDialog } from '@/components/ui/alert-dialog'
+import { formatCurrency } from '@/utils/format'
 
 interface AuctionBidSectionProps {
   minimumBid: number
@@ -31,14 +32,14 @@ export default function AuctionBidSection({
 
     const amount = parseInt(bidAmount)
     if (amount < minimumBid) {
-      showError(`최저 입찰가는 ${minimumBid.toLocaleString()}원입니다.`, () => {
+      showError(`최저 입찰가는 ${formatCurrency(minimumBid)}입니다.`, () => {
         inputRef.current?.focus()
       })
       return
     }
 
     showConfirm(
-      `${amount.toLocaleString()}원으로 입찰하시겠습니까?`,
+      `${formatCurrency(amount)}으로 입찰하시겠습니까?`,
       () => {
         if (onBid) {
           onBid(amount)
@@ -57,7 +58,7 @@ export default function AuctionBidSection({
         <div className="flex flex-col divide-y divide-gray-200">
           <div className="flex justify-between py-2 text-sm">
             <span className="text-gray-500">최저 입찰가</span>
-            <span className="font-medium text-gray-900">{minimumBid.toLocaleString()}만원</span>
+            <span className="font-medium text-gray-900">{formatCurrency(minimumBid)}</span>
           </div>
 
           <div className="flex flex-col gap-2 py-3">

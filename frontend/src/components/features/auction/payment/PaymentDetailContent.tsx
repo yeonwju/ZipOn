@@ -49,7 +49,7 @@ export default function PaymentDetailContent() {
           showError('가상계좌 발급에 실패했습니다. 다시 시도해주세요.')
         }
       },
-      onError: error => {
+      onError: () => {
         showError('가상계좌 발급에 실패했습니다. 다시 시도해주세요.')
       },
     })
@@ -61,10 +61,10 @@ export default function PaymentDetailContent() {
         <PaymentDetail
           data={propertyData}
           bidAmount={bidAmount}
-          deposit={20000000}
-          monthlyRent={500000}
-          lessorName="변가원"
-          lessorImage="/profile.svg"
+          deposit={propertyData.deposit}
+          monthlyRent={propertyData.mnRent}
+          lessorName={propertyData.lessorNm}
+          lessorImage={propertyData.lessorProfileImg}
           onPayment={handlePayment}
         />
       ) : (

@@ -22,12 +22,21 @@ export default function Profile() {
     >
       {/* 아바타 */}
       <div className={'relative'}>
-        <Avatar className={'h-20 w-20 rounded-3xl border-3 border-gray-100 shadow-lg'}>
-          <AvatarImage src="/profile.svg" alt="Profile" className="rounded-2xl object-cover" />
+        <Avatar className="h-20 w-20 rounded-3xl border-3 border-gray-100 shadow-lg">
+          <AvatarImage
+            src={user?.profileImg || '/default-profile.svg'}
+            alt="Profile"
+            className="rounded-2xl object-cover"
+            onError={e => {
+              ;(e.currentTarget as HTMLImageElement).src = '/default-profile.svg'
+            }}
+          />
+
           <AvatarFallback className="rounded-2xl">
             <Skeleton className="h-20 w-20 rounded-2xl bg-gray-200 dark:bg-gray-700" />
           </AvatarFallback>
         </Avatar>
+
         <button
           className={
             'absolute right-[-5] bottom-[-5] z-50 cursor-pointer rounded-full border-2 border-gray-200 bg-white p-1.5 shadow-sm'

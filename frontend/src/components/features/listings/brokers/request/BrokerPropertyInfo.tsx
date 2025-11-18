@@ -1,4 +1,5 @@
 import { ListingDetailDataResponse } from '@/types/api/listings'
+import { formatCurrency } from '@/utils/format'
 
 interface BrokerPropertyInfoProps {
   listing: ListingDetailDataResponse
@@ -19,15 +20,15 @@ export default function BrokerPropertyInfo({ listing }: BrokerPropertyInfoProps)
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">보증금</span>
-          <span className="font-medium text-gray-900">{listing.deposit.toLocaleString()}원</span>
+          <span className="font-medium text-gray-900">{formatCurrency(listing.deposit)}</span>
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">월세</span>
-          <span className="font-medium text-gray-900">{listing.mnRent.toLocaleString()}원</span>
+          <span className="font-medium text-gray-900">{formatCurrency(listing.mnRent)}</span>
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">관리비</span>
-          <span className="font-medium text-gray-900">{listing.fee}</span>
+          <span className="font-medium text-gray-900">{formatCurrency(listing.fee)}</span>
         </div>
         <div className="flex justify-between py-2 text-sm">
           <span className="text-gray-500">면적</span>

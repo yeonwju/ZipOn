@@ -1,6 +1,7 @@
 'use client'
 
 import { useAlertDialog } from '@/components/ui/alert-dialog'
+import { formatCurrency } from '@/utils/format'
 
 interface CompleteAccountInfoProps {
   accountNumber: string
@@ -47,9 +48,7 @@ export default function CompleteAccountInfo({
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-gray-500">입금 금액</span>
-            <span className="text-sm font-bold text-blue-600">
-              {totalAmount.toLocaleString()}원
-            </span>
+            <span className="text-sm font-bold text-blue-600">{formatCurrency(totalAmount)}</span>
           </div>
         </div>
         <p className="mt-3 text-xs text-gray-500">

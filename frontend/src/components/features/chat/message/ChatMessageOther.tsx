@@ -28,7 +28,7 @@ export default function ChatMessageOther({
       {/* 프로필 이미지 */}
       {showProfile ? (
         <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarImage src={profileImageSrc} alt={message.sender.name} />
+          <AvatarImage src={profileImageSrc || '/default-profile.svg'} alt={message.sender.name} />
         </Avatar>
       ) : (
         <div className="h-10 w-10 flex-shrink-0" />

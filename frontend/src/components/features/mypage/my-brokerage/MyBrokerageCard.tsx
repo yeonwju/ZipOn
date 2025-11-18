@@ -3,6 +3,7 @@ import Link from 'next/link'
 
 import { ROUTES } from '@/constants'
 import { MyBrokerageData } from '@/types/api/mypage'
+import { formatCurrency } from '@/utils/format'
 
 interface MyBrokerageCardProps {
   className?: string
@@ -42,8 +43,8 @@ function getBuildingTypeText(buildingType: string): string {
 export default function MyBrokerageCard({ className, brokerageData }: MyBrokerageCardProps) {
   const priceText =
     brokerageData.mnRent > 0
-      ? `${brokerageData.deposit.toLocaleString()} / ${brokerageData.mnRent.toLocaleString()}`
-      : `${brokerageData.deposit.toLocaleString()}`
+      ? `${formatCurrency(brokerageData.deposit)} / ${formatCurrency(brokerageData.mnRent)}`
+      : formatCurrency(brokerageData.deposit)
 
   return (
     <div className="flex w-full flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
@@ -82,7 +83,6 @@ export default function MyBrokerageCard({ className, brokerageData }: MyBrokerag
               {brokerageData.mnRent > 0 ? '월세' : '전세'}
             </span>
             <span className="text-base font-bold text-blue-600">{priceText}</span>
-            <span className="text-xs text-gray-500">만원</span>
           </div>
 
           {/* 버튼 영역 */}
@@ -99,4 +99,3 @@ export default function MyBrokerageCard({ className, brokerageData }: MyBrokerag
     </div>
   )
 }
-

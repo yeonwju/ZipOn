@@ -1,19 +1,25 @@
 import type { AreaFilter, DirectionFilter, FloorFilter, RoomCountFilter } from '@/types/filter'
 
 /**
- * 금액을 보기 좋게 포맷 (만원 단위)
- * @param amount - 만원 단위 금액
+ * 금액을 보기 좋게 포맷 (원 단위 입력)
+ * @param amount - 원 단위 금액
  * @returns 포맷된 문자열
+ * - 1억 이상: "1.2억" 형식
+ * - 1억 미만: "5000만원", "120만원", "70만원" 형식
  */
 export const formatCurrency = (amount: number): string => {
   if (amount === 0) return '0원'
-  if (amount >= 10000) {
-    const uk = Math.floor(amount / 10000)
-    const man = amount % 10000
-    if (man === 0) return `${uk}억원`
-    return `${uk}억 ${man.toLocaleString()}만원`
+  
+  // 1억 이상인 경우
+  if (amount >= 100000000) {
+    const eok = amount / 100000000
+    // 소수점이 없으면 정수로, 있으면 소수점 첫째자리까지
+    return `${eok % 1 === 0 ? eok.toFixed(0) : eok.toFixed(1)}억`
   }
-  return `${amount.toLocaleString()}만원`
+  
+  // 1억 미만인 경우 (만원 단위)
+  const man = amount / 10000
+  return `${man.toLocaleString()}만원`
 }
 
 /**

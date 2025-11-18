@@ -6,6 +6,7 @@ import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ROUTES } from '@/constants'
 import { useBidAccept, useBidReject } from '@/queries/useBid'
 import { MyAuctionsData } from '@/types/api/mypage'
+import { formatCurrency } from '@/utils/format'
 
 interface AuctionHistoryCardProps {
   auctionData: MyAuctionsData
@@ -75,9 +76,8 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
           <div className="mt-1 flex items-baseline gap-1">
             <span className="text-xs text-gray-500">입찰가</span>
             <span className="text-base font-bold text-blue-600">
-              {auctionData.bidAmount.toLocaleString('ko-KR')}
+              {formatCurrency(auctionData.bidAmount)}
             </span>
-            <span className="text-xs text-gray-500">원</span>
           </div>
 
           {/* 버튼 영역 */}
@@ -125,7 +125,9 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 </button>
                 <button
                   onClick={() => {
-                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                    router.push(
+                      `/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`
+                    )
                   }}
                   className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
@@ -143,7 +145,9 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 </Link>
                 <button
                   onClick={() => {
-                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                    router.push(
+                      `/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`
+                    )
                   }}
                   className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
@@ -170,7 +174,9 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 </button>
                 <button
                   onClick={() => {
-                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                    router.push(
+                      `/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`
+                    )
                   }}
                   className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
@@ -200,7 +206,9 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   </button>
                   <button
                     onClick={() => {
-                      router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                      router.push(
+                        `/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`
+                      )
                     }}
                     className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                   >
@@ -220,7 +228,9 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 </Link>
                 <button
                   onClick={() => {
-                    router.push(`/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`)
+                    router.push(
+                      `/auction/${auctionData.auctionSeq}?propertySeq=${auctionData.propertySeq}`
+                    )
                   }}
                   className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >

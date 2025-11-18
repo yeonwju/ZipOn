@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { ListingData } from '@/types/api/listings'
+import { formatCurrency } from '@/utils/format'
 
 interface AucListingCardProps {
   listing: ListingData
@@ -9,12 +10,7 @@ interface AucListingCardProps {
 }
 
 function formatKoreanMoney(value: number): string {
-  if (value >= 100000000) {
-    const eok = value / 100000000
-    return `${eok.toFixed(eok % 1 === 0 ? 0 : 1)}억`
-  }
-  const man = value / 10000
-  return `${man.toLocaleString()}만`
+  return formatCurrency(value)
 }
 
 export default function AucListingCard({ listing, className }: AucListingCardProps) {
