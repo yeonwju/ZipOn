@@ -2,16 +2,12 @@ pipeline {
   agent any
 
   environment {
-    // DOCKER_BUILDKIT = '1'
-    // COMPOSE_DOCKER_CLI_BUILD = '1'
-
-    // --- Common Paths ---
     DOCKER_OPTS  = "--pull"
     HEALTH       = "/usr/local/bin/zipon-health.sh"
     PROD_COMPOSE = "/home/ubuntu/zipon-app/docker-compose.service.yml"
     DEV_COMPOSE  = "/home/ubuntu/zipon-app/docker-compose.dev.yml"
 
-    // --- OAuth / API Keys ---
+    // OAuth / API Keys
     GOOGLE_CLIENT_ID     = credentials('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
 
@@ -21,38 +17,36 @@ pipeline {
     BIZNO_API_KEY = credentials('BIZNO_API_KEY')
     BIZNO_API_URL = credentials('BIZNO_API_URL')
 
-    // --- Redis ---
+    // Redis (공용)
     REDIS_HOST = 'zipondev-redis'
     REDIS_PORT = '6379'
 
-    // --- SOLAPI ---
+    // SOLAPI
     SOLAPI_API_KEY        = credentials('SOLAPI_API_KEY')
     SOLAPI_API_SECRET_KEY = credentials('SOLAPI_API_SECRET_KEY')
     SOLAPI_API_TEL        = credentials('SOLAPI_API_TEL')
 
-    // --- OpenVidu ---
+    // OpenVidu (DEV 서버 공용)
     OPENVIDU_URL    = credentials('OPENVIDU_URL')
     OPENVIDU_SECRET = credentials('OPENVIDU_SECRET')
     OPENVIDU_PUBLIC_WSS_URL = credentials('OPENVIDU_PUBLIC_WSS_URL')
 
-    // --- Kafka ---
+    // Kafka
     KAFKA_SERVER = 'zipondev-kafka:9092'
 
-
-    // --- Frontend ---
+    // Frontend
     NEXT_PUBLIC_KAKAO_MAP_API_KEY = credentials('NEXT_PUBLIC_KAKAO_MAP_API_KEY')
     NEXT_PUBLIC_PWA_ENABLE        = '1'
-    NEXT_PUBLIC_SOCKET_URL        = "https://dev-zipon.duckdns.org/ws"
 
-    // --- AWS ---
-    AWS_REGION = "ap-northeast-2"
+    // AWS
+    AWS_REGION = 'ap-northeast-2'
     AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
 
-    // --- Elasticsearch ---
+    // Elasticsearch
     ELASTICSEARCH_URL = 'zipondev-elasticsearch'
 
-    // --- Default FRONT_URL ---
+    // Default
     FRONT_URL = 'https://dev-zipon.duckdns.org'
   }
 
@@ -74,8 +68,19 @@ pipeline {
       steps {
         script {
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          env.FRONT_URL = currentBranch.contains('dev') ? "https://dev-zipon.duckdns.org" : "https://zipon.duckdns.org"
+
+          env.IS_DEV = currentBranch.contains('dev') ? "true" : "false"
+
+          env.FRONT_URL = (env.IS_DEV == "true") ?
+            "https://dev-zipon.duckdns.org" :
+            "https://zipon.duckdns.org"
+
+          env.NEXT_PUBLIC_SOCKET_URL = (env.IS_DEV == "true") ?
+            "https://dev-zipon.duckdns.org/ws" :
+            "https://zipon.duckdns.org/ws"
+
           echo "🌐 FRONT_URL = ${env.FRONT_URL}"
+          echo "🌐 SOCKET_URL = ${env.NEXT_PUBLIC_SOCKET_URL}"
         }
       }
     }
@@ -85,9 +90,11 @@ pipeline {
         script {
           def gitsha = sh(script: 'cat .gitsha', returnStdout: true).trim()
           def currentBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'dev'
-          def FRONT_API_BASE_URL = currentBranch.contains('dev') ? 'https://dev-zipon.duckdns.org' : 'https://zipon.duckdns.org'
+          def FRONT_API_BASE_URL = (env.IS_DEV == "true") ?
+            "https://dev-zipon.duckdns.org" :
+            "https://zipon.duckdns.org"
 
-          echo "🧱 Building images for commit ${gitsha} (branch=${currentBranch})"
+          echo "🧱 Building images for commit ${gitsha}"
 
           sh """
             set -e
@@ -128,11 +135,12 @@ pipeline {
               set -e
               docker network connect zipon-net jenkins-container 2>/dev/null || true
 
-              echo "[DEV] Creating .env file at /home/ubuntu/zipon-app/.env..."
+              echo "[DEV] Creating .env..."
               cat <<EOF2 > /home/ubuntu/zipon-app/.env
 SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
 SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
 SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
+
 GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 SSAFY_API_KEY=$SSAFY_API_KEY
@@ -140,49 +148,35 @@ SSAFY_API_URL=$SSAFY_API_URL
 GOV_API_KEY=$GOV_API_KEY
 BIZNO_API_KEY=$BIZNO_API_KEY
 BIZNO_API_URL=$BIZNO_API_URL
+
 SOLAPI_API_KEY=$SOLAPI_API_KEY
 SOLAPI_API_SECRET_KEY=$SOLAPI_API_SECRET_KEY
 SOLAPI_API_TEL=$SOLAPI_API_TEL
+
 REDIS_HOST=$REDIS_HOST
 REDIS_PORT=$REDIS_PORT
 ELASTICSEARCH_URL=$ELASTICSEARCH_URL
+
 OPENVIDU_URL=$OPENVIDU_URL
 OPENVIDU_SECRET=$OPENVIDU_SECRET
 OPENVIDU_PUBLIC_WSS_URL=$OPENVIDU_PUBLIC_WSS_URL
+
 AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+
 FRONT_URL=$FRONT_URL
 FAST_API=http://zipondev-ai:8000
 ELASTICSEARCH_INDEX=zipon_properties
 KAFKA_SERVER=$KAFKA_SERVER
 
-
-# --- AI Environment ---
+# AI
 GMS_KEY=$GMS_KEY
 GMS_API_URL=$GMS_API_URL
 MODEL_NAME=$MODEL_NAME
 EOF2
 
-              echo "[DEV] ✅ .env generated:"
-              cat /home/ubuntu/zipon-app/.env
-
-              echo "[DEV] 🚀 Starting docker compose..."
+              echo "[DEV] 🚀 Starting containers..."
               docker compose --env-file /home/ubuntu/zipon-app/.env -f "$DEV_COMPOSE" up -d --force-recreate
-
-              echo "[DEV] ⏳ Waiting for backend startup..."
-              for i in $(seq 1 40); do
-                CODE=$(curl -s -o /dev/null -w "%{http_code}" http://zipondev-backend:8080/v3/api-docs || true)
-                if [ "$CODE" = "200" ]; then
-                  echo "[DEV] ✅ Backend healthy (HTTP 200)"
-                  exit 0
-                fi
-                echo "[DEV] ($i/40) Waiting... HTTP=$CODE"
-                sleep 2
-              done
-
-              echo "[DEV] ❌ Health check failed, showing logs"
-              docker logs zipondev-backend --tail 40 || true
-              exit 1
             '''
           }
         }
@@ -195,13 +189,7 @@ EOF2
         sh '''
           set +e
           mkdir -p build
-          echo "[SWAGGER] Fetching OpenAPI JSON..."
-          curl -sf http://127.0.0.1:28080/v3/api-docs -o build/swagger.json || echo "[WARN] Swagger fetch failed, skipping"
-          if [ -f build/swagger.json ]; then
-            echo "[SWAGGER] ✅ Saved successfully (size: $(wc -c < build/swagger.json))"
-          else
-            echo "[SWAGGER] ⚠️ No swagger.json generated"
-          fi
+          curl -sf http://127.0.0.1:28080/v3/api-docs -o build/swagger.json || true
         '''
       }
     }
@@ -210,8 +198,9 @@ EOF2
       when { anyOf { branch 'main'; branch 'master' } }
       steps {
         sh """
-          echo "[PROD] 🚀 Deploying to production..."
-          docker compose -f ${PROD_COMPOSE} up -d --force-recreate --remove-orphans
+          echo "[PROD] 🚀 Deploying..."
+          docker compose --env-file /home/ubuntu/zipon-app/.env \
+            -f ${PROD_COMPOSE} up -d --force-recreate --remove-orphans
         """
       }
     }
@@ -223,7 +212,7 @@ EOF2
       sh 'docker system prune -f || true'
     }
     failure {
-      echo "❌ Pipeline failed. Check above logs."
+      echo "❌ Pipeline failed."
     }
   }
 }
