@@ -135,6 +135,10 @@ public class PropertySearchService {
         return es.search(req, PropertyDocument.class);
     }
 
+    /**
+     * 색인 주입
+     * @param p
+     */
     public void setIndex(Property p) {
         PropertyDocument doc = toDoc(p);
 
@@ -147,6 +151,18 @@ public class PropertySearchService {
             log.info("[ES] indexed property {}", p.getPropertySeq());
         } catch (Exception e) {
             log.error("[ES] index failed for property {}", p.getPropertySeq(), e);
+        }
+    }
+
+    public void deleteIndex(Integer propertySeq) {
+        try {
+            es.delete(d -> d
+                    .index(index)
+                    .id(String.valueOf(propertySeq))
+            );
+            log.info("[ES] 삭제된 매물 {}", propertySeq);
+        } catch (Exception e) {
+            log.error("[ES] 해당 매물에 대한 삭제가 실패되었습니다. = {}", propertySeq, e);
         }
     }
 
