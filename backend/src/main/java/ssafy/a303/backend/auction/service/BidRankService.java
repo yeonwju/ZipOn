@@ -1,6 +1,7 @@
 package ssafy.a303.backend.auction.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BidRankService {
@@ -30,14 +32,21 @@ public class BidRankService {
     private final BidTryCountRepository bidTryCountRepository;
     private static final int LIMIT = 10;
 
-    public void updateRanking(BidEventMessage message) {
+    public void check (BidEventMessage message){
         if(!auctionInProgressRepository.checkAuctionInProgress(message.auctionSeq()))
             throw new CustomException(ErrorCode.AUCTION_NOT_IN_PROGRESS);
-        boolean firstTime = bidTryCountRepository.tryFirstBid(message.auctionSeq(), message.userSeq());
-        if(!firstTime){
+        if(bidTryCountRepository.hasAlreadyBid(message.userSeq(), message.auctionSeq())){
             throw new CustomException(ErrorCode.ALREADY_BID);
         }
-        bidRankRepository.updateScore(message);
+    }
+
+    public void updateRanking(BidEventMessage message) {
+        check(message);
+        // 입찰 여부 등록
+        boolean firstTime = bidTryCountRepository.tryFirstBid(message.auctionSeq(), message.userSeq());
+        if(firstTime){
+            bidRankRepository.updateScore(message);
+        }
     }
 
     @Transactional
@@ -52,6 +61,7 @@ public class BidRankService {
 
         bidRankRepository.deleteKey(auctionSeq);
         bidTryCountRepository.deleteKey(auctionSeq);
+        auctionInProgressRepository.deleteKey(auctionSeq);
     }
 
     private void saveDB(Set<String> data, Auction auction, boolean isRanker) {
