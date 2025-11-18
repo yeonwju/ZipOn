@@ -2,7 +2,6 @@ package ssafy.a303.backend.auction.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 import ssafy.a303.backend.auction.dto.request.BidRequestDTO;
+import ssafy.a303.backend.auction.dto.response.BidAmountDTO;
 import ssafy.a303.backend.auction.dto.response.WinnerAcceptDTO;
 import ssafy.a303.backend.auction.kafka.BidEventProducer;
 import ssafy.a303.backend.auction.service.BidService;
@@ -23,7 +23,7 @@ import ssafy.a303.backend.common.response.ResponseDTO;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auction/bid")
-@Tag(name = "입찰(Bid)", description = "경매 입찰 관련 API")
+@Tag(name = "입찰", description = "경매 입찰 관련 API")
 public class BidController {
 
     private final BidEventProducer producer;
@@ -105,7 +105,7 @@ public class BidController {
     public ResponseEntity<ResponseDTO<WinnerAcceptDTO>> accept(
             @AuthenticationPrincipal Integer userSeq,
             @PathVariable int auctionSeq
-    ){
+    ) {
         int contractSeq = bidService.acceptOffer(userSeq, auctionSeq);
 
         WinnerAcceptDTO dto = new WinnerAcceptDTO(contractSeq);
@@ -138,8 +138,38 @@ public class BidController {
     public ResponseEntity<ResponseDTO<Void>> reject(
             @AuthenticationPrincipal Integer userSeq,
             @PathVariable int auctionSeq
-    ){
+    ) {
         bidService.rejectOffer(userSeq, auctionSeq);
         return ResponseDTO.ok(null, "처리되었습니다.");
+    }
+
+    @Operation(
+            summary = "내 입찰 금액 조회",
+            description = "해당 경매에서 ACCEPTED 상태인 ㅇ나의 입찰 금액을 조회합니다."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "경매를 조회하였습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = BidAmountDTO.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "해당 입찰 정보를 찾을 수 없습니다.",
+                            content = @Content()
+                    )
+            }
+    )
+    @GetMapping("/{auctionSeq}")
+    public ResponseEntity<ResponseDTO<BidAmountDTO>> getAuction(
+            @AuthenticationPrincipal int userSeq,
+            @PathVariable int auctionSeq) {
+        int amount = bidService.getBidAmount(userSeq, auctionSeq);
+        BidAmountDTO bidAmountDTO = new BidAmountDTO(amount);
+        return ResponseDTO.ok(bidAmountDTO, "경매를 조회하였습니다.");
     }
 }

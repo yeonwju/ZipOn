@@ -13,6 +13,7 @@ import ssafy.a303.backend.auction.entity.Auction;
 import ssafy.a303.backend.auction.entity.AuctionStatus;
 import ssafy.a303.backend.auction.repository.AuctionRepository;
 import ssafy.a303.backend.common.exception.CustomException;
+import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.livestream.dto.request.LiveCreateRequestDto;
 import ssafy.a303.backend.livestream.dto.response.*;
@@ -21,7 +22,6 @@ import ssafy.a303.backend.livestream.entity.LiveStream;
 import ssafy.a303.backend.livestream.enums.LiveStreamSortType;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
-import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
@@ -43,7 +43,6 @@ public class LiveService {
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
     private final StringRedisTemplate liveRedisTemplate;
     private final RedisTemplate<String, Object> liveRedisObjectTemplate;
-    private final PropertyRepository propertyRepository;
 
     public LiveService(
             AuctionRepository auctionRepository,
@@ -52,8 +51,7 @@ public class LiveService {
             OpenVidu openVidu,
             LiveStartNotificationPubSubService liveStartNotificationPubSubService,
             @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
-            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
-            PropertyRepository propertyRepository
+            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate
     ) {
         this.auctionRepository = auctionRepository;
         this.liveStreamRepository = liveStreamRepository;
@@ -62,7 +60,6 @@ public class LiveService {
         this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
         this.liveRedisTemplate = liveRedisTemplate;
         this.liveRedisObjectTemplate = liveRedisObjectTemplate;
-        this.propertyRepository = propertyRepository;
     }
 
     /**라이브 방송 시작*/
@@ -105,7 +102,7 @@ public class LiveService {
                 .chatCount(0)
                 .likeCount(0)
                 .recorded(false)
-                .startAt(LocalDateTime.now())
+                .startAt(LocalDateTime.now(KoreaClock.getClock()))
                 .build();
 
         liveStreamRepository.save(liveStream);
@@ -295,7 +292,7 @@ public class LiveService {
                 ? Objects.requireNonNull(liveRedisObjectTemplate.opsForSet().size(likeKey)).intValue() : 0;
 
         // 6. 엔티티 상태 변경 (LiveStream 종료 상태 & 최종 데이터 저장)
-        liveStream.end(LocalDateTime.now(), finalViewerCount, finalChatCount, finalLikeCount);
+        liveStream.end(LocalDateTime.now(KoreaClock.getClock()), finalViewerCount, finalChatCount, finalLikeCount);
         liveStreamRepository.save(liveStream);
 
         // 7. 방송 종료 이벤트 전송 (라이브 방송 내부 시청자용)
@@ -504,7 +501,7 @@ public class LiveService {
 
         // 이미 좋아요 되어있는지 확인
         Boolean alreadyLiked = liveRedisObjectTemplate.opsForSet().isMember(likeKey, userSeq);
-        //log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}",liveSeq, userSeq, beforeCount, alreadyLiked);
+        log.info("[LIVE][LIKE] liveSeq={}, userSeq={}, 변경 전 좋아요 수={}, 이미 좋아요={}",liveSeq, userSeq, beforeCount, alreadyLiked);
 
         if (Boolean.TRUE.equals(alreadyLiked)) {
             // 좋아요 취소
