@@ -61,7 +61,7 @@ public class MyPageController {
                           "propertySeq": 1,
                           "contractSeq": 1,
                           "contractStatus": "WAITING_AI_REVIEW",
-                          "attendanceStatus": "WAITING",
+                          "bidStatus": "WAITING",
                           "address": "서울특별시 강남구 강남대로 396",
                           "bidAmount": 4800000,
                           "bidRank": 1
@@ -72,7 +72,7 @@ public class MyPageController {
                           "propertySeq": 2,
                           "contractSeq": 1,
                           "contractStatus": "WAITING_AI_REVIEW",
-                          "attendanceStatus": "ACCEPTED",
+                          "bidStatus": "ACCEPTED",
                           "address": "서울특별시 강남구 테헤란로 123",
                           "bidAmount": 9500000,
                           "bidRank": 1
