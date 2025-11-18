@@ -337,6 +337,9 @@ public class PropertyService {
 
         assertCanEdit(p, userSeq);
         p.delete(OffsetDateTime.now(ZoneId.of("Asia/Seoul")).toString());
+
+        //ES 색인 삭제
+        propertySearchService.deleteIndex(p.getPropertySeq());
     }
 
 }
