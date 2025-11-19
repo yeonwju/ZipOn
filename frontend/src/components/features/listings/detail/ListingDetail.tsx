@@ -106,7 +106,7 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
           <ListingImageGallery images={result.images} />
           {/* 기본 정보 */}
           <ListingInfo
-            name={result.propertyNm}
+            name={result.lessorNm}
             imgSrc={result.lessorProfileImg || '/default-profile.svg'}
             deposit={result.deposit}
             rent={result.mnRent}

@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/constants'
 import { authFetch } from '@/lib/fetch'
+import { ContractAiVerifyResponse } from '@/types/api/contract'
 
 export async function contractSuccess(contractSeq: number) {
   return authFetch.post(API_ENDPOINTS.CONTRACT_SUCCESS(contractSeq))
@@ -19,5 +20,5 @@ export async function contractAiVerify(file: File) {
   const formData = new FormData()
   formData.append('file', file)
 
-  return authFetch.post<{ lines: string[] }>(API_ENDPOINTS.CONTRACT_AI_VERIFY, formData)
+  return authFetch.post<ContractAiVerifyResponse>(API_ENDPOINTS.CONTRACT_AI_VERIFY, formData)
 }
