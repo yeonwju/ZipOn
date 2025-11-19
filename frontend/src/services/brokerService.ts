@@ -26,7 +26,16 @@ export async function selectBroker(auctionSeq: number) {
  */
 export async function RequestBroker(
   propertySeq: number,
-  request: { strmDate: string; strmStartTm: string; strmEndTm: string; intro: string }
+  request: {
+    strmDate: string
+    strmStartTm: string
+    strmEndTm: string
+    intro: string
+    auctionEndAt: string
+  }
 ) {
-  return authFetch.post<RequestBrokerResponseDTO>(API_ENDPOINTS.REQUEST_BROKER(propertySeq), request)
+  return authFetch.post<RequestBrokerResponseDTO>(
+    API_ENDPOINTS.REQUEST_BROKER(propertySeq),
+    request
+  )
 }

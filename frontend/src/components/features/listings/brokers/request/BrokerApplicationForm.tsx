@@ -23,7 +23,6 @@ interface BrokerApplicationFormProps {
   className?: string
 }
 
-// 0~24시간 배열 생성 (HH:mm:ss 포맷)
 const generateTimeOptions = () => {
   return Array.from({ length: 24 }, (_, i) => {
     const hour = i.toString().padStart(2, '0')
@@ -34,7 +33,6 @@ const generateTimeOptions = () => {
   })
 }
 
-// 시간을 1시간 추가하는 함수
 const addOneHour = (time: string): string => {
   const [hour] = time.split(':')
   const nextHour = (parseInt(hour) + 1) % 24
@@ -45,6 +43,7 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
   const [strmDate, setStrmDate] = useState<Date | undefined>(undefined)
   const [strmStartTm, setStrmStartTm] = useState('')
   const [strmEndTm, setStrmEndTm] = useState('')
+  const [auctionEndAt, setAuctionEndAt] = useState('')
   const [intro, setIntro] = useState('')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
@@ -53,13 +52,21 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
   const { showSuccess, showError, AlertDialog } = useAlertDialog()
   const timeOptions = generateTimeOptions()
 
+  // 방송 시작 시간 선택 핸들러
   const handleStartTimeChange = (value: string) => {
+    console.log(`[방송 시작 시간 선택됨] ${value}`)
+
     setStrmStartTm(value)
-    // 시작 시간이 선택되면 자동으로 종료 시간을 1시간 뒤로 설정
     setStrmEndTm(addOneHour(value))
   }
 
-  // Date를 YYYY-MM-DD 형식으로 변환
+  // 경매 마감 시간 선택 핸들러
+  const handleAuctionEndTimeChange = (value: string) => {
+    console.log(`[경매 마감 시간 선택됨] ${value}`)
+
+    setAuctionEndAt(value)
+  }
+
   const formatDate = (date: Date): string => {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -74,10 +81,13 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
 
     const requestData = {
       strmDate: formatDate(strmDate),
-      strmStartTm: strmStartTm,
-      strmEndTm: strmEndTm,
+      strmStartTm,
+      strmEndTm,
+      auctionEndAt,
       intro: intro.trim(),
     }
+
+    console.log('[폼 전송 데이터]', requestData)
 
     requestBrokerMutation.mutate(requestData, {
       onSuccess: result => {
@@ -129,6 +139,7 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
                 onSelect={date => {
                   setStrmDate(date)
                   setIsCalendarOpen(false)
+                  console.log('[방송 날짜 선택됨]', date)
                 }}
                 disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
                 className={'rounded-md border-2 border-gray-200 bg-white'}
@@ -137,12 +148,29 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
           </Popover>
         </div>
 
-        {/* 시간 선택 */}
+        {/* 방송 시작 시간 */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-700">방송 시작 시간</label>
           <Select value={strmStartTm} onValueChange={handleStartTimeChange}>
             <SelectTrigger className="w-full border border-gray-200">
               <SelectValue placeholder="시작 시간을 선택해주세요" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px] border border-gray-200 bg-white">
+              {timeOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 경매 마감 시간 */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700">경매 마감 시간</label>
+          <Select value={auctionEndAt} onValueChange={handleAuctionEndTimeChange}>
+            <SelectTrigger className="w-full border border-gray-200">
+              <SelectValue placeholder="경매 마감 시간을 선택해주세요" />
             </SelectTrigger>
             <SelectContent className="max-h-[300px] border border-gray-200 bg-white">
               {timeOptions.map(option => (
@@ -164,18 +192,15 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
           </div>
         )}
 
-        {/* 자기소개 입력 */}
+        {/* 자기소개 */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="introduction" className="text-sm font-medium text-gray-700">
-            자기소개
-          </label>
+          <label className="text-sm font-medium text-gray-700">자기소개</label>
           <textarea
-            id="introduction"
             value={intro}
             onChange={e => setIntro(e.target.value)}
             placeholder="간단한 자기소개와 중개 경력을 입력해주세요."
             rows={4}
-            className="w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-base text-gray-900 transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-base text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
           <span className="text-xs text-gray-500">{intro.length}/200자</span>
         </div>
@@ -190,7 +215,6 @@ export default function BrokerApplicationForm({ className }: BrokerApplicationFo
         </Button>
       </div>
 
-      {/* AlertDialog */}
       <AlertDialog />
     </div>
   )

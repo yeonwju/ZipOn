@@ -40,6 +40,7 @@ export function useRequestBroker(propertySeq: number) {
       strmStartTm: string
       strmEndTm: string
       intro: string
+      auctionEndAt: string
     }) => RequestBroker(propertySeq, request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: brokerQueryKeys.lists(propertySeq) })
