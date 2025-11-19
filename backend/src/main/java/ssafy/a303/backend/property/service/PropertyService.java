@@ -359,31 +359,28 @@ public class PropertyService {
      */
     public Page<ListResponseDto> listByType(String type, Pageable pageable) {
 
-        Boolean isAucPref;
-        Boolean isBrkPref;
+        Page<PropertyAucInfo> page;
 
         switch (type.toLowerCase()) {
             case "general" -> {
-                isAucPref = false;
-                isBrkPref = false;
+                page = propertyAucInfoRepository
+                        .findByIsAucPrefAndProperty_DeletedAtIsNull(false, pageable);
             }
             case "broker" -> {
-                isAucPref = false;
-                isBrkPref = true;
+                page = propertyAucInfoRepository
+                        .findByIsAucPrefAndIsBrkPrefAndProperty_HasBrkAndProperty_DeletedAtIsNull(
+                                false,true, false, pageable
+                        );
             }
             case "auction" -> {
-                isAucPref = true;
-                isBrkPref = false;
+                page = propertyAucInfoRepository
+                        .findByIsAucPrefAndIsBrkPrefAndProperty_DeletedAtIsNull(
+                                true, false, pageable
+                        );
             }
             default -> throw new CustomException(ErrorCode.REQUEST_TYPE_ERROR);
         }
 
-        Page<PropertyAucInfo> page = propertyAucInfoRepository
-                .findByIsAucPrefAndIsBrkPrefAndProperty_DeletedAtIsNull(
-                        isAucPref,
-                        isBrkPref,
-                        pageable
-                );
         return page.map(this::toDto);
     }
 
