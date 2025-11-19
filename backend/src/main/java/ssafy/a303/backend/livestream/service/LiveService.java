@@ -22,9 +22,11 @@ import ssafy.a303.backend.livestream.entity.LiveStream;
 import ssafy.a303.backend.livestream.enums.LiveStreamSortType;
 import ssafy.a303.backend.livestream.enums.LiveStreamStatus;
 import ssafy.a303.backend.livestream.repository.LiveStreamRepository;
+import ssafy.a303.backend.property.util.S3Uploader;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +45,7 @@ public class LiveService {
     private final LiveStartNotificationPubSubService liveStartNotificationPubSubService;
     private final StringRedisTemplate liveRedisTemplate;
     private final RedisTemplate<String, Object> liveRedisObjectTemplate;
+    private final S3Uploader s3Uploader;
 
     public LiveService(
             AuctionRepository auctionRepository,
@@ -51,7 +54,8 @@ public class LiveService {
             OpenVidu openVidu,
             LiveStartNotificationPubSubService liveStartNotificationPubSubService,
             @Qualifier("liveRedisTemplate") StringRedisTemplate liveRedisTemplate,
-            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate
+            @Qualifier("liveRedisObjectTemplate") RedisTemplate<String, Object> liveRedisObjectTemplate,
+            S3Uploader s3Uploader
     ) {
         this.auctionRepository = auctionRepository;
         this.liveStreamRepository = liveStreamRepository;
@@ -60,6 +64,7 @@ public class LiveService {
         this.liveStartNotificationPubSubService = liveStartNotificationPubSubService;
         this.liveRedisTemplate = liveRedisTemplate;
         this.liveRedisObjectTemplate = liveRedisObjectTemplate;
+        this.s3Uploader = s3Uploader;
     }
 
     /**라이브 방송 시작*/
@@ -89,12 +94,25 @@ public class LiveService {
             throw new CustomException(ErrorCode.OPENVIDU_SESSION_CREATE_FAILED);
         }
 
+        //매물 썸네일 url 링크
+        String thumbnailUrl = null;
+        if (propertyThumbnail != null && !propertyThumbnail.isBlank()) {
+            thumbnailUrl = s3Uploader.presignedGetUrl(propertyThumbnail, Duration.ofHours(12));
+        }
+
+        //유저 썸네일 url 링크
+        String profileImg = host.getProfileImg();
+        String profile = null;
+        if (profileImg != null && !profileImg.isBlank()) {
+            profile = s3Uploader.presignedGetUrl(profileImg, Duration.ofHours(12));
+        }
+
         // 5. LiveStream 생성
         LiveStream liveStream = LiveStream.builder()
                 .auction(auction)
                 .host(host)
                 .title(requestDto.getTitle())
-                .thumbnail(propertyThumbnail)
+                .thumbnail(thumbnailUrl)
                 .streamUrl(session.getSessionId())
                 .chatChannel("live:" + session.getSessionId())
                 .status(LiveStreamStatus.LIVE)
@@ -130,7 +148,7 @@ public class LiveService {
                     .host(LiveStartNotificationDto.HostDto.builder()
                             .userSeq(host.getUserSeq())
                             .name(host.getName())
-                            .profileImg(host.getProfileImg())
+                            .profileImg(profile)
                             .build())
                     .startAt(liveStream.getStartAt())
                     .build();
@@ -157,7 +175,7 @@ public class LiveService {
                 .host(LiveCreateResponseDto.HostDto.builder()
                         .userSeq(host.getUserSeq())
                         .name(host.getName())
-                        .profileImg(host.getProfileImg())
+                        .profileImg(profile)
                         .build())
                 .startAt(liveStream.getStartAt())
                 .build();
@@ -318,13 +336,25 @@ public class LiveService {
         log.info("[LIVE] 방송 종료 완료: liveSeq={}, viewer={}, chat={}, like={}",
                 liveSeq, finalViewerCount, finalChatCount, finalLikeCount);
 
+        // 매물 썸네일 presigned URL
+        String thumbnailUrl = null;
+        if (liveStream.getThumbnail() != null && !liveStream.getThumbnail().isBlank()) {
+            thumbnailUrl = s3Uploader.presignedGetUrl(liveStream.getThumbnail(), Duration.ofHours(12));
+        }
+
+        // 프로필 이미지 presigned URL
+        String profileImg = null;
+        if (user.getProfileImg() != null && !user.getProfileImg().isBlank()) {
+            profileImg = s3Uploader.presignedGetUrl(user.getProfileImg(), Duration.ofHours(12));
+        }
+
         // 10. 종료 응답 반환
         return LiveEndResponseDto.builder()
                 .liveSeq(liveStream.getId())
                 .auctionSeq(liveStream.getAuction().getAuctionSeq())
                 .sessionId(liveStream.getStreamUrl())
                 .title(liveStream.getTitle())
-                .thumbnail(liveStream.getThumbnail())
+                .thumbnail(thumbnailUrl)
                 .status(liveStream.getStatus())
                 .viewerCount(finalViewerCount)
                 .chatCount(finalChatCount)
@@ -332,7 +362,7 @@ public class LiveService {
                 .host(LiveEndResponseDto.HostDto.builder()
                         .userSeq(user.getUserSeq())          // 종료 요청 유저(방장) 정보
                         .name(user.getName())
-                        .profileImg(user.getProfileImg())
+                        .profileImg(profileImg)
                         .build())
                 .startAt(liveStream.getStartAt())
                 .endAt(liveStream.getEndAt())
@@ -382,13 +412,25 @@ public class LiveService {
 
         //log.info("[LIVE] getLiveInfo: liked={}", liked);
 
+        // 매물 썸네일 presigned URL
+        String thumbnailUrl = null;
+        if (liveStream.getThumbnail() != null && !liveStream.getThumbnail().isBlank()) {
+            thumbnailUrl = s3Uploader.presignedGetUrl(liveStream.getThumbnail(), Duration.ofHours(12));
+        }
+
+        // 프로필 이미지 presigned URL
+        String profileImg = null;
+        if (liveStream.getHost().getProfileImg() != null && !liveStream.getHost().getProfileImg().isBlank()) {
+            profileImg = s3Uploader.presignedGetUrl(liveStream.getHost().getProfileImg(), Duration.ofHours(12));
+        }
+
         // 5. 응답 반환
         return LiveInfoResponseDto.builder()
                 .liveSeq(liveStream.getId())
                 .auctionSeq(liveStream.getAuction().getAuctionSeq())
                 .sessionId(liveStream.getStreamUrl())
                 .title(liveStream.getTitle())
-                .thumbnail(liveStream.getThumbnail())
+                .thumbnail(thumbnailUrl)
                 .status(liveStream.getStatus())
                 .viewerCount((int) viewerCount)
                 .chatCount((int) chatCount)
@@ -396,7 +438,7 @@ public class LiveService {
                 .host(LiveInfoResponseDto.HostDto.builder()
                         .userSeq(liveStream.getHost().getUserSeq())
                         .name(liveStream.getHost().getName())
-                        .profileImg(liveStream.getHost().getProfileImg())
+                        .profileImg(profileImg)
                         .build())
                 .startAt(liveStream.getStartAt())
                 .endAt(liveStream.getEndAt())
@@ -416,6 +458,16 @@ public class LiveService {
         // DTO 변환 후 정렬
         return liveStreams.stream()
                 .map(liveStream -> {
+
+                    String thumbnailUrl = null;
+                    if (liveStream.getThumbnail() != null && !liveStream.getThumbnail().isBlank()) {
+                        thumbnailUrl = s3Uploader.presignedGetUrl(liveStream.getThumbnail(), Duration.ofHours(12));
+                    }
+
+                    String profileImg = null;
+                    if (liveStream.getHost().getProfileImg() != null && !liveStream.getHost().getProfileImg().isBlank()) {
+                        profileImg = s3Uploader.presignedGetUrl(liveStream.getHost().getProfileImg(), Duration.ofHours(12));
+                    }
 
                     String viewerKey = "live:viewers:" + liveStream.getId();
                     String chatKey = "live:chat:" + liveStream.getId();
@@ -458,7 +510,7 @@ public class LiveService {
                             .auctionSeq(liveStream.getAuction().getAuctionSeq())
                             .sessionId(liveStream.getStreamUrl())
                             .title(liveStream.getTitle())
-                            .thumbnail(liveStream.getThumbnail())
+                            .thumbnail(thumbnailUrl)
                             .status(liveStream.getStatus())
                             .viewerCount(viewerCount)
                             .chatCount(chatCount)
@@ -466,7 +518,7 @@ public class LiveService {
                             .host(LiveInfoResponseDto.HostDto.builder()
                                     .userSeq(liveStream.getHost().getUserSeq())
                                     .name(liveStream.getHost().getName())
-                                    .profileImg(liveStream.getHost().getProfileImg())
+                                    .profileImg(profileImg)
                                     .build())
                             .startAt(liveStream.getStartAt())
                             .endAt(liveStream.getEndAt())
