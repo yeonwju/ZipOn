@@ -20,8 +20,7 @@ public class AuctionInProgressRepository {
     }
 
     public void enrollAuctionInProgress(int auctionSeq, LocalDateTime auctionEndAt) {
-        if (redis.opsForValue().get(generateKey(auctionSeq)) != null)
-            redis.opsForValue().setIfAbsent(generateKey(auctionSeq), String.valueOf(auctionSeq), life(auctionEndAt));
+        redis.opsForValue().setIfAbsent(generateKey(auctionSeq), String.valueOf(auctionSeq), life(auctionEndAt));
     }
 
     public boolean checkAuctionInProgress(int auctionSeq) {
