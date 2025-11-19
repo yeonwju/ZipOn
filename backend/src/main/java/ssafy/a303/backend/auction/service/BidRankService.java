@@ -41,7 +41,11 @@ public class BidRankService {
     }
 
     public void updateRanking(BidEventMessage message) {
-        check(message);
+        if(!auctionInProgressRepository.checkAuctionInProgress(message.auctionSeq()))
+            return;
+        if(bidTryCountRepository.hasAlreadyBid(message.userSeq(), message.auctionSeq())){
+            return;
+        }
         // 입찰 여부 등록
         boolean firstTime = bidTryCountRepository.tryFirstBid(message.auctionSeq(), message.userSeq());
         if(firstTime){
