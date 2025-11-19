@@ -16,8 +16,10 @@ import ssafy.a303.backend.mypage.dto.MyBrokerResponseDto;
 import ssafy.a303.backend.mypage.dto.MyPropertyResponseDto;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.repository.PropertyRepository;
+import ssafy.a303.backend.property.util.S3Uploader;
 import ssafy.a303.backend.user.repository.UserRepository;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,12 +35,14 @@ public class MyPageService {
     private final AuctionRepository auctionRepository;
     private final PropertyRepository propertyRepository;
     private final ContractRepository contractRepository;
+    private final S3Uploader s3Uploader;
 
-    public MyPageService(UserRepository userRepository, AuctionRepository auctionRepository, PropertyRepository propertyRepository, ContractRepository contractRepository) {
+    public MyPageService(UserRepository userRepository, AuctionRepository auctionRepository, PropertyRepository propertyRepository, ContractRepository contractRepository, S3Uploader s3Uploader) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.propertyRepository = propertyRepository;
         this.contractRepository = contractRepository;
+        this.s3Uploader = s3Uploader;
     }
 
     /**
@@ -55,6 +59,12 @@ public class MyPageService {
 
         return results.stream().map(row -> {
             String thumbnail = (String) row[0];
+
+            // 변경됨: 썸네일 presigned URL 적용
+            String thumbnailUrl = (thumbnail != null && !thumbnail.isBlank())
+                    ? s3Uploader.presignedGetUrl(thumbnail, Duration.ofHours(12))
+                    : null;
+
             Integer auctionSeq = ((Integer) row[1]);
             Integer propertySeq = (Integer) row[2];
             BidStatus bidStatus = (BidStatus) row[3];
@@ -79,7 +89,7 @@ public class MyPageService {
             }
 
             return MyAuctionResponseDto.builder()
-                    .thumbnail(thumbnail)
+                    .thumbnail(thumbnailUrl)
                     .auctionSeq(auctionSeq)
                     .propertySeq(propertySeq)
                     .contractSeq(contractSeq)
@@ -105,16 +115,22 @@ public class MyPageService {
         List<Property> properties = propertyRepository.findByLessorUserSeq(userSeq);
 
         //3. DTO 변환
-        return properties.stream().map(property ->
-                MyPropertyResponseDto.builder()
-                        .thumbnail(property.getThumbnail())
-                        .propertySeq(property.getPropertySeq())
-                        .buildingType(property.getBuildingType())
-                        .address(property.getAddress())
-                        .deposit(property.getDeposit() != null ? property.getDeposit().intValue() : 0)
-                        .mnRent(property.getMnRent())
-                        .build()
-        ).collect(Collectors.toList());
+        return properties.stream().map(property -> {
+
+            // 변경됨: 매물 썸네일 presigned URL 적용
+            String thumbnailUrl = (property.getThumbnail() != null && !property.getThumbnail().isBlank())
+                    ? s3Uploader.presignedGetUrl(property.getThumbnail(), Duration.ofHours(12))
+                    : null;
+
+            return MyPropertyResponseDto.builder()
+                    .thumbnail(thumbnailUrl)
+                    .propertySeq(property.getPropertySeq())
+                    .buildingType(property.getBuildingType())
+                    .address(property.getAddress())
+                    .deposit(property.getDeposit() != null ? property.getDeposit().intValue() : 0)
+                    .mnRent(property.getMnRent())
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -131,8 +147,14 @@ public class MyPageService {
         //3. DTO 변환
         return auctions.stream().map(auction -> {
             Property property = auction.getProperty();
+
+            // 변경됨: 매물 썸네일 presigned URL 적용
+            String thumbnailUrl = (property.getThumbnail() != null && !property.getThumbnail().isBlank())
+                    ? s3Uploader.presignedGetUrl(property.getThumbnail(), Duration.ofHours(12))
+                    : null;
+
             return MyBrokerResponseDto.builder()
-                    .thumbnail(property.getThumbnail())
+                    .thumbnail(thumbnailUrl)
                     .propertySeq(property.getPropertySeq())
                     .auctionSeq(auction.getAuctionSeq())
                     .auctionStatus(auction.getStatus())

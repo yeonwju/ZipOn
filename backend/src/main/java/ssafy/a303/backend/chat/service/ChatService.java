@@ -19,9 +19,11 @@ import ssafy.a303.backend.common.helper.KoreaClock;
 import ssafy.a303.backend.common.response.ErrorCode;
 import ssafy.a303.backend.property.entity.Property;
 import ssafy.a303.backend.property.repository.PropertyRepository;
+import ssafy.a303.backend.property.util.S3Uploader;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,6 +39,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final PropertyRepository propertyRepository;
     private final ChatNotificationPubSubService chatNotificationPubSubService;
+    private final S3Uploader s3Uploader;
 
     // 생성자에서 @Lazy 적용하여 순환 참조 해결
     public ChatService(
@@ -46,7 +49,7 @@ public class ChatService {
             MessageReadStatusRepository messageReadStatusRepository,
             UserRepository userRepository,
             PropertyRepository propertyRepository,
-            @Lazy ChatNotificationPubSubService chatNotificationPubSubService
+            @Lazy ChatNotificationPubSubService chatNotificationPubSubService, S3Uploader s3Uploader
     ) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageRepository = chatMessageRepository;
@@ -55,6 +58,7 @@ public class ChatService {
         this.userRepository = userRepository;
         this.propertyRepository = propertyRepository;
         this.chatNotificationPubSubService = chatNotificationPubSubService;
+        this.s3Uploader = s3Uploader;
     }
 
     /**
@@ -113,13 +117,18 @@ public class ChatService {
 
             // 새 채팅방 생성 시 상대방에게 알림 전송
             try {
+
+                String requesterProfile = requester.getProfileImg() != null
+                        ? s3Uploader.presignedGetUrl(requester.getProfileImg(), Duration.ofHours(12))
+                        : null;
+
                 ChatNotificationDto notification = ChatNotificationDto.builder()
                         .roomSeq(chatRoom.getId())
                         .sender(ChatNotificationDto.SenderDto.builder()
                                 .userSeq(requester.getUserSeq())
                                 .name(requester.getName())
                                 .nickname(requester.getNickname())
-                                .profileImg(requester.getProfileImg())
+                                .profileImg(requesterProfile)
                                 .build())
                         .content(requester.getNickname() + "님이 채팅을 시작했습니다.")
                         .sentAt(LocalDateTime.now(KoreaClock.getClock()))
@@ -140,6 +149,10 @@ public class ChatService {
             }
         }
 
+        String opponentProfile = opponent.getProfileImg() != null
+                ? s3Uploader.presignedGetUrl(opponent.getProfileImg(), Duration.ofHours(12))
+                : null;
+
         return ChatRoomResponseDto.builder()
                 .roomSeq(chatRoom.getId())
                 .newRoom(isNew)
@@ -147,7 +160,7 @@ public class ChatService {
                         .userSeq(opponent.getUserSeq())
                         .name(opponent.getName())
                         .nickname(opponent.getNickname())
-                        .profileImg(opponent.getProfileImg())
+                        .profileImg(opponentProfile)
                         .build())
                 .build();
     }
@@ -205,6 +218,11 @@ public class ChatService {
              */
             long unread = messageReadStatusRepository.countByChatRoomAndUserAndIsReadFalse(room, me);
 
+            // partner 프로필 presigned URL 적용
+            String partnerProfile = (partner != null && partner.getProfileImg() != null)
+                    ? s3Uploader.presignedGetUrl(partner.getProfileImg(), Duration.ofHours(12))
+                    : null;
+
             /*
              * 7) DTO 변환
              *    ← 여기서 핵심은 "opponent" 와 "lastMessage" 를
@@ -218,7 +236,7 @@ public class ChatService {
                                     .userSeq(partner.getUserSeq())
                                     .name(partner.getName())
                                     .nickname(partner.getNickname())
-                                    .profileImg(partner.getProfileImg())
+                                    .profileImg(partnerProfile)
                                     .build()
                                     : null
                             )
@@ -248,11 +266,15 @@ public class ChatService {
 
         for (ChatMessage m : chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom)) {
 
+            String senderProfile = m.getSender().getProfileImg() != null
+                    ? s3Uploader.presignedGetUrl(m.getSender().getProfileImg(), Duration.ofHours(12))
+                    : null;
+
             ChatMessageResponseDto.SenderDto senderDto = ChatMessageResponseDto.SenderDto.builder()
                     .userSeq(m.getSender().getUserSeq())
                     .name(m.getSender().getName())
                     .nickname(m.getSender().getNickname())
-                    .profileImg(m.getSender().getProfileImg())
+                    .profileImg(senderProfile)
                     .build();
 
             result.add(ChatMessageResponseDto.builder()
@@ -327,12 +349,17 @@ public class ChatService {
                     .build());
         }
 
+        // 변경됨: 메시지 발신자 프로필 presigned URL 적용
+        String senderProfile = sender.getProfileImg() != null
+                ? s3Uploader.presignedGetUrl(sender.getProfileImg(), Duration.ofHours(12))
+                : null;
+
         // 응답 DTO 로 변환
         ChatMessageResponseDto.SenderDto senderDto = ChatMessageResponseDto.SenderDto.builder()
                 .userSeq(sender.getUserSeq())
                 .name(sender.getName())
                 .nickname(sender.getNickname())
-                .profileImg(sender.getProfileImg())
+                .profileImg(senderProfile)
                 .build();
 
         return ChatMessageResponseDto.builder()
