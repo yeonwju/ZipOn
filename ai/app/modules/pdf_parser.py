@@ -39,5 +39,5 @@ def extract_text_from_file(pdf_path: str) -> str:
         all_text += f"\n\n--- Page {i} ---\n{text}"
 
     doc.close()
-    print("[INFO] PDF 텍스트 추출 완료 ✅")
+    print("[INFO] PDF 텍스트 추출 완료")
     return all_text

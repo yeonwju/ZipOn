@@ -19,15 +19,15 @@ def verify_registration_info(pdf_path: str, user_input: dict) -> dict:
     :return: {"verified": bool, "similarity": float, ...}
     """
 
-    # 1️⃣ PDF 텍스트 추출
+    # PDF 텍스트 추출
     print("[INFO] PDF 텍스트 추출 시작...")
     from app.modules.pdf_parser import extract_text_from_file
     pdf_text = extract_text_from_file(pdf_path)
 
-    # 2️⃣ LLM으로 정보 추출
+    # LLM으로 정보 추출
     extracted = extract_owner_info_llm(pdf_text)
 
-    # 3️⃣ 각각 비교
+    # 각각 비교
     owner_match = normalize_text(extracted.get("owner")) == normalize_text(user_input.get("owner"))
     birth_match = normalize_text(extracted.get("birth")) == normalize_text(user_input.get("birth"))
 
@@ -36,7 +36,7 @@ def verify_registration_info(pdf_path: str, user_input: dict) -> dict:
 
     verified = owner_match and birth_match and address_match
 
-    # 4️⃣ 결과 종합
+    # 결과 종합
     result = {
         "verified": verified,
         "owner_match": owner_match,
@@ -48,7 +48,7 @@ def verify_registration_info(pdf_path: str, user_input: dict) -> dict:
     }
 
     print("\n==============================")
-    print("📄 본인 인증 결과")
+    print("본인 인증 결과")
     print("==============================")
     print(result)
 

@@ -24,7 +24,7 @@ def normalize_address(addr: str) -> str:
     return addr
 
 def compare_node(state: VerifyState) -> VerifyState:
-    print("[NODE] 🧩 compare_node 실행 중...")
+    print("[NODE] compare_node 실행 중...")
 
     extracted = state.get("extracted")
     user_input = state.get("user_input")
@@ -32,16 +32,16 @@ def compare_node(state: VerifyState) -> VerifyState:
     if not extracted or not user_input:
         return {**state, "verified": False, "error": "missing extracted or user_input"}
 
-    # --- 1️⃣ 이름 비교 ---
+    # ---이름 비교 ---
     owner_sim = similarity(extracted.get("owner"), user_input.get("owner"))
     owner_match = owner_sim >= 0.8  # 80% 이상이면 일치로 인정
 
-    # --- 2️⃣ 생년월일 비교 (앞 6자리만) ---
+    # ---생년월일 비교 (앞 6자리만) ---
     birth_ex = normalize_text(extracted.get("birth"))[:6]
     birth_usr = normalize_text(user_input.get("birth"))[:6]
     birth_match = birth_ex == birth_usr
 
-    # --- 3️⃣ 주소 비교 ---
+    # --- 주소 비교 ---
     addr_ex = normalize_address(extracted.get("address"))
     addr_usr = normalize_address(user_input.get("address"))
     addr_sim = similarity(addr_ex, addr_usr)
@@ -49,7 +49,7 @@ def compare_node(state: VerifyState) -> VerifyState:
 
     verified = all([owner_match, birth_match, address_match])
 
-    print("\n[INFO] ✅ 비교 결과")
+    print("\n[INFO] 비교 결과")
     print(f" - 소유자 유사도: {owner_sim:.3f} → 일치: {owner_match}")
     print(f" - 생년월일 비교: {birth_ex} vs {birth_usr} → 일치: {birth_match}")
     print(f" - 주소 유사도: {addr_sim:.3f} → 일치: {address_match}")
