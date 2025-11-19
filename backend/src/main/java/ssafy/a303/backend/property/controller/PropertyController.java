@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +29,8 @@ import ssafy.a303.backend.property.dto.request.VerifyRequestDto;
 import ssafy.a303.backend.property.dto.response.*;
 import ssafy.a303.backend.property.service.PropertyService;
 import ssafy.a303.backend.property.service.VerificationService;
+import ssafy.a303.backend.search.dto.PageResponseDto;
+import ssafy.a303.backend.search.dto.SearchResponseDto;
 
 import java.util.List;
 
@@ -388,4 +392,25 @@ public class PropertyController {
         return ResponseDTO.ok(null, "매물이 삭제되었습니다.");
     }
 
+    /**
+     * 일반, 경매, 중개 매물 조회
+     */
+    @GetMapping("/list")
+    public ResponseEntity<PageResponseDto<ListResponseDto>> searchByType(
+            @RequestParam String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ListResponseDto> result = propertyService.listByType(type,pageable);
+
+        PageResponseDto<ListResponseDto> response = new PageResponseDto<>(
+                result.getTotalElements(),
+                result.getNumber(),
+                result.getSize(),
+                result.getContent()
+        );
+        return ResponseEntity.ok(response);
+    }
 }
