@@ -399,7 +399,7 @@ public class PropertyController {
     public ResponseEntity<ResponseDTO<PageResponseDto<ListResponseDto>>> searchByType(
             @RequestParam String type,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "2000") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
