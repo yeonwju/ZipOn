@@ -27,6 +27,7 @@ public class AuctionInProgressRepository {
         return redis.opsForValue().get(generateKey(auctionSeq)) != null;
     }
 
+    // 발표를 위해 종료 날짜 받을 수 있도록 수정 11.18
     private Duration life(LocalDateTime auctionEndAt) {
         LocalDateTime now = LocalDateTime.now(KoreaClock.getClock());
         // LocalDateTime end = LocalDateTime.of(LocalDate.now(KoreaClock.getClock()).plusDays(1), LocalTime.of(11, 59, 59));
