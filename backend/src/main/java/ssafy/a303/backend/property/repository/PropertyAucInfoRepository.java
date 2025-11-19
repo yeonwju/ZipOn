@@ -18,19 +18,16 @@ public interface PropertyAucInfoRepository extends JpaRepository<PropertyAucInfo
     );
 
     //2) broker
-    Page<PropertyAucInfo> findByIsAucPrefAndIsBrkPrefAndProperty_HasBrkAndProperty_DeletedAtIsNull(
-            Boolean isAucPref,
+    Page<PropertyAucInfo> findByIsBrkPrefAndProperty_DeletedAtIsNull(
             Boolean isBrkPref,
-            Boolean hasBrk,
             Pageable pageable
     );
 
     // 3) auction
-    Page<PropertyAucInfo> findByIsAucPrefAndIsBrkPrefAndProperty_DeletedAtIsNull(
-            Boolean isAucPref,
-            Boolean isBrkPref,
-            Pageable pageable
-    );
+//    Page<PropertyAucInfo> findByIsAucPrefAndProperty_DeletedAtIsNull(
+//            Boolean isAucPref,
+//            Pageable pageable
+//    );
 
 
 }
