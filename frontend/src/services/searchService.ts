@@ -79,7 +79,7 @@ export function convertFiltersToSearchParams(filters: {
 
   const params: SearchParams = {
     page: 0,
-    size: 10,
+    size: 1000,
     sortField: 'deposit',
     sortOrder: 'desc',
   }

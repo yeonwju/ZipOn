@@ -18,6 +18,7 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
   const isConnectingRef = useRef(false)
   const usedTokenRef = useRef<string | null>(null)
+  const isStreamAttachedRef = useRef(false) // 스트림 연결 상태 추적
 
   const [error, setError] = useState<string | null>(null)
   const [playError, setPlayError] = useState(false)
@@ -32,16 +33,16 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
   )
 
   useEffect(() => {
-    console.log('[OpenVidu] useEffect triggered', { token, isHost, hasToken: !!token })
+    console.log('[OpenVidu] 트리거', { token, isHost, hasToken: !!token })
 
     if (!token) {
-      console.log('[OpenVidu] No token provided, skipping initialization')
+      console.log('[OpenVidu] 토큰 없어유')
       return
     }
 
     // 같은 토큰으로 이미 연결했으면 무시 (토큰은 1회만 사용 가능)
     if (usedTokenRef.current === token) {
-      console.log('[OpenVidu] Token already used, skip', {
+      console.log('[OpenVidu] 토큰 이미 존재함 패수', {
         currentToken: token,
         usedToken: usedTokenRef.current,
       })
@@ -50,25 +51,26 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
     // 이미 연결 중이면 무시
     if (isConnectingRef.current) {
-      console.log('[OpenVidu] Already connecting, skip', {
+      console.log('[OpenVidu] 이미 연결중 패수', {
         isConnecting: isConnectingRef.current,
       })
       return
     }
 
     isConnectingRef.current = true
+    isStreamAttachedRef.current = false // 스트림 연결 상태 초기화
     setError(null)
     setPlayError(false)
 
-    console.log('[OpenVidu] Initializing...', {
+    console.log('[OpenVidu] 초기화 중...', {
       token,
       isHost,
       hasVideoRef: !!videoRef.current,
     })
 
-    // 토큰에서 실제 토큰 값 추출
+    // 토큰에서 실제 토큰 값 추출 (현재는 token과 동일하지만 확장성을 위해)
     const openViduToken = token
-    console.log('[OpenVidu] Token info:', {
+    console.log('[OpenVidu] 토큰 정보:', {
       original: token,
       extracted: openViduToken,
       tokenLength: token?.length,
@@ -76,17 +78,17 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
     const OV = new OpenVidu()
     openViduRef.current = OV
-    console.log('[OpenVidu] OpenVidu instance created')
+    console.log('[OpenVidu] 오픈비듀 객체 생성~')
 
     const session = OV.initSession()
     sessionRef.current = session
-    console.log('[OpenVidu] Session initialized', {
+    console.log('[OpenVidu] 세션 초기화 완료', {
       sessionId: session.sessionId,
       capabilities: session.capabilities,
     })
 
     session.on('streamCreated', event => {
-      console.log('[OpenVidu] Stream created event:', {
+      console.log('[OpenVidu] 스트림 생성:', {
         streamId: event.stream?.streamId,
         connectionId: event.stream?.connection?.connectionId,
         hasAudio: event.stream?.hasAudio,
@@ -95,204 +97,195 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
       })
 
       try {
-        console.log('[OpenVidu] Attempting to subscribe to stream', {
+        console.log('[OpenVidu] 구독 스트림 시도중', {
           hasVideoRef: !!videoRef.current,
           streamId: event.stream?.streamId,
         })
 
-        // video element를 직접 전달하여 subscriber 초기화
+        // 비디오 엘리먼트를 직접 전달하여 구독자 초기화
         const subscriber = session.subscribe(event.stream, videoRef.current || undefined)
         subscriberRef.current = subscriber
 
-        console.log('[OpenVidu] Subscriber created and subscribed', {
+        console.log('[OpenVidu] 구독자 구독 생성', {
           subscriberId: subscriber.id,
           streamId: subscriber.stream?.streamId,
         })
 
         subscriber.on('videoElementCreated', e => {
-          console.log('[OpenVidu] Subscriber videoElementCreated event:', {
+          console.log('[OpenVidu] 구독자 비디오 객체:', {
             hasElement: !!e.element,
             elementType: e.element?.tagName,
             event: e,
           })
 
           if (videoRef.current) {
-            console.log('[OpenVidu] Processing videoElementCreated - videoRef exists')
-            // e.element는 OpenVidu가 생성한 video element
+            console.log('[OpenVidu] 비디오 엘리먼트 생성 이벤트 처리 중 - 비디오 객체 존재')
+            // e.element는 OpenVidu가 생성한 비디오 엘리먼트
             const openViduVideoElement = e.element as HTMLVideoElement
 
-            // srcObject가 있으면 직접 사용
+            // videoElementCreated에서는 스트림 연결하지 않고 상태만 확인
+            // 실제 연결은 streamPlaying 이벤트에서 수행 (스트림이 재생 가능한 상태일 때)
             if (openViduVideoElement.srcObject) {
-              console.log(
-                '[OpenVidu] Subscriber videoElementCreated: Using srcObject from element',
-                {
-                  hasSrcObject: !!openViduVideoElement.srcObject,
-                  tracks: (openViduVideoElement.srcObject as MediaStream)?.getTracks()?.length,
-                }
-              )
-              videoRef.current.srcObject = openViduVideoElement.srcObject as MediaStream
-              // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
-              videoRef.current.muted = true
-              console.log(
-                '[OpenVidu] Subscriber video stream attached to video element (from srcObject)'
-              )
+              console.log('[OpenVidu] 구독자 비디오 엘리먼트 생성: srcObject 확인됨 (streamPlaying 대기)', {
+                hasSrcObject: !!openViduVideoElement.srcObject,
+                tracks: (openViduVideoElement.srcObject as MediaStream)?.getTracks()?.length,
+              })
+              // streamPlaying 이벤트에서 연결하도록 함
             } else {
               console.log(
-                '[OpenVidu] Subscriber videoElementCreated: No srcObject, trying getMediaStream()'
+                '[OpenVidu] 구독자 비디오 엘리먼트 생성: srcObject 없음 (streamPlaying 대기)',
+                {
+                  hasSubscriberStream: !!subscriber.stream,
+                }
               )
-              // srcObject가 없으면 subscriber의 stream에서 가져오기
-              try {
-                const mediaStream = subscriber.stream?.getMediaStream()
-                if (mediaStream) {
-                  console.log(
-                    '[OpenVidu] Subscriber videoElementCreated: Got MediaStream from subscriber.stream',
-                    {
-                      tracks: mediaStream.getTracks()?.length,
-                      audioTracks: mediaStream.getAudioTracks()?.length,
-                      videoTracks: mediaStream.getVideoTracks()?.length,
-                    }
-                  )
-                  videoRef.current.srcObject = mediaStream
-                  // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
-                  videoRef.current.muted = true
-                  console.log(
-                    '[OpenVidu] Subscriber video stream attached to video element (from getMediaStream)'
-                  )
-                } else {
-                  console.log(
-                    '[OpenVidu] Subscriber: MediaStream not available in videoElementCreated',
-                    {
-                      hasSubscriberStream: !!subscriber.stream,
-                    }
-                  )
-                  // 나중에 streamPlaying에서 처리하도록 함
-                  return
-                }
-              } catch (err) {
-                console.warn(
-                  '[OpenVidu] Subscriber: Failed to get MediaStream in videoElementCreated:',
-                  {
-                    error: err,
-                    errorName: err instanceof Error ? err.name : 'Unknown',
-                    errorMessage: err instanceof Error ? err.message : String(err),
-                  }
-                )
-                return
-              }
+              // streamPlaying 이벤트에서 연결하도록 함
             }
-
-            // video element가 로드되면 재생 시작
-            console.log('[OpenVidu] Subscriber videoElementCreated: Attempting to play video')
-            videoRef.current
-              .play()
-              .then(() => {
-                setPlayError(false)
-                console.log(
-                  '[OpenVidu] Subscriber video playing successfully from videoElementCreated'
-                )
-              })
-              .catch(err => {
-                console.error('[OpenVidu] Subscriber video play error from videoElementCreated:', {
-                  errorName: err.name,
-                  errorMessage: err.message,
-                  error: err,
-                })
-                if (err.name === 'NotAllowedError') {
-                  setPlayError(true)
-                  console.log('[OpenVidu] Autoplay blocked, user interaction required')
-                } else {
-                  console.log('[OpenVidu] Play error is not NotAllowedError, error type:', err.name)
-                }
-              })
           } else {
             console.log(
-              '[OpenVidu] Subscriber videoElementCreated: videoRef.current is null, skipping'
+              '[OpenVidu] 구독자 비디오 엘리먼트 생성: videoRef.current가 null, 건너뜀'
             )
           }
         })
 
         subscriber.on('streamPlaying', event => {
-          console.log('[OpenVidu] Subscriber streamPlaying event:', {
+          console.log('[OpenVidu] 구독자 스트림 재생 이벤트:', {
             hasVideoRef: !!videoRef.current,
             hasSrcObject: !!videoRef.current?.srcObject,
+            isStreamAttached: isStreamAttachedRef.current,
             event,
           })
 
-          if (videoRef.current) {
-            // video element에 스트림이 없으면 subscriber의 stream에서 직접 가져오기
-            if (!videoRef.current.srcObject) {
-              console.log(
-                '[OpenVidu] Subscriber streamPlaying: No srcObject, attempting to get from subscriber.stream'
-              )
-              try {
-                // OpenVidu Subscriber의 stream에서 MediaStream 가져오기
-                const mediaStream = subscriber.stream?.getMediaStream()
-                if (mediaStream) {
-                  console.log('[OpenVidu] Subscriber streamPlaying: Got MediaStream', {
-                    tracks: mediaStream.getTracks()?.length,
-                    audioTracks: mediaStream.getAudioTracks()?.length,
-                    videoTracks: mediaStream.getVideoTracks()?.length,
+          // streamPlaying 이벤트는 스트림이 재생 가능한 상태가 되었을 때 발생
+          // 이 시점에만 스트림을 연결해야 함
+          if (videoRef.current && !isStreamAttachedRef.current) {
+            console.log(
+              '[OpenVidu] 구독자 스트림 재생: 스트림 연결 시작 (streamPlaying에서 스트림이 준비됨)'
+            )
+            try {
+              // OpenVidu 구독자의 스트림에서 MediaStream 가져오기
+              const mediaStream = subscriber.stream?.getMediaStream()
+              if (mediaStream && mediaStream.getTracks().length > 0) {
+                console.log('[OpenVidu] 구독자 스트림 재생: MediaStream 획득 및 검증 완료', {
+                  tracks: mediaStream.getTracks()?.length,
+                  audioTracks: mediaStream.getAudioTracks()?.length,
+                  videoTracks: mediaStream.getVideoTracks()?.length,
+                })
+
+                // 스트림이 준비된 상태에서만 연결
+                videoRef.current.srcObject = mediaStream
+                // muted 속성을 명시적으로 설정하여 autoplay 정책 우회 (브라우저 autoplay 정책)
+                videoRef.current.muted = true
+                isStreamAttachedRef.current = true // 연결 상태 표시
+                console.log('[OpenVidu] 구독자: 스트림 연결 완료 (streamPlaying에서)')
+
+                videoRef.current
+                  .play()
+                  .then(() => {
+                    setPlayError(false)
+                    console.log(
+                      '[OpenVidu] 구독자 비디오 재생 성공 (streamPlaying에서)'
+                    )
                   })
-                  videoRef.current.srcObject = mediaStream
-                  // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
-                  videoRef.current.muted = true
-                  console.log('[OpenVidu] Subscriber: Stream attached from getMediaStream()')
-                  videoRef.current
-                    .play()
-                    .then(() => {
-                      setPlayError(false)
+                  .catch(err => {
+                    console.error('[OpenVidu] 구독자 비디오 재생 에러 (streamPlaying에서):', {
+                      errorName: err.name,
+                      errorMessage: err.message,
+                      error: err,
+                    })
+                    if (err.name === 'NotAllowedError') {
+                      setPlayError(true)
+                      console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
+                    } else {
                       console.log(
-                        '[OpenVidu] Subscriber video playing successfully from streamPlaying'
+                        '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
+                        err.name
                       )
-                    })
-                    .catch(err => {
-                      console.error('[OpenVidu] Subscriber video play error from streamPlaying:', {
-                        errorName: err.name,
-                        errorMessage: err.message,
-                        error: err,
-                      })
-                      if (err.name === 'NotAllowedError') {
-                        setPlayError(true)
-                        console.log('[OpenVidu] Autoplay blocked, user interaction required')
-                      } else {
-                        console.log(
-                          '[OpenVidu] Play error is not NotAllowedError, error type:',
-                          err.name
-                        )
-                      }
-                    })
-                } else {
-                  console.log('[OpenVidu] Subscriber: MediaStream not available yet', {
-                    hasSubscriberStream: !!subscriber.stream,
+                    }
                   })
-                }
-              } catch (err) {
-                console.warn('[OpenVidu] Subscriber: Failed to get MediaStream:', {
-                  error: err,
-                  errorName: err instanceof Error ? err.name : 'Unknown',
-                  errorMessage: err instanceof Error ? err.message : String(err),
+              } else {
+                console.log('[OpenVidu] 구독자: MediaStream이 아직 준비되지 않음', {
+                  hasSubscriberStream: !!subscriber.stream,
+                  hasMediaStream: !!mediaStream,
+                  tracksCount: mediaStream?.getTracks()?.length || 0,
                 })
               }
-            } else {
-              console.log('[OpenVidu] Subscriber: Stream already attached, playing', {
-                hasSrcObject: !!videoRef.current.srcObject,
-                tracks: (videoRef.current.srcObject as MediaStream)?.getTracks()?.length,
+            } catch (err) {
+              console.warn('[OpenVidu] 구독자: MediaStream 획득 실패:', {
+                error: err,
+                errorName: err instanceof Error ? err.name : 'Unknown',
+                errorMessage: err instanceof Error ? err.message : String(err),
               })
-              // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
-              if (videoRef.current) {
-                videoRef.current.muted = true
-              }
+            }
+          } else if (videoRef.current && isStreamAttachedRef.current) {
+            console.log('[OpenVidu] 구독자: 스트림 이미 연결됨, 재생만 수행', {
+              hasSrcObject: !!videoRef.current.srcObject,
+              tracks: (videoRef.current.srcObject as MediaStream)?.getTracks()?.length,
+            })
+            // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+            if (videoRef.current) {
+              videoRef.current.muted = true
+            }
+            videoRef.current
+              .play()
+              .then(() => {
+                setPlayError(false)
+                console.log(
+                  '[OpenVidu] 구독자 비디오 재생 성공 (streamPlaying에서, 이미 연결됨)'
+                )
+              })
+              .catch(err => {
+                console.error(
+                  '[OpenVidu] 구독자 비디오 재생 에러 (streamPlaying에서, 이미 연결됨):',
+                  {
+                    errorName: err.name,
+                    errorMessage: err.message,
+                    error: err,
+                  }
+                )
+                if (err.name === 'NotAllowedError') {
+                  setPlayError(true)
+                  console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
+                } else {
+                  console.log(
+                    '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
+                    err.name
+                  )
+                }
+              })
+          } else {
+            console.log('[OpenVidu] 구독자 스트림 재생: videoRef.current가 null 또는 이미 연결됨, 건너뜀', {
+              hasVideoRef: !!videoRef.current,
+              isStreamAttached: isStreamAttachedRef.current,
+            })
+          }
+        })
+
+        // streamPropertyChanged 이벤트도 처리 (스트림 속성이 변경될 때)
+        subscriber.on('streamPropertyChanged', event => {
+          console.log('[OpenVidu] 구독자 스트림 속성 변경 이벤트:', {
+            changedProperty: event.changedProperty,
+            newValue: event.newValue,
+            reason: event.reason,
+            event,
+          })
+
+          // streamPropertyChanged에서는 이미 연결된 경우에만 처리
+          // 새로운 연결은 streamPlaying에서만 수행
+          if (videoRef.current && isStreamAttachedRef.current && videoRef.current.srcObject) {
+            console.log('[OpenVidu] 구독자 스트림 속성 변경: 스트림 이미 연결됨, 재생만 확인')
+            // 이미 연결되어 있으므로 재생 상태만 확인
+            if (videoRef.current.paused) {
               videoRef.current
                 .play()
                 .then(() => {
                   setPlayError(false)
                   console.log(
-                    '[OpenVidu] Subscriber video playing successfully from streamPlaying (already attached)'
+                    '[OpenVidu] 구독자 비디오 재생 성공 (streamPropertyChanged에서 재생 재시도)'
                   )
                 })
                 .catch(err => {
                   console.error(
-                    '[OpenVidu] Subscriber video play error from streamPlaying (already attached):',
+                    '[OpenVidu] 구독자 비디오 재생 에러 (streamPropertyChanged에서):',
                     {
                       errorName: err.name,
                       errorMessage: err.message,
@@ -301,113 +294,47 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                   )
                   if (err.name === 'NotAllowedError') {
                     setPlayError(true)
-                    console.log('[OpenVidu] Autoplay blocked, user interaction required')
-                  } else {
-                    console.log(
-                      '[OpenVidu] Play error is not NotAllowedError, error type:',
-                      err.name
-                    )
+                    console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
                   }
                 })
             }
           } else {
-            console.log('[OpenVidu] Subscriber streamPlaying: videoRef.current is null, skipping')
-          }
-        })
-
-        // streamPropertyChanged 이벤트도 처리 (스트림 속성 변경 시)
-        subscriber.on('streamPropertyChanged', event => {
-          console.log('[OpenVidu] Subscriber streamPropertyChanged event:', {
-            changedProperty: event.changedProperty,
-            newValue: event.newValue,
-            reason: event.reason,
-            event,
-          })
-
-          if (videoRef.current && !videoRef.current.srcObject) {
-            console.log(
-              '[OpenVidu] Subscriber streamPropertyChanged: No srcObject, attempting to get MediaStream'
-            )
-            try {
-              const mediaStream = subscriber.stream?.getMediaStream()
-              if (mediaStream) {
-                console.log('[OpenVidu] Subscriber streamPropertyChanged: Got MediaStream', {
-                  tracks: mediaStream.getTracks()?.length,
-                  audioTracks: mediaStream.getAudioTracks()?.length,
-                  videoTracks: mediaStream.getVideoTracks()?.length,
-                })
-                videoRef.current.srcObject = mediaStream
-                // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
-                videoRef.current.muted = true
-                console.log('[OpenVidu] Subscriber: Stream attached from streamPropertyChanged')
-                videoRef.current
-                  .play()
-                  .then(() => {
-                    setPlayError(false)
-                    console.log(
-                      '[OpenVidu] Subscriber video playing successfully from streamPropertyChanged'
-                    )
-                  })
-                  .catch(err => {
-                    console.error(
-                      '[OpenVidu] Subscriber video play error from streamPropertyChanged:',
-                      {
-                        errorName: err.name,
-                        errorMessage: err.message,
-                        error: err,
-                      }
-                    )
-                    if (err.name === 'NotAllowedError') {
-                      setPlayError(true)
-                      console.log('[OpenVidu] Autoplay blocked, user interaction required')
-                    } else {
-                      console.log(
-                        '[OpenVidu] Play error is not NotAllowedError, error type:',
-                        err.name
-                      )
-                    }
-                  })
-              } else {
-                console.log(
-                  '[OpenVidu] Subscriber streamPropertyChanged: MediaStream not available',
-                  {
-                    hasSubscriberStream: !!subscriber.stream,
-                  }
-                )
-              }
-            } catch (err) {
-              console.warn(
-                '[OpenVidu] Subscriber: Failed to get MediaStream from streamPropertyChanged:',
-                {
-                  error: err,
-                  errorName: err instanceof Error ? err.name : 'Unknown',
-                  errorMessage: err instanceof Error ? err.message : String(err),
-                }
-              )
-            }
-          } else {
-            console.log('[OpenVidu] Subscriber streamPropertyChanged: Skipping', {
+            console.log('[OpenVidu] 구독자 스트림 속성 변경: 스트림 미연결, 건너뜀 (streamPlaying 대기)', {
               hasVideoRef: !!videoRef.current,
+              isStreamAttached: isStreamAttachedRef.current,
               hasSrcObject: !!videoRef.current?.srcObject,
             })
           }
         })
 
-        // 구독 직후에도 스트림 연결 시도
-        console.log('[OpenVidu] Setting up timeout fallback for subscriber stream attachment')
-        setTimeout(() => {
-          console.log('[OpenVidu] Timeout callback executed (1s after subscription)', {
+        // 구독 직후에도 스트림 연결 시도 (폴백 메커니즘)
+        // streamPlaying이 발생하지 않은 경우를 대비한 폴백
+        console.log('[OpenVidu] 구독자 스트림 연결을 위한 타임아웃 폴백 설정')
+        
+        let fallbackRetryCount = 0
+        const maxFallbackRetries = 5 // 최대 5초까지 시도
+        
+        const tryAttachStream = () => {
+          fallbackRetryCount++
+          console.log(`[OpenVidu] 타임아웃 폴백 콜백 실행 (${fallbackRetryCount}초 후)`, {
             hasVideoRef: !!videoRef.current,
             hasSrcObject: !!videoRef.current?.srcObject,
+            isStreamAttached: isStreamAttachedRef.current,
             hasSubscriberStream: !!subscriber.stream,
           })
 
-          if (videoRef.current && !videoRef.current.srcObject && subscriber.stream) {
-            console.log('[OpenVidu] Timeout: Attempting to attach stream')
+          // 이미 연결되어 있으면 더 이상 시도하지 않음
+          if (isStreamAttachedRef.current || videoRef.current?.srcObject) {
+            console.log('[OpenVidu] 타임아웃 폴백: 이미 스트림 연결됨, 종료')
+            return
+          }
+
+          if (videoRef.current && subscriber.stream) {
             try {
               const mediaStream = subscriber.stream.getMediaStream()
-              if (mediaStream) {
-                console.log('[OpenVidu] Timeout: Got MediaStream', {
+              // MediaStream이 존재하고 트랙이 있는지 확인 (스트림이 완전히 준비되었는지)
+              if (mediaStream && mediaStream.getTracks().length > 0) {
+                console.log('[OpenVidu] 타임아웃 폴백: MediaStream 획득 및 검증 완료', {
                   tracks: mediaStream.getTracks()?.length,
                   audioTracks: mediaStream.getAudioTracks()?.length,
                   videoTracks: mediaStream.getVideoTracks()?.length,
@@ -415,51 +342,70 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                 videoRef.current.srcObject = mediaStream
                 // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
                 videoRef.current.muted = true
-                console.log('[OpenVidu] Subscriber: Stream attached after timeout')
+                isStreamAttachedRef.current = true
+                console.log('[OpenVidu] 구독자: 타임아웃 폴백으로 스트림 연결됨')
+                
                 videoRef.current
                   .play()
                   .then(() => {
                     setPlayError(false)
-                    console.log('[OpenVidu] Subscriber video playing successfully from timeout')
+                    console.log('[OpenVidu] 구독자 비디오 재생 성공 (타임아웃 폴백에서)')
                   })
                   .catch(err => {
-                    console.error('[OpenVidu] Subscriber video play error from timeout:', {
+                    console.error('[OpenVidu] 구독자 비디오 재생 에러 (타임아웃 폴백에서):', {
                       errorName: err.name,
                       errorMessage: err.message,
                       error: err,
                     })
                     if (err.name === 'NotAllowedError') {
                       setPlayError(true)
-                      console.log('[OpenVidu] Autoplay blocked, user interaction required')
+                      console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
                     } else {
                       console.log(
-                        '[OpenVidu] Play error is not NotAllowedError, error type:',
+                        '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
                         err.name
                       )
                     }
                   })
               } else {
-                console.log('[OpenVidu] Timeout: MediaStream not available', {
+                console.log('[OpenVidu] 타임아웃 폴백: MediaStream이 아직 준비되지 않음, 재시도 대기', {
                   hasSubscriberStream: !!subscriber.stream,
+                  hasMediaStream: !!mediaStream,
+                  tracksCount: mediaStream?.getTracks()?.length || 0,
                 })
+                // 아직 준비되지 않았고 재시도 횟수가 남아있으면 계속 시도
+                if (fallbackRetryCount < maxFallbackRetries) {
+                  setTimeout(tryAttachStream, 1000)
+                } else {
+                  console.log('[OpenVidu] 타임아웃 폴백: 최대 재시도 횟수 도달, 종료')
+                }
               }
             } catch (err) {
-              console.warn('[OpenVidu] Subscriber: Failed to get MediaStream after timeout:', {
+              console.warn('[OpenVidu] 구독자: 타임아웃 폴백에서 MediaStream 획득 실패:', {
                 error: err,
                 errorName: err instanceof Error ? err.name : 'Unknown',
                 errorMessage: err instanceof Error ? err.message : String(err),
               })
+              // 재시도 횟수가 남아있으면 계속 시도
+              if (fallbackRetryCount < maxFallbackRetries) {
+                setTimeout(tryAttachStream, 1000)
+              }
             }
           } else {
-            console.log('[OpenVidu] Timeout: Conditions not met, skipping', {
+            console.log('[OpenVidu] 타임아웃 폴백: 조건 미충족', {
               hasVideoRef: !!videoRef.current,
-              hasSrcObject: !!videoRef.current?.srcObject,
               hasSubscriberStream: !!subscriber.stream,
             })
+            // 재시도 횟수가 남아있으면 계속 시도
+            if (fallbackRetryCount < maxFallbackRetries) {
+              setTimeout(tryAttachStream, 1000)
+            }
           }
-        }, 1000)
+        }
+
+        setTimeout(tryAttachStream, 1000)
       } catch (err) {
-        console.error('[OpenVidu] Subscribe error:', {
+        console.error('[OpenVidu] 구독 에러:', {
           error: err,
           errorName: err instanceof Error ? err.name : 'Unknown',
           errorMessage: err instanceof Error ? err.message : String(err),
@@ -469,7 +415,7 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
       }
     })
 
-    console.log('[OpenVidu] Attempting to connect to session', {
+    console.log('[OpenVidu] 세션 연결 시도 중', {
       tokenLength: openViduToken?.length,
       isHost,
     })
@@ -477,22 +423,22 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
     session
       .connect(openViduToken)
       .then(async () => {
-        console.log('[OpenVidu] Session connected!', {
+        console.log('[OpenVidu] 세션 연결 완료!', {
           sessionId: session.sessionId,
           capabilities: session.capabilities,
         })
         isConnectingRef.current = false
-        // 토큰 사용 표시
+        // 토큰 사용 표시 (이미 사용한 토큰은 재사용 방지)
         usedTokenRef.current = token
-        console.log('[OpenVidu] Connection state updated', {
+        console.log('[OpenVidu] 연결 상태 업데이트됨', {
           isConnecting: isConnectingRef.current,
           usedToken: usedTokenRef.current,
         })
 
         if (isHost) {
-          console.log('[OpenVidu] User is host, initializing publisher')
+          console.log('[OpenVidu] 사용자가 호스트입니다, Publisher 초기화 중')
           try {
-            console.log('[OpenVidu] Requesting camera and microphone permissions...', {
+            console.log('[OpenVidu] 카메라 및 마이크 권한 요청 중...', {
               hasMediaDevices: !!navigator.mediaDevices,
               hasGetUserMedia: !!navigator.mediaDevices?.getUserMedia,
             })
@@ -507,7 +453,7 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               audio: true,
             })
 
-            console.log('[OpenVidu] Media permissions granted, initializing publisher...', {
+            console.log('[OpenVidu] 미디어 권한 승인됨, Publisher 초기화 중...', {
               tracks: stream.getTracks()?.length,
               audioTracks: stream.getAudioTracks()?.length,
               videoTracks: stream.getVideoTracks()?.length,
@@ -515,15 +461,15 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               audioTrackSettings: stream.getAudioTracks()?.[0]?.getSettings(),
             })
 
-            // 권한이 승인되면 스트림을 종료하고 OpenVidu Publisher 사용
-            console.log('[OpenVidu] Stopping temporary media stream tracks')
+            // 권한이 승인되면 임시 스트림을 종료하고 OpenVidu Publisher 사용 (OpenVidu가 직접 미디어 스트림 관리)
+            console.log('[OpenVidu] 임시 미디어 스트림 트랙 종료 중')
             stream.getTracks().forEach(track => {
-              console.log('[OpenVidu] Stopping track', { kind: track.kind, id: track.id })
+              console.log('[OpenVidu] 트랙 종료', { kind: track.kind, id: track.id })
               track.stop()
             })
 
-            // video element를 직접 전달하여 Publisher 초기화
-            console.log('[OpenVidu] Initializing OpenVidu publisher', {
+            // 비디오 엘리먼트를 직접 전달하여 Publisher 초기화
+            console.log('[OpenVidu] OpenVidu Publisher 초기화 중', {
               hasVideoRef: !!videoRef.current,
               options: {
                 publishAudio: true,
@@ -541,198 +487,217 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
             })
 
             publisherRef.current = publisher
-            console.log('[OpenVidu] Publisher initialized', {
+            console.log('[OpenVidu] Publisher 초기화 완료', {
               publisherId: publisher.id,
               streamId: publisher.stream?.streamId,
               hasAudio: publisher.stream?.hasAudio,
               hasVideo: publisher.stream?.hasVideo,
             })
 
-            // Publisher의 video element를 우리의 video element에 연결
-            // initPublisherAsync에 video element를 전달했으므로 자동으로 연결됨
-            // 하지만 추가로 이벤트 리스너도 등록
+            // Publisher의 비디오 엘리먼트를 우리의 비디오 엘리먼트에 연결
+            // initPublisherAsync에 비디오 엘리먼트를 전달했으므로 자동으로 연결됨
+            // 하지만 추가로 이벤트 리스너도 등록하여 안정성 확보
             publisher.on('videoElementCreated', event => {
-              console.log('[OpenVidu] Publisher videoElementCreated event:', {
+              console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성 이벤트:', {
                 hasElement: !!event.element,
                 elementType: event.element?.tagName,
                 event,
               })
 
               if (videoRef.current) {
-                console.log('[OpenVidu] Publisher videoElementCreated: videoRef exists')
-                // event.element는 OpenVidu가 생성한 video element
+                console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: videoRef 존재')
+                // event.element는 OpenVidu가 생성한 비디오 엘리먼트
                 const publisherVideoElement = event.element as HTMLVideoElement
                 if (publisherVideoElement && publisherVideoElement.srcObject) {
-                  console.log('[OpenVidu] Publisher videoElementCreated: Element has srcObject', {
+                  console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: 엘리먼트에 srcObject 있음 (streamPlaying 대기)', {
                     hasSrcObject: !!publisherVideoElement.srcObject,
                     tracks: (publisherVideoElement.srcObject as MediaStream)?.getTracks()?.length,
                   })
-                  // 이미 videoRef.current에 연결되어 있으면 확인만
-                  if (videoRef.current.srcObject !== publisherVideoElement.srcObject) {
-                    console.log('[OpenVidu] Publisher videoElementCreated: Attaching new srcObject')
-                    videoRef.current.srcObject = publisherVideoElement.srcObject as MediaStream
-                    // muted 속성을 명시적으로 설정 (호스트는 자신의 비디오를 보지만 음소거 유지)
-                    videoRef.current.muted = true
-                    console.log('[OpenVidu] Video stream attached to video element')
-                  } else {
-                    console.log(
-                      '[OpenVidu] Publisher videoElementCreated: srcObject already attached, skipping'
-                    )
-                  }
-
-                  // video element가 로드되면 재생 시작
-                  console.log('[OpenVidu] Publisher videoElementCreated: Attempting to play video')
-                  videoRef.current
-                    .play()
-                    .then(() => {
-                      setPlayError(false)
-                      console.log(
-                        '[OpenVidu] Publisher video playing successfully from videoElementCreated'
-                      )
-                    })
-                    .catch(err => {
-                      // AbortError는 비디오가 DOM에서 제거되었을 때 발생하는 일반적인 에러 (무시)
-                      if (err.name === 'AbortError') {
-                        console.log('[OpenVidu] Video play aborted (element may be removed)')
-                        return
-                      }
-                      console.error('[OpenVidu] Video play error from videoElementCreated:', {
-                        errorName: err.name,
-                        errorMessage: err.message,
-                        error: err,
-                      })
-                      if (err.name === 'NotAllowedError') {
-                        setPlayError(true)
-                        console.log('[OpenVidu] Autoplay blocked, user interaction required')
-                      } else {
-                        console.log(
-                          '[OpenVidu] Play error is not NotAllowedError or AbortError, error type:',
-                          err.name
-                        )
-                      }
-                    })
-
+                  // videoElementCreated에서는 연결하지 않고 streamPlaying에서 연결
+                  // handleStreamReady는 여기서 호출 (스트림은 준비되었으므로)
                   handleStreamReady(publisherVideoElement.srcObject as MediaStream)
-                  console.log('[OpenVidu] Publisher videoElementCreated: handleStreamReady called')
+                  console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: handleStreamReady 호출됨')
                 } else {
-                  console.log('[OpenVidu] Publisher videoElementCreated: No element or srcObject', {
+                  console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: 엘리먼트 또는 srcObject 없음', {
                     hasElement: !!publisherVideoElement,
                     hasSrcObject: !!publisherVideoElement?.srcObject,
                   })
                 }
               } else {
                 console.log(
-                  '[OpenVidu] Publisher videoElementCreated: videoRef.current is null, skipping'
+                  '[OpenVidu] Publisher 비디오 엘리먼트 생성: videoRef.current가 null, 건너뜀'
                 )
               }
             })
 
-            // accessAllowed 이벤트 처리 (권한 승인 후)
+            // accessAllowed 이벤트 처리 (카메라/마이크 권한 승인 후)
             publisher.on('accessAllowed', () => {
-              console.log('[OpenVidu] Publisher accessAllowed event fired')
+              console.log('[OpenVidu] Publisher 접근 허용 이벤트 발생')
             })
 
             // accessDenied 이벤트 처리
             publisher.on('accessDenied', () => {
-              console.error('[OpenVidu] Publisher accessDenied event fired')
+              console.error('[OpenVidu] Publisher 접근 거부 이벤트 발생')
               setError('카메라/마이크 접근이 거부되었습니다.')
             })
 
-            // streamPlaying 이벤트 처리 (스트림이 재생될 때)
+            // streamPlaying 이벤트 처리 (스트림이 재생될 때 발생)
             publisher.on('streamPlaying', event => {
-              console.log('[OpenVidu] Publisher streamPlaying event:', {
+              console.log('[OpenVidu] Publisher 스트림 재생 이벤트:', {
                 hasVideoRef: !!videoRef.current,
                 hasSrcObject: !!videoRef.current?.srcObject,
+                isStreamAttached: isStreamAttachedRef.current,
                 event,
               })
 
-              if (videoRef.current) {
-                // video element에 이미 스트림이 연결되어 있는지 확인
-                if (!videoRef.current.srcObject) {
-                  console.log(
-                    '[OpenVidu] Publisher streamPlaying: No stream in video element, waiting for videoElementCreated event',
-                    {
-                      hasVideoRef: !!videoRef.current,
-                      hasSrcObject: false,
-                    }
-                  )
-                } else {
-                  console.log(
-                    '[OpenVidu] Publisher streamPlaying: Stream already attached, playing',
-                    {
-                      hasSrcObject: true,
-                      tracks: (videoRef.current.srcObject as MediaStream)?.getTracks()?.length,
-                    }
-                  )
-                  // muted 속성을 명시적으로 설정
-                  if (videoRef.current) {
+              // streamPlaying 이벤트는 스트림이 재생 가능한 상태가 되었을 때 발생
+              // 이 시점에만 스트림을 연결해야 함
+              if (videoRef.current && !isStreamAttachedRef.current) {
+                console.log(
+                  '[OpenVidu] Publisher 스트림 재생: 스트림 연결 시작 (streamPlaying에서 스트림이 준비됨)'
+                )
+                try {
+                  // Publisher의 스트림에서 MediaStream 가져오기
+                  const mediaStream = publisher.stream?.getMediaStream()
+                  if (mediaStream && mediaStream.getTracks().length > 0) {
+                    console.log('[OpenVidu] Publisher 스트림 재생: MediaStream 획득 및 검증 완료', {
+                      tracks: mediaStream.getTracks()?.length,
+                      audioTracks: mediaStream.getAudioTracks()?.length,
+                      videoTracks: mediaStream.getVideoTracks()?.length,
+                    })
+
+                    // 스트림이 준비된 상태에서만 연결
+                    videoRef.current.srcObject = mediaStream
+                    // muted 속성을 명시적으로 설정 (호스트는 자신의 비디오를 보지만 음소거 유지하여 에코 방지)
                     videoRef.current.muted = true
-                  }
-                  videoRef.current
-                    .play()
-                    .then(() => {
-                      setPlayError(false)
-                      console.log(
-                        '[OpenVidu] Publisher video playing successfully from streamPlaying'
-                      )
-                    })
-                    .catch(err => {
-                      console.error('[OpenVidu] Video play error from streamPlaying:', {
-                        errorName: err.name,
-                        errorMessage: err.message,
-                        error: err,
-                      })
-                      if (err.name === 'NotAllowedError') {
-                        setPlayError(true)
-                        console.log('[OpenVidu] Autoplay blocked, user interaction required')
-                      } else {
+                    isStreamAttachedRef.current = true // 연결 상태 표시
+                    console.log('[OpenVidu] Publisher: 스트림 연결 완료 (streamPlaying에서)')
+
+                    videoRef.current
+                      .play()
+                      .then(() => {
+                        setPlayError(false)
                         console.log(
-                          '[OpenVidu] Play error is not NotAllowedError, error type:',
-                          err.name
+                          '[OpenVidu] Publisher 비디오 재생 성공 (streamPlaying에서)'
                         )
-                      }
+                      })
+                      .catch(err => {
+                        // AbortError는 비디오가 DOM에서 제거되었을 때 발생하는 일반적인 에러이므로 무시
+                        if (err.name === 'AbortError') {
+                          console.log('[OpenVidu] 비디오 재생 중단됨 (엘리먼트가 제거되었을 수 있음)')
+                          return
+                        }
+                        console.error('[OpenVidu] 비디오 재생 에러 (streamPlaying에서):', {
+                          errorName: err.name,
+                          errorMessage: err.message,
+                          error: err,
+                        })
+                        if (err.name === 'NotAllowedError') {
+                          setPlayError(true)
+                          console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
+                        } else {
+                          console.log(
+                            '[OpenVidu] 재생 에러가 NotAllowedError 또는 AbortError가 아님, 에러 타입:',
+                            err.name
+                          )
+                        }
+                      })
+                  } else {
+                    console.log('[OpenVidu] Publisher: MediaStream이 아직 준비되지 않음', {
+                      hasPublisherStream: !!publisher.stream,
+                      hasMediaStream: !!mediaStream,
+                      tracksCount: mediaStream?.getTracks()?.length || 0,
                     })
+                  }
+                } catch (err) {
+                  console.warn('[OpenVidu] Publisher: MediaStream 획득 실패:', {
+                    error: err,
+                    errorName: err instanceof Error ? err.name : 'Unknown',
+                    errorMessage: err instanceof Error ? err.message : String(err),
+                  })
                 }
+              } else if (videoRef.current && isStreamAttachedRef.current) {
+                console.log('[OpenVidu] Publisher: 스트림 이미 연결됨, 재생만 수행', {
+                  hasSrcObject: !!videoRef.current.srcObject,
+                  tracks: (videoRef.current.srcObject as MediaStream)?.getTracks()?.length,
+                })
+                // muted 속성을 명시적으로 설정 (브라우저 autoplay 정책)
+                if (videoRef.current) {
+                  videoRef.current.muted = true
+                }
+                videoRef.current
+                  .play()
+                  .then(() => {
+                    setPlayError(false)
+                    console.log(
+                      '[OpenVidu] Publisher 비디오 재생 성공 (streamPlaying에서, 이미 연결됨)'
+                    )
+                  })
+                  .catch(err => {
+                    // AbortError는 비디오가 DOM에서 제거되었을 때 발생하는 일반적인 에러이므로 무시
+                    if (err.name === 'AbortError') {
+                      console.log('[OpenVidu] 비디오 재생 중단됨 (엘리먼트가 제거되었을 수 있음)')
+                      return
+                    }
+                    console.error('[OpenVidu] 비디오 재생 에러 (streamPlaying에서):', {
+                      errorName: err.name,
+                      errorMessage: err.message,
+                      error: err,
+                    })
+                    if (err.name === 'NotAllowedError') {
+                      setPlayError(true)
+                      console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
+                    } else {
+                      console.log(
+                        '[OpenVidu] 재생 에러가 NotAllowedError 또는 AbortError가 아님, 에러 타입:',
+                        err.name
+                      )
+                    }
+                  })
               } else {
                 console.log(
-                  '[OpenVidu] Publisher streamPlaying: videoRef.current is null, skipping'
+                  '[OpenVidu] Publisher 스트림 재생: videoRef.current가 null 또는 이미 연결됨, 건너뜀',
+                  {
+                    hasVideoRef: !!videoRef.current,
+                    isStreamAttached: isStreamAttachedRef.current,
+                  }
                 )
               }
             })
 
-            console.log('[OpenVidu] Publishing publisher to session', {
+            console.log('[OpenVidu] 세션에 Publisher 발행 중', {
               publisherId: publisher.id,
               sessionId: session.sessionId,
             })
             session.publish(publisher)
-            console.log('[OpenVidu] Publisher published to session successfully')
+            console.log('[OpenVidu] Publisher 세션에 성공적으로 발행됨')
           } catch (err) {
-            console.error('[OpenVidu] Publisher error:', {
+            console.error('[OpenVidu] Publisher 에러:', {
               error: err,
               errorName: err instanceof Error ? err.name : 'Unknown',
               errorMessage: err instanceof Error ? err.message : String(err),
               stack: err instanceof Error ? err.stack : undefined,
             })
             if (err instanceof Error && err.name === 'NotAllowedError') {
-              console.log('[OpenVidu] Publisher error: NotAllowedError - Permission denied')
+              console.log('[OpenVidu] Publisher 에러: NotAllowedError - 권한 거부됨')
               setError(
                 '카메라/마이크 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해주세요.'
               )
             } else {
-              console.log('[OpenVidu] Publisher error: Other error type', {
+              console.log('[OpenVidu] Publisher 에러: 기타 에러 타입', {
                 errorType: err instanceof Error ? err.name : typeof err,
               })
               setError(err instanceof Error ? err.message : 'Publisher 초기화 실패')
             }
           }
         } else {
-          console.log('[OpenVidu] User is not host, skipping publisher initialization', {
+          console.log('[OpenVidu] 사용자가 호스트가 아님, Publisher 초기화 건너뜀', {
             isHost,
           })
         }
       })
       .catch(err => {
-        console.error('[OpenVidu] Connect error:', {
+        console.error('[OpenVidu] 연결 에러:', {
           error: err,
           errorName: err instanceof Error ? err.name : 'Unknown',
           errorMessage: err instanceof Error ? err.message : String(err),
@@ -745,22 +710,22 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
   // 비디오 재생 재시도 핸들러
   const handlePlayRetry = useCallback(async () => {
-    console.log('[OpenVidu] handlePlayRetry called', {
+    console.log('[OpenVidu] 비디오 재생 재시도 호출됨', {
       hasVideoRef: !!videoRef.current,
       hasSrcObject: !!videoRef.current?.srcObject,
       playError,
     })
 
     if (videoRef.current && videoRef.current.srcObject) {
-      console.log('[OpenVidu] handlePlayRetry: Conditions met, attempting to play')
+      console.log('[OpenVidu] 비디오 재생 재시도: 조건 충족, 재생 시도 중')
       try {
-        // 재시도 시에도 muted 속성 확인
+        // 재시도 시에도 muted 속성 확인 (autoplay 정책 준수)
         videoRef.current.muted = true
         await videoRef.current.play()
         setPlayError(false)
-        console.log('[OpenVidu] Video play retry successful')
+        console.log('[OpenVidu] 비디오 재생 재시도 성공')
       } catch (err) {
-        console.error('[OpenVidu] Video play retry failed:', {
+        console.error('[OpenVidu] 비디오 재생 재시도 실패:', {
           error: err,
           errorName: err instanceof Error ? err.name : 'Unknown',
           errorMessage: err instanceof Error ? err.message : String(err),
@@ -768,7 +733,7 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
         setPlayError(true)
       }
     } else {
-      console.log('[OpenVidu] handlePlayRetry: Conditions not met', {
+      console.log('[OpenVidu] 비디오 재생 재시도: 조건 미충족', {
         hasVideoRef: !!videoRef.current,
         hasSrcObject: !!videoRef.current?.srcObject,
       })
@@ -777,23 +742,23 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
   // 비디오 클릭 시 재생 재시도
   const handleVideoClick = useCallback(() => {
-    console.log('[OpenVidu] handleVideoClick called', {
+    console.log('[OpenVidu] 비디오 클릭 핸들러 호출됨', {
       playError,
       hasVideoRef: !!videoRef.current,
     })
 
     if (playError && videoRef.current) {
-      console.log('[OpenVidu] handleVideoClick: Calling handlePlayRetry')
+      console.log('[OpenVidu] 비디오 클릭: 재생 재시도 호출 중')
       handlePlayRetry()
     } else {
-      console.log('[OpenVidu] handleVideoClick: Conditions not met, skipping retry', {
+      console.log('[OpenVidu] 비디오 클릭: 조건 미충족, 재시도 건너뜀', {
         playError,
         hasVideoRef: !!videoRef.current,
       })
     }
   }, [playError, handlePlayRetry])
 
-  console.log('[OpenVidu] Render', {
+  console.log('[OpenVidu] 렌더링', {
     hasError: !!error,
     error,
     playError,
@@ -804,15 +769,15 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
   })
 
   if (error) {
-    console.log('[OpenVidu] Render: Showing error message', { error })
+    console.log('[OpenVidu] 렌더링: 에러 메시지 표시 중', { error })
   } else {
-    console.log('[OpenVidu] Render: Showing video element', {
+    console.log('[OpenVidu] 렌더링: 비디오 엘리먼트 표시 중', {
       playError,
       // eslint-disable-next-line react-hooks/refs
       hasVideoRef: !!videoRef.current,
     })
     if (playError) {
-      console.log('[OpenVidu] Render: Showing play error overlay')
+      console.log('[OpenVidu] 렌더링: 재생 에러 오버레이 표시 중')
     }
   }
 
