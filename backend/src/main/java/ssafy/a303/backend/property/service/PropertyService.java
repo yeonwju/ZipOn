@@ -368,14 +368,14 @@ public class PropertyService {
             }
             case "broker" -> {
                 page = propertyAucInfoRepository
-                        .findByIsAucPrefAndIsBrkPrefAndProperty_HasBrkAndProperty_DeletedAtIsNull(
-                                false,true, false, pageable
+                        .findByIsBrkPrefAndProperty_DeletedAtIsNull(
+                                true, pageable
                         );
             }
             case "auction" -> {
                 page = propertyAucInfoRepository
-                        .findByIsAucPrefAndIsBrkPrefAndProperty_DeletedAtIsNull(
-                                true, false, pageable
+                        .findByIsAucPrefAndProperty_DeletedAtIsNull(
+                                true, pageable
                         );
             }
             default -> throw new CustomException(ErrorCode.REQUEST_TYPE_ERROR);
