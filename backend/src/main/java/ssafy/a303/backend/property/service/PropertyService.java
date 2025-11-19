@@ -1,9 +1,12 @@
 package ssafy.a303.backend.property.service;
 
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssafy.a303.backend.auction.entity.Auction;
@@ -26,6 +29,7 @@ import ssafy.a303.backend.property.repository.PropertyAucInfoRepository;
 import ssafy.a303.backend.property.repository.PropertyImageRepository;
 import ssafy.a303.backend.property.repository.PropertyRepository;
 import ssafy.a303.backend.property.util.S3Uploader;
+import ssafy.a303.backend.search.dto.SearchResponseDto;
 import ssafy.a303.backend.search.service.PropertySearchService;
 import ssafy.a303.backend.user.entity.User;
 import ssafy.a303.backend.user.repository.UserRepository;
@@ -348,6 +352,79 @@ public class PropertyService {
 
         //ES 색인 삭제
         propertySearchService.deleteIndex(p.getPropertySeq());
+    }
+
+    /**
+     * 매물 타입별로 조회
+     */
+    public Page<ListResponseDto> listByType(String type, Pageable pageable) {
+
+        Page<PropertyAucInfo> page;
+
+        switch (type.toLowerCase()) {
+            case "general" -> {
+                page = propertyAucInfoRepository
+                        .findByIsAucPrefAndProperty_DeletedAtIsNull(false, pageable);
+            }
+            case "broker" -> {
+                page = propertyAucInfoRepository
+                        .findByIsAucPrefAndIsBrkPrefAndProperty_HasBrkAndProperty_DeletedAtIsNull(
+                                false,true, false, pageable
+                        );
+            }
+            case "auction" -> {
+                page = propertyAucInfoRepository
+                        .findByIsAucPrefAndIsBrkPrefAndProperty_DeletedAtIsNull(
+                                true, false, pageable
+                        );
+            }
+            default -> throw new CustomException(ErrorCode.REQUEST_TYPE_ERROR);
+        }
+
+        return page.map(this::toDto);
+    }
+
+    private ListResponseDto toDto(PropertyAucInfo aucInfo) {
+        Property p = aucInfo.getProperty();
+
+        String createdAtStr = p.getCreatedAt().toString();
+
+        String lessorNm = p.getLessorNm();
+        if (lessorNm == null && p.getLessor() != null) {
+            lessorNm = p.getLessor().getName();
+        }
+
+        String buildingType = (p.getBuildingType() != null)
+                ? p.getBuildingType().name()
+                : null;
+
+        Boolean hasBrk = p.getHasBrk();
+
+        Short roomCnt = p.getRoomCnt() != null ? p.getRoomCnt().shortValue() : null;
+        Short floor = p.getFloor() != null ? p.getFloor().shortValue() : null;
+
+        return new ListResponseDto(
+                p.getPropertySeq(),
+                p.getLatitude(),
+                p.getLongitude(),
+                lessorNm,
+                p.getThumbnail(),
+                p.getPropertyNm(),
+                p.getContent(),
+                buildingType,
+                p.getAddress(),
+                p.getDeposit(),
+                p.getMnRent(),
+                p.getFee(),
+                p.getArea(),
+                p.getAreaP(),
+                roomCnt,
+                floor,
+                aucInfo.getIsAucPref(),
+                aucInfo.getIsBrkPref(),
+                hasBrk,
+                createdAtStr
+        );
     }
 
 }
