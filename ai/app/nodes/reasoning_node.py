@@ -10,12 +10,11 @@ load_dotenv()
 GMS_KEY = os.getenv("GMS_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
-# ✅ GMS 서버용 LLM
 llm = ChatOpenAI(
     model=MODEL_NAME,
     openai_api_base="https://gms.ssafy.io/gmsapi/api.openai.com/v1",
     openai_api_key=GMS_KEY,
-    temperature=0.3,  # 조금 더 자연스럽게 설명하도록
+    temperature=0.3,  
     streaming=False,
     max_retries=2,
 )
@@ -64,9 +63,6 @@ def reasoning_node(state: ContractState) -> ContractState:
 
         joined_details = "\n".join(clause_details)
 
-        # --------------------------
-        # 🧠 2️⃣ LLM에게 최종 보고문 생성 요청
-        # --------------------------
         prompt = f"""
         당신은 법률 전문가입니다.
         아래는 계약서에서 발견된 의심 조항 목록과 관련 법령 근거입니다.
@@ -91,10 +87,10 @@ def reasoning_node(state: ContractState) -> ContractState:
         response = llm.invoke(prompt)
         full_report = response.content.strip().replace("```", "")
 
-        # 상태 반환
+        
         return {
             **state,
-            "unfair_clauses": full_report,  # 최종 보고서 전체를 하나의 문자열로 저장
+            "unfair_clauses": full_report,  
             "error": None,
         }
 

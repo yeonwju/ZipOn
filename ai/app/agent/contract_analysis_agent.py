@@ -20,7 +20,7 @@ def create_contract_analysis_graph():
     graph.add_node("reasoning", reasoning_node)
 
 
-    #  노드 연결 (순차 흐름)
+    #  노드 연결 
     graph.add_edge("extract_contract", "extract_unfair_clause")
     graph.add_edge("extract_unfair_clause", "law_tool")
     graph.add_edge("law_tool", "reasoning")

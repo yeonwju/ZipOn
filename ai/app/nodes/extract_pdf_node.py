@@ -9,7 +9,7 @@ def extract_pdf_node(state: VerifyState) -> VerifyState:
     """
     state["num_try"] = state.get("num_try", 0) + 1 
     try:
-        print("[NODE] 📄 extract_pdf_node 실행 중...")
+        print("[NODE]  extract_pdf_node 실행 중...")
         pdf_text = extract_text_from_bytes(state["pdf_bytes"])
         return {**state, "pdf_text": pdf_text, "error":None}
     except Exception as e:

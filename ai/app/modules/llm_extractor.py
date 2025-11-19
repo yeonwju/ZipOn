@@ -10,7 +10,7 @@ load_dotenv()
 GMS_KEY = os.getenv("GMS_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
-# ✅ LangChain용 GMS 호환 LLM 설정
+# LangChain용 GMS 호환 LLM 설정
 llm = ChatOpenAI(
     model=MODEL_NAME,
     openai_api_base="https://gms.ssafy.io/gmsapi/api.openai.com/v1",  # GMS 서버를 OpenAI처럼 사용
@@ -26,7 +26,7 @@ def extract_owner_info_llm(pdf_text: str) -> dict:
     LLM을 통해 소유자, 근저당권, 권리제한, 위험도 등을 추출합니다.
     (LangChain ChatOpenAI 기반)
     """
-    print("[INFO] 🧠 GMS LLM (LangChain 기반) 리스크 평가 호출 중...")
+    print("[INFO] GMS LLM (LangChain 기반) 리스크 평가 호출 중...")
 
     prompt = f"""
 다음은 등기부등본의 OCR 원문입니다.
@@ -85,23 +85,23 @@ def extract_owner_info_llm(pdf_text: str) -> dict:
 """
 
     try:
-        # 🧠 LangChain으로 GMS LLM 호출
+        # LangChain으로 GMS LLM 호출
         response = llm.invoke(prompt)
         content = response.content.strip()
 
-        # ✅ JSON 정제
+        #JSON 정제
         clean_text = re.sub(r"^```[a-zA-Z]*|```$", "", content.strip(), flags=re.MULTILINE)
         json_match = re.search(r"\{[\s\S]*\}", clean_text)
         if json_match:
             clean_text = json_match.group(0)
 
         parsed = json.loads(clean_text)
-        print("\n[INFO] ✅ LLM 리스크 평가 완료")
+        print("\n[INFO] LLM 리스크 평가 완료")
         print(json.dumps(parsed, ensure_ascii=False, indent=2))
         return parsed
 
     except json.JSONDecodeError:
-        print("[ERROR] ⚠️ JSONDecodeError 발생 — 원문에 코드블록 포함된 가능성 있음.")
+        print("[ERROR]  JSONDecodeError 발생 — 원문에 코드블록 포함된 가능성 있음.")
         return {"error": "JSONDecodeError", "raw": content}
     except Exception as e:
         print(f"[ERROR] 요청 실패: {e}")

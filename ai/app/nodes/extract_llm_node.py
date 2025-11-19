@@ -15,14 +15,14 @@ def extract_llm_node(state: VerifyState) -> VerifyState:
             print("[WARN] PDF 텍스트가 비어있거나 너무 짧습니다. LLM 호출 생략.")
             return {**state, "extracted": None, "error": "invalid pdf_text"}
 
-        # 기존 함수 재사용
+        
         extracted = extract_owner_info_llm(state["pdf_text"])
 
         if not any(extracted.values()):
             print("[WARN] LLM이 유효한 정보를 추출하지 못했습니다.")
             return {**state, "extracted": None, "error": "no valid extraction"}
 
-        print("[INFO] LLM 추출 완료 ✅")
+        print("[INFO] LLM 추출 완료")
         return {
             **state,
             "extracted": {
