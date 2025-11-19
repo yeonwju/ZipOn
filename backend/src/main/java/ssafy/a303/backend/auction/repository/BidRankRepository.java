@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import ssafy.a303.backend.auction.dto.request.BidEventMessage;
 import ssafy.a303.backend.common.helper.DataSerializer;
 
-import java.util.Set;
+import java.util.*;
 
 @Repository
 public class BidRankRepository {
@@ -45,11 +45,26 @@ public class BidRankRepository {
         );
     }
 
+    public BidEventMessage getUser(Integer auctionSeq, int userSeq) {
+        Set<String> set = redis.opsForZSet().reverseRange(generateKey(auctionSeq), 0, -1);
+        if (set == null || set.isEmpty()) {
+            return null;
+        }
+
+        for (String msg : set) {
+            BidEventMessage data = DataSerializer.deserialize(msg, BidEventMessage.class);
+            if (data.userSeq() == userSeq) {
+                return data;
+            }
+        }
+        return null;
+    }
+
     private String generateKey(int auctionSeq) {
         return KEY_FORMAT.formatted(auctionSeq);
     }
 
-    public void deleteKey(int auctionSeq){
+    public void deleteKey(int auctionSeq) {
         redis.delete(generateKey(auctionSeq));
     }
 }
