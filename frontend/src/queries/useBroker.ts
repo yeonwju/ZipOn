@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { brokerQueryKeys } from '@/constants'
+import { brokerQueryKeys, mypageQueryKeys } from '@/constants'
 import { getBrokerList, RequestBroker, selectBroker } from '@/services/brokerService'
 
 /**
@@ -24,7 +24,8 @@ export function useSelectBroker(auctionSeq: number, propertySeq: number) {
   return useMutation({
     mutationFn: () => selectBroker(auctionSeq),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: brokerQueryKeys.lists(propertySeq) })
+      queryClient.invalidateQueries({ queryKey: brokerQueryKeys.all })
+      queryClient.invalidateQueries({ queryKey: mypageQueryKeys.all })
     },
     onError: error => {
       console.error('브로커 선택 실패', error)

@@ -12,9 +12,9 @@ export const API_ENDPOINTS = {
   LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
   LISTINGS_SEARCH: '/api/v1/properties/search',
   LISTINGS_DELETE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
-  LISTINGS_AUCTION: `/api/v1/properties/search?isAuc=true&hasBrk=true`,
-  LISTINGS_GENERAL: `/api/v1/properties/search?isAuc=false&isBrk=false`,
-  LISTINGS_BRK: `/api/v1/properties/search?isAuc=true&isBrk=true&hasBrk=false`,
+  LISTINGS_AUCTION: `/api/v1/properties/list?type=auction`,
+  LISTINGS_GENERAL: `/api/v1/properties/list?type=general`,
+  LISTINGS_BRK: `/api/v1/properties/list?type=broker`,
 
   // 사용자
   ACCESS_TOKEN_REFRESH: '/api/v1/jwt/refresh',

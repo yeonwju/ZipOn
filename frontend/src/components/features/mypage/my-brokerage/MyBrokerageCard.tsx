@@ -10,7 +10,7 @@ interface MyBrokerageCardProps {
   brokerageData: MyBrokerageData
 }
 
-// 경매 상태 뱃지 표시
+// 상태 뱃지 표시
 function getAuctionStatusBadge(status: string) {
   const statusConfig: Record<string, { text: string; color: string }> = {
     REQUESTED: { text: '요청됨', color: 'bg-yellow-100 text-yellow-700' },

@@ -6,7 +6,8 @@ import { formatCurrency } from '@/utils/format'
 import ListingInfoItem from './ListingInfoItem'
 
 interface ListingInfoProps {
-  name: string
+  propertyName: string
+  lessorName: string
   imgSrc: string
   deposit: number
   rent: number
@@ -25,7 +26,8 @@ interface ListingInfoProps {
  * TODO 특약사항 추가
  */
 export default function ListingInfo({
-  name,
+  propertyName,
+  lessorName,
   imgSrc,
   deposit,
   rent,
@@ -38,9 +40,9 @@ export default function ListingInfo({
 }: ListingInfoProps) {
   return (
     <section className="bg-white px-3">
-      <div className="text-2xl font-bold">{name}</div>
+      <div className="text-2xl font-bold">{propertyName}</div>
       <div className={'my-2'}>
-        <ListingDetailProfile imgSrc={imgSrc} name={name} className={'font-medium'} />
+        <ListingDetailProfile imgSrc={imgSrc} name={lessorName} className={'font-medium'} />
       </div>
 
       {/* 가격 */}

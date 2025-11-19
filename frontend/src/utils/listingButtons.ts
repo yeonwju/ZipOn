@@ -78,8 +78,7 @@ export function getListingButtonConfig(
   const isOwner = lessorSeq === currentUserSeq
   const isBroker = brkSeq === currentUserSeq
 
-  // auctionSeq가 있고 소유자가 아닌 경우 입찰하기 버튼 우선 표시
-  if (auctionSeq && !isOwner && !isBroker && isLiveDone) {
+  if (typeof auctionSeq === 'number' && auctionSeq > 0 && !isOwner && !isBroker && isLiveDone) {
     return {
       primary: {
         text: '입찰하기',
