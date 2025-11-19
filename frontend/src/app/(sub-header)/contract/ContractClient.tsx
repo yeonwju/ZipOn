@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import FileUploadArea from '@/components/common/FileUploadArea'
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { useContractAiVerify } from '@/queries/useContract'
+import { ContractAiVerifyResponse } from '@/types/api/contract'
 
 export default function ContractClient() {
   const router = useRouter()
@@ -28,10 +29,10 @@ export default function ContractClient() {
     const file = files[0]
 
     verifyContract(file, {
-      onSuccess: (data: { lines: string[] }) => {
+      onSuccess: (data: ContractAiVerifyResponse) => {
         // 검증 결과를 sessionStorage에 저장하고 결과 페이지로 이동
-        if (data && data.lines && Array.isArray(data.lines)) {
-          sessionStorage.setItem('contractVerifyResult', JSON.stringify(data.lines))
+        if (data && data.data && data.data.lines && Array.isArray(data.data.lines)) {
+          sessionStorage.setItem('contractVerifyResult', JSON.stringify(data.data.lines))
           router.push(`/contract/result?contractSeq=${contractSeq}`)
         } else {
           showError('검증 결과를 받아오지 못했습니다.')
