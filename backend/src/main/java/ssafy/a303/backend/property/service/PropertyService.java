@@ -387,7 +387,10 @@ public class PropertyService {
     private ListResponseDto toDto(PropertyAucInfo aucInfo) {
         Property p = aucInfo.getProperty();
 
-        String createdAtStr = p.getCreatedAt().toString();
+        String createdAtStr = null;
+        if(p.getCreatedAt() != null){
+            createdAtStr = p.getCreatedAt().toString();
+        }
 
         String lessorNm = p.getLessorNm();
         if (lessorNm == null && p.getLessor() != null) {
