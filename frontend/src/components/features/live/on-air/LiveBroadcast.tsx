@@ -19,6 +19,8 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
   const isConnectingRef = useRef(false)
   const usedTokenRef = useRef<string | null>(null)
   const isStreamAttachedRef = useRef(false) // 스트림 연결 상태 추적
+  const hasStreamPlayingFiredRef = useRef(false) // streamPlaying 이벤트 발생 여부 추적
+  const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null) // 폴백 타임아웃 참조
 
   const [error, setError] = useState<string | null>(null)
   const [playError, setPlayError] = useState(false)
@@ -59,6 +61,14 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
 
     isConnectingRef.current = true
     isStreamAttachedRef.current = false // 스트림 연결 상태 초기화
+    hasStreamPlayingFiredRef.current = false // streamPlaying 이벤트 발생 여부 초기화
+
+    // 기존 폴백 타임아웃 제거
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current)
+      fallbackTimeoutRef.current = null
+    }
+
     setError(null)
     setPlayError(false)
 
@@ -126,10 +136,13 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
             // videoElementCreated에서는 스트림 연결하지 않고 상태만 확인
             // 실제 연결은 streamPlaying 이벤트에서 수행 (스트림이 재생 가능한 상태일 때)
             if (openViduVideoElement.srcObject) {
-              console.log('[OpenVidu] 구독자 비디오 엘리먼트 생성: srcObject 확인됨 (streamPlaying 대기)', {
-                hasSrcObject: !!openViduVideoElement.srcObject,
-                tracks: (openViduVideoElement.srcObject as MediaStream)?.getTracks()?.length,
-              })
+              console.log(
+                '[OpenVidu] 구독자 비디오 엘리먼트 생성: srcObject 확인됨 (streamPlaying 대기)',
+                {
+                  hasSrcObject: !!openViduVideoElement.srcObject,
+                  tracks: (openViduVideoElement.srcObject as MediaStream)?.getTracks()?.length,
+                }
+              )
               // streamPlaying 이벤트에서 연결하도록 함
             } else {
               console.log(
@@ -141,13 +154,12 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               // streamPlaying 이벤트에서 연결하도록 함
             }
           } else {
-            console.log(
-              '[OpenVidu] 구독자 비디오 엘리먼트 생성: videoRef.current가 null, 건너뜀'
-            )
+            console.log('[OpenVidu] 구독자 비디오 엘리먼트 생성: videoRef.current가 null, 건너뜀')
           }
         })
 
         subscriber.on('streamPlaying', event => {
+          hasStreamPlayingFiredRef.current = true // streamPlaying 이벤트 발생 표시
           console.log('[OpenVidu] 구독자 스트림 재생 이벤트:', {
             hasVideoRef: !!videoRef.current,
             hasSrcObject: !!videoRef.current?.srcObject,
@@ -165,43 +177,64 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               // OpenVidu 구독자의 스트림에서 MediaStream 가져오기
               const mediaStream = subscriber.stream?.getMediaStream()
               if (mediaStream && mediaStream.getTracks().length > 0) {
-                console.log('[OpenVidu] 구독자 스트림 재생: MediaStream 획득 및 검증 완료', {
+                // ICE 연결 상태 확인
+                const peerConnection = subscriber.stream?.getRTCPeerConnection()
+                const iceConnectionState = peerConnection?.iceConnectionState
+
+                console.log('[OpenVidu] 구독자 스트림 재생: ICE 연결 상태 확인', {
+                  iceConnectionState,
                   tracks: mediaStream.getTracks()?.length,
                   audioTracks: mediaStream.getAudioTracks()?.length,
                   videoTracks: mediaStream.getVideoTracks()?.length,
                 })
 
-                // 스트림이 준비된 상태에서만 연결
-                videoRef.current.srcObject = mediaStream
-                // muted 속성을 명시적으로 설정하여 autoplay 정책 우회 (브라우저 autoplay 정책)
-                videoRef.current.muted = true
-                isStreamAttachedRef.current = true // 연결 상태 표시
-                console.log('[OpenVidu] 구독자: 스트림 연결 완료 (streamPlaying에서)')
+                // ICE 연결이 안정적인 상태인지 확인 (connected, completed, or checking도 허용)
+                if (
+                  iceConnectionState &&
+                  ['connected', 'completed', 'checking'].includes(iceConnectionState)
+                ) {
+                  // 스트림이 준비된 상태에서만 연결
+                  videoRef.current.srcObject = mediaStream
+                  // muted 속성을 명시적으로 설정하여 autoplay 정책 우회 (브라우저 autoplay 정책)
+                  videoRef.current.muted = true
+                  isStreamAttachedRef.current = true // 연결 상태 표시
+                  console.log('[OpenVidu] 구독자: 스트림 연결 완료 (streamPlaying에서)')
 
-                videoRef.current
-                  .play()
-                  .then(() => {
-                    setPlayError(false)
-                    console.log(
-                      '[OpenVidu] 구독자 비디오 재생 성공 (streamPlaying에서)'
-                    )
-                  })
-                  .catch(err => {
-                    console.error('[OpenVidu] 구독자 비디오 재생 에러 (streamPlaying에서):', {
-                      errorName: err.name,
-                      errorMessage: err.message,
-                      error: err,
+                  // 폴백 타임아웃 제거 (streamPlaying이 발생했으므로)
+                  if (fallbackTimeoutRef.current) {
+                    clearTimeout(fallbackTimeoutRef.current)
+                    fallbackTimeoutRef.current = null
+                    console.log('[OpenVidu] 구독자: streamPlaying 발생으로 폴백 타임아웃 제거')
+                  }
+
+                  videoRef.current
+                    .play()
+                    .then(() => {
+                      setPlayError(false)
+                      console.log('[OpenVidu] 구독자 비디오 재생 성공 (streamPlaying에서)')
                     })
-                    if (err.name === 'NotAllowedError') {
-                      setPlayError(true)
-                      console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
-                    } else {
-                      console.log(
-                        '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
-                        err.name
-                      )
-                    }
+                    .catch(err => {
+                      console.error('[OpenVidu] 구독자 비디오 재생 에러 (streamPlaying에서):', {
+                        errorName: err.name,
+                        errorMessage: err.message,
+                        error: err,
+                      })
+                      if (err.name === 'NotAllowedError') {
+                        setPlayError(true)
+                        console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
+                      } else {
+                        console.log(
+                          '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
+                          err.name
+                        )
+                      }
+                    })
+                } else {
+                  console.log('[OpenVidu] 구독자: ICE 연결 상태가 안정적이지 않음, 대기 중', {
+                    iceConnectionState,
+                    hasSubscriberStream: !!subscriber.stream,
                   })
+                }
               } else {
                 console.log('[OpenVidu] 구독자: MediaStream이 아직 준비되지 않음', {
                   hasSubscriberStream: !!subscriber.stream,
@@ -229,9 +262,7 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               .play()
               .then(() => {
                 setPlayError(false)
-                console.log(
-                  '[OpenVidu] 구독자 비디오 재생 성공 (streamPlaying에서, 이미 연결됨)'
-                )
+                console.log('[OpenVidu] 구독자 비디오 재생 성공 (streamPlaying에서, 이미 연결됨)')
               })
               .catch(err => {
                 console.error(
@@ -246,17 +277,17 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                   setPlayError(true)
                   console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
                 } else {
-                  console.log(
-                    '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
-                    err.name
-                  )
+                  console.log('[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:', err.name)
                 }
               })
           } else {
-            console.log('[OpenVidu] 구독자 스트림 재생: videoRef.current가 null 또는 이미 연결됨, 건너뜀', {
-              hasVideoRef: !!videoRef.current,
-              isStreamAttached: isStreamAttachedRef.current,
-            })
+            console.log(
+              '[OpenVidu] 구독자 스트림 재생: videoRef.current가 null 또는 이미 연결됨, 건너뜀',
+              {
+                hasVideoRef: !!videoRef.current,
+                isStreamAttached: isStreamAttachedRef.current,
+              }
+            )
           }
         })
 
@@ -284,14 +315,11 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                   )
                 })
                 .catch(err => {
-                  console.error(
-                    '[OpenVidu] 구독자 비디오 재생 에러 (streamPropertyChanged에서):',
-                    {
-                      errorName: err.name,
-                      errorMessage: err.message,
-                      error: err,
-                    }
-                  )
+                  console.error('[OpenVidu] 구독자 비디오 재생 에러 (streamPropertyChanged에서):', {
+                    errorName: err.name,
+                    errorMessage: err.message,
+                    error: err,
+                  })
                   if (err.name === 'NotAllowedError') {
                     setPlayError(true)
                     console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
@@ -299,33 +327,48 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                 })
             }
           } else {
-            console.log('[OpenVidu] 구독자 스트림 속성 변경: 스트림 미연결, 건너뜀 (streamPlaying 대기)', {
-              hasVideoRef: !!videoRef.current,
-              isStreamAttached: isStreamAttachedRef.current,
-              hasSrcObject: !!videoRef.current?.srcObject,
-            })
+            console.log(
+              '[OpenVidu] 구독자 스트림 속성 변경: 스트림 미연결, 건너뜀 (streamPlaying 대기)',
+              {
+                hasVideoRef: !!videoRef.current,
+                isStreamAttached: isStreamAttachedRef.current,
+                hasSrcObject: !!videoRef.current?.srcObject,
+              }
+            )
           }
         })
 
         // 구독 직후에도 스트림 연결 시도 (폴백 메커니즘)
-        // streamPlaying이 발생하지 않은 경우를 대비한 폴백
-        console.log('[OpenVidu] 구독자 스트림 연결을 위한 타임아웃 폴백 설정')
-        
+        // streamPlaying이 4초 안에 발생하지 않은 경우를 대비한 폴백
+        // streamPlaying 이벤트가 4초 안에 발생해야 하므로, 최소 5초 후에 폴백 실행
+        console.log('[OpenVidu] 구독자 스트림 연결을 위한 타임아웃 폴백 설정 (5초 후)')
+
         let fallbackRetryCount = 0
-        const maxFallbackRetries = 5 // 최대 5초까지 시도
-        
+        const initialFallbackDelay = 5000 // streamPlaying이 4초 안에 발생해야 하므로 5초 후 시작
+        const maxFallbackRetries = 3 // 최대 3회 재시도 (총 8초까지)
+
         const tryAttachStream = () => {
           fallbackRetryCount++
-          console.log(`[OpenVidu] 타임아웃 폴백 콜백 실행 (${fallbackRetryCount}초 후)`, {
+          const elapsedTime = initialFallbackDelay + (fallbackRetryCount - 1) * 1000
+          console.log(`[OpenVidu] 타임아웃 폴백 콜백 실행 (${elapsedTime}ms 후)`, {
             hasVideoRef: !!videoRef.current,
             hasSrcObject: !!videoRef.current?.srcObject,
             isStreamAttached: isStreamAttachedRef.current,
+            hasStreamPlayingFired: hasStreamPlayingFiredRef.current,
             hasSubscriberStream: !!subscriber.stream,
           })
+
+          // streamPlaying 이벤트가 이미 발생했으면 폴백 불필요
+          if (hasStreamPlayingFiredRef.current) {
+            console.log('[OpenVidu] 타임아웃 폴백: streamPlaying 이벤트가 이미 발생함, 종료')
+            fallbackTimeoutRef.current = null
+            return
+          }
 
           // 이미 연결되어 있으면 더 이상 시도하지 않음
           if (isStreamAttachedRef.current || videoRef.current?.srcObject) {
             console.log('[OpenVidu] 타임아웃 폴백: 이미 스트림 연결됨, 종료')
+            fallbackTimeoutRef.current = null
             return
           }
 
@@ -334,50 +377,88 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               const mediaStream = subscriber.stream.getMediaStream()
               // MediaStream이 존재하고 트랙이 있는지 확인 (스트림이 완전히 준비되었는지)
               if (mediaStream && mediaStream.getTracks().length > 0) {
-                console.log('[OpenVidu] 타임아웃 폴백: MediaStream 획득 및 검증 완료', {
+                // ICE 연결 상태 확인
+                const peerConnection = subscriber.stream?.getRTCPeerConnection()
+                const iceConnectionState = peerConnection?.iceConnectionState
+
+                console.log('[OpenVidu] 타임아웃 폴백: ICE 연결 상태 확인', {
+                  iceConnectionState,
                   tracks: mediaStream.getTracks()?.length,
                   audioTracks: mediaStream.getAudioTracks()?.length,
                   videoTracks: mediaStream.getVideoTracks()?.length,
                 })
-                videoRef.current.srcObject = mediaStream
-                // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
-                videoRef.current.muted = true
-                isStreamAttachedRef.current = true
-                console.log('[OpenVidu] 구독자: 타임아웃 폴백으로 스트림 연결됨')
-                
-                videoRef.current
-                  .play()
-                  .then(() => {
-                    setPlayError(false)
-                    console.log('[OpenVidu] 구독자 비디오 재생 성공 (타임아웃 폴백에서)')
+
+                // ICE 연결이 안정적인 상태인지 확인 (connected, completed만 허용 - checking은 불안정)
+                if (iceConnectionState && ['connected', 'completed'].includes(iceConnectionState)) {
+                  console.log('[OpenVidu] 타임아웃 폴백: MediaStream 획득 및 검증 완료', {
+                    tracks: mediaStream.getTracks()?.length,
+                    audioTracks: mediaStream.getAudioTracks()?.length,
+                    videoTracks: mediaStream.getVideoTracks()?.length,
                   })
-                  .catch(err => {
-                    console.error('[OpenVidu] 구독자 비디오 재생 에러 (타임아웃 폴백에서):', {
-                      errorName: err.name,
-                      errorMessage: err.message,
-                      error: err,
+                  videoRef.current.srcObject = mediaStream
+                  // muted 속성을 명시적으로 설정하여 autoplay 정책 우회
+                  videoRef.current.muted = true
+                  isStreamAttachedRef.current = true
+                  fallbackTimeoutRef.current = null
+                  console.log('[OpenVidu] 구독자: 타임아웃 폴백으로 스트림 연결됨')
+
+                  videoRef.current
+                    .play()
+                    .then(() => {
+                      setPlayError(false)
+                      console.log('[OpenVidu] 구독자 비디오 재생 성공 (타임아웃 폴백에서)')
                     })
-                    if (err.name === 'NotAllowedError') {
-                      setPlayError(true)
-                      console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
-                    } else {
-                      console.log(
-                        '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
-                        err.name
-                      )
+                    .catch(err => {
+                      console.error('[OpenVidu] 구독자 비디오 재생 에러 (타임아웃 폴백에서):', {
+                        errorName: err.name,
+                        errorMessage: err.message,
+                        error: err,
+                      })
+                      if (err.name === 'NotAllowedError') {
+                        setPlayError(true)
+                        console.log('[OpenVidu] 자동재생 차단됨, 사용자 상호작용 필요')
+                      } else {
+                        console.log(
+                          '[OpenVidu] 재생 에러가 NotAllowedError가 아님, 에러 타입:',
+                          err.name
+                        )
+                      }
+                    })
+                } else {
+                  console.log(
+                    '[OpenVidu] 타임아웃 폴백: ICE 연결 상태가 안정적이지 않음, 재시도 대기',
+                    {
+                      iceConnectionState,
+                      hasSubscriberStream: !!subscriber.stream,
+                      retryCount: fallbackRetryCount,
+                      maxRetries: maxFallbackRetries,
                     }
-                  })
+                  )
+                  // 아직 준비되지 않았고 재시도 횟수가 남아있으면 계속 시도
+                  if (fallbackRetryCount < maxFallbackRetries) {
+                    fallbackTimeoutRef.current = setTimeout(tryAttachStream, 1000)
+                  } else {
+                    console.log('[OpenVidu] 타임아웃 폴백: 최대 재시도 횟수 도달, 종료')
+                    fallbackTimeoutRef.current = null
+                  }
+                }
               } else {
-                console.log('[OpenVidu] 타임아웃 폴백: MediaStream이 아직 준비되지 않음, 재시도 대기', {
-                  hasSubscriberStream: !!subscriber.stream,
-                  hasMediaStream: !!mediaStream,
-                  tracksCount: mediaStream?.getTracks()?.length || 0,
-                })
+                console.log(
+                  '[OpenVidu] 타임아웃 폴백: MediaStream이 아직 준비되지 않음, 재시도 대기',
+                  {
+                    hasSubscriberStream: !!subscriber.stream,
+                    hasMediaStream: !!mediaStream,
+                    tracksCount: mediaStream?.getTracks()?.length || 0,
+                    retryCount: fallbackRetryCount,
+                    maxRetries: maxFallbackRetries,
+                  }
+                )
                 // 아직 준비되지 않았고 재시도 횟수가 남아있으면 계속 시도
                 if (fallbackRetryCount < maxFallbackRetries) {
-                  setTimeout(tryAttachStream, 1000)
+                  fallbackTimeoutRef.current = setTimeout(tryAttachStream, 1000)
                 } else {
                   console.log('[OpenVidu] 타임아웃 폴백: 최대 재시도 횟수 도달, 종료')
+                  fallbackTimeoutRef.current = null
                 }
               }
             } catch (err) {
@@ -388,22 +469,29 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
               })
               // 재시도 횟수가 남아있으면 계속 시도
               if (fallbackRetryCount < maxFallbackRetries) {
-                setTimeout(tryAttachStream, 1000)
+                fallbackTimeoutRef.current = setTimeout(tryAttachStream, 1000)
+              } else {
+                fallbackTimeoutRef.current = null
               }
             }
           } else {
             console.log('[OpenVidu] 타임아웃 폴백: 조건 미충족', {
               hasVideoRef: !!videoRef.current,
               hasSubscriberStream: !!subscriber.stream,
+              retryCount: fallbackRetryCount,
+              maxRetries: maxFallbackRetries,
             })
             // 재시도 횟수가 남아있으면 계속 시도
             if (fallbackRetryCount < maxFallbackRetries) {
-              setTimeout(tryAttachStream, 1000)
+              fallbackTimeoutRef.current = setTimeout(tryAttachStream, 1000)
+            } else {
+              fallbackTimeoutRef.current = null
             }
           }
         }
 
-        setTimeout(tryAttachStream, 1000)
+        // streamPlaying이 4초 안에 발생해야 하므로, 최소 5초 후에 폴백 실행
+        fallbackTimeoutRef.current = setTimeout(tryAttachStream, initialFallbackDelay)
       } catch (err) {
         console.error('[OpenVidu] 구독 에러:', {
           error: err,
@@ -509,19 +597,25 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                 // event.element는 OpenVidu가 생성한 비디오 엘리먼트
                 const publisherVideoElement = event.element as HTMLVideoElement
                 if (publisherVideoElement && publisherVideoElement.srcObject) {
-                  console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: 엘리먼트에 srcObject 있음 (streamPlaying 대기)', {
-                    hasSrcObject: !!publisherVideoElement.srcObject,
-                    tracks: (publisherVideoElement.srcObject as MediaStream)?.getTracks()?.length,
-                  })
+                  console.log(
+                    '[OpenVidu] Publisher 비디오 엘리먼트 생성: 엘리먼트에 srcObject 있음 (streamPlaying 대기)',
+                    {
+                      hasSrcObject: !!publisherVideoElement.srcObject,
+                      tracks: (publisherVideoElement.srcObject as MediaStream)?.getTracks()?.length,
+                    }
+                  )
                   // videoElementCreated에서는 연결하지 않고 streamPlaying에서 연결
                   // handleStreamReady는 여기서 호출 (스트림은 준비되었으므로)
                   handleStreamReady(publisherVideoElement.srcObject as MediaStream)
                   console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: handleStreamReady 호출됨')
                 } else {
-                  console.log('[OpenVidu] Publisher 비디오 엘리먼트 생성: 엘리먼트 또는 srcObject 없음', {
-                    hasElement: !!publisherVideoElement,
-                    hasSrcObject: !!publisherVideoElement?.srcObject,
-                  })
+                  console.log(
+                    '[OpenVidu] Publisher 비디오 엘리먼트 생성: 엘리먼트 또는 srcObject 없음',
+                    {
+                      hasElement: !!publisherVideoElement,
+                      hasSrcObject: !!publisherVideoElement?.srcObject,
+                    }
+                  )
                 }
               } else {
                 console.log(
@@ -577,14 +671,14 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
                       .play()
                       .then(() => {
                         setPlayError(false)
-                        console.log(
-                          '[OpenVidu] Publisher 비디오 재생 성공 (streamPlaying에서)'
-                        )
+                        console.log('[OpenVidu] Publisher 비디오 재생 성공 (streamPlaying에서)')
                       })
                       .catch(err => {
                         // AbortError는 비디오가 DOM에서 제거되었을 때 발생하는 일반적인 에러이므로 무시
                         if (err.name === 'AbortError') {
-                          console.log('[OpenVidu] 비디오 재생 중단됨 (엘리먼트가 제거되었을 수 있음)')
+                          console.log(
+                            '[OpenVidu] 비디오 재생 중단됨 (엘리먼트가 제거되었을 수 있음)'
+                          )
                           return
                         }
                         console.error('[OpenVidu] 비디오 재생 에러 (streamPlaying에서):', {
