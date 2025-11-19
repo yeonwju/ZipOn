@@ -115,12 +115,12 @@ public class ChatService {
 
             isNew = true;
 
+            String requesterProfileUrl = requester.getProfileImg() != null
+                    ? s3Uploader.presignedGetUrl(requester.getProfileImg(), Duration.ofHours(12))
+                    : null;
+
             // 새 채팅방 생성 시 상대방에게 알림 전송
             try {
-
-                String requesterProfile = requester.getProfileImg() != null
-                        ? s3Uploader.presignedGetUrl(requester.getProfileImg(), Duration.ofHours(12))
-                        : null;
 
                 ChatNotificationDto notification = ChatNotificationDto.builder()
                         .roomSeq(chatRoom.getId())
@@ -128,7 +128,7 @@ public class ChatService {
                                 .userSeq(requester.getUserSeq())
                                 .name(requester.getName())
                                 .nickname(requester.getNickname())
-                                .profileImg(requesterProfile)
+                                .profileImg(requesterProfileUrl)
                                 .build())
                         .content(requester.getNickname() + "님이 채팅을 시작했습니다.")
                         .sentAt(LocalDateTime.now(KoreaClock.getClock()))
@@ -149,7 +149,7 @@ public class ChatService {
             }
         }
 
-        String opponentProfile = opponent.getProfileImg() != null
+        String opponentProfileUrl = (opponent.getProfileImg() != null)
                 ? s3Uploader.presignedGetUrl(opponent.getProfileImg(), Duration.ofHours(12))
                 : null;
 
@@ -160,7 +160,7 @@ public class ChatService {
                         .userSeq(opponent.getUserSeq())
                         .name(opponent.getName())
                         .nickname(opponent.getNickname())
-                        .profileImg(opponentProfile)
+                        .profileImg(opponentProfileUrl)
                         .build())
                 .build();
     }
@@ -219,7 +219,7 @@ public class ChatService {
             long unread = messageReadStatusRepository.countByChatRoomAndUserAndIsReadFalse(room, me);
 
             // partner 프로필 presigned URL 적용
-            String partnerProfile = (partner != null && partner.getProfileImg() != null)
+            String partnerProfileUrl = (partner != null && partner.getProfileImg() != null)
                     ? s3Uploader.presignedGetUrl(partner.getProfileImg(), Duration.ofHours(12))
                     : null;
 
@@ -236,7 +236,7 @@ public class ChatService {
                                     .userSeq(partner.getUserSeq())
                                     .name(partner.getName())
                                     .nickname(partner.getNickname())
-                                    .profileImg(partnerProfile)
+                                    .profileImg(partnerProfileUrl)
                                     .build()
                                     : null
                             )
@@ -266,7 +266,8 @@ public class ChatService {
 
         for (ChatMessage m : chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom)) {
 
-            String senderProfile = m.getSender().getProfileImg() != null
+            /* ✨ 메시지 발신자 프로필 presigned URL */
+            String senderProfileUrl = m.getSender().getProfileImg() != null
                     ? s3Uploader.presignedGetUrl(m.getSender().getProfileImg(), Duration.ofHours(12))
                     : null;
 
@@ -274,7 +275,7 @@ public class ChatService {
                     .userSeq(m.getSender().getUserSeq())
                     .name(m.getSender().getName())
                     .nickname(m.getSender().getNickname())
-                    .profileImg(senderProfile)
+                    .profileImg(senderProfileUrl)
                     .build();
 
             result.add(ChatMessageResponseDto.builder()
@@ -349,8 +350,8 @@ public class ChatService {
                     .build());
         }
 
-        // 변경됨: 메시지 발신자 프로필 presigned URL 적용
-        String senderProfile = sender.getProfileImg() != null
+        /* ✨ 발신자 프로필 presigned URL */
+        String senderProfileUrl = sender.getProfileImg() != null
                 ? s3Uploader.presignedGetUrl(sender.getProfileImg(), Duration.ofHours(12))
                 : null;
 
@@ -359,7 +360,7 @@ public class ChatService {
                 .userSeq(sender.getUserSeq())
                 .name(sender.getName())
                 .nickname(sender.getNickname())
-                .profileImg(senderProfile)
+                .profileImg(senderProfileUrl)
                 .build();
 
         return ChatMessageResponseDto.builder()

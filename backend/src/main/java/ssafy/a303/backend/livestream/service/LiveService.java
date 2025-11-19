@@ -100,11 +100,11 @@ public class LiveService {
             thumbnailUrl = s3Uploader.presignedGetUrl(propertyThumbnail, Duration.ofHours(12));
         }
 
-        //유저 썸네일 url 링크
-        String profileImg = host.getProfileImg();
-        String profile = null;
-        if (profileImg != null && !profileImg.isBlank()) {
-            profile = s3Uploader.presignedGetUrl(profileImg, Duration.ofHours(12));
+        // host profile presigned URL 생성
+        String profileKey = host.getProfileImg();
+        String profileUrl = null;
+        if (profileKey != null && !profileKey.isBlank()) {
+            profileUrl = s3Uploader.presignedGetUrl(profileKey, Duration.ofHours(12));
         }
 
         // 5. LiveStream 생성
@@ -112,7 +112,7 @@ public class LiveService {
                 .auction(auction)
                 .host(host)
                 .title(requestDto.getTitle())
-                .thumbnail(thumbnailUrl)
+                .thumbnail(propertyThumbnail)
                 .streamUrl(session.getSessionId())
                 .chatChannel("live:" + session.getSessionId())
                 .status(LiveStreamStatus.LIVE)
@@ -143,12 +143,12 @@ public class LiveService {
                     .auctionSeq(auction.getAuctionSeq())
                     .sessionId(session.getSessionId())
                     .title(liveStream.getTitle())
-                    .thumbnail(liveStream.getThumbnail())
+                    .thumbnail(thumbnailUrl)
                     .status(liveStream.getStatus())
                     .host(LiveStartNotificationDto.HostDto.builder()
                             .userSeq(host.getUserSeq())
                             .name(host.getName())
-                            .profileImg(profile)
+                            .profileImg(profileUrl)
                             .build())
                     .startAt(liveStream.getStartAt())
                     .build();
@@ -170,12 +170,12 @@ public class LiveService {
                 .auctionSeq(auction.getAuctionSeq())
                 .sessionId(session.getSessionId())
                 .title(liveStream.getTitle())
-                .thumbnail(liveStream.getThumbnail())
+                .thumbnail(thumbnailUrl)
                 .status(liveStream.getStatus())
                 .host(LiveCreateResponseDto.HostDto.builder()
                         .userSeq(host.getUserSeq())
                         .name(host.getName())
-                        .profileImg(profile)
+                        .profileImg(profileUrl)
                         .build())
                 .startAt(liveStream.getStartAt())
                 .build();
