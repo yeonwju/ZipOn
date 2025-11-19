@@ -19,6 +19,33 @@ export default function ListingsTabContent() {
   const { data: generalData, isLoading: isGeneralLoading } = useGeneralListings()
   const { data: brokerData, isLoading: isBrokerLoading } = useBrkListings()
 
+  // API 응답 데이터 로그
+  console.log('[ListingsTabContent] API 응답 데이터:', {
+    activeTab,
+    generalData: generalData
+      ? {
+          itemsCount: generalData.items?.length || 0,
+          items: generalData.items?.map(item => ({
+            propertySeq: item.propertySeq,
+            title: item.title,
+            thumbnail: item.thumbnail,
+            thumbnailType: typeof item.thumbnail,
+          })),
+        }
+      : null,
+    brokerData: brokerData
+      ? {
+          itemsCount: brokerData.items?.length || 0,
+          items: brokerData.items?.map(item => ({
+            propertySeq: item.propertySeq,
+            title: item.title,
+            thumbnail: item.thumbnail,
+            thumbnailType: typeof item.thumbnail,
+          })),
+        }
+      : null,
+  })
+
   const tabs = [
     { key: 'general' as const, label: '일반 매물' },
     { key: 'broker' as const, label: '중개' },

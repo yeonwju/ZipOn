@@ -83,3 +83,11 @@ export interface LeaveChatRoomResponse {
 /**
  * =================================================================
  */
+
+/**
+ * =========== 채팅읽음 처리 ===========================
+ */
+export interface MarkAsReadResponse {
+  status: number
+  message: string
+}

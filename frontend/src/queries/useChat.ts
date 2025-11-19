@@ -9,6 +9,7 @@ import {
   getChatRoomHistory,
   getChatRoomList,
   leaveChatRoom,
+  messageRead,
 } from '@/services/chatService'
 
 /**
@@ -93,6 +94,26 @@ export function useLeaveChatRoom() {
     },
     onError: error => {
       console.error('채팅방 나가기 실패:', error)
+    },
+  })
+}
+
+/**
+ * 채팅 읽음 처리 Mutation
+ */
+export function useReadChat(roomSeq: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => messageRead(roomSeq),
+    onSuccess: () => {
+      // 채팅방 목록 캐시 무효화하여 읽음 처리 반영
+      queryClient.invalidateQueries({
+        queryKey: chatQueryKeys.rooms(),
+      })
+    },
+    onError: error => {
+      console.error('채팅 읽음 처리 실패:', error)
     },
   })
 }

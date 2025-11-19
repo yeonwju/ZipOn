@@ -44,8 +44,7 @@ export default function Step3AdditionalInfo({
   /** --------------------------------------
    *  날짜 표시에만 +1일 보정하는 함수
    --------------------------------------- */
-  const addOneDay = (date?: Date) =>
-    date ? new Date(date.getTime() + 24 * 60 * 60 * 1000) : undefined
+  const addOneDay = (date?: Date) => (date ? new Date(date.getTime()) : undefined)
 
   const updateField = (field: keyof AdditionalInfo, value: string | boolean) => {
     const newInfo = { ...additionalInfo, [field]: value }

@@ -14,8 +14,25 @@ function formatKoreanMoney(value: number): string {
 }
 
 export default function AucListingCard({ listing, className }: AucListingCardProps) {
+  // 썸네일 디버깅 로그
+  console.log('[AucListingCard] 썸네일 정보:', {
+    propertySeq: listing.propertySeq,
+    title: listing.title,
+    originalThumbnail: listing.thumbnail,
+    thumbnailType: typeof listing.thumbnail,
+    thumbnailIsNull: listing.thumbnail === null,
+    thumbnailIsUndefined: listing.thumbnail === undefined,
+    thumbnailIsEmpty: listing.thumbnail === '',
+  })
+
   const thumbnailUrl = normalizeThumbnailUrl(listing.thumbnail, '/listing.svg')
   const isExternalUrl = thumbnailUrl.startsWith('https://')
+
+  console.log('[AucListingCard] 정규화된 썸네일 URL:', {
+    propertySeq: listing.propertySeq,
+    normalizedUrl: thumbnailUrl,
+    isExternalUrl,
+  })
 
   return (
     <Link href={`/listings/${listing.propertySeq}`}>

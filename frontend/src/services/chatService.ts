@@ -8,6 +8,7 @@ import {
   CreateChatRoomResponse,
   CreateChatRoomResponseData,
   LeaveChatRoomResponse,
+  MarkAsReadResponse,
 } from '@/types/api/chat'
 
 /**
@@ -39,4 +40,11 @@ export async function getChatRoomList() {
  */
 export async function leaveChatRoom(roomId: number) {
   return authFetch.delete<LeaveChatRoomResponse>(API_ENDPOINTS.CHAT_ROOM_LEAVE(roomId))
+}
+
+/**
+ * 채팅읽음처리
+ */
+export async function messageRead(roomSeq: number) {
+  return authFetch.post<MarkAsReadResponse>(API_ENDPOINTS.CHAT_MESSAGE_READ(roomSeq))
 }
