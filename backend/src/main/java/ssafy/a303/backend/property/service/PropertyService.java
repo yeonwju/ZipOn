@@ -368,14 +368,14 @@ public class PropertyService {
             }
             case "broker" -> {
                 page = propertyAucInfoRepository
-                        .findByIsAucPrefAndIsBrkPrefAndProperty_HasBrkAndProperty_DeletedAtIsNull(
-                                false,true, false, pageable
+                        .findByIsBrkPrefAndProperty_DeletedAtIsNull(
+                                true, pageable
                         );
             }
             case "auction" -> {
                 page = propertyAucInfoRepository
-                        .findByIsAucPrefAndIsBrkPrefAndProperty_DeletedAtIsNull(
-                                true, false, pageable
+                        .findByIsAucPrefAndProperty_DeletedAtIsNull(
+                                true, pageable
                         );
             }
             default -> throw new CustomException(ErrorCode.REQUEST_TYPE_ERROR);
@@ -387,7 +387,10 @@ public class PropertyService {
     private ListResponseDto toDto(PropertyAucInfo aucInfo) {
         Property p = aucInfo.getProperty();
 
-        String createdAtStr = p.getCreatedAt().toString();
+        String createdAtStr = null;
+        if(p.getCreatedAt() != null){
+            createdAtStr = p.getCreatedAt().toString();
+        }
 
         String lessorNm = p.getLessorNm();
         if (lessorNm == null && p.getLessor() != null) {
@@ -403,12 +406,17 @@ public class PropertyService {
         Short roomCnt = p.getRoomCnt() != null ? p.getRoomCnt().shortValue() : null;
         Short floor = p.getFloor() != null ? p.getFloor().shortValue() : null;
 
+        String thumbnailUrl = null;
+        if (p.getThumbnail() != null && !p.getThumbnail().isBlank()) {
+            thumbnailUrl = s3Uploader.presignedGetUrl(p.getThumbnail(), Duration.ofHours(12));
+        }
+
         return new ListResponseDto(
                 p.getPropertySeq(),
                 p.getLatitude(),
                 p.getLongitude(),
                 lessorNm,
-                p.getThumbnail(),
+                thumbnailUrl,
                 p.getPropertyNm(),
                 p.getContent(),
                 buildingType,
