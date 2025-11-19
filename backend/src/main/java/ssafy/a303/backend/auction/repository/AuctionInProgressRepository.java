@@ -23,12 +23,8 @@ public class AuctionInProgressRepository {
         redis.opsForValue().setIfAbsent(generateKey(auctionSeq), String.valueOf(auctionSeq), life(auctionEndAt));
     }
 
-    public Integer read(int auctionSeq){
-        return Integer.parseInt(redis.opsForValue().get(generateKey(auctionSeq)));
-    }
-
     public boolean checkAuctionInProgress(int auctionSeq) {
-        return read(auctionSeq) != null;
+        return redis.opsForValue().get(generateKey(auctionSeq)) != null;
     }
 
     // 발표를 위해 종료 날짜 받을 수 있도록 수정 11.18
