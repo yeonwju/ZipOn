@@ -406,12 +406,17 @@ public class PropertyService {
         Short roomCnt = p.getRoomCnt() != null ? p.getRoomCnt().shortValue() : null;
         Short floor = p.getFloor() != null ? p.getFloor().shortValue() : null;
 
+        String thumbnailUrl = null;
+        if (p.getThumbnail() != null && !p.getThumbnail().isBlank()) {
+            thumbnailUrl = s3Uploader.presignedGetUrl(p.getThumbnail(), Duration.ofHours(12));
+        }
+
         return new ListResponseDto(
                 p.getPropertySeq(),
                 p.getLatitude(),
                 p.getLongitude(),
                 lessorNm,
-                p.getThumbnail(),
+                thumbnailUrl,
                 p.getPropertyNm(),
                 p.getContent(),
                 buildingType,

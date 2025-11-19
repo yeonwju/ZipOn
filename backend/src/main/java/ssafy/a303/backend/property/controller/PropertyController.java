@@ -396,7 +396,7 @@ public class PropertyController {
      * 일반, 경매, 중개 매물 조회
      */
     @GetMapping("/list")
-    public ResponseEntity<PageResponseDto<ListResponseDto>> searchByType(
+    public ResponseEntity<ResponseDTO<PageResponseDto<ListResponseDto>>> searchByType(
             @RequestParam String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -411,6 +411,6 @@ public class PropertyController {
                 result.getSize(),
                 result.getContent()
         );
-        return ResponseEntity.ok(response);
+        return ResponseDTO.ok(response, "매물 조회 성공");
     }
 }
