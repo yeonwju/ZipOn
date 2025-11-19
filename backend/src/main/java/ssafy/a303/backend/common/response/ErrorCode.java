@@ -110,7 +110,7 @@ public enum ErrorCode {
     PROPERTY_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물이 삭제되었거나 존재하지 않습니다."),
     AUC_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "해당 매물의 경매 정보가 존재하지 않습니다."),
     CERTIFICATION_INFO_NOT_FOUND(400, HttpStatus.BAD_REQUEST, "매물의 검증정보가 존재하지 않습니다."),
-
+    REQUEST_TYPE_ERROR(400, HttpStatus.BAD_REQUEST, "type 값이 잘못되었습니다."),
     NO_AUTHORIZATION(401, HttpStatus.UNAUTHORIZED, "수정 권한이 없습니다. 직접 등록한 매물만 수정할 수 있습니다."),
 
     // 매물 사진 S3
