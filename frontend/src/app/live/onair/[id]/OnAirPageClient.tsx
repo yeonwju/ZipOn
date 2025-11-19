@@ -216,7 +216,7 @@ export default function OnAirPageClient({ authToken: initialAuthToken }: OnAirPa
           <LiveHostInfo
             title={liveInfo.title}
             hostName={liveInfo.host.name}
-            hostProfileImage={liveInfo.host.profileImg}
+            hostProfileImage={'/default-profile.png'}
             interaction={
               <LiveInteraction
                 viewers={viewers}

@@ -44,7 +44,7 @@ export default function ChatRoomCard({ className, chatRoom }: ChatRoomCardProps)
     >
       <Avatar>
         <AvatarImage
-          src={normalizeImageUrl(chatRoom.partner?.profileImg)}
+          src={'/default-profile.png'}
           alt="프로필 이미지"
           className={'h-13 w-13 rounded-full'}
         />
