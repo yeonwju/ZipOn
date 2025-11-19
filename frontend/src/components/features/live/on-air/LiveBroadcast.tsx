@@ -341,11 +341,12 @@ export default function LiveBroadcast({ token, isHost, onStreamReady }: LiveBroa
         // 구독 직후에도 스트림 연결 시도 (폴백 메커니즘)
         // streamPlaying이 4초 안에 발생하지 않은 경우를 대비한 폴백
         // streamPlaying 이벤트가 4초 안에 발생해야 하므로, 최소 5초 후에 폴백 실행
-        console.log('[OpenVidu] 구독자 스트림 연결을 위한 타임아웃 폴백 설정 (5초 후)')
+        // 네트워크 지연을 고려하여 총 15초까지 대기
+        console.log('[OpenVidu] 구독자 스트림 연결을 위한 타임아웃 폴백 설정 (5초 후, 총 15초까지)')
 
         let fallbackRetryCount = 0
         const initialFallbackDelay = 5000 // streamPlaying이 4초 안에 발생해야 하므로 5초 후 시작
-        const maxFallbackRetries = 3 // 최대 3회 재시도 (총 8초까지)
+        const maxFallbackRetries = 10 // 최대 10회 재시도 (총 15초까지)
 
         const tryAttachStream = () => {
           fallbackRetryCount++
