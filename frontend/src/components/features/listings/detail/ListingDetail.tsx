@@ -69,25 +69,23 @@ export default function ListingDetail({ propertySeq }: ListingDetailProps) {
   }
 
   // 버튼 설정 가져오기
-  const buttonConfig = isLiveTimePassed(result.liveAt)
-    ? null
-    : getListingButtonConfig(
-        result.isAucPref,
-        result.isBrkPref,
-        result.isLiveDone,
-        result.hasBrk,
-        result.lessorSeq,
-        result.brkSeq,
-        user?.userSeq,
-        result.auctionSeq,
-        propertySeq,
-        showSuccess,
-        showError,
-        showConfirm,
-        router,
-        handleDeleteListing,
-        createChatRoom
-      )
+  const buttonConfig = getListingButtonConfig(
+    result.isAucPref,
+    result.isBrkPref,
+    result.isLiveDone,
+    result.hasBrk,
+    result.lessorSeq,
+    result.brkSeq,
+    user?.userSeq,
+    result.auctionSeq,
+    propertySeq,
+    showSuccess,
+    showError,
+    showConfirm,
+    router,
+    handleDeleteListing,
+    createChatRoom
+  )
   console.log('buttonConfig:', buttonConfig)
   // 특징 배열 생성
   const features: string[] = []
