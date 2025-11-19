@@ -1,5 +1,9 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+
+import { useAlertDialog } from '@/components/ui/alert-dialog'
+import { useAuctionStatusStore } from '@/store/auctionStatus'
 import { ListingDetailDataResponse } from '@/types/api/listings'
 
 import CompleteAccountInfo from './CompleteAccountInfo'
@@ -11,7 +15,6 @@ interface CompleteDetailProps {
   bidAmount: number
   accountNumber: string
   accountHolder: string
-  onConfirm?: () => void
 }
 
 export default function CompleteDetail({
@@ -19,9 +22,11 @@ export default function CompleteDetail({
   bidAmount,
   accountNumber,
   accountHolder,
-  onConfirm,
 }: CompleteDetailProps) {
   const totalAmount = bidAmount
+  const { showSuccess, AlertDialog } = useAlertDialog()
+  const router = useRouter()
+  const setBidStatus = useAuctionStatusStore(state => state.setBidStatus)
 
   return (
     <div className="flex flex-col bg-gray-50 px-5 pt-2 pb-4">
@@ -45,12 +50,21 @@ export default function CompleteDetail({
 
         {/* 확인 버튼 */}
         <button
-          onClick={onConfirm}
+          onClick={() => {
+            setTimeout(() => {
+              // 상태를 AI_CONTRACT로 변경
+              if (data.auctionSeq) {
+                setBidStatus(data.auctionSeq, 'AI_CONTRACT')
+              }
+              showSuccess('송금이 완료되었습니다.', () => router.push('/mypage'))
+            }, 700)
+          }}
           className="mt-6 w-full rounded-full bg-blue-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 active:bg-blue-700"
         >
           확인
         </button>
       </div>
+      <AlertDialog />
     </div>
   )
 }

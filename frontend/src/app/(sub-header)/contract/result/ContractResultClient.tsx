@@ -88,9 +88,7 @@ export default function ContractResultClient() {
 
             completeContract(undefined, {
               onSuccess: () => {
-                showSuccess('계약이 완료되었습니다.', () => {
-                  router.push('/home')
-                })
+                router.push('/contract/complete')
               },
               onError: error => {
                 showError(

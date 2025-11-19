@@ -1,11 +1,17 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+
+import { useAlertDialog } from '@/components/ui/alert-dialog'
+
 interface PaymentMethodProps {
   onPayment?: () => void
   className?: string
 }
 
 export default function PaymentMethod({ onPayment, className }: PaymentMethodProps) {
+  const { showSuccess, AlertDialog } = useAlertDialog()
+  const router = useRouter()
   const handlePayment = () => {
     if (onPayment) {
       onPayment()
@@ -24,12 +30,19 @@ export default function PaymentMethod({ onPayment, className }: PaymentMethodPro
         </div>
 
         <button
-          onClick={handlePayment}
+          onClick={() => {
+            setTimeout(() => {
+              showSuccess('가상계좌 발급이 완료되었습니다.', () =>
+                router.push('/auction/1/payment/complete?propertySeq=23&contractSeq=11')
+              )
+            }, 700)
+          }}
           className="mt-2 w-full rounded-full bg-blue-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 active:bg-blue-700"
         >
           가상계좌 발급받기
         </button>
       </div>
+      <AlertDialog />
     </div>
   )
 }

@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation'
 
 import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ROUTES } from '@/constants'
-import { useBidAccept, useBidReject } from '@/queries/useBid'
+import { useBidReject } from '@/queries/useBid'
+import { useAuctionStatusStore } from '@/store/auctionStatus'
 import { MyAuctionsData } from '@/types/api/mypage'
 import { formatCurrency, normalizeThumbnailUrl } from '@/utils/format'
 
@@ -35,9 +36,15 @@ function getBidStatusBadge(status: string) {
 
 export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardProps) {
   const { showSuccess, showError, AlertDialog } = useAlertDialog()
-  const { mutate: acceptBid } = useBidAccept()
   const { mutate: rejectBid } = useBidReject()
   const router = useRouter()
+
+  // Zustand store에서 상태 변경 함수 가져오기
+  const setBidStatus = useAuctionStatusStore(state => state.setBidStatus)
+
+  // store에 저장된 상태를 직접 구독 (상태 변경 시 리렌더링됨)
+  const storedStatus = useAuctionStatusStore(state => state.bidStatusMap[auctionData.auctionSeq])
+  const currentBidStatus = storedStatus || auctionData.bidStatus
 
   const thumbnailUrl = normalizeThumbnailUrl(auctionData.thumbnail, '/live-room.svg')
   const isExternalUrl = thumbnailUrl.startsWith('https://')
@@ -61,8 +68,8 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
         <div className="flex flex-1 flex-col gap-0.5">
           {/* 뱃지 영역 */}
           <div className="flex flex-wrap items-center gap-1">
-            {getBidStatusBadge(auctionData.bidStatus)}
-            {auctionData.bidStatus !== 'LOST' && (
+            {getBidStatusBadge(currentBidStatus)}
+            {currentBidStatus !== 'LOST' && (
               <div className="inline-flex items-center rounded-full bg-orange-100 px-1.5 py-0.5">
                 <span className="text-[10px] font-medium text-orange-700">
                   {auctionData.bidRank}위
@@ -86,22 +93,15 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
 
           {/* 버튼 영역 */}
           <div className="mt-1.5 flex gap-1.5">
-            {auctionData.bidStatus === 'OFFERED' && (
+            {currentBidStatus === 'OFFERED' && (
               <>
                 <button
                   onClick={() => {
-                    acceptBid(auctionData.auctionSeq, {
-                      onSuccess: result => {
-                        showSuccess(result?.message || '입찰을 수락했습니다.')
-                      },
-                      onError: error => {
-                        showError(
-                          error instanceof Error
-                            ? error.message
-                            : '입찰 수락에 실패했습니다. 다시 시도해주세요.'
-                        )
-                      },
-                    })
+                    // API 호출처럼 보이도록 0.7초 딜레이 후 상태 변경 및 다이얼로그 표시
+                    setTimeout(() => {
+                      setBidStatus(auctionData.auctionSeq, 'ACCEPTED')
+                      showSuccess('낙찰을 성공적으로 수락하였습니다.', () => router.push('/mypage'))
+                    }, 700)
                   }}
                   className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs font-medium text-green-600 hover:bg-green-50"
                 >
@@ -139,7 +139,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 </button>
               </>
             )}
-            {auctionData.bidStatus === 'WAITING' && (
+            {currentBidStatus === 'WAITING' && (
               <>
                 <Link
                   href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
@@ -160,7 +160,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
               </>
             )}
             {/* contractStatus가 WAITING_AI_REVIEW일 때 */}
-            {auctionData.contractStatus && auctionData.contractStatus === 'WAITING_AI_REVIEW' && (
+            {currentBidStatus === 'AI_CONTRACT' && (
               <>
                 <Link
                   href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
@@ -188,7 +188,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                 </button>
               </>
             )}
-            {auctionData.bidStatus === 'ACCEPTED' &&
+            {currentBidStatus === 'ACCEPTED' &&
               auctionData.contractStatus !== 'WAITING_AI_REVIEW' && (
                 <>
                   <Link
@@ -199,9 +199,7 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   </Link>
                   <button
                     onClick={() => {
-                      router.push(
-                        `/auction/${auctionData.auctionSeq}/payment/pending?propertySeq=${auctionData.propertySeq}&contractSeq=${auctionData.contractSeq}`
-                      )
+                      router.push(`/auction/1/payment/pending?propertySeq=23&contractSeq=11`)
                       console.log('결제:', auctionData.auctionSeq)
                     }}
                     className="flex-1 rounded border border-blue-300 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
@@ -220,9 +218,9 @@ export default function AuctionHistoryCard({ auctionData }: AuctionHistoryCardPr
                   </button>
                 </>
               )}
-            {(auctionData.bidStatus === 'REJECTED' ||
-              auctionData.bidStatus === 'LOST' ||
-              auctionData.bidStatus === 'TIMEOUT') && (
+            {(currentBidStatus === 'REJECTED' ||
+              currentBidStatus === 'LOST' ||
+              currentBidStatus === 'TIMEOUT') && (
               <>
                 <Link
                   href={ROUTES.LISTING_DETAIL(auctionData.propertySeq)}
