@@ -12,7 +12,7 @@ export const API_ENDPOINTS = {
   LISTINGS_SEARCH_MAP: '/api/v1/properties/map',
   LISTINGS_SEARCH: '/api/v1/properties/search',
   LISTINGS_DELETE: (propertySeq: number) => `/api/v1/properties/${propertySeq}`,
-  LISTINGS_AUCTION: `/api/v1/properties/search?isAuc=true`,
+  LISTINGS_AUCTION: `/api/v1/properties/search?isAuc=true&hasBrk=true`,
   LISTINGS_GENERAL: `/api/v1/properties/search?isAuc=false&isBrk=false`,
   LISTINGS_BRK: `/api/v1/properties/search?isAuc=true&isBrk=true&hasBrk=false`,
 
@@ -36,6 +36,7 @@ export const API_ENDPOINTS = {
   CHAT_ROOM_HISTORY: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/history`,
   CHAT_ROOM_LIST: `/api/v1/chat/my/rooms`,
   CHAT_ROOM_LEAVE: (roomId: number) => `/api/v1/chat/room/${roomId}/leave`,
+  CHAT_MESSAGE_READ: (roomSeq: number) => `/api/v1/chat/room/${roomSeq}/read`,
 
   // 경매
   BID: '/api/v1/auction/bid',

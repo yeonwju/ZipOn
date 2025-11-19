@@ -8,7 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 import SubHeader from '@/components/layout/header/SubHeader'
 import { chatQueryKeys } from '@/constants'
 import { ChatMessage, connectWS, sendChat, subscribeChat, unsubscribeChat } from '@/lib/socket'
-import { useLeaveChatRoom } from '@/queries/useChat'
+import { useLeaveChatRoom, useReadChat } from '@/queries/useChat'
 import { useUser } from '@/queries/useUser'
 import { useChatStore } from '@/store/chatStore'
 import { ChatRoomHistoryResponseData } from '@/types/api/chat'
@@ -57,6 +57,9 @@ export default function ChatRoom({
 
   // 채팅방 나가기 Mutation
   const { mutate: leaveChatRoom, isPending: isLeaving } = useLeaveChatRoom()
+
+  // 채팅 읽음 처리 Mutation
+  const { mutate: readChat } = useReadChat(roomSeq)
 
   // Zustand store 사용
   const { setMessages, addMessage, clearUnreadCount, clearRoomMessages } = useChatStore()
@@ -117,14 +120,18 @@ export default function ChatRoom({
     }
   }, [roomSeq, initialMessages, setMessages, queryClient])
 
-  // 채팅방 진입 시 Zustand unreadCount 초기화
+  // 채팅방 진입 시 읽음 처리 및 Zustand unreadCount 초기화
   useEffect(() => {
     if (roomSeq) {
+      // 서버에 읽음 처리 요청
+      readChat()
+      console.log('✅ 채팅방 진입: 읽음 처리 요청', roomSeq)
+
       // Zustand의 unreadCount 초기화 (즉시 뱃지 제거)
       clearUnreadCount(roomSeq)
       console.log('✅ 채팅방 진입: unreadCount 초기화', roomSeq)
     }
-  }, [roomSeq, clearUnreadCount])
+  }, [roomSeq, readChat, clearUnreadCount])
 
   // 실시간 메시지 수신 처리 (useCallback으로 메모이제이션하여 중복 구독 방지)
   const handleReceiveMessage = useCallback(
@@ -184,13 +191,17 @@ export default function ChatRoom({
 
     initWebSocket()
 
-    // 클린업: 구독 해제 (WebSocket 연결은 유지)
+    // 클린업: 구독 해제 및 읽음 처리 (WebSocket 연결은 유지)
     return () => {
+      // 컴포넌트 언마운트 시 읽음 처리 요청
+      readChat()
+      console.log('✅ ChatRoom 언마운트: 읽음 처리 요청', roomSeq)
+
       unsubscribeChat(roomSeq)
       console.log(`🔌 ChatRoom: 채팅방 구독 해제 - /sub/chat/${roomSeq}`)
       // 채팅방을 나갈 때 메시지 정리하지 않음 (다시 들어올 때를 위해 유지)
     }
-  }, [roomSeq, authToken, handleReceiveMessage])
+  }, [roomSeq, authToken, handleReceiveMessage, readChat])
 
   // 메시지 전송
   const handleSendMessage = async (content: string) => {
@@ -223,6 +234,10 @@ export default function ChatRoom({
       console.log('채팅방 나가기 처리 중...')
       return
     }
+
+    // 나가기 전에 읽음 처리 요청
+    readChat()
+    console.log('✅ 채팅방 나가기: 읽음 처리 요청', roomSeq)
 
     // WebSocket 구독 해제
     unsubscribeChat(roomSeq)

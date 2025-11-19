@@ -167,7 +167,8 @@ export default function SearchPageClient() {
               onChange={e => setKeyword(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="매물명, 주소, 지역으로 검색"
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pr-4 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pr-4 pl-10 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+              style={{ fontSize: '16px' }}
             />
             {keyword && (
               <button
