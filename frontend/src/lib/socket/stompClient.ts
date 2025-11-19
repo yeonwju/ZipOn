@@ -7,7 +7,7 @@
 import { Client, StompConfig } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
-const WS_BASE_URL = 'http://localhost:8080/ws'
+const WS_BASE_URL = 'https://dev-zipon.duckdns.org/ws'
 
 /**
  * STOMP 클라이언트 생성 (공통)
@@ -43,21 +43,21 @@ export function createStompClient(
     },
 
     // 연결 실패 또는 에러
-    onStompError: (frame) => {
+    onStompError: frame => {
       console.error('[STOMP] 에러:', frame.headers['message'])
       console.error('[STOMP] 상세:', frame.body)
       onError(frame)
     },
 
     // WebSocket 연결 종료
-    onWebSocketClose: (event) => {
+    onWebSocketClose: event => {
       console.log('[STOMP] WebSocket 연결 종료:', event.reason)
     },
   }
 
   // 디버그 로그 (선택적으로 추가)
   if (debug) {
-    config.debug = (str) => console.log('[STOMP]', str)
+    config.debug = str => console.log('[STOMP]', str)
   }
 
   return new Client(config)
@@ -65,26 +65,25 @@ export function createStompClient(
 
 /**
  * JWT 토큰 가져오기 (클라이언트 사이드에서 쿠키에서 직접 읽기)
- * 
+ *
  * 쿠키가 HttpOnly가 아닌 경우 클라이언트에서 직접 읽을 수 있습니다.
  */
 export async function getAuthToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null
-  
+
   try {
     // 쿠키에서 직접 토큰 읽기
     const { getAccessTokenFromCookie } = await import('@/utils/token')
     const token = getAccessTokenFromCookie()
-    
+
     if (!token) {
       console.warn('[getAuthToken] 쿠키에서 토큰을 찾을 수 없습니다.')
       return null
     }
-    
+
     return token
   } catch (error) {
     console.error('[getAuthToken] 토큰 가져오기 실패:', error)
     return null
   }
 }
-
