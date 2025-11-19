@@ -49,6 +49,7 @@ public class BidRankService {
         // 입찰 여부 등록
         boolean firstTime = bidTryCountRepository.tryFirstBid(message.auctionSeq(), message.userSeq());
         if(firstTime){
+            log.info(String.format("매물번호: %s, 입찰자: %s , 입찰액: %s", message.auctionSeq(), message.userSeq(), message.amount()));
             bidRankRepository.updateScore(message);
         }
     }
@@ -98,5 +99,9 @@ public class BidRankService {
             bids.add(bid);
         }
         bidRepository.saveAll(bids);
+    }
+
+    public BidEventMessage readBidInRedis(int auctionSeq, int userSeq){
+        return bidRankRepository.getUser(auctionSeq, userSeq);
     }
 }
