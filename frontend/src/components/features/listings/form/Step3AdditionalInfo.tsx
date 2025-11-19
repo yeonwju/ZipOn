@@ -55,7 +55,7 @@ export default function Step3AdditionalInfo({
   const handleAuctionDateChange = (date: Date | undefined) => {
     setSelectedAuctionDate(date)
     if (date) {
-      updateField('aucAt', date.toISOString().split('T')[0])
+      updateField('aucAt', date.toISOString().slice(0, 19))
     } else {
       updateField('aucAt', '')
     }
