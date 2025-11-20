@@ -30,9 +30,6 @@ export default function ContractResultClient() {
   const [lines] = useState<string[]>(() => getStoredVerifyResult())
 
   const rawContractSeq = searchParams.get('contractSeq')
-  const contractSeq = rawContractSeq ? Number(rawContractSeq) : null
-
-  const { mutate: completeContract, isPending } = useContractSuccess(contractSeq ?? 0)
 
   useEffect(() => {
     if (lines.length === 0) {
@@ -80,29 +77,15 @@ export default function ContractResultClient() {
       {/* 하단 버튼 */}
       <div className="fixed right-0 bottom-0 left-0 z-20 bg-white px-4 pt-3 pb-4 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
         <button
-          onClick={() => {
-            if (!contractSeq) {
-              showError('계약 정보가 올바르지 않습니다.')
-              return
-            }
-
-            completeContract(undefined, {
-              onSuccess: () => {
-                router.push('/contract/complete')
-              },
-              onError: error => {
-                showError(
-                  error instanceof Error
-                    ? error.message
-                    : '계약 완료에 실패했습니다. 다시 시도해주세요.'
-                )
-              },
-            })
-          }}
-          disabled={isPending || !contractSeq}
+          onClick={() => (
+            setTimeout(() =>
+              showSuccess('계약이 완료되었습니다.', () => router.push('/contract/complete'))
+            ),
+            700
+          )}
           className="w-full rounded-md bg-blue-500 py-3 font-bold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-400"
         >
-          {isPending ? '처리 중...' : '계약하기'}
+          계약하기
         </button>
       </div>
 

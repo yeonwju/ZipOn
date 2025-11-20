@@ -1,13 +1,9 @@
 'use client'
 
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 import { PaymentDetail } from '@/components/features/auction'
-import { AlertDialog, useAlertDialog } from '@/components/ui/alert-dialog'
-import { useBidAmount } from '@/queries/useBid'
-import { useContractProxyAccount } from '@/queries/useContract'
-import { useSearchListingDetail } from '@/queries/useListing'
-import { normalizeImageUrl } from '@/utils/format'
+import { useAlertDialog } from '@/components/ui/alert-dialog'
 import { ListingDetailDataResponse } from '@/types/api/listings'
 
 export default function PaymentDetailContent() {
