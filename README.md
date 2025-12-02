@@ -346,11 +346,66 @@ docker build -t zipon-ai:latest ./ai
 - **[김윤정]** - 실시간 1:1 채팅 및 라이브 방송 화상 통신 / 마이페이지 구현
 - **[문준호]** - 경매 입찰 관리 / 소셜 로그인 / JWT 인증과 ACCESS, REFRESH 쿠키 관리 및 재발급 / 사업자 확인 및 등록 / SMS 문자 전송
 - **[변가원]** - firebase를 이용한 알림 서비스 구현
-- **[주연우]** - 담당 기능/역할
+- **[주연우]** - 매물 검색 / 중개인 매칭 / 부동산 안심 거래 / 등기부등본, 계약서 에이전트 FAST API 연결
+### Frontend
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+### Backend
+```bash
+cd backend
+./gradlew test
+```
+
+## 📦 배포
+
+### CI/CD
+
+Jenkins를 통한 자동 배포 파이프라인이 구성되어 있습니다.
+
+- **dev 브랜치**: 개발 환경 자동 배포
+- **main/master 브랜치**: 프로덕션 환경 배포
+
+### Docker 이미지 빌드
+
+```bash
+# Frontend
+docker build -t zipon-frontend:latest ./frontend
+
+# Backend
+docker build -t zipon-backend:latest ./backend
+
+# AI
+docker build -t zipon-ai:latest ./ai
+```
+
+## 🔐 보안
+
+- JWT 기반 인증/인가
+- OAuth 2.0 소셜 로그인
+- HTTPS 통신
+- 환경 변수를 통한 민감 정보 관리
+- Firebase 서비스 계정 키 파일 보안 관리
+
+## 👥 팀원 역할
+
+### Frontend
+- **[김도현]** - 실시간 1:1 채팅 및 라이브 방송 화상통신 / 경매 / 지도 / 매물 관련 / 마이페이지 / 결제 / 계약 부분 구현
+- **[변가원]** - PWA 및 알림 서비스 구현
+
+### Backend
+- **[김윤정]** - 실시간 1:1 채팅 및 라이브 방송 화상 통신 / 마이페이지 구현
+- **[문준호]** - 경매 입찰 관리 / 소셜 로그인 / JWT 인증과 ACCESS, REFRESH 쿠키 관리 및 재발급 / 사업자 확인 및 등록 / SMS 문자 전송
+- **[변가원]** - firebase를 이용한 알림 서비스 구현
+- **[주연우]** - 매물 검색 / 중개인 매칭 / 부동산 안심 결제 시스템 / 등기부등본, 계약서 에이전트 서버 연동
 
 ### AI
 - **[권주현]** - 등기부등본 인증 / 계약서 분석 에이전트 구현
 
 ### Infra
 - **[변가원]** - 개발 서버·배포 서버를 분리 및 CI/CD 자동 배포 파이프라인 구축
+
 
